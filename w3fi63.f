@@ -143,6 +143,7 @@ C                         ADDED GRID 179 (12 KM POLAR STEREOGRAPHIC OVER NORTH A
 C                         CHANGED GRID 194 TO 3KM MERCATOR GRID OVER PUERTO RICO
 C                         CORRECTED LATITUDE OF SW CORNER POINT OF GRID 151
 C 2011-10-12  VUONG       ADDED GRID 129, 187, 188, 189 AND 193
+C 2012-04-16  VUONG       ADDED NEW GRID 132, 200
 C
 C USAGE:    CALL W3FI63(MSGA,KPDS,KGDS,KBMS,DATA,KPTR,KRET)
 C   INPUT ARGUMENT LIST:
@@ -1229,7 +1230,7 @@ C  ----------- TEST FOR NEW GRID
                       ELSE IF (KPDS(3).EQ.196) THEN
                       ELSE IF (KPDS(3).EQ.197) THEN
                       ELSE IF (KPDS(3).EQ.198) THEN
-                      ELSE IF (KPDS(3).GE.201.AND.KPDS(3).LE.237) THEN
+                      ELSE IF (KPDS(3).GE.200.AND.KPDS(3).LE.237) THEN
                       ELSE
 C                         PRINT *,' HAVE ENCOUNTERED A NEW GRID FOR',
 C    *                    ' NMC WITHOUT A GRID DESCRIPTION SECTION'
@@ -1827,6 +1828,7 @@ C 2010-08-05  VUONG       ADDED NEW GRID 184, 199, 83 AND
 C                         REDEFINED GRID 90 FOR NEW RTMA CONUS 1.27-KM
 C                         REDEFINED GRID 91 FOR NEW RTMA ALASKA 2.976-KM
 C                         REDEFINED GRID 92 FOR NEW RTMA ALASKA 1.488-KM
+C 2012-02-28  VUONG       ADDED NEW GRID 200
 C
 C USAGE:    CALL FI634(MSGA,KPTR,KPDS,KGDS,KBMS,KRET)
 C   INPUT ARGUMENT LIST:
@@ -2379,6 +2381,10 @@ C                 ----- U.S. GRID 129 - MAP SIZE 1548800
 C                 ----- U.S. GRID 130 - MAP SIZE 151987
                   J     = 151987
                   GO TO 800
+              ELSE IF (KPDS(3).EQ.132) THEN
+C                 ----- U.S. GRID 132 - MAP SIZE 385441
+                  J     = 385441
+                  GO TO 800
               ELSE IF (KPDS(3).EQ.138) THEN
 C                 ----- U.S. GRID 138 - MAP SIZE 134784
                   J     = 134784
@@ -2532,7 +2538,10 @@ C                     ----- U.S. NON-STANDARD GRID
                   GO TO 895
               END IF
           ELSE IF (KPDS(3).GE.200) THEN
-              IF (KPDS(3).EQ.201) THEN
+              IF (KPDS(3).EQ.200) THEN
+                  J = 10152
+                  GO TO 800
+              ELSE IF (KPDS(3).EQ.201) THEN
                   J = 4225
                   GO TO 800
               ELSE IF (KPDS(3).EQ.202) THEN
@@ -4008,6 +4017,10 @@ C  ---------------------------------------
               IF (I.NE.J) THEN
                   RETURN
               END IF
+          ELSE IF (KPDS(3).EQ.132) THEN
+              IF (I.NE.J) THEN
+                  RETURN
+              END IF
           ELSE IF (KPDS(3).EQ.138) THEN
               IF (I.NE.J) THEN
                   RETURN
@@ -4064,7 +4077,7 @@ C  ---------------------------------------
               IF (I.NE.J) THEN
                   RETURN
               END IF
-          ELSE IF (KPDS(3).GE.201.AND.KPDS(3).LE.254) THEN
+          ELSE IF (KPDS(3).GE.200.AND.KPDS(3).LE.254) THEN
               IF (I.NE.J) THEN
                   RETURN
               END IF
