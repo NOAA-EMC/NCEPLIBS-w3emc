@@ -814,6 +814,7 @@ C***********************************************************************
       LOGICAL      FCST,REJP_PS,REJPS,REJT,REJQ,REJW,REJPW,REJPW1,
      $             REJPW2,REJPW3,REJPW4,SATMQC,SATEMP,SOLN60,SOLS60,
      $             MOERR_P,MOERR_T,ADPUPA_VIRT,DOBERR,DOFCST,SOME_FCST
+     &,            RECALC_Q,DOPREV
 
       COMMON /GBEVAA/ SID,OBS(13,255),QMS(12,255),BAK(12,255),XOB,
      $ YOB,DHR,TYP,NLEV
@@ -836,7 +837,7 @@ C***********************************************************************
       DATA PW3VN /'PW3O PW3Q PW3P PW3R     '/
       DATA PW4VN /'PW4O PW4Q PW4P PW4R     '/
 
-      DATA BMISS /10E10/,NFLGRT/2400*0/
+      DATA BMISS /10E08/,NFLGRT/2400*0/
 
       DATA OEMIN /0.5,0.1,1.0,0.5,1.0/
 
@@ -1504,7 +1505,7 @@ C-----------------------------------------------------------------------
 
 
 
-      DATA BMISS / 10E10  /
+      DATA BMISS / 10E08  /
       DATA TZERO / 273.15 /
       DATA BETAP / .0552  /
       DATA BETA  / .00650 /
@@ -1673,7 +1674,7 @@ C***********************************************************************
       COMMON /GBEVAA/ SID,OBS(13,255),QMS(12,255),BAK(12,255),XOB,
      $ YOB,DHR,TYP,NLEV
 
-      DATA BMISS /10E10/
+      DATA BMISS /10E08/
 
       DATA OEMIN /0.5,0.1,1.0,0.5,1.0/
 
@@ -1892,7 +1893,7 @@ C$$$
 
       COMMON /GBEVDD/ERRS(300,33,6)
 
-      OEFG01 = 10E10
+      OEFG01 = 10E08
 
 C  LOOK UP ERRORS FOR PARTICULAR OB TYPES
 C  --------------------------------------
@@ -1923,10 +1924,10 @@ C  --------------------------------------
       OEFG01 = ((1.0 - DEL) * ERRS(KX,K1,IE)) + (DEL * ERRS(KX,K2,IE))
       OEFG01 = MAX(OEFG01,OEMIN)
 
-C  SET MISSING ERROR VALUE TO 10E10
+C  SET MISSING ERROR VALUE TO 10E08
 C  --------------------------------
 
-      IF(OEFG01.GE.5E5) OEFG01 = 10E10
+      IF(OEFG01.GE.5E5) OEFG01 = 10E08
 
       RETURN
 
@@ -2025,6 +2026,7 @@ C$$$
 
       LOGICAL      EVNQ,EVNV,DOVTMP,TROP,ADPUPA_VIRT,DOBERR,DOFCST,
      $             SOME_FCST
+     &,            RECALC_Q,DOPREV
 
       COMMON /GBEVAA/ SID,OBS(13,255),QMS(12,255),BAK(12,255),XOB,
      $ YOB,DHR,TYP,NLEV
@@ -2034,7 +2036,7 @@ C$$$
 
       DATA EVNSTQ /'QOB QQM QPC QRC'/
       DATA EVNSTV /'TOB TQM TPC TRC'/
-      DATA BMISS /10E10/
+      DATA BMISS /10E08/
 
 C-----------------------------------------------------------------------
 C FCNS BELOW CONVERT TEMP/TD (K) & PRESS (MB) INTO SAT./ SPEC. HUM.(G/G)
@@ -2362,15 +2364,15 @@ C  --------------------------------------
       MDIMA   = JCAP1*JCAP2
       MDIMB   = MDIMA/2+JCAP1
       MDIMC   = MDIMB*2
-      IMAX    = 384
+      IMAX    = im !!!384
       JMAX    = IMAX/2+1
  
       DLAT  = 180./(JMAX-1)
       DLON  = 360./IMAX
  
       PRINT 2, JCAP,KMAX,kmaxs,DLAT,DLON,COORD(IDVC)
-    2 FORMAT(/' --> GBLEVENTS: GLOBAL MODEL SPECS: T',I3,' ',I3,
-     $ ' LEVELS ',I3,' SCALARS -------> ',F4.2,' X ',F4.2,' VERT. ',
+    2 FORMAT(/' --> GBLEVENTS: GLOBAL MODEL SPECS: T',I4,' ',I3,
+     $ ' LEVELS ',I3,' SCALARS -------> ',F6.3,' X ',F6.3,' VERT. ',
      $ 'COORD: ',A)
  
       GO TO 902
@@ -2464,8 +2466,13 @@ C  -----------------------
       SFCPRESS_ID  = MOD(HEAD(1)%IDVM,TEN)
       THERMODYN_ID = MOD(HEAD(1)%IDVM/TEN,TEN)
 
-      print *,' sfcpress_id=',sfcpress_id,' thermodyn_id=',
+      if (coord(idvc) == 'GEN_HYB' ) then
+        print *,' sfcpress_id=',sfcpress_id,' thermodyn_id=',
      $ thermodyn_id,' cpi(0)=',head(1)%cpi(1)
+      else
+        print *,' sfcpress_id=',sfcpress_id,' thermodyn_id=',
+     $ thermodyn_id
+      endif
 
       DO IFILE=1,KFILES
          CALL SIGIO_ALDATS(HEAD(IFILE),DATS,IRETS)
@@ -2489,7 +2496,7 @@ C  -----------------------
             print *,' irets from sigio_rrdatm = ', irets
             RETURN
          ENDIF
-ccccc    print *,' aft sigio_rrdatm irets=',irets
+         print *,' aft sigio_rrdatm irets=',irets
 
          IE = KMAX + 2
          COFS_F(:,3:IE,IFILE)        = DATM%T
@@ -2505,11 +2512,12 @@ ccccc    print *,' aft sigio_rrdatm irets=',irets
          CALL SIGIO_AXDATM(DATM,IRETS)
       ENDDO
 
-ccccc print *,' after sigio_axdatm'
+      print *,' after sigio_axdatm',' imax=',imax,jmax,kmax,kmaxs
 
       ALLOCATE (COFS(MDIMA,KMAXS),     COFV(MDIMA,KMAX,2))
       ALLOCATE (GRDS(imax,jmax,KMAXS), GRDV(imax,jmax,KMAX,2))
       ALLOCATE (WRK1(imax*jmax,KMAX),  WRK2(imax*jmax,KMAX+1))
+!     print *,' print 0',' imax=',imax,jmax,kmax,kmaxs
 
       IF(KFILES.EQ.1)  THEN
          DO I = 1,MDIMA
@@ -2562,7 +2570,7 @@ ccccc print *,' after sigio_axdatm'
          WRK2(:,L+1) = WRK2(:,L) - WRK2(:,L+1)             ! in Pa
       ENDDO
 
-ccccc print *,' wrk1=',wrk1(1001,:)
+!     print *,' wrk1=',wrk1(1001,:)
 ccccc print *,' wrk2=',wrk2(1001,:)
 
 ccccc CALL GBLEVN11(IMAX,JMAX,WRK2(1,KMAX+1))
@@ -2608,7 +2616,7 @@ ccccc ENDDO
       ENDDO
 
 
-ccccc print *,' iar14t=',iar14t(1,80,:)
+!     print *,' iar14t=',iar14t(1,80,:)
 ccccc print *,' iar15u=',iar15u(1,80,:)
 ccccc print *,' iar16v=',iar16v(1,80,:)
 ccccc print *,' iarpsi=',iarpsi(1,80,:)

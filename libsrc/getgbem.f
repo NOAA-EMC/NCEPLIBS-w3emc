@@ -267,8 +267,8 @@ C  READ AND UNPACK GRIB RECORD
       ELSEIF(LENGDS(KGDS).GT.JF) THEN
         IRET=98
       ELSE
-        CALL GETGB1R(LUGB,LSKIP,LGRIB,KF,KPDS,KGDS,KENS,LB,F,NBITSS
-     + ,IRET)
+        CALL GETGB1R(LUGB,LSKIP,LGRIB,KF,KPDS,KGDS,KENS,LB,F,NBITS,
+     &               IRET)
       ENDIF
 C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       RETURN

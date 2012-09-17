@@ -24,7 +24,24 @@ Jim Tuccillo August 1999
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/utsname.h>
-#include <sys/proc.h>   
+
+#if LINUX
+void summary_( returnVal  )
+int * returnVal;
+{
+
+  return;
+}
+
+void start_()
+{
+
+  return;
+}
+#endif
+
+#if IBM4 || IBM8
+/* #include <sys/proc.h>   */
 
 /* #include "trace_mpif.h" */
 
@@ -462,4 +479,4 @@ void start()
 
   return;
 }
-
+#endif

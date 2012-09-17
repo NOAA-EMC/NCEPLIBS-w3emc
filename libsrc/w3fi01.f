@@ -11,6 +11,8 @@ C PROGRAM HISTORY LOG:
 C   92-01-10  R. KISTLER (W/NMC23)
 C   92-05-22  D. A. KEYSER -- DOCBLOCKED/COMMENTED
 C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
+C 2001-06-07  Gilbert     Uses f90 standard routine bit_size to
+C                         find integer word length
 C
 C USAGE:    CALL W3FI01(LW)
 C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
@@ -24,20 +26,8 @@ C   MACHINE:  CRAY, WORKSTATIONS
 C
 C$$$
 C
-      CHARACTER*8  CTEST1,CTEST2
-      CHARACTER*4  CPRINT(2)
-C
-      INTEGER      ITEST1,ITEST2
-C
-      EQUIVALENCE  (CTEST1,ITEST1),(CTEST2,ITEST2)
-C
-      DATA  CTEST1/'12345678'/
-C
-      ITEST2 = ITEST1
-      IF (CTEST1 .EQ. CTEST2) THEN
-        LW = 8
-      ELSE
-        LW = 4
-      END IF
+      INTEGER      LW
+      LW=BIT_SIZE(LW)
+      LW=LW/8
       RETURN
       END

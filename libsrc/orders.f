@@ -106,13 +106,6 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
  
-      IF(I1.EQ.4) THEN
-         CALL ORDER4(IN,ISORT,IDATA,INDEX,N,M,I1,I2)
-         RETURN
-      ELSEIF(I1.NE.8) THEN
-         PRINT*,'ORDERS CALLED WITH ODD SIZED WORDS - DEFAULT 8 BYTE'
-      ENDIF
- 
 C  DISCERN THE VARIABLE TYPE OF THE INPUT ARRAY, AND MAYBE SET INDEXES
 C  -------------------------------------------------------------------
  
@@ -123,6 +116,21 @@ C  -------------------------------------------------------------------
          ENDDO
       ENDIF
  
+c  call different branches for different types of keys
+c  ---------------------------------------------------
+
+      IF(I1.EQ.4) THEN
+         if(itype==0) CALL ORDEC4(IN,ISORT,IDATA,INDEX,N,M,I1,I2)
+         if(itype/=0) CALL ORDER4(IN,ISORT,IDATA,INDEX,N,M,I1,I2)
+         RETURN
+      ELSEIF(I1.EQ.8) then
+         IF(ITYPE==0) CALL ORDEC8(IN,ISORT,IDATA,INDEX,N,M,I1,I2)
+         IF(ITYPE==0) RETURN 
+      ELSEIF(I1.NE.8) THEN
+         PRINT*,'ORDERS CALLED WITH ODD SIZED WORDS - DEFAULT 8 BYTE'
+         call bort('ORDERS CALLED WITH ODD SIZED WORDS') 
+      ENDIF
+
 C  COMPUTE A POSITIVE BIAS FOR INTEGER OR REAL NUMBERS
 C  ---------------------------------------------------
  
@@ -274,3 +282,116 @@ C  ---------
  
       RETURN
       END
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+      SUBROUTINE ORDEC8(IN,ISORT,IDATA,INDEX,N,M,I1,I2)
+ 
+      DIMENSION    ISORT(N),INDEX(N)
+      character(8) IDATA(M,N)
+      DIMENSION    INDX(0:255),KNDX(0:255)
+ 
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+ 
+C  DISCERN THE VARIABLE TYPE OF THE INPUT ARRAY, AND MAYBE SET INDEXES
+C  -------------------------------------------------------------------
+ 
+      ITYPE = MOD(IN,10)
+      IF(IN.LT.10) THEN
+         DO I=1,N
+         INDEX(I) = I
+         ENDDO
+      ENDIF
+ 
+C  SORT THE INPUT SET W/1BYTE RADIX - REARRANGE SORT LIST INDEXES ONLY
+C  -------------------------------------------------------------------
+ 
+      DO IBYT=0,I1-1
+ 
+      KNDX(0) = 1
+      DO I=0,255
+      INDX(I) = 0
+      ENDDO
+
+      II=I1-IBYT
+ 
+      DO I=1,N
+      JBYT = ICHAR(IDATA(1,INDEX(I))(II:II))
+      INDX(JBYT) = INDX(JBYT)+1
+      ISORT(I) = INDEX(I)
+      ENDDO
+ 
+      DO I=1,255
+      KNDX(I) = KNDX(I-1)+INDX(I-1)
+      ENDDO
+ 
+      DO I=1,N
+      JBYT = ICHAR(IDATA(1,isort(I))(II:II))
+      INDEX(KNDX(JBYT)) = ISORT(I)
+      KNDX(JBYT) = KNDX(JBYT)+1
+      ENDDO
+ 
+      ENDDO
+ 
+C  FINISHED!
+C  ---------
+ 
+      RETURN
+      END
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+      SUBROUTINE ORDEC4(IN,ISORT,IDATA,INDEX,N,M,I1,I2)
+
+      DIMENSION    ISORT(N),INDEX(N)
+      character(4) IDATA(M,N)
+      DIMENSION    INDX(0:255),KNDX(0:255)
+
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+
+C  DISCERN THE VARIABLE TYPE OF THE INPUT ARRAY, AND MAYBE SET INDEXES
+C  -------------------------------------------------------------------
+
+      ITYPE = MOD(IN,10)
+      IF(IN.LT.10) THEN
+         DO I=1,N
+         INDEX(I) = I
+         ENDDO
+      ENDIF
+
+C  SORT THE INPUT SET W/1BYTE RADIX - REARRANGE SORT LIST INDEXES ONLY
+C  -------------------------------------------------------------------
+
+      DO IBYT=0,I1-1
+
+      KNDX(0) = 1
+      DO I=0,255
+      INDX(I) = 0
+      ENDDO
+
+      II=I1-IBYT
+
+      DO I=1,N
+      JBYT = ICHAR(IDATA(1,INDEX(I))(II:II))
+      INDX(JBYT) = INDX(JBYT)+1
+      ISORT(I) = INDEX(I)
+      ENDDO
+
+      DO I=1,255
+      KNDX(I) = KNDX(I-1)+INDX(I-1)
+      ENDDO
+
+      DO I=1,N
+      JBYT = ICHAR(IDATA(1,isort(I))(II:II))
+      INDEX(KNDX(JBYT)) = ISORT(I)
+      KNDX(JBYT) = KNDX(JBYT)+1
+      ENDDO
+
+      ENDDO
+
+C  FINISHED!
+C  ---------
+
+      RETURN
+      END
+
