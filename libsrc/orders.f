@@ -1,7 +1,7 @@
 C$$$  SUBROUTINE DOCUMENTATION BLOCK
 C                .      .    .                                       .
 C SUBROUTINE:   ORDERS       A STABLE (RADIX) MULTIPURPOSE SORT ROUTINE
-C   PRGMMR: KEYSER           ORG: NP22        DATE: 1999-06-03
+C   PRGMMR: WOOLLEN          ORG: NP22        DATE: 1999-06-03
 C
 C ABSTRACT:
 C   ORDERS IS A FAST AND STABLE SORT ROUTINE SUITABLE FOR EFFICIENT,
@@ -50,6 +50,7 @@ C 1999-06-03  D. KEYSER   MODIFIED TO PORT TO IBM SP AND RUN IN 4 OR
 C                         8 BYTE STORAGE
 C 1999-06-09  J. WOOLLEN  ADDED POTENTIAL FOR FOUR OR EIGHT BYTE KEYS
 C                         IN EITHER A FOUR OR EIGHT BYTE ENVIRONMENT
+C 2012-09-16  J. WOOLLEN  made sorting characters work on little endian 
 C
 C USAGE: CALL ORDERS(IN,ISORT,IDATA,INDEX,N,M,I1,I2)
 C
@@ -127,8 +128,9 @@ c  ---------------------------------------------------
          IF(ITYPE==0) CALL ORDEC8(IN,ISORT,IDATA,INDEX,N,M,I1,I2)
          IF(ITYPE==0) RETURN 
       ELSEIF(I1.NE.8) THEN
-         PRINT*,'ORDERS CALLED WITH ODD SIZED WORDS - DEFAULT 8 BYTE'
-         call bort('ORDERS CALLED WITH ODD SIZED WORDS') 
+         PRINT*,'ORDERS argument i1 (keyword size) can be 4 or 8'
+         PRINT*,'ORDERS argument i1 here=',i1 
+         CALL ERREXIT(99_4) 
       ENDIF
 
 C  COMPUTE A POSITIVE BIAS FOR INTEGER OR REAL NUMBERS
