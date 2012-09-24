@@ -63,7 +63,7 @@ C
       INTEGER     IDIV(8)
       INTEGER     NBUFA(*)
       INTEGER     NBUFB(*)
-      INTEGER*8   ZERO(8)
+      INTEGER     ZERO(8)
 C
       CHARACTER*1 BLANK
       CHARACTER*1 JTEMP(8)

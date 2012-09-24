@@ -34,11 +34,6 @@ C   94-11-22  FARLEY      ENLARGED WORK ARRAYS TO HANDLE .5DEGREE GRIDS
 C   95-06-01  R.E.JONES   CORRECTION FOR NUMBER OF UNUSED BITS AT END
 C                         OF SECTION 4, IN BDS BYTE 4, BITS 5-8.
 C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C 2001-06-06  GILBERT     CHanged gbyte/sbyte calls to refer to 
-C                         Wesley Ebisuzaki's endian independent
-C                         versions gbytec/sbytec.
-C                         Use f90 standard routine bit_size to get
-C                         number of bits in an integer instead of w3fi01.
 C
 C USAGE:    CALL W3FI75 (IBITL,ITYPE,ITOSS,FLD,IFLD,IBMAP,IBDSFL,
 C    &              NPTS,BDS11,IPFLD,PFLD,LEN,LENBDS,IBERR,PDS,IGDS)
@@ -97,7 +92,7 @@ C
       REAL            FWORK(NPTS)
       REAL            RMIN,REFNCE
 C
-      character(len=1)         IPFLD(*)
+      INTEGER         IPFLD(*)
       INTEGER         IBDSFL(*)
       INTEGER         IBMAP(*)
       INTEGER         IFLD(*),IGDS(*)
@@ -111,6 +106,11 @@ C
 C
       CHARACTER * 1   BDS11(11),PDS(*)
       CHARACTER * 1   PFLD(*)
+      CHARACTER * 1   CIEXP(8)
+      CHARACTER * 1   CIMANT(8)
+C
+      EQUIVALENCE     (IEXP,CIEXP(1))
+      EQUIVALENCE     (IMANT,CIMANT(1))
 C
 C            1.0   PACK THE FIELD.
 C
@@ -280,7 +280,7 @@ C
 C            TEST FOR SECOND DIFFERENCE PACKING
 C            BASED OF SIZE OF PDS - SIZE IN FIRST 3 BYTES
 C
-          CALL GBYTEC(PDS,IPDSIZ,0,24)
+          CALL GBYTE (PDS,IPDSIZ,0,24)
           IF (IPDSIZ.EQ.50) THEN
 C             PRINT*,'  DO SECOND DIFFERENCE PACKING '
 C
@@ -319,32 +319,32 @@ C
               FVAL1 = FVAL1 + REFNCE*SCAL2
 C                                          FIRST TEST TO SEE IF
 C                                          ON 32 OR 64 BIT COMPUTER
-C              CALL W3FI01(LW)
-              IF (bit_size(LW).EQ.32) THEN
+              CALL W3FI01(LW)
+              IF (LW.EQ.4) THEN
                   CALL W3FI76 (FVAL1,IEXP,IMANT,32)
               ELSE
                   CALL W3FI76 (FVAL1,IEXP,IMANT,64)
               END IF
-              CALL SBYTEC(PDS,IEXP,320,8)
-              CALL SBYTEC(PDS,IMANT,328,24)
+              CALL SBYTE (PDS,IEXP,320,8)
+              CALL SBYTE (PDS,IMANT,328,24)
 C
-              IF (bit_size(LW).EQ.32) THEN
+              IF (LW.EQ.4) THEN
                   CALL W3FI76 (FDIFF1,IEXP,IMANT,32)
               ELSE
                   CALL W3FI76 (FDIFF1,IEXP,IMANT,64)
               END IF
-              CALL SBYTEC(PDS,IEXP,352,8)
-              CALL SBYTEC(PDS,IMANT,360,24)
+              CALL SBYTE (PDS,IEXP,352,8)
+              CALL SBYTE (PDS,IMANT,360,24)
 C
 C             TURN ISCAL2 INTO SIGNED POSITIVE INTEGER
 C             AND STORE IN TWO BYTES
 C
               IF(ISCAL2.GE.0)  THEN
-                CALL SBYTEC(PDS,ISCAL2,384,16)
+                CALL SBYTE (PDS,ISCAL2,384,16)
               ELSE
-                CALL SBYTEC(PDS,1,384,1)
+                CALL SBYTE (PDS,1,384,1)
                 ISCAL2 = - ISCAL2
-                CALL SBYTEC( PDS,ISCAL2,385,15)
+                CALL SBYTE( PDS,ISCAL2,385,15)
               ENDIF
 C
               MAX  = IWORK(1)
@@ -457,26 +457,26 @@ C
 C                 CONCANTENATE ALL FIELDS FOR BDS
 C
 C                               BYTES 1-3
-          CALL SBYTEC (BDS11,LENBDS,0,24)
+          CALL SBYTE (BDS11,LENBDS,0,24)
 C
 C                               BYTE  4
 C                                       FLAGS
-          CALL SBYTEC (BDS11,IBDSFL(1),24,1)
-          CALL SBYTEC (BDS11,IBDSFL(2),25,1)
-          CALL SBYTEC (BDS11,IBDSFL(3),26,1)
-          CALL SBYTEC (BDS11,IBDSFL(4),27,1)
+          CALL SBYTE (BDS11,IBDSFL(1),24,1)
+          CALL SBYTE (BDS11,IBDSFL(2),25,1)
+          CALL SBYTE (BDS11,IBDSFL(3),26,1)
+          CALL SBYTE (BDS11,IBDSFL(4),27,1)
 C                                        NR OF FILL BITS
-          CALL SBYTEC (BDS11,NFILL,28,4)
+          CALL SBYTE (BDS11,NFILL,28,4)
 C
 C$      FILL OCTETS 5-6 WITH THE SCALE FACTOR.
 C
 C                               BYTE  5-6
           IF (ISCALE.LT.0) THEN
-              CALL SBYTEC (BDS11,1,32,1)
+              CALL SBYTE (BDS11,1,32,1)
               ISCALE  = - ISCALE
-              CALL SBYTEC (BDS11,ISCALE,33,15)
+              CALL SBYTE (BDS11,ISCALE,33,15)
           ELSE
-              CALL SBYTEC (BDS11,ISCALE,32,16)
+              CALL SBYTE (BDS11,ISCALE,32,16)
           END IF
 C
 C$  FILL OCTET 7-10 WITH THE REFERENCE VALUE
@@ -487,20 +487,20 @@ C                               BYTE  7-10
 C                                        REFERENCE VALUE
 C                                          FIRST TEST TO SEE IF
 C                                          ON 32 OR 64 BIT COMPUTER
-C          CALL W3FI01(LW)
-          IF (bit_size(LW).EQ.32) THEN
+          CALL W3FI01(LW)
+          IF (LW.EQ.4) THEN
               CALL W3FI76 (REFNCE,IEXP,IMANT,32)
           ELSE
               CALL W3FI76 (REFNCE,IEXP,IMANT,64)
           END IF
-          CALL SBYTEC (BDS11,IEXP,48,8)
-          CALL SBYTEC (BDS11,IMANT,56,24)
+          CALL SBYTE (BDS11,IEXP,48,8)
+          CALL SBYTE (BDS11,IMANT,56,24)
 C
 C
 C$                        FILL OCTET 11 WITH THE NUMBER OF BITS.
 C
 C                               BYTE  11
-          CALL SBYTEC (BDS11,NBITS,80,8)
+          CALL SBYTE (BDS11,NBITS,80,8)
       END IF
 C
       RETURN
@@ -549,7 +549,7 @@ C
 C
       INTEGER         ISCAL2,KWIDE
       INTEGER         LENBDS
-      CHARACTER(len=1)         IPFLD(*)
+      INTEGER         IPFLD(*)
       INTEGER         LEN,KBDS(22)
       INTEGER         IWORK(*)
 C                        OCTET NUMBER IN SECTION, FIRST ORDER PACKING
@@ -565,13 +565,13 @@ C     INTEGER         KBDS(17)
 C                        NUMBER OF SECOND ORDER PACKED VALUES
 C     INTEGER         KBDS(19)
 C                        WIDTH OF SECOND ORDER PACKING
-      character(len=1)         ISOWID(400000)
+      INTEGER         ISOWID(50000)
 C                        SECONDARY BIT MAP
-      character(len=1)         ISOBMP(65600)
+      INTEGER         ISOBMP(8200)
 C                        FIRST ORDER PACKED VALUES
-      character(len=1)         IFOVAL(400000)
+      INTEGER         IFOVAL(50000)
 C                        SECOND ORDER PACKED VALUES
-      character(len=1)         ISOVAL(800000)
+      INTEGER         ISOVAL(100000)
 C
 C     INTEGER         KBDS(11)
 C                        BIT WIDTH TABLE
@@ -585,17 +585,16 @@ C
      *                      1073741823,2147483647/
 C  ----------------------------------
 C                       INITIALIZE ARRAYS
-
-      DO I = 1, 400000
-          IFOVAL(I)  = char(0)
-          ISOWID(I)  = char(0)
-      ENDDO
+      DO 100 I = 1, 50000
+          ISOWID(I)  = 0
+          IFOVAL(I)  = 0
+  100 CONTINUE
 C
-      DO 101 I = 1, 65600
-          ISOBMP(I)  = char(0)
+      DO 101 I = 1, 8200
+          ISOBMP(I)  = 0
   101 CONTINUE
-      DO 102 I = 1, 800000
-          ISOVAL(I)  = char(0)
+      DO 102 I = 1, 100000
+          ISOVAL(I)  = 0
   102 CONTINUE
 C                      INITIALIZE POINTERS
 C                            SECONDARY BIT WIDTH POINTER
@@ -669,9 +668,9 @@ C                 ENTER FIRST ORDER VALUE
           DO 2220 LK = 0, KPTS-1
               IWORK(ISTART+LK)  = IWORK(ISTART+LK) - NMIN
  2220     CONTINUE
-          CALL SBYTEC (IFOVAL,NMIN,IFOPTR,KBDS(11))
+          CALL SBYTE (IFOVAL,NMIN,IFOPTR,KBDS(11))
       ELSE
-          CALL SBYTEC (IFOVAL,IWORK(ISTART),IFOPTR,KBDS(11))
+          CALL SBYTE (IFOVAL,IWORK(ISTART),IFOPTR,KBDS(11))
       END IF
       IFOPTR  = IFOPTR + KBDS(11)
 C                  PROCESS SECOND ORDER BIT WIDTH
@@ -685,19 +684,19 @@ C                  PROCESS SECOND ORDER BIT WIDTH
       ELSE
           KWIDE  = 0
       END IF
-      CALL SBYTEC (ISOWID,KWIDE,IWDPTR,8)
+      CALL SBYTE (ISOWID,KWIDE,IWDPTR,8)
       IWDPTR  = IWDPTR + 8
 C         PRINT *,KWIDE,' IFOVAL=',NMIN,IWORK(ISTART),KPTS
 C               IF KWIDE NE 0, SAVE SECOND ORDER VALUE
       IF (KWIDE.GT.0) THEN
-          CALL SBYTESC (ISOVAL,IWORK(ISTART),ISOPTR,KWIDE,0,KPTS)
+          CALL SBYTES (ISOVAL,IWORK(ISTART),ISOPTR,KWIDE,0,KPTS)
           ISOPTR  = ISOPTR + KPTS * KWIDE
           KBDS(19)  = KBDS(19) + KPTS
 C         PRINT *,'            SECOND ORDER VALUES'
 C         PRINT *,(IWORK(ISTART+I),I=0,KPTS-1)
       END IF
 C                 ADD TO SECOND ORDER BITMAP
-      CALL SBYTEC (ISOBMP,1,IBMP2P,1)
+      CALL SBYTE (ISOBMP,1,IBMP2P,1)
       IBMP2P  = IBMP2P + KPTS
       ISTART  = ISTART + KPTS
       GO TO 2000
@@ -715,50 +714,44 @@ C                                          LEAVE SPACE FOR THIS
       IPTR   = IPTR + 16
 C                               BYTE 14
 C                                          EXTENDED FLAGS
-      CALL SBYTEC (IPFLD,IBDSFL(5),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(5),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(6),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(6),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(7),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(7),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(8),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(8),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(9),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(9),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(10),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(10),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(11),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(11),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(12),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(12),IPTR,1)
       IPTR  = IPTR + 1
 C                               BYTES 15-16
 C                 SKIP OVER VALUE  FOR N2
       IPTR  = IPTR + 16
 C                               BYTES 17-18
 C                                     P1
-      CALL SBYTEC (IPFLD,KBDS(17),IPTR,16)
+      CALL SBYTE (IPFLD,KBDS(17),IPTR,16)
       IPTR  = IPTR + 16
 C                               BYTES 19-20
 C                                   P2
-      CALL SBYTEC (IPFLD,KBDS(19),IPTR,16)
+      CALL SBYTE (IPFLD,KBDS(19),IPTR,16)
       IPTR  = IPTR + 16
 C                               BYTE 21 - RESERVED LOCATION
-      CALL SBYTEC (IPFLD,0,IPTR,8)
+      CALL SBYTE (IPFLD,0,IPTR,8)
       IPTR  = IPTR + 8
 C                               BYTES 22 - ?
 C                                      WIDTHS OF SECOND ORDER PACKING
       IX    = (IWDPTR + 32) / 32
-C      CALL SBYTESC (IPFLD,ISOWID,IPTR,32,0,IX)
-      ijk=IWDPTR/8
-      jst=(iptr/8)+1
-      ipfld(jst:jst+ijk)=ISOWID(1:ijk)
+      CALL SBYTES (IPFLD,ISOWID,IPTR,32,0,IX)
       IPTR  = IPTR + IWDPTR
 C                                      SECONDARY BIT MAP
       IJ    = (IBMP2P + 32) / 32
-C      CALL SBYTESC (IPFLD,ISOBMP,IPTR,32,0,IJ)
-      ijk=(IBMP2P/8)+1
-      jst=(iptr/8)+1
-      ipfld(jst:jst+ijk)=ISOBMP(1:ijk)
+      CALL SBYTES (IPFLD,ISOBMP,IPTR,32,0,IJ)
       IPTR  = IPTR + IBMP2P
       IF (MOD(IPTR,8).NE.0) THEN
           IPTR  = IPTR + 8 - MOD(IPTR,8)
@@ -767,13 +760,10 @@ C                                         DETERMINE LOCATION FOR START
 C                                         OF FIRST ORDER PACKED VALUES
       KBDS(12)  = IPTR / 8 + 12
 C                                        STORE LOCATION
-      CALL SBYTEC (IPFLD,KBDS(12),0,16)
+      CALL SBYTE (IPFLD,KBDS(12),0,16)
 C                                     MOVE IN FIRST ORDER PACKED VALUES
       IPASS   = (IFOPTR + 32) / 32
-C      CALL SBYTESC (IPFLD,IFOVAL,IPTR,32,0,IPASS)
-      ijk=(IFOPTR/8)+1
-      jst=(iptr/8)+1
-      ipfld(jst:jst+ijk)=ifoval(1:ijk)
+      CALL SBYTES (IPFLD,IFOVAL,IPTR,32,0,IPASS)
       IPTR  = IPTR + IFOPTR
       IF (MOD(IPTR,8).NE.0) THEN
           IPTR  = IPTR + 8 - MOD(IPTR,8)
@@ -783,13 +773,10 @@ C                DETERMINE LOCATION FOR START
 C                     OF SECOND ORDER VALUES
       KBDS(15)  = IPTR / 8 + 12
 C                                   SAVE LOCATION OF SECOND ORDER VALUES
-      CALL SBYTEC (IPFLD,KBDS(15),24,16)
+      CALL SBYTE (IPFLD,KBDS(15),24,16)
 C                  MOVE IN SECOND ORDER PACKED VALUES
       IX    = (ISOPTR + 32) / 32
-c      CALL SBYTESC (IPFLD,ISOVAL,IPTR,32,0,IX)
-      ijk=(ISOPTR/8)+1
-      jst=(iptr/8)+1
-      ipfld(jst:jst+ijk)=isoval(1:ijk)
+      CALL SBYTES (IPFLD,ISOVAL,IPTR,32,0,IX)
       IPTR  = IPTR + ISOPTR
       NLEFT  = MOD(IPTR+88,16)
       IF (NLEFT.NE.0) THEN
@@ -804,22 +791,22 @@ C  -----------------------------------
 C                               BYTES 1-3
 C                                   THIS FUNCTION COMPLETED BELOW
 C                                   WHEN LENGTH OF BDS IS KNOWN
-      CALL SBYTEC (BDS11,LENBDS,0,24)
+      CALL SBYTE (BDS11,LENBDS,0,24)
 C                               BYTE  4
-      CALL SBYTEC (BDS11,IBDSFL(1),24,1)
-      CALL SBYTEC (BDS11,IBDSFL(2),25,1)
-      CALL SBYTEC (BDS11,IBDSFL(3),26,1)
-      CALL SBYTEC (BDS11,IBDSFL(4),27,1)
+      CALL SBYTE (BDS11,IBDSFL(1),24,1)
+      CALL SBYTE (BDS11,IBDSFL(2),25,1)
+      CALL SBYTE (BDS11,IBDSFL(3),26,1)
+      CALL SBYTE (BDS11,IBDSFL(4),27,1)
 C                              ENTER NUMBER OF FILL BITS
-      CALL SBYTEC (BDS11,NLEFT,28,4)
+      CALL SBYTE (BDS11,NLEFT,28,4)
 C                               BYTE  5-6
       IF (ISCAL2.LT.0) THEN
-          CALL SBYTEC (BDS11,1,32,1)
+          CALL SBYTE (BDS11,1,32,1)
           ISCAL2 = - ISCAL2
       ELSE
-          CALL SBYTEC (BDS11,0,32,1)
+          CALL SBYTE (BDS11,0,32,1)
       END IF
-      CALL SBYTEC (BDS11,ISCAL2,33,15)
+      CALL SBYTE (BDS11,ISCAL2,33,15)
 C
 C$  FILL OCTET 7-10 WITH THE REFERENCE VALUE
 C   CONVERT THE FLOATING POINT OF YOUR MACHINE TO IBM370 32 BIT
@@ -827,18 +814,18 @@ C   FLOATING POINT NUMBER
 C                                        REFERENCE VALUE
 C                                          FIRST TEST TO SEE IF
 C                                          ON 32 OR 64 BIT COMPUTER
-C          CALL W3FI01(LW)
-          IF (bit_size(LW).EQ.32) THEN
+          CALL W3FI01(LW)
+          IF (LW.EQ.4) THEN
               CALL W3FI76 (REFNCE,IEXP,IMANT,32)
           ELSE
               CALL W3FI76 (REFNCE,IEXP,IMANT,64)
           END IF
-          CALL SBYTEC (BDS11,IEXP,48,8)
-          CALL SBYTEC (BDS11,IMANT,56,24)
+          CALL SBYTE (BDS11,IEXP,48,8)
+          CALL SBYTE (BDS11,IMANT,56,24)
 C
 C                               BYTE  11
 C
-      CALL SBYTEC (BDS11,KBDS(11),80,8)
+      CALL SBYTE (BDS11,KBDS(11),80,8)
 C
       RETURN
       END
@@ -920,13 +907,13 @@ C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
 C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
 C
 C$$$
-      CHARACTER*1     BDS11(*),PDS(*),IPFLD(*)
+      CHARACTER*1     BDS11(*),PDS(*)
 C
       REAL            REFNCE
 C
       INTEGER         ISCAL2,KWIDE
       INTEGER         LENBDS
-      INTEGER         IGDS(*)
+      INTEGER         IPFLD(*),IGDS(*)
       INTEGER         LEN,KBDS(22)
       INTEGER         IWORK(*)
 C                        OCTET NUMBER IN SECTION, FIRST ORDER PACKING
@@ -942,28 +929,27 @@ C     INTEGER         KBDS(17)
 C                        NUMBER OF SECOND ORDER PACKED VALUES
 C     INTEGER         KBDS(19)
 C                        WIDTH OF SECOND ORDER PACKING
-      character(len=1)         ISOWID(400000)
+      INTEGER         ISOWID(50000)
 C                        SECONDARY BIT MAP
-      character(len=1)         ISOBMP(65600)
+      INTEGER         ISOBMP(8200)
 C                        FIRST ORDER PACKED VALUES
-      character(len=1)         IFOVAL(400000)
+      INTEGER         IFOVAL(50000)
 C                        SECOND ORDER PACKED VALUES
-      character(len=1)         ISOVAL(800000)
+      INTEGER         ISOVAL(100000)
 C
 C     INTEGER         KBDS(11)
 C  ----------------------------------
 C                       INITIALIZE ARRAYS
+      DO 100 I = 1, 50000
+          ISOWID(I)  = 0
+          IFOVAL(I)  = 0
+  100 CONTINUE
 C
-      DO I = 1, 400000
-          IFOVAL(I)  = char(0)
-          ISOWID(I)  = char(0)
-      ENDDO
-C
-      DO 101 I = 1, 65600
-          ISOBMP(I)  = char(0)
+      DO 101 I = 1, 8200
+          ISOBMP(I)  = 0
   101 CONTINUE
-      DO 102 I = 1, 800000
-          ISOVAL(I)  = char(0)
+      DO 102 I = 1, 100000
+          ISOVAL(I)  = 0
   102 CONTINUE
 C                      INITIALIZE POINTERS
 C                            SECONDARY BIT WIDTH POINTER
@@ -1011,9 +997,9 @@ C                             CONSTRUCT WORKING BIT MAP
       DO 2000 I = 1, KOUT
           DO 1000 J = 1, KIN
               IF (J.EQ.1) THEN
-                  CALL SBYTEC (ISOBMP,1,IBMP2P,1)
+                  CALL SBYTE (ISOBMP,1,IBMP2P,1)
               ELSE
-                  CALL SBYTEC (ISOBMP,0,IBMP2P,1)
+                  CALL SBYTE (ISOBMP,0,IBMP2P,1)
               END IF
               IBMP2P  = IBMP2P + 1
  1000     CONTINUE
@@ -1037,7 +1023,7 @@ C                              FIND FIRST ORDER VALUE
               JPTR  = JPTR + 1
  4000     CONTINUE
 C                            SAVE FIRST ORDER VALUE
-          CALL SBYTEC (IFOVAL,LOWEST,IFOPTR,KWIDE)
+          CALL SBYTE (IFOVAL,LOWEST,IFOPTR,KWIDE)
           IFOPTR  = IFOPTR + KWIDE
 C         PRINT *,'FOVAL',I,LOWEST,KWIDE
 C                            SUBTRACT FIRST ORDER VALUE FROM OTHER VALS
@@ -1055,13 +1041,13 @@ C                            HOW MANY BITS TO CONTAIN LARGEST SECOND
 C                                         ORDER VALUE IN SEGMENT
           CALL FI7505 (IBIG,NWIDE)
 C                            SAVE BIT WIDTH
-          CALL SBYTEC (ISOWID,NWIDE,IWDPTR,8)
+          CALL SBYTE (ISOWID,NWIDE,IWDPTR,8)
           IWDPTR  = IWDPTR + 8
 C         PRINT *,I,'SOVAL',IBIG,' IN',NWIDE,' BITS'
 C         WRITE (6,4101) (IWORK(K),K=KPTR,KPTR+52)
 C                            SAVE SECOND ORDER VALUES OF THIS SEGMENT
           DO 5000 J = 0, KIN-1
-              CALL SBYTEC (ISOVAL,IWORK(KPTR+J),ISOPTR,NWIDE)
+              CALL SBYTE (ISOVAL,IWORK(KPTR+J),ISOPTR,NWIDE)
               ISOPTR  = ISOPTR + NWIDE
  5000     CONTINUE
           KPTR    = KPTR + KIN
@@ -1077,43 +1063,40 @@ C                                          LEAVE SPACE FOR THIS
       IPTR   = IPTR + 16
 C                               BYTE 14
 C                                          EXTENDED FLAGS
-      CALL SBYTEC (IPFLD,IBDSFL(5),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(5),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(6),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(6),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(7),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(7),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(8),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(8),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(9),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(9),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(10),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(10),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(11),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(11),IPTR,1)
       IPTR  = IPTR + 1
-      CALL SBYTEC (IPFLD,IBDSFL(12),IPTR,1)
+      CALL SBYTE (IPFLD,IBDSFL(12),IPTR,1)
       IPTR  = IPTR + 1
 C                               BYTES 15-16
 C                 SKIP OVER VALUE  FOR N2
       IPTR  = IPTR + 16
 C                               BYTES 17-18
 C                                     P1
-      CALL SBYTEC (IPFLD,KBDS(17),IPTR,16)
+      CALL SBYTE (IPFLD,KBDS(17),IPTR,16)
       IPTR  = IPTR + 16
 C                               BYTES 19-20
 C                                   P2
-      CALL SBYTEC (IPFLD,KBDS(19),IPTR,16)
+      CALL SBYTE (IPFLD,KBDS(19),IPTR,16)
       IPTR  = IPTR + 16
 C                               BYTE 21 - RESERVED LOCATION
-      CALL SBYTEC (IPFLD,0,IPTR,8)
+      CALL SBYTE (IPFLD,0,IPTR,8)
       IPTR  = IPTR + 8
 C                               BYTES 22 - ?
 C                                      WIDTHS OF SECOND ORDER PACKING
       IX    = (IWDPTR + 32) / 32
-C      CALL SBYTESC (IPFLD,ISOWID,IPTR,32,0,IX)
-      ijk=IWDPTR/8
-      jst=(iptr/8)+1
-      ipfld(jst:jst+ijk)=ISOWID(1:ijk)
+      CALL SBYTES (IPFLD,ISOWID,IPTR,32,0,IX)
       IPTR  = IPTR + IWDPTR
 C     PRINT *,'ISOWID',IWDPTR,IX
 C     CALL BINARY (ISOWID,IX)
@@ -1124,13 +1107,10 @@ C                                         DETERMINE LOCATION FOR START
 C                                         OF FIRST ORDER PACKED VALUES
       KBDS(12)  = IPTR / 8 + 12
 C                                        STORE LOCATION
-      CALL SBYTEC (IPFLD,KBDS(12),0,16)
+      CALL SBYTE (IPFLD,KBDS(12),0,16)
 C                                     MOVE IN FIRST ORDER PACKED VALUES
       IPASS   = (IFOPTR + 32) / 32
-c      CALL SBYTESC (IPFLD,IFOVAL,IPTR,32,0,IPASS)
-      ijk=(IFOPTR/8)+1
-      jst=(iptr/8)+1
-      ipfld(jst:jst+ijk)=ifoval(1:ijk)
+      CALL SBYTES (IPFLD,IFOVAL,IPTR,32,0,IPASS)
       IPTR  = IPTR + IFOPTR
 C     PRINT *,'IFOVAL',IFOPTR,IPASS,KWIDE
 C     CALL BINARY (IFOVAL,IPASS)
@@ -1142,13 +1122,10 @@ C                DETERMINE LOCATION FOR START
 C                     OF SECOND ORDER VALUES
       KBDS(15)  = IPTR / 8 + 12
 C                                   SAVE LOCATION OF SECOND ORDER VALUES
-      CALL SBYTEC (IPFLD,KBDS(15),24,16)
+      CALL SBYTE (IPFLD,KBDS(15),24,16)
 C                  MOVE IN SECOND ORDER PACKED VALUES
       IX    = (ISOPTR + 32) / 32
-C      CALL SBYTESC (IPFLD,ISOVAL,IPTR,32,0,IX)
-      ijk=(ISOPTR/8)+1
-      jst=(iptr/8)+1
-      ipfld(jst:jst+ijk)=isoval(1:ijk)
+      CALL SBYTES (IPFLD,ISOVAL,IPTR,32,0,IX)
       IPTR  = IPTR + ISOPTR
 C     PRINT *,'ISOVAL',ISOPTR,IX
 C     CALL BINARY (ISOVAL,IX)
@@ -1165,22 +1142,22 @@ C  -----------------------------------
 C                               BYTES 1-3
 C                                   THIS FUNCTION COMPLETED BELOW
 C                                   WHEN LENGTH OF BDS IS KNOWN
-      CALL SBYTEC (BDS11,LENBDS,0,24)
+      CALL SBYTE (BDS11,LENBDS,0,24)
 C                               BYTE  4
-      CALL SBYTEC (BDS11,IBDSFL(1),24,1)
-      CALL SBYTEC (BDS11,IBDSFL(2),25,1)
-      CALL SBYTEC (BDS11,IBDSFL(3),26,1)
-      CALL SBYTEC (BDS11,IBDSFL(4),27,1)
+      CALL SBYTE (BDS11,IBDSFL(1),24,1)
+      CALL SBYTE (BDS11,IBDSFL(2),25,1)
+      CALL SBYTE (BDS11,IBDSFL(3),26,1)
+      CALL SBYTE (BDS11,IBDSFL(4),27,1)
 C                              ENTER NUMBER OF FILL BITS
-      CALL SBYTEC (BDS11,NLEFT,28,4)
+      CALL SBYTE (BDS11,NLEFT,28,4)
 C                               BYTE  5-6
       IF (ISCAL2.LT.0) THEN
-          CALL SBYTEC (BDS11,1,32,1)
+          CALL SBYTE (BDS11,1,32,1)
           ISCAL2 = - ISCAL2
       ELSE
-          CALL SBYTEC (BDS11,0,32,1)
+          CALL SBYTE (BDS11,0,32,1)
       END IF
-      CALL SBYTEC (BDS11,ISCAL2,33,15)
+      CALL SBYTE (BDS11,ISCAL2,33,15)
 C
 C$  FILL OCTET 7-10 WITH THE REFERENCE VALUE
 C   CONVERT THE FLOATING POINT OF YOUR MACHINE TO IBM370 32 BIT
@@ -1188,18 +1165,18 @@ C   FLOATING POINT NUMBER
 C                                        REFERENCE VALUE
 C                                          FIRST TEST TO SEE IF
 C                                          ON 32 OR 64 BIT COMPUTER
-C      CALL W3FI01(LW)
-      IF (bit_size(LW).EQ.32) THEN
+      CALL W3FI01(LW)
+      IF (LW.EQ.4) THEN
           CALL W3FI76 (REFNCE,IEXP,IMANT,32)
       ELSE
           CALL W3FI76 (REFNCE,IEXP,IMANT,64)
       END IF
-      CALL SBYTEC (BDS11,IEXP,48,8)
-      CALL SBYTEC (BDS11,IMANT,56,24)
+      CALL SBYTE (BDS11,IEXP,48,8)
+      CALL SBYTE (BDS11,IMANT,56,24)
 C
 C                               BYTE  11
 C
-      CALL SBYTEC (BDS11,KBDS(11),80,8)
+      CALL SBYTE (BDS11,KBDS(11),80,8)
 C
       KLEN  = LENBDS / 4 + 1
 C     PRINT *,'BDS11 LISTING',4,LENBDS

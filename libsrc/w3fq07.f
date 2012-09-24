@@ -193,7 +193,7 @@ C
       DATA       INUNIT        /5/
       INTEGER    CARDFIL
       INTEGER    OUTFIL
-      INTEGER    NK,NM,NJ,NF,KRET4
+      INTEGER_4    NK,NM,NJ,NF,KRET4
 C
 
       LOGICAL*1  BYPASS
@@ -258,7 +258,7 @@ C
            ENDIF
            WRITE(6,FMT='('' W3FQ07: READING CARD FROM UNIT '',
      1           I4)') CARDFIL
-              READ(CARDFIL,FMT='(80A1)',END=940)
+              READ(CARDFIL,FMT='(80A1),END=940)')
      1         (LPARM(I:I),I=1,NUMBYT)
 C   
            WRITE(6,FMT='('' W3FQ07: PARM='',

@@ -25,14 +25,11 @@
 ###############################################################
 
 #
-#    Updated by Shrinivas Moorthi on 03/05/2011
-#
 #     Generate a list of object files that corresponds to the
 #     list of Fortran ( .f ) files in the current directory
 #
-export ncepxlf=${1:-ncepxlf}
-export ncepxlc=${2:-ncepxlc}
-for i in `ls *.f` ; do
+for i in `ls *.f`
+do
   obj=`basename $i .f`
   OBJS="$OBJS ${obj}.o"
 done
@@ -40,7 +37,8 @@ done
 #     Generate a list of object files that corresponds to the
 #     list of C ( .c ) files in the current directory
 #
-for i in `ls *.c` ; do
+for i in `ls *.c`
+do
   obj=`basename $i .c`
   OBJS="$OBJS ${obj}.o"
 done
@@ -48,7 +46,8 @@ done
 #     Remove make file, if it exists.  May need a new make file
 #     with an updated object file list.
 #
-if [ -f make.libw3 ] ; then
+if [ -f make.libw3 ] 
+then
   rm -f make.libw3
 fi
 #
@@ -61,61 +60,39 @@ SHELL=/bin/sh
 \$(LIB):	\$(LIB)( ${OBJS} )
 
 .f.a:
-	$ncepxlf -c \$(FFLAGS) \$<
+	ncepxlf -c \$(FFLAGS) \$<
 	ar -ruv \$(AFLAGS) \$@ \$*.o
 	rm -f \$*.o
 
 .c.a:
-	$ncepxlc -c \$(CFLAGS) \$<
+	ncepxlc -c \$(CFLAGS) \$<
 	ar -ruv  \$(AFLAGS) \$@ \$*.o
 	rm -f \$*.o
 EOF
 #
-#     Update 4-byte version of libw3lib-2.0_4.a
+#     Update 4-byte version of libw3_4.a
 #
-export LIB="../../libw3lib-2.0_4.a"
-export libinc=../../incmod
-mkdir -p $libinc/w3lib-2.0_4
-if [ $ncepxlf = xlf_r ] ; then
- export FFLAGS=" -O3 -qnosave -qmoddir=$libinc/w3lib-2.0_4 -I $libinc/sigio_4 -I $libinc/w3lib-2.0_4"
- export AFLAGS=" -X64"
- export CFLAGS=" -O3 -q64"
-else
- export FFLAGS=" -g -O3 -convert big_endian -traceback -module $libinc/w3lib-2.0_4 -I $libinc/sigio_4 -I $libinc/w3lib-2.0_4"
- export AFLAGS=" "
- export CFLAGS=" -O3 -DLINUX -Dfunder -DUNDERSCORE -DFortranByte=char -DFortranInt=int -DFortranLlong='long long'"
-fi
+export LIB="../../libw3_4.a"
+export FFLAGS=" -O3 -qnosave -qmoddir=/nwprod/lib/incmod/w3_4 -I /nwprod/lib/incmod/sigio_4 -I /nwprod/lib/incmod/w3_4"
+export AFLAGS=" -X64"
+export CFLAGS=" -O3 -q64"
 make -f make.libw3
 #
-#     Update 8-byte version of libw3lib-2.0_8.a
+#     Update 8-byte version of libw3_8.a
 #
-export LIB="../../libw3lib-2.0_8.a"
-mkdir -p $libinc/w3lib-2.0_8
-if [ $ncepxlf = xlf_r ] ; then
- export FFLAGS=" -O3 -qnosave -qintsize=8 -qrealsize=8 -qmoddir=$libinc/w3lib-2.0_8 -I $libinc/sigio_4 -I $libinc/w3lib-2.0_8"
- export AFLAGS=" -X64"
- export CFLAGS=" -O3 -q64"
-else
- export FFLAGS=" -O3 -i8 -r8 -convert big_endian -traceback -module $libinc/w3lib-2.0_8 -I $libinc/sigio_4 -I $libinc/w3lib-2.0_8"
- export AFLAGS=" "
- export CFLAGS=" -O3 -DLINUX -Dfunder -DUNDERSCORE -DFortranByte=char -DFortranInt=int -DFortranLlong='long long'"
-fi
+export LIB="../../libw3_8.a"
+export FFLAGS=" -O3 -qnosave -qintsize=8 -qrealsize=8 -qmoddir=/nwprod/lib/incmod/w3_8 -I /nwprod/lib/incmod/sigio_4 -I /nwprod/lib/incmod/w3_8"
+export AFLAGS=" -X64"
+export CFLAGS=" -O3 -q64"
 make -f make.libw3
 #
 #     Update Double Precision (Size of Real 8-byte and default Integer) version 
-#     of libw3lib-2.0_d.a
+#     of libw3_d.a
 #
-export LIB="../../libw3lib-2.0_d.a"
-mkdir -p $libinc/w3lib-2.0_d
-if [ $ncepxlf = xlf_r ] ; then
- export FFLAGS=" -O3 -qnosave -qrealsize=8 -qmoddir=$libinc/w3lib-2.0_d -I $libinc/sigio_4 -I $libinc/w3lib-2.0_d"
- export AFLAGS=" -X64"
- export CFLAGS=" -O3 -q64"
-else
- export FFLAGS=" -O3 -r8 -convert big_endian -traceback -module $libinc/w3lib-2.0_d -I $libinc/sigio_4 -I $libinc/w3lib-2.0_d"
- export AFLAGS=" "
- export CFLAGS=" -O3 -DLINUX -Dfunder -DUNDERSCORE -DFortranByte=char -DFortranInt=int -DFortranLlong='long long'"
-fi
+export LIB="../../libw3_d.a"
+export FFLAGS=" -O3 -qnosave -qrealsize=8 -qmoddir=/nwprod/lib/incmod/w3_d -I /nwprod/lib/incmod/sigio_4 -I /nwprod/lib/incmod/w3_d"
+export AFLAGS=" -X64"
+export CFLAGS=" -O3 -q64"
 make -f make.libw3
 
 rm -f make.libw3
