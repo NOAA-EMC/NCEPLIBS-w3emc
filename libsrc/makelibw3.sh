@@ -23,13 +23,26 @@
 #              archive libraries.
 #
 ###############################################################
-
+#
+#    Updated by Shrinivas Moorthi on 03/05/2011
+#    Updated by Boi Vuong         on 09/11/2012
 #
 #     Generate a list of object files that corresponds to the
 #     list of Fortran ( .f ) files in the current directory
 #
-for i in `ls *.f`
-do
+export FC=${1:-ifort}
+export CC=${2:-icc}
+export VER=emc
+#
+#  Make INCMOD directory to store all module files
+#
+export MODDIR=../../incmod
+mkdir -p $MODDIR
+mkdir -p $MODDIR/w3"$VER"_4
+mkdir -p $MODDIR/w3"$VER"_8
+mkdir -p $MODDIR/w3"$VER"_d
+#
+for i in `ls *.f` ; do
   obj=`basename $i .f`
   OBJS="$OBJS ${obj}.o"
 done
@@ -37,8 +50,7 @@ done
 #     Generate a list of object files that corresponds to the
 #     list of C ( .c ) files in the current directory
 #
-for i in `ls *.c`
-do
+for i in `ls *.c` ; do
   obj=`basename $i .c`
   OBJS="$OBJS ${obj}.o"
 done
@@ -46,8 +58,7 @@ done
 #     Remove make file, if it exists.  May need a new make file
 #     with an updated object file list.
 #
-if [ -f make.libw3 ] 
-then
+if [ -f make.libw3 ] ; then
   rm -f make.libw3
 fi
 #
@@ -60,39 +71,42 @@ SHELL=/bin/sh
 \$(LIB):	\$(LIB)( ${OBJS} )
 
 .f.a:
-	ncepxlf -c \$(FFLAGS) \$<
+	$FC -c \$(FFLAGS) \$<
 	ar -ruv \$(AFLAGS) \$@ \$*.o
 	rm -f \$*.o
 
 .c.a:
-	ncepxlc -c \$(CFLAGS) \$<
+	$CC -c \$(CFLAGS) \$<
 	ar -ruv  \$(AFLAGS) \$@ \$*.o
 	rm -f \$*.o
 EOF
 #
-#     Update 4-byte version of libw3_4.a
+#     Update 4-byte version of libw3_v2.0.3_4.a
 #
-export LIB="../../libw3_4.a"
-export FFLAGS=" -O3 -qnosave -qmoddir=/nwprod/lib/incmod/w3_4 -I /nwprod/lib/incmod/sigio_4 -I /nwprod/lib/incmod/w3_4"
-export AFLAGS=" -X64"
-export CFLAGS=" -O3 -q64"
+export LIB="../../libw3"$VER"_4.a"
+#export FFLAGS=" -O3 -g -module $MODDIR/w3"$VER"_4 -I $MODDIR/sigio_4 -I $MODDIR/w3"$VER"_4"
+export FFLAGS=" -O3 -g -module $MODDIR/w3"$VER"_4 -I $MODDIR/sigio_big_4 -I $MODDIR/w3"$VER"_4"
+export AFLAGS=" "
+export CFLAGS=" -O3 -DLINUX"
 make -f make.libw3
 #
-#     Update 8-byte version of libw3_8.a
+#     Update 8-byte version of libw3_v2.0.a_8.a
 #
-export LIB="../../libw3_8.a"
-export FFLAGS=" -O3 -qnosave -qintsize=8 -qrealsize=8 -qmoddir=/nwprod/lib/incmod/w3_8 -I /nwprod/lib/incmod/sigio_4 -I /nwprod/lib/incmod/w3_8"
-export AFLAGS=" -X64"
-export CFLAGS=" -O3 -q64"
+export LIB="../../libw3"$VER"_8.a"
+#export FFLAGS=" -O3 -g -r8 -i8 -module $MODDIR/w3"$VER"_8 -I $MODDIR/sigio_4 -I $MODDIR/w3"$VER"_8"
+export FFLAGS=" -O3 -g -r8 -i8 -module $MODDIR/w3"$VER"_8 -I $MODDIR/sigio_big_4 -I $MODDIR/w3"$VER"_8"
+export AFLAGS=" "
+export CFLAGS=" -O3 -DLINUX"
 make -f make.libw3
 #
 #     Update Double Precision (Size of Real 8-byte and default Integer) version 
-#     of libw3_d.a
+#     of libw3_v2.0.3_d.a
 #
-export LIB="../../libw3_d.a"
-export FFLAGS=" -O3 -qnosave -qrealsize=8 -qmoddir=/nwprod/lib/incmod/w3_d -I /nwprod/lib/incmod/sigio_4 -I /nwprod/lib/incmod/w3_d"
-export AFLAGS=" -X64"
-export CFLAGS=" -O3 -q64"
+export LIB="../../libw3"$VER"_d.a"
+#export FFLAGS=" -O3 -g -r8 -module $MODDIR/w3"$VER"_d -I $MODDIR/sigio_4 -I $MODDIR/w3"$VER"_d"
+export FFLAGS=" -O3 -g -r8 -module $MODDIR/w3"$VER"_d -I $MODDIR/sigio_big_4 -I $MODDIR/w3"$VER"_d"
+export AFLAGS=" "
+export CFLAGS=" -O3 -DLINUX"
 make -f make.libw3
 
 rm -f make.libw3
