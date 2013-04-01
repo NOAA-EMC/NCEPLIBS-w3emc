@@ -1,0 +1,92 @@
+Instructions for building and installing w3emc on Unix
+******************************************************
+
+$Revision$
+nceplibs support email: ncep.list.emc.nceplibs.support@noaa.gov
+
+
+The easy (I hope) way...
+------------------------
+
+To build the single (_4), double (_8), and mixed (_d) precision w3emc libraries
+using the sigio library in /nwprod/lib, you can use the "make_w3emc_lib.sh"
+script specifying the build configuration. The available build configurations
+are:
+  gfortran-debug  ifort-debug  pgf95-debug  xlf2003-debug
+  gfortran        ifort        pgf95        xlf2003
+
+So, on WCOSS/tide you would type:
+
+  $ make_w3emc_lib.sh ifort
+
+
+On the CCS you would type
+
+  $ make_w3emc_lib.sh xlf2003
+
+
+This script iterates over the single (_4), double (_8), and mixed (_d) precision
+build configurations setting the appropriate default real and integer precision
+promotion compiler switches.
+
+Some additional points:
+- Both GNU-type and NCO-type installs are performed.
+- The libraries are installed relative to the current directory.
+
+You can tailor the build process using this "make_w3emc_lib.sh" script by
+modifying the relevant build configuration setup file in the "config-setup/"
+subdirectory.
+
+
+
+The more flexible way
+---------------------
+
+If you need more flexibility in the library build you can specify the necessary 
+information directly to the configure script that generates the makefiles. For
+example, on WCOSS/tide:
+
+  $ ./configure --prefix=${PWD} \
+                --enable-promote=4|8|d \
+                FC="ifort" \
+                FCFLAGS="-O2 -g -traceback -fixed -I/nwprod/lib/incmod/sigio_4" \
+                LDFLAGS="-L/nwprod/lib" \
+                LIBS="-lsigio_4"
+
+The --prefix switch sets the installation directory and defaults to /usr/local so
+make sure you set it to a directory in which you have write access.
+
+The --enable-promote switch allows you to specify the type of precision build be it
+single (4), double (8), or mixed (d) precision. To build the mixed precision library
+you would use:
+
+  --enable-promote=d
+
+Not specifying this switch is equivalent to "--enable-promote=4".
+
+The definition of the "FC" enviroment variable is not strictly necessary as it defaults
+to "ifort" on linux systems if available (followed by "gfortran" and "pgf95" if not), and
+to "xlf2003" on AIX systems.
+
+Use the configure script method of generating the makefiles if you want to link to a
+different version of the sigio library, or a version in a different location, e.g.
+
+  $ ./configure --prefix=${PWD} \
+                --enable-promote=4|8|d \
+                FCFLAGS="-O2 -g -traceback -fixed -I/usrx/local/nceplibs/incmod/sigio_4" \
+                LDFLAGS="-L/usrx/local/nceplibs" \
+                LIBS="-lsigio_4"
+
+To start the library build for a particular configuration, simply type
+
+  $ make
+
+To install the library in a directory conforming to the NCO organisation and
+naming conventions, type:
+
+  $ make nco_install
+
+To perform a GNU-type install, type:
+
+  $ make install
+
