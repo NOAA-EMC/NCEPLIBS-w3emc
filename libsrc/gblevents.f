@@ -2134,7 +2134,12 @@ cdak $ print *, '&&& bad QM fails sanity check'
             QOB = QS(TDO+273.16,POB)
 ccccc       BAKQ_8(1,L) = QOB*1E6 ! dak fix 2/27/13: can't be > bmiss
                                   !  else flting pt overflow in BUFRLIB
-            IF(QOB*1E6.LT.BMISS) BAKQ_8(1,L) = QOB*1E6
+ccc         IF(QOB*1E6.LT.BMISS) BAKQ_8(1,L) = QOB*1E6
+                                  ! dak add'l fix 4/12/13: don't allow
+                                  !  calc. q to be < 0 which can occur
+                                  !  on WCOSS for cases of horribly bad
+                                  !  mesonet data
+            IF(QOB*1E6.LT.BMISS .AND. QOB.GT.0.) BAKQ_8(1,L) = QOB*1E6
             BAKQ_8(2,L) = QQM_8(L)  ! Moist qm same as before for
                                     !  re-calc. q
             BAKQ_8(3,L) = VTCD
