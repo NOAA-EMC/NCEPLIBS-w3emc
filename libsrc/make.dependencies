@@ -1,3 +1,4 @@
+start.o : start.F 
 args_mod.o : args_mod.f 
 gblevents.o : gblevents.f 
 getgbens.o : getgbens.f 
@@ -7,7 +8,6 @@ mersenne_twister.o : mersenne_twister.f
 mova2i.o : mova2i.f 
 orders.o : orders.f 
 putgbens.o : putgbens.f 
-start.o : start.f 
 summary.o : summary.f 
 w3ai40.o : w3ai40.f 
 w3ai41.o : w3ai41.f 

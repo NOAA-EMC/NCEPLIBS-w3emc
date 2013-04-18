@@ -3,26 +3,30 @@
 # libsrc/ level makefile template
 
 # Package-specific substitution variables
-package = @PACKAGE_NAME@
-version = @PACKAGE_VERSION@
-tarname = @PACKAGE_TARNAME@
-distdir = $(tarname)_$(version)@SUFFIX@
+package   = @PACKAGE_NAME@
+version   = @PACKAGE_VERSION@
+tarname   = @PACKAGE_TARNAME@
+precision = @PRECISION@
+distdir   = $(tarname)_$(version)_$(precision)
 
 # Prefix-specific substitution variables
 prefix      = @prefix@
-exec_prefix = @exec_prefix@
-bindir      = @bindir@
 
 # Mixed package and prefix substitution variables
 installdir  = $(prefix)/$(distdir)
 
 # Compiler substitution variables
-FC = @FC@
-FCFLAGS = @FCFLAGS@ -c
+FC       = @FC@
+FCFLAGS  = @FCFLAGS@ -c
+FPPFLAGS = @FPPFLAGS@
+AR       = @AR@
+ARFLAGS  = @ARFLAGS@
+RANLIB   = @RANLIB@
 INSTALL         = @INSTALL@
 INSTALL_DATA    = @INSTALL_DATA@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_SCRIPT  = @INSTALL_SCRIPT@
+
+# The library name
+LIBRARY = lib$(tarname).a
 
 # The file definitions. This include must occur before targets.
 include make.filelist
@@ -30,41 +34,51 @@ include make.filelist
 # The targets
 all: library
 
-library: $(OBJ_FILES)
-	ar -crvs lib$(package).a $(OBJ_FILES)
+$(LIBRARY): $(OBJ_FILES)
+	$(AR) $(ARFLAGS) $@ $(OBJ_FILES)
+	$(RANLIB) $@
+        
+library: $(LIBRARY)
 
 clean:
 	-rm *.o *.mod *.a
 
-distclean: clean
+distclean:
 	-rm Makefile
 
-check: all
+check:  library
 	@echo "***THIS IS WHERE THE UNIT TEST INVOCATION GOES***"
 
-install_include:
+# ...Gnu-style installation
+install:
 	$(INSTALL) -d $(DESTDIR)$(installdir)/include
 	$(INSTALL_DATA) *.mod $(DESTDIR)$(installdir)/include
-
-install_lib:
 	$(INSTALL) -d $(DESTDIR)$(installdir)/lib
-	$(INSTALL_DATA) lib$(package)$(SUFFIX).a $(DESTDIR)$(installdir)/lib
+	$(INSTALL_DATA) $(LIBRARY) $(DESTDIR)$(installdir)/lib
+	$(INSTALL_DATA) ../config.log $(DESTDIR)$(installdir)
 
-install: install_include install_lib
-
-nco_install_lib:
+# ...NCO-style installation
+nco_install: FORCE
 	$(INSTALL) -d $(DESTDIR)$(installdir)
-	$(INSTALL_DATA) lib$(package)$(SUFFIX).a $(DESTDIR)$(installdir)/lib$(package)_$(version)$(SUFFIX).a
-
-nco_install_include:
+	$(INSTALL_DATA) $(LIBRARY) $(DESTDIR)$(installdir)/lib$(distdir).a
 	$(INSTALL) -d $(DESTDIR)$(installdir)/incmod/$(distdir)
 	$(INSTALL_DATA) *.mod $(DESTDIR)$(installdir)/incmod/$(distdir)
+	$(INSTALL_DATA) ../config.log $(DESTDIR)$(installdir)/config.log.$(distdir)
 
-nco_install: nco_install_include nco_install_lib
-
+FORCE:
+	@if [ -d $(DESTDIR)$(installdir) ]; then \
+          echo; \
+	  echo "*** NCO-style installation does not install into existing directories! ***"; \
+	  echo "*** $(DESTDIR)$(installdir) already exists! ***"; \
+          echo; \
+	  exit 1; \
+	fi
+        
+# ...Universal uninstallation
 uninstall:
-	-rm -fr $(DESTDIR)$(installdir)
+	-rm -fr $(DESTDIR)$(installdir) >/dev/null 2>&1
 
+# ...Reconfig targets
 Makefile: Makefile.in ../config.status
 	cd .. && ./config.status libsrc/$@
 
@@ -79,7 +93,10 @@ include make.dependencies
 
 # Suffix rules
 .SUFFIXES:
-.SUFFIXES: .f .o
+.SUFFIXES: .F .f .o
+.F.o:
+	$(FC) $(EXTRA_FCFLAGS) $(FCFLAGS) $(FPPFLAGS) $<
+
 .f.o:
 	$(FC) $(EXTRA_FCFLAGS) $(FCFLAGS) $<
 

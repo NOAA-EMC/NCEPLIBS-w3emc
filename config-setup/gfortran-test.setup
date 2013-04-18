@@ -1,0 +1,20 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# DEBUG build settings for Linux gfortran compiler using envars to point to
+#       Gnu-style installed sigio library
+#-------------------------------------------------------------------------------#
+
+export FC="gfortran"
+
+export FCFLAGS=" \
+ -fbounds-check \
+ -ffpe-trap=overflow,zero,invalid \
+ -fno-range-check \
+ -ffixed-form \
+ -ggdb \
+ -Wall \
+ -I${SIGIO_DIR}/include"
+ 
+export LDFLAGS="-L${SIGIO_DIR}/lib"
+
+export LIBS="-lsigio"
