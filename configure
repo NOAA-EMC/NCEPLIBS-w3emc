@@ -2700,7 +2700,7 @@ esac
 # Special case the xlf2003 compiler to:
 #   a) set the AIX macro
 #   b) not insert "#line" directives when it encounters multiple empty lines
-if test "${FC}" = xlf2003 -o test "${FC}" = ncepxlf; then
+if test "${FC}" = xlf2003 || test "${FC}" = ncepxlf; then
   FPPFLAGS="-WF,-DAIX -WF,-P $FPPFLAGS"
 fi
 
