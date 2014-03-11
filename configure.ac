@@ -81,4 +81,16 @@ fi
 AC_SUBST(FPPFLAGS)
 
 
+# Append standard module environment variables for sigio library
+AC_MSG_NOTICE([Using SIGIO_INC4 value: "${SIGIO_INC4}"])
+AC_MSG_NOTICE([Using SIGIO_LIB4 value: "${SIGIO_LIB4}"])
+FCFLAGS="${FCFLAGS} -I${SIGIO_INC4}"
+LIBS="${LIBS} ${SIGIO_LIB4}"
+# ...Check for sigio library
+AC_MSG_CHECKING([for library containing sigio_head definition])
+AC_LINK_IFELSE(
+  [AC_LANG_SOURCE([      program main; use sigio_module; type(sigio_head)::head; end])],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_FAILURE([Unable to link to sigio library],[1])])
+
 AC_OUTPUT
