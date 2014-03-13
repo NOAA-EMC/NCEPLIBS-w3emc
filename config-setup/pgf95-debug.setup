@@ -1,4 +1,10 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# DEBUG build settings for PGI pgf95 compiler
+#-------------------------------------------------------------------------------#
+
 export FC="pgf95"
+
 export FCFLAGS=" \
  -g \
  -Kieee \
@@ -9,8 +15,4 @@ export FCFLAGS=" \
  -Mdclchk \
  -Minform,inform \
  -Mnosave \
- -Mref_externals \
- -fast \
- -I/nwprod/lib/incmod/sigio_4"
-export LDFLAGS="-L/nwprod/lib"
-export LIBS="-lsigio_4"
+ -Mref_externals"

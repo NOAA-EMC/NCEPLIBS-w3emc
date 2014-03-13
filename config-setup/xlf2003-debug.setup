@@ -1,4 +1,10 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# DEBUG build settings for AIX xlf2003 compiler
+#-------------------------------------------------------------------------------#
+
 export FC="xlf2003"
+
 export FCFLAGS=" \
  -qarch=auto \
  -qcheck \
@@ -7,7 +13,4 @@ export FCFLAGS=" \
  -qflttrap=ov:zero:en \
  -qinitauto \
  -qmaxmem=-1 \
- -qnosave \
- -I/nwprod/lib/incmod/sigio_4"
-export LDFLAGS="-L/nwprod/lib"
-export LIBS="-lsigio_4"
+ -qnosave"

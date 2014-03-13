@@ -1,10 +1,14 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# DEBUG build settings for Linux gfortran compiler
+#-------------------------------------------------------------------------------#
+
 export FC="gfortran"
+
 export FCFLAGS=" \
  -fbounds-check \
  -ffpe-trap=overflow,zero,invalid \
  -ffixed-form \
+ -fno-range-check \
  -ggdb \
- -Wall \
- -I/nwprod/lib/incmod/sigio_4"
-export LDFLAGS="-L/nwprod/lib"
-export LIBS="-lsigio_4"
+ -Wall"
