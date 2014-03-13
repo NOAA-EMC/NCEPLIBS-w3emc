@@ -3,15 +3,6 @@
 #
 # $Id$
 #
-# Script to iterate the configuration script over the set of precision
-# versions of the library.
-#
-# The build configuration setup (compiler, compiler switched, libraries, etc)
-# is specified via files in the config-setup/ subdirectory that are sourced
-# within this script.
-#
-# The installation directory is ${PWD}
-#
 ###############################################################################
 
 usage()
@@ -20,7 +11,18 @@ usage()
   echo " Usage: make_w3emc_lib.sh [-g|-h] setup-file"
   echo
   echo "   Script to iterate the configuration script over the set of precision"
-  echo "   versions of the library."
+  echo "   versions of the w3emc library."
+  echo
+  echo "   The w3emc library has a sigio library dependency. The location of the"
+  echo "   sigio include files and the fully specified library name are defined via"
+  echo "   the"
+  echo "     SIGIO_INC4  (include files)"
+  echo "   and"
+  echo "     SIGIO_LIB4  (fully specified library name)"
+  echo "   environment variables. In NCO production, these variables are defined"
+  echo "   via a"
+  echo "     module load sigio"
+  echo "   command."
   echo
   echo '   The installation directory is ${PWD}'
   echo
@@ -33,8 +35,8 @@ usage()
   echo
   echo " Arguments:"
   echo '   setup-file  File, in the "config-setup/" subdirectory, that contains'
-  echo "               the build configuration setup (compiler, compiler switches,"
-  echo "               libraries, etc) that are sourced within this script."
+  echo "               the available build configuration setup (compiler and compiler"
+  echo "               switches) that are sourced within this script."
   echo
   echo "               Currently available setup files are:"
   for file in `ls ./config-setup/`; do
@@ -94,6 +96,25 @@ if [ ! -f ${SETUP_FILE} ]; then
   exit ${FAILURE}
 fi
 . ${SETUP_FILE}
+
+
+# Check that the necessary dependent library environment variables have been defined
+echo; echo
+echo "==============================================================="
+echo "Checking for required environment variables"
+echo "==============================================================="
+echo
+ENVAR_LIST="SIGIO_INC4 SIGIO_LIB4"
+for ENVAR_NAME in ${ENVAR_LIST}; do
+  printf "  Checking %s..." "${ENVAR_NAME}"
+  eval ENVAR=\$${ENVAR_NAME}
+  if [ -z ${ENVAR} ]; then
+    echo "not defined"
+    echo "${SCRIPT_NAME}: ERROR - Required environment variable ${ENVAR_NAME} not specified" >&2
+    exit ${FAILURE}
+  fi
+  echo "defined as ${ENVAR}"
+done
 
 
 # The configuration and build
