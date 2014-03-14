@@ -1,10 +1,14 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# PROD build settings for Linux gfortran compiler
+#-------------------------------------------------------------------------------#
+
 export FC="gfortran"
+
 export FCFLAGS=" \
  -O3 \
  -ffixed-form \
  -funroll-loops \
+ -fno-range-check \
  -ggdb \
- -Wall \
- -I/nwprod/lib/incmod/sigio_4"
-export LDFLAGS="-L/nwprod/lib"
-export LIBS="-lsigio_4"
+ -Wall"
