@@ -8,6 +8,8 @@ nceplibs support email: ncep.list.emc.nceplibs.support@noaa.gov
          Contents
          ========
   A. The easy (I hope) way...
+    1. Defining the SIGIO_INC4 and SIGIO_LIB4 variables
+    2. Running the master build script
   B. The more flexible way
     1. Configuration
     2. Building the library
@@ -23,27 +25,44 @@ nceplibs support email: ncep.list.emc.nceplibs.support@noaa.gov
 A. The easy (I hope) way...
 ===========================
 
-To build the single (_4), double (_8), and mixed (_d) precision w3emc libraries
-using the sigio library in /nwprod/lib, you can use the "make_w3emc_lib.sh"
-script specifying the build configuration. Type
+The "make_w3emc_lib.sh" script builds the single (_4), double (_8), and
+mixed (_d) precision w3emc libraries using the sigio include and library
+values defined in the SIGIO_INC4 and SIGIO_LIB4 environment variables (envars).
+
+
+1. Defining the SIGIO_INC4 and SIGIO_LIB4 variables
+---------------------------------------------------
+
+On WCOSS these envars can be set via the command,
+
+  $ module load sigio
+
+If you want to use different values you can specify them explicity, e.g.
+
+  $ export SIGIO_INC4="-I/path/to/incmod"
+  $ export SIGIO_LIB4="/path/to/libsigio_to-use.a"
+
+
+2. Running the master build script
+----------------------------------
+
+Once the sigio library envars have been defined, you can use the
+"make_w3emc_lib.sh" script specifying the build configuration. To get
+usage information for the script, type
 
   $ make_w3emc_lib.sh -h
 
-to get the usage information for the script.
-
-The available build configurations to use /nwprod/lib are:
+The available build configurations are:
 
   gfortran-debug.setup  ifort-debug.setup  pgf95-debug.setup  xlf2003-debug.setup
   gfortran.setup        ifort.setup        pgf95.setup        xlf2003.setup
+  wcoss.setup
 
-So, on WCOSS/tide you would type:
+The "wcoss.setup" is simply a link to the "ifort.setup" file.
 
-  $ make_w3emc_lib.sh ifort.setup
+So, on WCOSS you would type:
 
-
-On the CCS you would type
-
-  $ make_w3emc_lib.sh xlf2003.setup
+  $ make_w3emc_lib.sh wcoss.setup
 
 
 This script iterates over the single (_4), double (_8), and mixed (_d) precision
@@ -53,7 +72,7 @@ promotion compiler switches.
 Some additional points:
 - The "NCO-type" install is performed by default.
 - The libraries are installed relative to the current directory. After
-  running the script you should see two new directories containing the 
+  running the script you should see two new directories containing the
   single (4), double (8), and mixed (d) precision libraries.
 - See section B.4 below for information about the installation directory
   structure
@@ -73,16 +92,15 @@ B. The more flexible way
 1. Configuration
 ----------------
 
-If you need more flexibility in the library build you can specify the necessary 
+If you need more flexibility in the library build you can specify the necessary
 information directly to the configure script that generates the makefiles. For
-example, on WCOSS/tide:
+example, on WCOSS:
 
+  $ module load sigio
   $ ./configure --prefix=${PWD} \
                 --enable-promote=4|8|d \
                 FC="ifort" \
-                FCFLAGS="-O2 -g -traceback -fixed -I/nwprod/lib/incmod/sigio_4" \
-                LDFLAGS="-L/nwprod/lib" \
-                LIBS="-lsigio_4"
+                FCFLAGS="-O2 -g -traceback -fixed"
 
 The --prefix switch sets the installation directory and defaults to /usr/local so
 make sure you set it to a directory in which you have write access.
@@ -99,6 +117,15 @@ The definition of the "FC" enviroment variable is not strictly necessary as it d
 to "ifort" on linux systems if available (followed by "gfortran" and "pgf95" if not), and
 to "xlf2003" on AIX systems.
 
+You can also specify the sigio library information on the command line if you need that
+flexibility. For example:
+
+  $ ./configure --prefix=${PWD} \
+                FC="ifort" \
+                FCFLAGS="-O2 -g -traceback -fixed" \
+                SIGIO_INC4="-I/path/to/incmod" \
+                SIGIO_LIB4="/path/to/libsigio_to-use.a"
+
 
 
 
@@ -108,6 +135,12 @@ to "xlf2003" on AIX systems.
 To start the library build for a particular configuration, simply type
 
   $ make
+
+If you are building multiple precision versions of the library by hand (i.e. not using the
+"make_w3emc_lib.sh" script, see Section A) then make sure to clean out all the previous
+build's products first by invoking hte clean target first, i.e.:
+
+  $ make clean; make
 
 
 
@@ -124,16 +157,8 @@ We don't have any package-level tests for w3emc yet. Sorry! They're coming...
 -------------------------
 
 Installation of the library *always* occurs into its own directory within the
-directory specified by the --prefix switch. The name of the installation 
-directory follows the convention:
+directory specified by the --prefix switch.
 
-  <library name>_<version>_<precision>
-
-So, if the a library version (say, v2.1.0) build was configured with --prefix=$PWD
-for the default precision (4) build, then the installation directory will be
-
-  ${PWD}/w3emc_v2.1.0_4
- 
 
 
 NCO Install
@@ -145,30 +170,41 @@ type:
   $ make nco_install
 
 For a library version (say, v2.1.0) and the default precision (4), this will create
-a directory called "w3emc_v2.1.0_4". That directory is organised according to the
-current NCO structure on CCS and WCOSS in /nwprod/lib, as shown below:
+a directory called "w3emc". That directory is organised in the so-called vertical
+structure on WCOSS in /nwprod/lib, as shown below:
 
-  w3emc_v2.1.0_4/
+  w3emc/
     |
-    |--libw3emc_v2.1.0_4.a
+    `--v2.1.0/
+        |
+        |--libw3emc_v2.1.0_4.a
+        |
+        `--incmod/
+            |
+            `--w3emc_v2.1.0_4
+
+If you subsequently build and "nco_install" the other w3emc precision libraries
+("8" and "d"), the "w3emc" directory structure will look like:
+
+  w3emc/
     |
-    `--incmod/
-         |
-         `--w3emc_v2.1.0_4/
+    `--v2.1.0/
+        |
+        |--libw3emc_v2.1.0_4.a
+        |--libw3emc_v2.1.0_8.a
+        |--libw3emc_v2.1.0_d.a
+        |
+        `--incmod/
+            |
+            |--w3emc_v2.1.0_4
+            |--w3emc_v2.1.0_8
+            `--w3emc_v2.1.0_d
 
-The contents of the "w3emc_v2.1.0_4" directory can then be moved into the official
-/nwprod/lib location as needed.
+The version subdirectory (v2.1.0) can then be moved into the official
+/nwprod/lib/w3emc location as needed.
 
-Note the include directory is currently empty (i.e. there are no *.mod files yet.)
-
-Let's assume the above install was moved into "/usrx/local/nceplibs", to use the
-library in this structure in your own application, the usual environment variables
-would be modified something like:
-
-  libroot="/usrx/local/nceplibs"
-  FCFLAGS="-I${libroot}/incmod/w3emc_v2.1.0_4 ${FCFLAGS}"
-  LDFLAGS="-L${libroot} ${LDFLAGS}"
-  LIBS="-lw3emc_v2.1.0_4"
+NOTE: The "make_w3emc_lib.sh" script (see Section A) does all of this building and
+installing of the multiple libraries for you.
 
 
 
@@ -188,21 +224,10 @@ a directory called "w3emc_v2.1.0_4". That directory structure is shown below:
     |
     `--lib/
          |
-         `--libbacio.a
+         `--libw3emc.a
 
 Note that the only versioned item in this type of install is the name of the
 installation directory itself.
-
-Note the include directory is currently empty (i.e. there are no *.mod files yet.)
-
-Let's assume the above install was moved into "/usrx/local/nceplibs", to use the
-library in this structure in your own application, the usual environment variables
-would be modified something like:
-
-  libroot="/usrx/local/nceplibs"
-  FCFLAGS="-I${libroot}/w3emc_v2.1.0_4/include ${FCFLAGS}"
-  LDFLAGS="-L${libroot}/w3emc_v2.1.0_4/lib ${LDFLAGS}"
-  LIBS="-lbacio"
 
 
 
@@ -212,23 +237,22 @@ Uninstalling the library
 To uninstall the library (assuming you haven't moved the installation directory
 contents somewhere else) you can type:
 
+  $ make nco_uninstall
+
+to roll-back an NCO-type install, or:
+
   $ make uninstall
-  
-This will delete the created installation directory. So, for a library version
-(say, v2.1.0) and the default precision (4), if your configure script invocation
-was something like
 
-  $ ./configure --prefix=${PWD} ...other command line arguments...
+to roll back a Gnu-type install.
 
-then the "uninstall" target will delete the "${PWD}/w3emc_v2.1.0_4" directory.
-
+These target will delete the created installation directory.
 
 
 
 5. Cleaning up
 --------------
 
-Two targets are provided for cleaning up after the build. To remove all the 
+Two targets are provided for cleaning up after the build. To remove all the
 build products type
 
   $ make clean
