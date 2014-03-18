@@ -467,7 +467,7 @@ C$$$
       REAL(8)      OBS_8,QMS_8,BAK_8,SID_8,HDR_8(10)
       REAL(8)      BMISS,GETBMISS
       LOGICAL      DOVTMP,DOFCST,SOME_FCST,DOBERR,FCST,VIRT,DOANLS,
-     $             SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV
+     $             SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV,dopmsl
 
       DIMENSION    IUNITF(2)
 
@@ -475,7 +475,7 @@ C$$$
      $ XOB,YOB,DHR,TYP,NLEV
       COMMON /GBEVBB/ PVCD,VTCD
       COMMON /GBEVCC/ DOVTMP,DOFCST,SOME_FCST,DOBERR,FCST,VIRT,
-     $ QTOP_REJ,SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV
+     $ QTOP_REJ,SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV,dopmsl
       COMMON /GBEVDD/ ERRS(300,33,6)
       COMMON /GBEVFF/ BMISS
 
@@ -497,7 +497,7 @@ C$$$
      $ 'POE QOE TOE ZOE WOE PWE PW1E PW2E PW3E PW4E NUL  NUL      '/
 
       NAMELIST /PREVDATA/DOVTMP,DOFCST,SOME_FCST,DOBERR,DOANLS,
-     $ QTOP_REJ,SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV
+     $ QTOP_REJ,SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV,dopmsl
 
 C----------------------------------------------------------------------
 C----------------------------------------------------------------------
@@ -532,6 +532,7 @@ C  ----------------------------------------------
          QTOP_REJ    = 300.
          SATMQC      = .FALSE.
          ADPUPA_VIRT = .FALSE.
+         dopmsl      = .false.
          READ(5,PREVDATA,ERR=101,END=102)
          GO TO 103
 C-----------------------------------------------------------------------
@@ -566,6 +567,7 @@ C-----------------------------------------------------------------------
             SOME_FCST   = .FALSE.
             DOBERR      = .FALSE.
             ADPUPA_VIRT = .FALSE.
+            dopmsl      = .false.
          ENDIF
          IF(DOVTMP)  RECALC_Q=.TRUE. ! RECALC_Q must be T if DOVTMP is T
          WRITE (6,PREVDATA)
@@ -756,7 +758,7 @@ C  ------------------------------------------------
          IF(NEWTYP.EQ.1)  WRITE(IUNITS,1807)
  1807 FORMAT(/'  ==> "PREVENT" EVENT PROCESSING IS  PERFORMED FOR THIS',
      $ ' TABLE A ENTRY'/)
-         CALL GBLEVN02(IUNITP,IUNITS,NEWTYP)
+         CALL GBLEVN02(IUNITP,IUNITS,NEWTYP,subset)
       ELSE
          IF(NEWTYP.EQ.1)  WRITE(IUNITS,1806)
  1806 FORMAT(/'  ==> "PREVENT" EVENT PROCESSING NOT PERFORMED FOR THIS',
@@ -817,15 +819,16 @@ C  ---------------------------------
       END
 C***********************************************************************
 C***********************************************************************
-      SUBROUTINE GBLEVN02(IUNITP,IUNITS,NEWTYP)
+      SUBROUTINE GBLEVN02(IUNITP,IUNITS,NEWTYP,subset)
                                          ! FORMERLY SUBROUTINE FILTAN
 
       DIMENSION    NFLGRT(100:299,12),OEMIN(2:6)
-      CHARACTER*8  STNID
+      CHARACTER*8  STNID,subset
       CHARACTER*40 PEVN,QEVN,TEVN,WEVN,PWVN,PW1VN,PW2VN,PW3VN,PW4VN
       REAL(8)      PEV_8(4,255),QEV_8(4,255),TEV_8(4,255),WEV_8(5,255),
      $             PWV_8(4,255),PW1V_8(4,255),PW2V_8(4,255),
-     $             PW3V_8(4,255),PW4V_8(4,255),OBS_8,QMS_8,BAK_8,SID_8
+     $             PW3V_8(4,255),PW4V_8(4,255),OBS_8,QMS_8,BAK_8,SID_8,
+     $             ufc_8,vfc_8
       LOGICAL      FCST,REJP_PS,REJPS,REJT,REJQ,REJW,REJPW,REJPW1,
      $             REJPW2,REJPW3,REJPW4,SATMQC,SATEMP,SOLN60,SOLS60,
      $             MOERR_P,MOERR_T,ADPUPA_VIRT,DOBERR,DOFCST,SOME_FCST,
@@ -836,7 +839,7 @@ C***********************************************************************
      $ XOB,YOB,DHR,TYP,NLEV
       COMMON /GBEVBB/ PVCD,VTCD
       COMMON /GBEVCC/ DOVTMP,DOFCST,SOME_FCST,DOBERR,FCST,VIRT,
-     $ QTOP_REJ,SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV
+     $ QTOP_REJ,SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV,dopmsl
       COMMON /GBEVEE/PSG01,ZSG01,TG01(500),UG01(500),VG01(500),
      x     QG01(500),zint(500),pint(500),pintlog(500),plev(500),
      x     plevlog(500)
@@ -1307,6 +1310,27 @@ CDAKCDAKCDAKCDAK  WRITE(IUNITS,1404) STNID,NINT(TYP),YOB,XOB,WQM
                   MAXWEV = L
                ENDIF
             ENDIF
+c           Reject calm surface marine winds
+            if(subset.eq."SFCSHP".and.uob.eq.0..and.vob.eq.0.) then
+              call ufbint(-iunitp,ufc_8,1,1,iret,'UFC')
+              call ufbint(-iunitp,vfc_8,1,1,iret,'VFC')
+              if(ibfms(ufc_8).eq.0.or.ibfms(vfc_8).eq.0) then
+                if(abs(ufc_8).ge.5..or.abs(vfc_8).ge.5.) then
+                  if(wqm.le.3) then
+                    write(iunits,1504) stnid,nint(typ),ufc_8,vfc_8
+ 1504 FORMAT(/' --> ID ',A8,', (RTP ',I3,' UFC=',F5.2,' VFC=',F5.2,') ',
+     $ 'NEW WIND EVENT, UOB/VOB CALM (0 M/S) WHILE |UFC| AND/OR |VFC| ',
+     $ '>= 5 M/S, QM SET TO 8'/)
+                    wev_8(1,1) = uob
+                    wev_8(2,1) = vob
+                    wev_8(3,1) = 8
+                    wev_8(4,1) = 4
+                    wev_8(5,1) = 8
+                    maxwev = 1
+                  end if
+                end if
+              end if
+            end if
          ENDIF
 
 C  -------------------------------------------------------------------
@@ -2016,6 +2040,10 @@ C     QQM WAS 9 OR 15 AND ALL OTHER CONDITIONS MET; FOR "SATEMP" TYPES,
 C     ENCODES A SIMPLE COPY OF THE REPORTED (VIRTUAL) TEMPERATURE AS A
 C     "VIRTMP" EVENT IF DOVTMP IS TRUE, GETS REASON CODE 3 (SIMILAR TO
 C     WHAT IS ALREADY DONE FOR "RASSDA" TYPES)
+C 2012-09-26 S. MELCHIOR -- FOR RTMA WHEN DOPMSL=T, PMSL IS DERIVED FROM
+C     POB, ZOB, AND VIRTMP (IF AVAILABLE) IN CASES WHEN PMSL IS MISSING.
+C     THE DERIVED PMSL EITHER GETS A QUALITY MARK OF 3 OR INHERITS PQM,
+C     WHICHEVER IS GREATER.
 C
 C USAGE:    CALL GBLEVN08(IUNITP)
 C   INPUT ARGUMENT LIST:
@@ -2039,30 +2067,39 @@ C
 C$$$
       SUBROUTINE GBLEVN08(IUNITP,SUBSET) ! FORMERLY SUBROUTINE VTPEVN
 
-      CHARACTER*80 EVNSTQ,EVNSTV
-      CHARACTER*8  SUBSET
+      parameter    (Rd=287.04, g=9.81)
+      CHARACTER*80 EVNSTQ,EVNSTV,evnstp
+      CHARACTER*8  SUBSET,stnid
       REAL(8)      TDP_8(255),TQM_8(255),QQM_8(255),BAKQ_8(4,255),
-     $             BAKV_8(4,255),OBS_8,QMS_8,BAK_8,SID_8
+     $             BAKV_8(4,255),bakp_8(3,255),OBS_8,QMS_8,BAK_8,
+     $             SID_8,pqm_8,pob_8,tdo_8
+      real(8)      t,p,tv,z,pmo_8,zob_8,pmsl_8
       REAL(8)      BMISS
 
       LOGICAL      EVNQ,EVNV,DOVTMP,TROP,ADPUPA_VIRT,DOBERR,DOFCST,
-     $             SOME_FCST,FCST,VIRT,SATMQC,RECALC_Q,DOPREV
+     $             SOME_FCST,FCST,VIRT,SATMQC,RECALC_Q,DOPREV,
+     $             evnp,dopmsl
 
       COMMON /GBEVAA/ SID_8,OBS_8(13,255),QMS_8(12,255),BAK_8(12,255),
      $ XOB,YOB,DHR,TYP,NLEV
       COMMON /GBEVBB/ PVCD,VTCD
       COMMON /GBEVCC/ DOVTMP,DOFCST,SOME_FCST,DOBERR,FCST,VIRT,
-     $ QTOP_REJ,SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV
+     $ QTOP_REJ,SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV,dopmsl
       COMMON /GBEVFF/ BMISS
 
       DATA EVNSTQ /'QOB QQM QPC QRC'/
       DATA EVNSTV /'TOB TQM TPC TRC'/
+      data evnstp /'PMO PMQ PMIN'/
+
+      equivalence (sid_8,stnid)
 
 C-----------------------------------------------------------------------
 C FCNS BELOW CONVERT TEMP/TD (K) & PRESS (MB) INTO SAT./ SPEC. HUM.(G/G)
+C FCN BELOW derives PMSL from POB, VIRTMP, ZOB
 C-----------------------------------------------------------------------
       ES(T) = 6.1078*EXP((17.269*(T - 273.16))/((T - 273.16)+237.3))
       QS(T,P) = (0.622*ES(T))/(P-(0.378*ES(T)))
+      PMSL_fcn(P,Tv,Z) = P*exp((g*Z)/(Rd*Tv))
 C-----------------------------------------------------------------------
 
 C  CLEAR TEMPERATURE AND SPECIFIC HUMIDITY EVENTS
@@ -2070,16 +2107,24 @@ C  ----------------------------------------------
 
       EVNQ   = .FALSE.
       EVNV   = .FALSE.
+      evnp   = .false.
       BAKQ_8 = BMISS
       BAKV_8 = BMISS
+      bakp_8 = bmiss
       TROP   = .FALSE.
 
 C  GET DEWPOINT TEMPERATURE AND CURRENT T,Q QUALITY MARKERS
+C  Get mean sea level pressure, station pressure quality mark,
+C  and station height
 C  --------------------------------------------------------
 
       CALL UFBINT(-IUNITP,TDP_8,1,255,NLTD,'TDO')
       CALL UFBINT(-IUNITP,QQM_8,1,255,NLQQ,'QQM')
       CALL UFBINT(-IUNITP,TQM_8,1,255,NLTQ,'TQM')
+      call ufbint(-iunitp,pmo_8,1,1,nlpm,'PMO')
+      call ufbint(-iunitp,zob_8,1,1,nlz,'ZOB')
+      call ufbint(-iunitp,sid_8,1,1,nlz,'SID')
+      call ufbint(-iunitp,pqm_8,1,1,nlz,'PQM')
       IF(SUBSET.NE.'RASSDA  '.AND.SUBSET.NE.'SATEMP  ') THEN
          IF(NLTD.EQ.0) RETURN
          IF(NLQQ.EQ.0) RETURN
@@ -2196,6 +2241,26 @@ cdak $ " (set TQM_8=8)")', l
                                      !  not bad) and T qm orig "bad"
                      BAKV_8(4,L) = 2 ! Tv gets unique reason code 2
                   ENDIF
+c  Derive Pmsl in cases when it is not reported
+                  if(dopmsl) then
+                    if(pmo_8.ge.bmiss) then
+                      tv = bakv_8(1,1) + 273.16
+                      pmsl_8=PMSL_fcn(pob*10.,tv,zob_8)
+                      bakp_8(1,L) = pmsl_8 * 0.1
+                      bakp_8(2,L) = max(3,int(pqm_8)) ! qm>=3 b/c derived
+                      bakp_8(3,L) = 1. ! pmin=1 for derived value
+                      write(*,4000) stnid,bakp_8(3,l),bakp_8(2,l)
+ 4000 format('--> ID ',A8,' Pmsl missing - derived from Pstn; ',
+     $ 'PMIN = ',F3.1,' PQM = ',F4.1,'')
+                      evnp = .true.
+c Diagnostics for Pmsl values that are suspiciously high
+                      if(pmsl_8*0.1.gt.1060) then
+                        write(*,4001) stnid,pob,bakp_8(1,l)
+ 4001 format('--> ID ',A8,' Derived PMSL unrealistic; FLAG; ',
+     $ 'POB = ',F7.2,' PMO = ',F7.2,'')
+                      end if
+                    end if
+                  end if
                ENDIF
                EVNV = .TRUE.
             ENDIF
@@ -2209,6 +2274,7 @@ C  -------------------------
       IF(NLEV.GT.0)  THEN
          IF(EVNQ) CALL UFBINT(IUNITP,BAKQ_8,4,NLEV,IRET,EVNSTQ)
          IF(EVNV) CALL UFBINT(IUNITP,BAKV_8,4,NLEV,IRET,EVNSTV)
+         if(evnp) call ufbint(iunitp,bakp_8,3,nlev,iret,evnstp)
       ENDIF
 
       RETURN

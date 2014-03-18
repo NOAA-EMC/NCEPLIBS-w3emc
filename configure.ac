@@ -3,7 +3,7 @@ AC_REVISION($Id$)
 
 
 ## Initialise autoconf
-AC_INIT([nceplibs w3emc], [v2.1.0], [ncep.list.emc.nceplibs.support@noaa.gov], [w3emc])
+AC_INIT([nceplibs w3emc], [v2.2.0], [ncep.list.emc.nceplibs.support@noaa.gov], [w3emc])
 
 
 # Output info for user
