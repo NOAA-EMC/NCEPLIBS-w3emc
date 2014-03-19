@@ -37,7 +37,12 @@ On WCOSS these envars can be set via the command,
 
   $ module load sigio
 
-If you want to use different values you can specify them explicity, e.g.
+You can get access to the production modulefiles via the following command
+on WCOSS:
+
+  $ module use -a /nwprod/lib/modulefiles
+  
+If you want to use different envar values you can specify them explicity, e.g.
 
   $ export SIGIO_INC4="-I/path/to/incmod"
   $ export SIGIO_LIB4="/path/to/libsigio_to-use.a"
