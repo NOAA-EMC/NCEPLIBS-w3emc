@@ -511,7 +511,7 @@ C -------------------------------
          IFIRST = 1
          PRINT 700
   700 FORMAT(/1X,100('#')/' =====> SUBROUTINE GBLEVENTS INVOKED FOR ',
-     $ 'THE FIRST TIME - VERSION LAST UPDATED 2013-02-13'/)
+     $ 'THE FIRST TIME - VERSION LAST UPDATED 2014-03-24'/)
 
          BMISS = GETBMISS()
          print *
@@ -2040,7 +2040,7 @@ C     QQM WAS 9 OR 15 AND ALL OTHER CONDITIONS MET; FOR "SATEMP" TYPES,
 C     ENCODES A SIMPLE COPY OF THE REPORTED (VIRTUAL) TEMPERATURE AS A
 C     "VIRTMP" EVENT IF DOVTMP IS TRUE, GETS REASON CODE 3 (SIMILAR TO
 C     WHAT IS ALREADY DONE FOR "RASSDA" TYPES)
-C 2012-09-26 S. MELCHIOR -- FOR RTMA WHEN DOPMSL=T, PMSL IS DERIVED FROM
+C 2014-03-25 S. MELCHIOR -- FOR RTMA WHEN DOPMSL=T, PMSL IS DERIVED FROM
 C     POB, ZOB, AND VIRTMP (IF AVAILABLE) IN CASES WHEN PMSL IS MISSING.
 C     THE DERIVED PMSL EITHER GETS A QUALITY MARK OF 3 OR INHERITS PQM,
 C     WHICHEVER IS GREATER.
@@ -2072,8 +2072,8 @@ C$$$
       CHARACTER*8  SUBSET,stnid
       REAL(8)      TDP_8(255),TQM_8(255),QQM_8(255),BAKQ_8(4,255),
      $             BAKV_8(4,255),bakp_8(3,255),OBS_8,QMS_8,BAK_8,
-     $             SID_8,pqm_8,pob_8,tdo_8
-      real(8)      t,p,tv,z,pmo_8,zob_8,pmsl_8
+     $             SID_8,pqm_8
+      real(8)      pmo_8,zob_8,pmsl_8
       REAL(8)      BMISS
 
       LOGICAL      EVNQ,EVNV,DOVTMP,TROP,ADPUPA_VIRT,DOBERR,DOFCST,
@@ -2245,7 +2245,8 @@ c  Derive Pmsl in cases when it is not reported
                   if(dopmsl) then
                     if(pmo_8.ge.bmiss) then
                       tv = bakv_8(1,1) + 273.16
-                      pmsl_8=PMSL_fcn(pob*10.,tv,zob_8)
+                      zob=zob_8
+                      pmsl_8=PMSL_fcn(pob*10.,tv,zob)
                       bakp_8(1,L) = pmsl_8 * 0.1
                       bakp_8(2,L) = max(3,int(pqm_8)) ! qm>=3 b/c derived
                       bakp_8(3,L) = 1. ! pmin=1 for derived value
