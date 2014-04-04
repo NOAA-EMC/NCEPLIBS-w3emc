@@ -1,7 +1,7 @@
 C$$$  SUBPROGRAM DOCUMENTATION BLOCK
 C
 C SUBPROGRAM:    GBLEVENTS   PRE/POST PROCESSING OF PREPBUFR EVENTS 
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 2013-02-13
+C   PRGMMR: S. MELCHIOR      ORG: NP22       DATE: 2014-03-25
 C
 C ABSTRACT: RUNS IN TWO MODES: "PREVENTS" AND "POSTEVENTS".  IN THE
 C   PREVENTS MODE, PREPARES OBSERVATIONAL PREPBUFR REPORTS FOR
@@ -9,9 +9,10 @@ C   SUBSEQUENT QUALITY CONTROL AND ANALYSIS PROGRAMS.  THIS IS DONE
 C   THROUGH THE FOLLOWING: INTERPOLATION OF GLOBAL SPECTRAL SIMGA
 C   FIRST GUESS TO PREPBUFR OBSERVATION LOCATIONS WITH ENCODING OF
 C   FIRST GUESS VALUES INTO PREPBUFR REPORTS; ENCODING OF "PREVENT"
-C   AND/OR "VIRTMP" EVENTS INTO PREPBUFR REPORTS; AND ENCODING OF
-C   OBSERVATION ERRORS FROM THE ERROR SPECIFICATION FILE INTO
-C   PREPBUFR REPORTS.  IN THE POSTEVENTS MODE, AFTER ALL QUALITY
+C   AND/OR "VIRTMP" EVENTS INTO PREPBUFR REPORTS; IN CERTAIN CASES,
+C   ENCODING OF A DERIVED PMSL INTO SURFACE PREPBUFR REPORTS; AND
+C   ENCODING OF OBSERVATION ERRORS FROM THE ERROR SPECIFICATION FILE
+C   INTO PREPBUFR REPORTS.  IN THE POSTEVENTS MODE, AFTER ALL QUALITY
 C   CONTROL AND ANALYSIS PROGRAMS HAVE RUN, INTERPOLATES THE GLOBAL
 C   SPECTRAL SIMGA ANALYSIS TO PREPBUFR OBSERVATION LOCATIONS AND
 C   ENCODES THESE ANALYZED VALUES INTO PREPBUFR REPORTS.  THE
@@ -28,7 +29,7 @@ C   OBSERVATION (RE-CALCULATED) AS WELL AS THE TEMPERATURE
 C   OBSERVATION (FROM SENSIBLE TO VIRTUAL TEMPERATURE, BASED ON
 C   JUST-CALCULATED SPECIFIC HUMIDITY).  CURRENTLY THIS APPLIES ONLY
 C   TO SURFACE (LAND, MARINE AND MESONET) DATA TYPES, POSSIBLY TO
-C   RAOB, DROP AND MULTI-LEVEL RECCO DAA TYPES IF THE SWITCH
+C   RAOB, DROP AND MULTI-LEVEL RECCO DATA TYPES IF THE SWITCH
 C   "ADPUPA_VIRT" IS TRUE (NORMALLY, HOWEVER IT IS FALSE) [OTHER DATA
 C   TYPES WITH REPORTED SENSIBLE TEMPERATURE EITHER HAVE MISSING
 C   MOISTURE (E.G., ALL AIRCRAFT TYPES EXCEPT FOR SOME ACARS, SATELLITE
@@ -53,7 +54,10 @@ C   DOFCST=FALSE & SOME_FCST=FALSE), AND "VIRTMP" EVENT PROCESSING IS
 C   NOT INVOKED (EITHER MESSAGE TYPE IS NOT "ADPSFC", "SFCSHP" OR
 C   "MSONET" WHEN "ADPUPA_VIRT" IS FALSE, OR MESSAGE TYPE IS NOT
 C   "ADPSFC", "SFCSHP", "MSONET" OR "ADPUPA" WHEN "ADPUPA_VIRT" IS
-C   TRUE).
+C   TRUE). ALSO, IF VIRTUAL TEMPERATURE PROCESSING IS PERFORMED, ALL
+C   SURFACE REPORTS WITH MISSING PMSL WILL ENCODE A DERIVED PMSL INTO
+C   PREPBUFR IF THE SWITCH DOPMSL IS TRUE AND A VIRTUAL TEMPERATURE WAS
+C   SUCCESSFULLY CALCULATED.
 C
 C PROGRAM HISTORY LOG:
 C 1999-07-01 D. A. KEYSER -- ORIGINAL AUTHOR (ADAPTED FROM PREVENTS
@@ -221,6 +225,25 @@ C     OVERFLOW ON WCOSS - SEE CALLING PROGRAM FOR MORE INFO)}
 C 2013-02-13  D. A. KEYSER -- FINAL CHANGES TO RUN ON WCOSS: USE
 C     FORMATTED PRINT STATEMENTS WHERE PREVIOUSLY UNFORMATTED PRINT WAS
 C     > 80 CHARACTERS; RENAME ALL REAL(8) VARIABLES AS *_8
+C 2013-04-12  D. A. KEYSER -- IN SUBROUTINE GBLEVN08, DON'T ALLOW
+C     CALCULATED Q TO BE < 0 WHICH CAN OCCUR ON WCOSS FOR CASES OF
+C     HORRIBLY BAD MESONET DATA
+C 2014-03-25 S. MELCHIOR -- ADDED NEW NAMELIST SWITCH "DOPMSL" WHICH,
+C     WHEN TRUE, DERIVES PMSL (MNEMONIC "PMO") FROM REPORTED STATION
+C     PRESSURE ("POB"), STATION HEIGHT/ELEVATION ("ZOB") AND THE JUST-
+C     COMPUTED VIRTUAL TEMPERATURE FOR SURFACE REPORTS IN CASES WHEN
+C     REPORTED PMSL IS MISSING (DONE IN SUBROUTINE GBLEVN08).  DOVTMP
+C     MUST BE TRUE AND DOANLS MUST BE FALSE ("PREVENTS" MODE). THE
+C     DERIVED PMSL EITHER GETS A QUALITY MARK ("PMQ") OF 3 OR INHERITS
+C     THE STATION PRESSURE QUALITY MARK ("PQM"), WHICHEVER IS GREATER.
+C     THE VALUE OF THE PMSL INDICATOR (NEW MNEMONIC "PMIN") IS SET TO 1
+C     TO DENOTE PMSL WAS DERIVED RATHER THAN OBSERVED.  THE DEFAULT FOR
+C     "DOPMSL" IS FALSE (NORMALLY ONLY TRUE IN RTMA AND URMA RUNS).  IT
+C     IS FORCED TO BE FALSE IN "POSTEVENTS" MODE (DOANLS=TRUE). IN
+C     SUBROUTINE GBLEVN02, SFCSHP REPORTS WITH CALM WINDS AND NON-
+C     MISSING BACKGROUND U- OR V-COMPONENT WIND .GE. 5 M/SEC ARE
+C     FLAGGED WITH Q.M. 8 (EVENT PGM "PREVENT", REASON CODE 8).
+C
 C
 C USAGE:    CALL GBLEVENTS(IDATEP,IUNITF,IUNITE,IUNITP,IUNITS,SUBSET,
 C          $               NEWTYP)
@@ -291,7 +314,7 @@ C                  MODULE: GBLEVN_MODULE
 C     LIBRARY:
 C       SPLIB    - SPTEZM   SPTEZMV
 C       W3NCO    - W3MOVDAT ERREXIT
-C       BUFRLIB  - UFBINT   UFBQCD   GETBMISS
+C       BUFRLIB  - UFBINT   UFBQCD   GETBMISS ibfms
 C
 C   EXIT STATES:
 C     COND =   0 - SUCCESSFUL RUN
@@ -433,6 +456,18 @@ C              SATMQC = .FALSE. ---> NO                        (DEFAULT)
 C      (NOTE: THIS APPLIES ONLY TO THE CDAS OR HISTORICAL RE-RUNS
 C             WITH TEMPERATURE SOUNDINGS IN THESE REPORT TYPES)
 C
+C    DOPMSL  - ENCODE DERIVED PMSL ("PMO") FOR ALL SURFACE REPORTS WHEN
+C              REPORTED PMSL IS MISSING - ?
+C              DOPMSL = .TRUE.  ---> YES
+C              DOPMSL = .FALSE. ---> NO ("PMO" REMAINS MISSING)(DEFAULT)
+C      {NOTE: THIS APPLIES ONLY WHEN DOVTMP=TRUE AND DOANLS=FALSE
+C             ("PREVENTS" MODE), VIRTUAL TEMPERATURE CAN BE CALCULATED,
+C             AND STATION PRESSURE AND SURFACE HEIGHT/ELEVATION ARE
+C             BOTH PRESENT.  THE DERIVED PMSL EITHER GETS A QUALITY
+C             MARK ("PMQ") OF 3 OR INHERITS THE STATION PRESSURE
+C             QUALITY MARK ("PQM") PQM, WHICHEVER IS GREATER. THE VALUE
+C             OF THE PMSL INDICATOR ("PMIN") IS SET TO 1 TO DENOTE PMSL
+C             WAS DERIVED RATHER THAN OBSERVED.}
 CC
 C
 C ATTRIBUTES:
@@ -511,7 +546,7 @@ C -------------------------------
          IFIRST = 1
          PRINT 700
   700 FORMAT(/1X,100('#')/' =====> SUBROUTINE GBLEVENTS INVOKED FOR ',
-     $ 'THE FIRST TIME - VERSION LAST UPDATED 2014-03-24'/)
+     $ 'THE FIRST TIME - VERSION LAST UPDATED 2014-03-25'/)
 
          BMISS = GETBMISS()
          print *
@@ -1078,7 +1113,7 @@ C        AS IS
 C  -------------------------------------------------------------------
 
          IF(TOB.LT.BMISS) THEN
-            REJT = OEFG01(POB,TYP,2,OEMIN(2)).GE.BMISS  .OR. 
+            REJT = OEFG01(POB,TYP,2,OEMIN(2)).GE.BMISS  .OR.
      $             (SOLN60.AND.NINT(POB*10.).GE.1000)   .OR.
      $             (SOLS60.AND.NINT(POB*10.).GT.1000)
             IF(REJT.OR.REJP_PS) THEN
@@ -1259,6 +1294,9 @@ C              for wind reports.)
 C    - THIS IS SFC LEVEL AND PRESSURE VIOLATES RULES FOR SFC PRESSURE
 C       (EXCEPT FOR MISSING OBSERVATION ERROR, ALREADY COVERED IN RULE
 C       2 ABOVE) (SEE ABOVE)
+C    - This is a SFCSHP report with calm winds and non-missing
+C      background u- or v-component wind is .GE. 5 m/sec --
+C      "PREVENT" PGM REASON CODE 8, Q.M. set to 8
 C    - PRESSURE ON LEVEL VIOLATES RULES FOR PRESSURE (SEE ABOVE)
 C  REJECTION FOR FIRST TWO RULES MEANS Q.M. SET TO 9 UNLESS:
 C      - ANY OTHER RULE CAUSES REJECTION, THEN Q.M. SET TO 8
@@ -1310,11 +1348,14 @@ CDAKCDAKCDAKCDAK  WRITE(IUNITS,1404) STNID,NINT(TYP),YOB,XOB,WQM
                   MAXWEV = L
                ENDIF
             ENDIF
-c           Reject calm surface marine winds
+c  Reject calm sfc marine winds if background u- or v- wind .ge. 5 m/s
             if(subset.eq."SFCSHP".and.uob.eq.0..and.vob.eq.0.) then
               call ufbint(-iunitp,ufc_8,1,1,iret,'UFC')
               call ufbint(-iunitp,vfc_8,1,1,iret,'VFC')
-              if(ibfms(ufc_8).eq.0.or.ibfms(vfc_8).eq.0) then
+cccccccc      if(ibfms(ufc_8).eq.0.or.ibfms(vfc_8).eq.0) then
+                          ! DAK: changed to only allow this test if
+                          !      both UFC and VFC are non-missing
+              if(ibfms(ufc_8).eq.0.and.ibfms(vfc_8).eq.0) then
                 if(abs(ufc_8).ge.5..or.abs(vfc_8).ge.5.) then
                   if(wqm.le.3) then
                     write(iunits,1504) stnid,nint(typ),ufc_8,vfc_8
@@ -1324,7 +1365,7 @@ c           Reject calm surface marine winds
                     wev_8(1,1) = uob
                     wev_8(2,1) = vob
                     wev_8(3,1) = 8
-                    wev_8(4,1) = 4
+                    wev_8(4,1) = pvcd
                     wev_8(5,1) = 8
                     maxwev = 1
                   end if
@@ -1979,8 +2020,8 @@ C  ----------------------------------
 
 C$$$  SUBPROGRAM DOCUMENTATION BLOCK
 C
-C SUBPROGRAM:    GBLEVN08    CALCULATE SPEC. HUMIDITY AND VIRTUAL TEMP
-C   PRGMMR: D.A. KEYSER      ORG: NP22       DATE: 2007-09-14
+C SUBPROGRAM:    GBLEVN08
+C   PRGMMR: S. MELCHIOR      ORG: NP22       DATE: 2014-03-25
 C
 C ABSTRACT: CREATE VIRTUAL TEMPERATURE EVENTS WITHIN GBLEVENTS
 C   SUBROUTINE.  FOR ALL TYPES EXCEPT RASS, THIS CONSISTS OF FIRST RE-
@@ -1997,16 +2038,19 @@ C   REASON CODE 0, 2 OR 6).  FOR RASS DATA, SPECIFIC HUMIDITY IS
 C   MISSING HOWEVER IF THE NAMELIST SWITCH DOVTMP IS TRUE, A SIMPLE
 C   COPY OF THE REPORTED (VIRTUAL) TEMPERATURE IS ENCODED AS A STACKED
 C   EVENT TO BE LATER WRITTEN INTO THE PREPBUFR FILE (UNDER PROGRAM
-C   "VIRTMP", REASON CODE 3).  THIS SUBROUTINE IS CURRENTLY ONLY
-C   CALLED FOR SURFACE LAND ("ADPSFC"), MARINE ("SFCSHP"), MESONET
-C   ("MSONET"), RASS ("RASSDA") OR SATELLITE TEMPERATURE RETRIEVAL
-C   ("SATEMP") DATA TYPES WHEN SWITCH "ADPUPA_VIRT" IS FALSE AND ONLY
-C   FOR SURFACE LAND ("ADPSFC"), MARINE ("SFCSHP"), MESONET ("MSONET"),
-C   RASS ("RASSDA"), SATELLITE TEMPERATURE RETRIEVAL ("SATEMP") OR
-C   RAOB/DROP/MULTI-LVL RECCO ("ADPUPA") DATA TYPES WHEN SWITCH
-C   "ADPUPA_VIRT" IS TRUE.  IT IS ALSO ONLY CALLED IN THE PREVENTS
-C   MODE.  THIS ROUTINE IS CALLED ONCE FOR EACH VALID REPORT IN THE
-C   PREPBUFR FILE.
+C   "VIRTMP", REASON CODE 3).  FOR SURFACE DATA WITH A MISSING PMSL, IF
+C   DOVTMP=T AND DOPMSL=T AND A VIRTUAL TEMPERATURE HAS BEEN COMPUTED,
+C   CALCULATE AN ESTIMATED PMSL AND ENCODE IT INTO PREPBUFR FILE ALONG
+C   WITH AN INDICATOR THAT IS WAS DERIVED HERE. THIS SUBROUTINE IS
+C   CURRENTLY ONLY CALLED FOR SURFACE LAND ("ADPSFC"), MARINE
+C   ("SFCSHP"), MESONET ("MSONET"), RASS ("RASSDA") OR SATELLITE
+C   TEMPERATURE RETRIEVAL ("SATEMP") DATA TYPES WHEN SWITCH
+C   "ADPUPA_VIRT" IS FALSE AND ONLY FOR SURFACE LAND ("ADPSFC"), MARINE
+C   ("SFCSHP"), MESONET ("MSONET"), RASS ("RASSDA"), SATELLITE
+C   TEMPERATURE RETRIEVAL ("SATEMP") OR RAOB/DROP/MULTI-LVL RECCO
+C   ("ADPUPA") DATA TYPES WHEN SWITCH "ADPUPA_VIRT" IS TRUE.  IT IS
+C   ALSO ONLY CALLED IN THE PREVENTS MODE.  THIS ROUTINE IS CALLED ONCE
+C   FOR EACH VALID REPORT IN THE PREPBUFR FILE.
 C
 C PROGRAM HISTORY LOG:
 C 1995-05-17  J. WOOLLEN (NP20) - ORIGINAL AUTHOR
@@ -2040,10 +2084,20 @@ C     QQM WAS 9 OR 15 AND ALL OTHER CONDITIONS MET; FOR "SATEMP" TYPES,
 C     ENCODES A SIMPLE COPY OF THE REPORTED (VIRTUAL) TEMPERATURE AS A
 C     "VIRTMP" EVENT IF DOVTMP IS TRUE, GETS REASON CODE 3 (SIMILAR TO
 C     WHAT IS ALREADY DONE FOR "RASSDA" TYPES)
-C 2014-03-25 S. MELCHIOR -- FOR RTMA WHEN DOPMSL=T, PMSL IS DERIVED FROM
-C     POB, ZOB, AND VIRTMP (IF AVAILABLE) IN CASES WHEN PMSL IS MISSING.
-C     THE DERIVED PMSL EITHER GETS A QUALITY MARK OF 3 OR INHERITS PQM,
-C     WHICHEVER IS GREATER.
+C 2013-04-12  D. A. KEYSER -- DON'T ALLOW CALCULATED Q TO BE < 0 WHICH
+C     CAN OCCUR ON WCOSS FOR CASES OF HORRIBLY BAD MESONET DATA
+C 2014-03-25 S. MELCHIOR -- ADDED NEW NAMELIST SWITCH "DOPMSL" WHICH,
+C     WHEN TRUE, DERIVES PMSL (MNEMONIC "PMO") FROM REPORTED STATION
+C     PRESSURE ("POB"), STATION HEIGHT/ELEVATION ("ZOB") AND THE JUST-
+C     COMPUTED VIRTUAL TEMPERATURE FOR SURFACE REPORTS IN CASES WHEN
+C     REPORTED PMSL IS MISSING.  DOVTMP MUST BE TRUE AND DOANLS MUST BE
+C     FALSE ("PREVENTS" MODE). THE DERIVED PMSL EITHER GETS A QUALITY
+C     MARK ("PMQ") OF 3 OR INHERITS THE STATION PRESSURE QUALITY MARK
+C     ("PQM"), WHICHEVER IS GREATER. THE VALUE OF THE PMSL INDICATOR
+C     (NEW MNEMONIC "PMIN") IS SET TO 1 TO DENOTE PMSL WAS DERIVED
+C     RATHER THAN OBSERVED.  THE DEFAULT FOR "DOPMSL" IS FALSE
+C     (NORMALLY ONLY TRUE IN RTMA AND URMA RUNS).  IT IS FORCED TO BE
+C     FALSE IN "POSTEVENTS" MODE (DOANLS=TRUE).
 C
 C USAGE:    CALL GBLEVN08(IUNITP)
 C   INPUT ARGUMENT LIST:
@@ -2071,14 +2125,14 @@ C$$$
       CHARACTER*80 EVNSTQ,EVNSTV,evnstp
       CHARACTER*8  SUBSET,stnid
       REAL(8)      TDP_8(255),TQM_8(255),QQM_8(255),BAKQ_8(4,255),
-     $             BAKV_8(4,255),bakp_8(3,255),OBS_8,QMS_8,BAK_8,
+     $             BAKV_8(4,255),bakp_8(3),OBS_8,QMS_8,BAK_8,
      $             SID_8,pqm_8
       real(8)      pmo_8,zob_8,pmsl_8
       REAL(8)      BMISS
 
       LOGICAL      EVNQ,EVNV,DOVTMP,TROP,ADPUPA_VIRT,DOBERR,DOFCST,
      $             SOME_FCST,FCST,VIRT,SATMQC,RECALC_Q,DOPREV,
-     $             evnp,dopmsl
+     $             evnp,dopmsl,surf
 
       COMMON /GBEVAA/ SID_8,OBS_8(13,255),QMS_8(12,255),BAK_8(12,255),
      $ XOB,YOB,DHR,TYP,NLEV
@@ -2095,10 +2149,14 @@ C$$$
 
 C-----------------------------------------------------------------------
 C FCNS BELOW CONVERT TEMP/TD (K) & PRESS (MB) INTO SAT./ SPEC. HUM.(G/G)
-C FCN BELOW derives PMSL from POB, VIRTMP, ZOB
 C-----------------------------------------------------------------------
       ES(T) = 6.1078*EXP((17.269*(T - 273.16))/((T - 273.16)+237.3))
       QS(T,P) = (0.622*ES(T))/(P-(0.378*ES(T)))
+C-----------------------------------------------------------------------
+C FCN BELOW derives mean sea-level pressure (mb)from P (station
+C  pressure, mb), Tv (virtual temperature, K), and Z (station height/
+C  elevation, m) for surface reports
+C-----------------------------------------------------------------------
       PMSL_fcn(P,Tv,Z) = P*exp((g*Z)/(Rd*Tv))
 C-----------------------------------------------------------------------
 
@@ -2113,18 +2171,22 @@ C  ----------------------------------------------
       bakp_8 = bmiss
       TROP   = .FALSE.
 
+      surf = (subset.eq.'ADPSFC'.or.subset.eq.'SFCSHP'.or.
+     $           subset.eq.'MSONET')
+
 C  GET DEWPOINT TEMPERATURE AND CURRENT T,Q QUALITY MARKERS
-C  Get mean sea level pressure, station pressure quality mark,
-C  and station height
-C  --------------------------------------------------------
+C  Also get mean sea level pressure, station pressure quality mark,
+C   and station height (elevation) for surface reports if dopmsl=T
+C  ----------------------------------------------------------------
 
       CALL UFBINT(-IUNITP,TDP_8,1,255,NLTD,'TDO')
       CALL UFBINT(-IUNITP,QQM_8,1,255,NLQQ,'QQM')
       CALL UFBINT(-IUNITP,TQM_8,1,255,NLTQ,'TQM')
-      call ufbint(-iunitp,pmo_8,1,1,nlpm,'PMO')
-      call ufbint(-iunitp,zob_8,1,1,nlz,'ZOB')
-      call ufbint(-iunitp,sid_8,1,1,nlz,'SID')
-      call ufbint(-iunitp,pqm_8,1,1,nlz,'PQM')
+      if(surf.and.dopmsl) then
+         call ufbint(-iunitp,pmo_8,1,1,nlpm,'PMO')
+         call ufbint(-iunitp,zob_8,1,1,nlzo,'ZOB')
+         call ufbint(-iunitp,pqm_8,1,1,nlpq,'PQM')
+      endif
       IF(SUBSET.NE.'RASSDA  '.AND.SUBSET.NE.'SATEMP  ') THEN
          IF(NLTD.EQ.0) RETURN
          IF(NLQQ.EQ.0) RETURN
@@ -2145,7 +2207,9 @@ C  --------------------------------------------------------
          CALL ERREXIT(62)
       ENDIF
 
-C  COMPUTE VIRTUAL TEMPERATURE AND SPECIFIC HUMIDITY USING REPORTED DEWP
+C  COMPUTE SPECIFIC HUMIDITY AND VIRTUAL TEMPERATURE USING REPORTED DEWP
+C  For surface reports, also calculate PMSL if it is missing, dopmsl=T,
+C   and a virtual temperature has been computed
 C  ---------------------------------------------------------------------
 
       IF(NLEV.GT.0)  THEN
@@ -2170,6 +2234,7 @@ C  ---------------------------------------------------------------------
      $                   .AND. TDO.LT.BMISS) THEN
             IF(QQM_8(L).GT.3) THEN
 C  Don't update q or calculate Tv if bad moisture obs fails sanity check
+C   (also don't calc. PMSL if it is missing and dopmsl=T for sfc rpts)
 cdak           IF(TDO.LT.-103.15 .OR. TDO.GT.46.83 .OR. POB.LT.0.1 .OR.
 cdak $          POB.GT.1100.)
 cdak $ print *, '&&& bad QM fails sanity check'
@@ -2241,24 +2306,33 @@ cdak $ " (set TQM_8=8)")', l
                                      !  not bad) and T qm orig "bad"
                      BAKV_8(4,L) = 2 ! Tv gets unique reason code 2
                   ENDIF
-c  Derive Pmsl in cases when it is not reported
-                  if(dopmsl) then
-                    if(pmo_8.ge.bmiss) then
-                      tv = bakv_8(1,1) + 273.16
-                      zob=zob_8
-                      pmsl_8=PMSL_fcn(pob*10.,tv,zob)
-                      bakp_8(1,L) = pmsl_8 * 0.1
-                      bakp_8(2,L) = max(3,int(pqm_8)) ! qm>=3 b/c derived
-                      bakp_8(3,L) = 1. ! pmin=1 for derived value
-                      write(*,4000) stnid,bakp_8(3,l),bakp_8(2,l)
+                  if(surf) then
+c  For sfc rpts & dopmsl=T, derive Pmsl in cases when it is not reported
+c  DAK: Note right now this can only happen for sfc rpts where a Tv is
+c       set to be calculated and where it is successfully calculated.
+c       Eventually this may be able to be relaxed such that PMSL can be
+c       derived even if, e.g., no moisture were reported (in this case
+c       Ts would have to be used, still a decent estimate of PMSL could
+c       liekly be made). Might also be able to be derived if no T rpted.
+                    if(dopmsl) then
+                      if(ibfms(pmo_8).ne.0) then
+                        tv = bakv_8(1,1) + 273.16
+                        zob=zob_8
+                        pmsl_8=PMSL_fcn(pob,tv,zob)
+                        bakp_8(1) = pmsl_8
+                        bakp_8(2) = max(3,int(pqm_8))! qm>=3 b/c derived
+                        bakp_8(3) = 1. ! pmin=1 for derived value
+ ! DAK: suppress printout
+cccccccccc              write(*,4000) stnid,bakp_8(3),bakp_8(2)
  4000 format('--> ID ',A8,' Pmsl missing - derived from Pstn; ',
-     $ 'PMIN = ',F3.1,' PQM = ',F4.1,'')
-                      evnp = .true.
+     $ 'PMIN = ',F4.1,' PQM = ',F4.1,'')
+                        evnp = .true.
 c Diagnostics for Pmsl values that are suspiciously high
-                      if(pmsl_8*0.1.gt.1060) then
-                        write(*,4001) stnid,pob,bakp_8(1,l)
+                        if(pmsl_8.gt.1060) then
+                          write(*,4001) stnid,pob,bakp_8(1)
  4001 format('--> ID ',A8,' Derived PMSL unrealistic; FLAG; ',
      $ 'POB = ',F7.2,' PMO = ',F7.2,'')
+                        end if
                       end if
                     end if
                   end if
@@ -2275,7 +2349,8 @@ C  -------------------------
       IF(NLEV.GT.0)  THEN
          IF(EVNQ) CALL UFBINT(IUNITP,BAKQ_8,4,NLEV,IRET,EVNSTQ)
          IF(EVNV) CALL UFBINT(IUNITP,BAKV_8,4,NLEV,IRET,EVNSTV)
-         if(evnp) call ufbint(iunitp,bakp_8,3,nlev,iret,evnstp)
+         if(nlev.eq.1.and.evnp)
+     $    call ufbint(iunitp,bakp_8,3,nlev,iret,evnstp)
       ENDIF
 
       RETURN
