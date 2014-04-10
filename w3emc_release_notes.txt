@@ -1,0 +1,36 @@
+w3emc_release_notes.txt
+  History of updates and changes to w3emc library.
+
+Modification history
+ 10 Apr 2014 - original file
+---
+
+  The w3emc library was created by the splitting of the production w3lib into 
+separate w3nco and w3emc libraries (c. 27 Dec 2012).
+
+  As of the first authoring of these release notes (c. April 2014) the version 
+of the w3emc library in use in production was v2.0.5.
+
+---- History of Releases:
+
+*** w3emc_v2.0.5 --> released c. 16 Apr 2013
+ In production use thru April 2014.
+
+*** w3emc_v2.1.0 --> released c. Apr 2014
+ Never separately implemented into production (included in v2.2.0 release)
+ Changes...   ???
+
+*** w3emc_v2.2.0 --> released c. Apr 2014
+ Implemented into production c. April 2014, in support of prepobs_prepdata release v3.0.0
+ 
+ 4 April 2014  DKeyser  Updated gblevents
+   * Only attempt PMSL derivation for surface reports.
+   * Store pmsl ob/qm and pmin in a 1-dim array rather than a 2-dim array 
+     since only 1 level (surface report) is processed.
+   * Suppress printout of reports where pmsl is derived.
+   * Add requirement that exactly 1 level was updated with derived pmsl in 
+     order to write out new derived pmsl "pseudo-event". 
+
+
+---end of w3emc_release_notes.txt
+
