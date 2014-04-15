@@ -1,5 +1,8 @@
 w3emc_release_notes.txt
   History of updates and changes to w3emc library.
+  
+  $Revision$
+  $Date$
 
 Modification history
  10 Apr 2014 - original file
