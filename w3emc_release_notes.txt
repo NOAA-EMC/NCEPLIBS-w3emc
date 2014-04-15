@@ -16,13 +16,50 @@ of the w3emc library in use in production was v2.0.5.
 *** w3emc_v2.0.5 --> released c. 16 Apr 2013
  In production use thru April 2014.
 
-*** w3emc_v2.1.0 --> released c. Apr 2014
- Never separately implemented into production (included in v2.2.0 release)
- Changes...   ???
+*** w3emc_v2.1.0 --> tagged 06 May 2013
+ Never separately implemented into production. The changes for this library tag
+ were mostly build-procedure related.
+ 
+ Build procedure changes.
+ ---- See nceplibs trac ticket #16, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/16
+ * All source code was moved into the /libsrc directory.
+ * An Autoconf configuration script, configure, was created.
+ * A generic build script, make_w3emc_lib.sh, was created to build the three different
+   precisions of the w3emc library.
+ * A set of "standard" environment variable setup files were created and placed in the
+   config-setup directory.
+ * A README file for the new build procedure was created.
+ ---- See nceplibs trac ticket #56, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/56
+ * Corrected a problem with if-block syntax in the "configure.ac" script.
+ * Updated the gfortran compiler setup files to prevent integer overflow compile errors.
+ 
+ Code changes.
+ ---- See nceplibs trac ticket #36, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/36
+ * Removed "C$" comment characters from affected w3emc code as these are the sentinel
+   characters for fixed source form conditional compilation in OpenMP.
+ ---- See nceplibs trac ticket #50, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/50
+ * Modified the "start.f" source code to allow preprocessing so the correct 
+   subroutine name is used for non-AIX systems (not really an issue now the CCS 
+   has been retired.)
+ ---- See nceplibs trac ticket #51, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/51
+ * This updated the nceplibs repository copy of "gblevents.f" to be brought up to date
+   with an implementation by NCO via the ObsProc group.
+ ---- See nceplibs trac ticket #56, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/56
+ * Defined the iargc() function as an external in "args_mod.f" to prevent recursive
+   call compile errors when gfortran is used.
+ 
 
 *** w3emc_v2.2.0 --> released c. Apr 2014
  Implemented into production c. April 2014, in support of prepobs_prepdata release v3.0.0
+
+ Build procedure changes.
+ ---- See nceplibs trac ticket #68, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/68
+ * The build procedure was updated to use both the new vertical structure for the
+   library implementations as well as use the module-load-defined environment
+   variables, SIGIO_INC4 and SIGIO_LIB4, for the location of the dependent sigio
+   include files and static library. 
  
+ Code changes.
  4 April 2014  DKeyser  Updated gblevents
    * Only attempt PMSL derivation for surface reports.
    * Store pmsl ob/qm and pmin in a 1-dim array rather than a 2-dim array 
