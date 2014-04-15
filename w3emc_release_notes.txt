@@ -3,6 +3,7 @@ w3emc_release_notes.txt
   
   $Revision$
   $Date$
+  $URL$
 
 Modification history
  10 Apr 2014 - original file
