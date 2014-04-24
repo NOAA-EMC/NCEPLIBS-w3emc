@@ -2322,10 +2322,9 @@ c       liekly be made). Might also be able to be derived if no T rpted.
                         bakp_8(1) = pmsl_8
                         bakp_8(2) = max(3,int(pqm_8))! qm>=3 b/c derived
                         bakp_8(3) = 1. ! pmin=1 for derived value
- ! DAK: suppress printout
 cccccccccc              write(*,4000) stnid,bakp_8(3),bakp_8(2)
  4000 format('--> ID ',A8,' Pmsl missing - derived from Pstn; ',
-     $ 'PMIN = ',F4.1,' PQM = ',F4.1,'')
+     $ 'PMIN = ',F4.1,' PMQ = ',F4.1,'')
                         evnp = .true.
 c Diagnostics for Pmsl values that are suspiciously high
                         if(pmsl_8.gt.1060) then
