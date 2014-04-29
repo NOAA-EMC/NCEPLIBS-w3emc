@@ -6,7 +6,7 @@ w3emc_release_notes.txt
   $URL$
 
 Modification history
- 10 Apr 2014 - original file
+ 29 Apr 2014 - original file (created w/ release of v2.2.0)
 ---
 
   The w3emc library was created by the splitting of the production w3lib into 
@@ -21,8 +21,9 @@ of the w3emc library in use in production was v2.0.5.
  In production use thru April 2014.
 
 *** w3emc_v2.1.0 --> tagged 06 May 2013
- Never separately implemented into production. The changes for this library tag
- were mostly build-procedure related.
+ This version was never separately implemented into production; it was included w/ the 
+release of build v2.2.0 in April 2014.
+ The changes for this library tag were mostly build-procedure related.
  
  Build procedure changes.
  ---- See nceplibs trac ticket #16, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/16
@@ -54,7 +55,8 @@ of the w3emc library in use in production was v2.0.5.
  
 
 *** w3emc_v2.2.0 --> released c. Apr 2014
- Implemented into production c. April 2014, in support of prepobs_prepdata release v3.0.0
+ Implemented into production c. April 2014; Changes include modifications to build 
+procedures, as well as source code updates in support of prepobs_prepdata release v3.0.0.
 
  Build procedure changes.
  ---- See nceplibs trac ticket #68, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/68
