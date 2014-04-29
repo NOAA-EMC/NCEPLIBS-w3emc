@@ -64,13 +64,20 @@ of the w3emc library in use in production was v2.0.5.
    include files and static library. 
  
  Code changes.
- 4 April 2014  DKeyser  Updated gblevents
-   * Only attempt PMSL derivation for surface reports.
-   * Store pmsl ob/qm and pmin in a 1-dim array rather than a 2-dim array 
-     since only 1 level (surface report) is processed.
-   * Suppress printout of reports where pmsl is derived.
-   * Add requirement that exactly 1 level was updated with derived pmsl in 
-     order to write out new derived pmsl "pseudo-event". 
+ 4 April 2014  DKeyser and SMelchior Updated gblevents
+   * Added new namelist switch "DOPMSL" which, when true, derives PMSL
+     (mnemonic PMO), from station pressure (POB), station elevation (ZOB), and
+     computed virtual temperature for surface reports in cases when reported
+     PMSL is missing.  The drived PMSL either gets a quality mark (PMQ) of 3
+     or inherits the station pressure quality mark (PQM), whichever is
+     greater. The value of the PMSL indicator (new mnemonic "PMIN") is set to
+     1 to denote PMSL was derived rather than observed.  The default for
+     DOPMSL is false (normally only true in RTMA and URMA runs).
+   * Reject calm surface marine winds if background u- or v- winds are
+     greater than or equal to 5 m/s. 
+   * Retain reports that lack observed station pressure.  A majority of the
+     changes for this feature are in prepobs_prepdata.fd and in individual
+     network prepobs_prepdata parm cards. 
 
 
 ---end of w3emc_release_notes.txt
