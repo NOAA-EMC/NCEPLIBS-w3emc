@@ -3297,8 +3297,8 @@ C***********************************************************************
      &           VCOORD(1:kmax+1,2),VCOORD(1:kmax+1,3),
      &           IAR13P,IAR14T,IARPSI,IARPSD,IARPSL)
               
-      print *,'in getnemsio,IARPSI,',maxval(IARPSI),minval(IARPSI)
-      print *,'in getnemsio,IARPSL,',maxval(IARPSL),minval(IARPSL)
+      print*,'GBLEVN12 after SPDP,IARPSI,',maxval(IARPSI),minval(IARPSI)
+      print*,'GBLEVN12 after SPDP,IARPSL,',maxval(IARPSL),minval(IARPSL)
 
       CALL NEMSIO_FINALIZE()
 !
