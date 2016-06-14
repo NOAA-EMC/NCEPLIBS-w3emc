@@ -52,7 +52,8 @@ SCRIPT_NAME=$(basename $0)
 SUCCESS=0
 FAILURE=1
 # ...Defaults
-INSTALL_TYPE="nco"
+#INSTALL_TYPE="nco"
+INSTALL_TYPE="GUN"
 
 
 # Parse the command line options
@@ -104,7 +105,8 @@ echo "==============================================================="
 echo "Checking for required environment variables"
 echo "==============================================================="
 echo
-ENVAR_LIST="SIGIO_INC4 SIGIO_LIB4"
+source ./setlib.rc
+ENVAR_LIST="SIGIO_INC4 SIGIO_LIB4 NEMSIO_INC4 NEMSIO_LIB4"
 for ENVAR_NAME in ${ENVAR_LIST}; do
   printf "  Checking %s..." "${ENVAR_NAME}"
   eval ENVAR=\$${ENVAR_NAME}

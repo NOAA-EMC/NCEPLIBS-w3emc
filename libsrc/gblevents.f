@@ -246,14 +246,13 @@ C     FLAGGED WITH Q.M. 8 (EVENT PGM "PREVENT", REASON CODE 8).
 C 2014-05-08 JWhiting -- altered print statement (2 format) in GBLEVN10 
 C     subroutine; increased field width for spectral resolution to 
 C     accommodate models w/ up to 5-digit resolution (I3 to I5).
-C 2016-06-10 Fanglin Yang -- HANG LEI ADDED NEMSIO IN SUBROUTINE
-C     GBLEVN10 AND REMOVED ALL SIGIO FUNCTIONALITY DUE TO CODE 
-C     CONFILICT. THIS UPDATE RESTROES GBLEVN10 FOR PROCESSING SIGIO
-C     INPUT, AND ADDS A NEW GLBEVN12 FOR PROCESSING NEMSIO INPUT.
-C     THE INPUT GFS FILE TYPE SIGIO VS NEMSIO IS NOW DETERMINED 
-C     IN THE MAIN PROGRAM.  HANG'S CODE WAS FURTURE MODIFIED TO
-C     TO REMOVE BUGS.
-C
+C 2016-06-13 FANGLIN YANG AND RUSS TREADON -- HANG LEI ADDED NEMSIO 
+C     TO SUBROUTINE GBLEVN10 AND REMOVED ALL SIGIO CAPABILITY.
+C     THIS UPDATE RESTROES GBLEVN10 FOR PROCESSING SIGIO INPUT, AND 
+C     ADDS A NEW GLBEVN12 FOR PROCESSING NEMSIO INPUT. THE INPUT GFS 
+C     FILE TYPE SIGIO VS NEMSIO IS NOW DETERMINED IN THE MAIN PROGRAM. 
+C     THE CODE IS ALSO UPDATED TO REMOVE BUGS. SUBROUTINE SPDP IS
+C     REWRITTEN TO COMPUTE LAYER AND INTERFACE PRESSURE CORRECTLY.
 C
 C USAGE:    CALL GBLEVENTS(IDATEP,IUNITF,IUNITE,IUNITP,IUNITS,SUBSET,
 C          $               NEWTYP)
@@ -497,7 +496,8 @@ C$$$
       REAL (KIND=8), ALLOCATABLE :: IAR14T(:,:,:), IAR15U(:,:,:),
      $                              IAR16V(:,:,:), IAR17Q(:,:,:),
      $                              IAR12Z(:,:),   IAR13P(:,:),
-     $                              IARPSI(:,:,:), IARPSL(:,:,:)
+     $                              IARPSI(:,:,:), IARPSL(:,:,:),
+     $                              IARPSD(:,:,:)
       REAL (KIND=4), ALLOCATABLE :: VCOORD(:,:)
       REAL DLAT,DLON
 
@@ -662,15 +662,13 @@ C  ------------------------------------------------------------------
             CALL GBLEVN10(IUNITF,IDATEP,IM,JM,IDRT)
           ELSE
             CALL NEMSIO_OPEN(GFILE1,trim(CFILE1),'read',IRET=IRET)
-            IF(IRET == 0 ) THEN
-             print *,' GFS INPUT IS NEMSIO '
+            print *,' after calling NEMSIO_OPEN, IRET=', IRET
+            IF(IRET == 0) THEN
              CALL NEMSIO_CLOSE(GFILE1,IRET=IRET)
+             print *,' GFS INPUT IS NEMSIO '
              CALL GBLEVN12(IUNITF,IDATEP,IM,JM,IDRT)
-            ELSE
-             print*,'GFS INPUT IS NEITHER SIGIO NOR NEMSIO, EXIT 59'
-             CALL ERREXIT(59)
             ENDIF
-          ENDIF
+          ENDIF 
          ENDIF
 
          print*,'after calling GBLEVN10 or GBLEVN12',' idrt=',idrt
@@ -2896,7 +2894,7 @@ C***********************************************************************
 
       INTEGER IDATE(8,2),JDATE(8,2),KDATE(8,2),KINDX(2)
       CHARACTER*6  COORD(3)
-      CHARACTER*20 CFILE
+      CHARACTER*20 CFILE2
       REAL FHOUR,RINC(5)
       DATA COORD /'SIGMA ','HYBRID','GENHYB'/
 
@@ -2934,10 +2932,10 @@ C  -----------------------------------------------------------------
       DO IFILE=1,KFILES
          JFILE = IFILE
          IDATE(:,IFILE)   = 0   !HL
-         WRITE(CFILE,'("fort.",I2.2)') IUNITF(IFILE)
+         WRITE(CFILE2,'("fort.",I2.2)') IUNITF(IFILE)
 
-         CALL NEMSIO_OPEN(GFILE(IFILE),trim(CFILE),'read',iret=iret)
-         print *,' cfile=',cfile,'nemsio open,iret=',iret
+         CALL NEMSIO_OPEN(GFILE(IFILE),trim(CFILE2),'read',iret=iret)
+         print *,' cfile2=',cfile2,'nemsio open,iret=',iret
 
          IDRTNEMS=IDRT
          CALL NEMSIO_GETFILEHEAD(GFILE(IFILE),IDATE=IDATE7,
@@ -3053,7 +3051,8 @@ C------------------------------------------
       ALLOCATE (iar12z(imax,jmax), iar13p(imax,jmax))
       ALLOCATE (iar14t(imax,jmax,kmax),  iar15u(imax,jmax,kmax),
      $          iar16v(imax,jmax,kmax),  iar17q(imax,jmax,kmax),
-     $          iarpsl(imax,jmax,kmax),  iarpsi(imax,jmax,kmax+1))
+     $          iarpsl(imax,jmax,kmax),  iarpsi(imax,jmax,kmax+1),
+     $          iarpsd(imax,jmax,kmax))
 
       if(idvc.eq.0)  idvc = 1  ! Reset IDVC=0 to 1 (sigma coord.)
       IF(IDVC < 0 .or. IDVC > 3) THEN
@@ -3283,96 +3282,89 @@ C***********************************************************************
        ENDDO
 !-----------------------------------------
 
-!--compute P and DP
-       CALL SPDP(imax,jmax,kmax,VCOORD(1:kmax+1,1),
+!--compute Tv from temp
+       DO K=1,KMAX
+        DO J=1,JMAX
+         DO i=1,IMAX
+            TFAC=ONER+FV*MIN(IAR17Q(I,J,K)*1.0E-6,QMIN)
+            IAR14T(I,J,K4)=IAR14T(I,J,K)*TFAC
+         ENDDO
+        ENDDO
+       ENDDO
+
+!--COMPUTE PI,PM AND DP
+       CALL SPDP(IMAX,JMAX,KMAX,VCOORD(1:KMAX+1,1),
      &           VCOORD(1:kmax+1,2),VCOORD(1:kmax+1,3),
-     &           IAR13P,IAR16V,IAR17Q,IARPSI,IARPSL)
+     &           IAR13P,IAR14T,IARPSI,IARPSD,IARPSL)
               
-
-!compute Tv from temp
-       do j=1,JMAX
-         do i=1,IMAX
-            tfac=oner+fv*min(IAR17Q(i,j,k4)*1.0E-6,qmin)
-            IAR14T(i,j,K4)=IAR14T(i,j,K4)*tfac
-         enddo
-       enddo
-
+      print *,'in getnemsio,IARPSI,',maxval(IARPSI),minval(IARPSI)
+      print *,'in getnemsio,IARPSL,',maxval(IARPSL),minval(IARPSL)
 
       CALL NEMSIO_FINALIZE()
 !
-      call getlats(idrt)
+      CALL GETLATS(IDRT)
 
 
       RETURN
       END
 !-----------------------------------------------------------------HL
-      SUBROUTINE SPDP(IM,IX,KM,AK,BK,CK,PS,TP,QP,PI,DP)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM:    SPDP       COMPUTE MODEL PRESSURES
-C   PRGMMR: LEI               DATE: 2016-06-10
-C
-C ABSTRACT: Calculate Pressure and THICKNESS FOR SIGMA-THETA COORDINATE
-C
-C PROGRAM HISTORY LOG:
-C 2016-06-10  HANG LEI    hybrid sigma, sigma-p, and sigma-theta
-C
-C   INPUT ARGUMENT LIST:
-C     IM           INTEGER NUMBER OF POINTS TO COMPUTE
-C     IX           INTEGER FIRST DIMENSION
-C     KM           INTEGER NUMBER OF LEVELS
-C     AK           REAL (KM+1) HYBRID INTERFACE A
-C     BK           REAL (KM+1) HYBRID INTERFACE B
-C     CK           REAL (KM+1) HYBRID INTERFACE C
-C     TP           REAL (IX,KM) OLD TEMPERATURE
-C     QP           REAL (IX,KM) OLD SPECIFIC HUMIDITY
-C     PS           REAL (IX) SURFACE PRESSURE (hPa)
-C   OUTPUT ARGUMENT LIST:
-C     PI           Vertical Pressure (hPa)
-C     DP           Thicknees of pressure layer (hPa)
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN
-C
-CC$$$
-      IMPLICIT NONE
-      INTEGER IM,IX,KM
-      REAL,PARAMETER  :: RD=287.05,RV=461.50,CP=1004.6
-      REAL,PARAMETER  :: ROCP=RD/CP,ROCP1=ROCP+1,ROCPR=1./ROCP,
-     &                   FV=RV/RD-1.
-      REAL(kind=4) AK(KM+1),BK(KM+1),CK(KM+1)
-      REAL(kind=8) PS(IX,IM)
-      REAL(kind=8) TP(IX,IM,KM),QP(IX,IM,KM),PI(IX,IM,KM+1),DP(IX,IM,KM)
-      REAL TOV(KM),TRK,TVU,TVD
-      INTEGER N,K,I,KMIN
-      REAL FTV,AT,AQ
+      SUBROUTINE SPDP(IM,JM,KM,AK,BK,CK,PS,TP,PI,DP,PM)
 !
-      FTV(AT,AQ)=AT*(1+FV*AQ)
+!-- COMPUTE MODEL LAYER AND INTERFACE PRESSURES
+!
+!   INPUT ARGUMENT LIST:
+!     IM           INTEGER NUMBER OF LONGITUDE POINTS 
+!     JM           INTEGER NUMBER OF LATITUDE POINTS
+!     KM           INTEGER NUMBER OF LEVELS
+!     AK           REAL (KM+1) HYBRID INTERFACE A (hPa)
+!     BK           REAL (KM+1) HYBRID INTERFACE B
+!     CK           REAL (KM+1) HYBRID INTERFACE C
+!     TP           REAL (IM,JM,KM) VIRTUAL TEMPERATURE
+!     PS           REAL (IM,JM) SURFACE PRESSURE (hPa)
+!   OUTPUT ARGUMENT LIST:
+!     PI           REAL (IM,JM,KM+1) INTERFACE-LAYER PRESSURE (hPa)
+!     DP           REAL (IM,JM,KM)   THICKNEES OF PRESSURE LAYER (hPa)
+!     MP           REAL (IM,JM,KM)   INTERGER-LAYER PRESSURE (hPa)    
+
+      IMPLICIT NONE
+      INTEGER IM,JM,KM
+      REAL(KIND=8),PARAMETER:: CP=1.0046E+3,RD=2.8705E+2,ROCPR=CP/RD
+      REAL(KIND=4) AK(KM+1),BK(KM+1),CK(KM+1)
+      REAL(KIND=8) PS(IM,JM),TP(IM,JM,KM),QP(IM,JM,KM)
+      REAL(KIND=8) PI(IM,JM,KM+1),DP(IM,JM,KM),PM(IM,JM,KM)
+      REAL(KIND=8) TRK
+      INTEGER I,J,K
+!
 C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        DO K=1,KM
-          TOV(K) = 300.0
+      
+       DO J=1,JM
+        DO I=1,IM
+         PI(I,J,1)=PS(I,J)
+         PI(I,J,KM+1)=0.0
         ENDDO
-       DO N=1,IX
-        PI(N,1:IM,1)=PS(N,1:IM)
-        PI(N,1:IM,KM+1)=0.0
+       ENDDO
+
 !$OMP PARALLEL DO DEFAULT(SHARED)
-!$OMP+ PRIVATE(K,I,TVU,TVD,TRK)
+!$OMP+ PRIVATE(K,I,J,TRK)
         DO K=2,KM
+         DO J=1,JM
           DO I=1,IM
-            TVU=FTV(TP(N,I,K),QP(N,I,K))
-            TVD=FTV(TP(N,I,K-1),QP(N,I,K-1))
-            TRK = (TVD+TVU)/(TOV(K-1)+TOV(K))
-            TRK = TRK ** ROCPR
-            PI(N,I,K)=AK(K)+BK(K)*PS(N,I)+CK(K)*TRK
+           TRK = (0.5*(TP(I,J,K)+TP(I,J,K-1))/300.)**ROCPR
+           PI(I,J,K)=AK(K)+BK(K)*PS(I,J)+CK(K)*TRK
           ENDDO
+         ENDDO
         ENDDO
 !$OMP END PARALLEL DO
 
-        DO I=1,IM
-          DO K=1,KM
-              DP(N,I,K)=PI(N,I,K)-PI(N,I,K+1)
+        DO K=1,KM
+         DO J=1,JM
+          DO I=1,IM
+            DP(I,J,K)=PI(I,J,K)-PI(I,J,K+1)
+            PM(I,J,K)=0.5*(PI(I,J,K)+PI(I,J,K+1))
           ENDDO
+         ENDDO
         ENDDO
-       ENDDO
+
       RETURN
       END
 
