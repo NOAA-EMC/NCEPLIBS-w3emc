@@ -2863,7 +2863,7 @@ C***********************************************************************
       SUBROUTINE GBLEVN12(IUNITF,IDATEP,IM,JM,IDRT) 
 !---------------------------------------------------------
 !--INITIALLY DEVELOPED BY HANG LEI BASED ON GBLEVN10 FOR NEMSIO
-!--AND SUBSEQUENTLY MODIFIED BY FANGLIN YANG 
+!--AND SUBSEQUENTLY MODIFIED BY FANGLIN YANG AND RUSS TREADON
                                                    
       USE GBLEVN_MODULE
       USE NEMSIO_MODULE       
@@ -3287,7 +3287,7 @@ C***********************************************************************
         DO J=1,JMAX
          DO i=1,IMAX
             TFAC=ONER+FV*MIN(IAR17Q(I,J,K)*1.0E-6,QMIN)
-            IAR14T(I,J,K4)=IAR14T(I,J,K)*TFAC
+            IAR14T(I,J,K)=IAR14T(I,J,K)*TFAC
          ENDDO
         ENDDO
        ENDDO
