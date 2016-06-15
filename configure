@@ -2729,10 +2729,10 @@ fi
 $as_echo "$as_me: Using SIGIO_INC4 value: \"${SIGIO_INC4}\"" >&6;}
 { $as_echo "$as_me:$LINENO: Using SIGIO_LIB4 value: \"${SIGIO_LIB4}\"" >&5
 $as_echo "$as_me: Using SIGIO_LIB4 value: \"${SIGIO_LIB4}\"" >&6;}
-FCFLAGS="${FCFLAGS} -I${SIGIO_INC4} -I${NEMSIO_INC4}"
-LIBS="${LIBS} ${SIGIO_LIB4} ${NEMSIO_LIB4}"
-#FCFLAGS="${FCFLAGS} -I${SIGIO_INC4}"
-#LIBS="${LIBS} ${SIGIO_LIB4}"
+#FCFLAGS="${FCFLAGS} -I${SIGIO_INC4} -I${NEMSIO_INC4}"
+FCFLAGS="${FCFLAGS} -I${NEMSIO_INC4}  -I${SIGIO_INC4}"
+#LIBS="${LIBS} ${SIGIO_LIB4} ${NEMSIO_LIB4}"
+LIBS="${LIBS} ${NEMSIO_LIB4} ${SIGIO_LIB4}"
 # ...Check for sigio library
 { $as_echo "$as_me:$LINENO: checking for library containing sigio_head definition" >&5
 $as_echo_n "checking for library containing sigio_head definition... " >&6; }
