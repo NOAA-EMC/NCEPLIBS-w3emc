@@ -8,7 +8,8 @@ nceplibs support email: ncep.list.emc.nceplibs.support@noaa.gov
          Contents
          ========
   A. The easy (I hope) way...
-    1. Defining the SIGIO_INC4 and SIGIO_LIB4 variables
+    1. Defining the SIGIO_INC4, NEMSIO_INC, SIGIO_LIB4, 
+       and NEMSIO_LIB variables
     2. Running the master build script
   B. The more flexible way
     1. Configuration
@@ -26,16 +27,24 @@ A. The easy (I hope) way...
 ===========================
 
 The "make_w3emc_lib.sh" script builds the single (_4), double (_8), and
-mixed (_d) precision w3emc libraries using the sigio include and library
-values defined in the SIGIO_INC4 and SIGIO_LIB4 environment variables (envars).
+mixed (_d) precision w3emc libraries using the sigio and nemsio include 
+and library values defined in the SIGIO_INC4, NEMSIO_INC, SIGIO_LIB4, and
+NEMSIO_LIB  environment variables (envars).
 
 
-1. Defining the SIGIO_INC4 and SIGIO_LIB4 variables
+1. Defining the SIGIO_INC4, NEMSIO_INC, SIGIO_LIB4, and NEMSIO_LIB variables
 ---------------------------------------------------
 
 On WCOSS these envars can be set via the command,
 
   $ module load sigio
+  $ module load nemsio
+
+On CRAY these envars can be set via the command,
+
+  $ module load sigio-intel
+  $ module load nemsio-intel
+
 
 You can get access to the production modulefiles via the following command
 on WCOSS:
@@ -46,12 +55,15 @@ If you want to use different envar values you can specify them explicity, e.g.
 
   $ export SIGIO_INC4="-I/path/to/incmod"
   $ export SIGIO_LIB4="/path/to/libsigio_to-use.a"
+  $ export NEMSIO_INC="-I/path/to/incmod"
+  $ export NEMSIO_LIB="/path/to/libnemsio_to-use.a"
+
 
 
 2. Running the master build script
 ----------------------------------
 
-Once the sigio library envars have been defined, you can use the
+Once the sigio and nemsio library envars have been defined, you can use the
 "make_w3emc_lib.sh" script specifying the build configuration. To get
 usage information for the script, type
 
@@ -102,6 +114,7 @@ information directly to the configure script that generates the makefiles. For
 example, on WCOSS:
 
   $ module load sigio
+  # module load nemsio
   $ ./configure --prefix=${PWD} \
                 --enable-promote=4|8|d \
                 FC="ifort" \
@@ -122,14 +135,16 @@ The definition of the "FC" enviroment variable is not strictly necessary as it d
 to "ifort" on linux systems if available (followed by "gfortran" and "pgf95" if not), and
 to "xlf2003" on AIX systems.
 
-You can also specify the sigio library information on the command line if you need that
-flexibility. For example:
+You can also specify the sigio and nemsio library information on the command line if you
+need that flexibility. For example:
 
   $ ./configure --prefix=${PWD} \
                 FC="ifort" \
                 FCFLAGS="-O2 -g -traceback -fixed" \
                 SIGIO_INC4="-I/path/to/incmod" \
-                SIGIO_LIB4="/path/to/libsigio_to-use.a"
+                SIGIO_LIB4="/path/to/libsigio_to-use.a" \
+                NEMSIO_INC="-I/path/to/incmod" \
+                NEMSIO_LIB="/path/to/libnemsio_to-use.a"
 
 
 

@@ -2724,20 +2724,27 @@ fi
 
 
 
-# Append standard module environment variables for sigio library
+# Append standard module environment variables for sigio and nemsio library
 { $as_echo "$as_me:$LINENO: Using SIGIO_INC4 value: \"${SIGIO_INC4}\"" >&5
 $as_echo "$as_me: Using SIGIO_INC4 value: \"${SIGIO_INC4}\"" >&6;}
 { $as_echo "$as_me:$LINENO: Using SIGIO_LIB4 value: \"${SIGIO_LIB4}\"" >&5
 $as_echo "$as_me: Using SIGIO_LIB4 value: \"${SIGIO_LIB4}\"" >&6;}
-#FCFLAGS="${FCFLAGS} -I${SIGIO_INC4} -I${NEMSIO_INC4}"
-FCFLAGS="${FCFLAGS} -I${NEMSIO_INC4}  -I${SIGIO_INC4}"
-#LIBS="${LIBS} ${SIGIO_LIB4} ${NEMSIO_LIB4}"
-LIBS="${LIBS} ${NEMSIO_LIB4} ${SIGIO_LIB4}"
-# ...Check for sigio library
-{ $as_echo "$as_me:$LINENO: checking for library containing sigio_head definition" >&5
-$as_echo_n "checking for library containing sigio_head definition... " >&6; }
+{ $as_echo "$as_me:$LINENO: Using NEMSIO_INC value: \"${NEMSIO_INC}\"" >&5
+$as_echo "$as_me: Using NEMSIO_INC value: \"${NEMSIO_INC}\"" >&6;}
+{ $as_echo "$as_me:$LINENO: Using NEMSIO_LIB value: \"${NEMSIO_LIB}\"" >&5
+$as_echo "$as_me: Using NEMSIO_LIB value: \"${NEMSIO_LIB}\"" >&6;}
+FCFLAGS="${FCFLAGS} -I${NEMSIO_INC} -I${SIGIO_INC4}"
+LIBS="${LIBS} ${NEMSIO_LIB} ${SIGIO_LIB4}"
+# ...Check for sigio and nemsio library
+{ $as_echo "$as_me:$LINENO: checking for library containing sigio_head and nemsio_gfile definition" >&5
+$as_echo_n "checking for library containing sigio_head and nemsio_gfile definition... " >&6; }
 cat >conftest.$ac_ext <<_ACEOF
-      program main; use sigio_module; type(sigio_head)::head; end
+      program main
+       use sigio_module
+       use nemsio_module
+       type(sigio_head)::heads
+       type(nemsio_gfile)::headn
+      end
 _ACEOF
 rm -f conftest.$ac_objext conftest$ac_exeext
 if { (ac_try="$ac_link"
@@ -2768,9 +2775,9 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 	{ { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-{ { $as_echo "$as_me:$LINENO: error: Unable to link to sigio library
+{ { $as_echo "$as_me:$LINENO: error: Unable to link to sigio or nemsio library
 See \`config.log' for more details." >&5
-$as_echo "$as_me: error: Unable to link to sigio library
+$as_echo "$as_me: error: Unable to link to sigio or nemsio library
 See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }; }
 fi

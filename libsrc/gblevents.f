@@ -249,10 +249,10 @@ C     accommodate models w/ up to 5-digit resolution (I3 to I5).
 C 2016-06-13 FANGLIN YANG AND RUSS TREADON -- HANG LEI ADDED NEMSIO 
 C     TO SUBROUTINE GBLEVN10 AND REMOVED ALL SIGIO CAPABILITY.
 C     THIS UPDATE RESTROES GBLEVN10 FOR PROCESSING SIGIO INPUT, AND 
-C     ADDS A NEW GLBEVN12 FOR PROCESSING NEMSIO INPUT. THE INPUT GFS 
+C     ADDS A NEW GBLEVN12 FOR PROCESSING NEMSIO INPUT. THE INPUT GFS 
 C     FILE TYPE SIGIO VS NEMSIO IS NOW DETERMINED IN THE MAIN PROGRAM. 
-C     THE CODE IS ALSO UPDATED TO REMOVE BUGS. SUBROUTINE SPDP IS
-C     REWRITTEN TO COMPUTE LAYER AND INTERFACE PRESSURE CORRECTLY.
+C     THE CODE IS ALSO UPDATED TO REMOVE BUGS. SUBROUTINE SIGIO_MODPR
+C     IS USED TO COMPUTE LAYER AND INTERFACE PRESSURE FOR NEMSIO INPUT.
 C
 C USAGE:    CALL GBLEVENTS(IDATEP,IUNITF,IUNITE,IUNITP,IUNITS,SUBSET,
 C          $               NEWTYP)
@@ -511,6 +511,7 @@ C$$$
       USE NEMSIO_MODULE
       USE NEMSIO_OPENCLOSE
       USE NEMSIO_READ
+      USE GBLEVN_MODULE
 
       INTEGER, PARAMETER :: IM=384, JM=IM/2+1, IDRT=0
 
@@ -662,7 +663,6 @@ C  ------------------------------------------------------------------
             CALL GBLEVN10(IUNITF,IDATEP,IM,JM,IDRT)
           ELSE
             CALL NEMSIO_OPEN(GFILE1,trim(CFILE1),'read',IRET=IRET)
-            print *,' after calling NEMSIO_OPEN, IRET=', IRET
             IF(IRET == 0) THEN
              CALL NEMSIO_CLOSE(GFILE1,IRET=IRET)
              print *,' GFS INPUT IS NEMSIO '
@@ -2444,7 +2444,7 @@ C***********************************************************************
          PRINT 331, MOD(IDATEP,100)
   331    FORMAT(/' --> GBLEVENTS: THE PREPBUFR CENTER HOUR (',I2.2,
      $    ') IS A MULTIPLE OF 3 - ONLY ONE GLOBAL SIGMA OR HYBRID FILE',
-     $    ' IS READ,'/16X,'NO INTERPOLATION OF SPECTRAL COEFFICIENTS ',
+     $    ' IS READ,'/16X,'NO TIME INTERPOLATION OF GLOBAL FIELDS ',
      $    'IS PERFORMED'/)
       ELSE
          KFILES = 2
@@ -2453,7 +2453,7 @@ C***********************************************************************
          PRINT 332, MOD(IDATEP,100)
   332    FORMAT(/' --> GBLEVENTS: THE PREPBUFR CENTER HOUR (',I2.2,
      $    ') IS NOT A MULTIPLE OF 3 - TWO SPANNING GLOBAL SIGMA OR ',
-     $    'HYBRID FILES'/16X,'ARE READ AND THE SPECTRAL COEFFICIENTS ',
+     $    'HYBRID FILES'/16X,'ARE READ AND THE GLOBAL FIELDS ',
      $    'ARE INTERPOLATED TO THE PREPBUFR CENTER TIME'/)
       ENDIF
 
@@ -2467,10 +2467,9 @@ C  -----------------------------------------------------------------
 
          WRITE(CFILE,'("fort.",I2.2)') IUNITF(IFILE)
 
-         print *,' cfile=',cfile
-
          CALL SIGIO_RROPEN(IUNIT4(IFILE),CFILE,IRET)
          CALL SIGIO_RRHEAD(IUNIT4(IFILE),HEAD(IFILE),IRET1)
+         print *,' cfile_sig=',cfile,'sigio open, iret=',iret
 
          IF(IRET.NE.0)  GO TO 903
          IF(IRET1.NE.0) GO TO 904
@@ -2542,10 +2541,12 @@ C  -------------------
       KMAX    = HEAD(1)%LEVS
       KM4     = KMAX
       IDVC    = HEAD(1)%IDVC
+      IDSL    = head(1)%IDSL
       IDVM    = HEAD(1)%IDVM
       NTRAC   = HEAD(1)%NTRAC
       NVCOORD = HEAD(1)%NVCOORD
       ALLOCATE (VCOORD(KMAX+1,NVCOORD))
+      VCOORD  = 0.0
       VCOORD  = HEAD(1)%VCOORD
 
       SFCPRESS_ID  = MOD(HEAD(1)%IDVM,TEN)
@@ -2584,11 +2585,12 @@ C  --------------------------------------
       DLAT  = 180./(JMAX-1)
       DLON  = 360./IMAX
  
-      PRINT 2, JCAP,KMAX,kmaxs,DLAT,DLON,COORD(IDVC)
-    2 FORMAT(/' --> GBLEVENTS: GLOBAL MODEL SPECS: T',I5,' ',I3,
-     $ ' LEVELS ',I3,' SCALARS -------> ',F5.2,' X ',F5.2,' VERT. ',
+      PRINT 2, JCAP,IMAX,JMAX,KMAX,kmaxs,DLAT,DLON,COORD(IDVC)
+    2 FORMAT(/' --> GBLEVENTS: GLOBAL MODEL SPECS: T',I5,' ',
+     $ I5,' x ',I5,' GRID WITH ',I3,' LEVELS ',I3,
+     $' SCALARS -------> ',F5.2,' X ',F5.2,' VERT. ',
      $ 'COORD: ',A)
- 
+
       GO TO 902
 
   901 CONTINUE
@@ -2681,8 +2683,10 @@ C  -----------------------
       SFCPRESS_ID  = MOD(HEAD(1)%IDVM,TEN)
       THERMODYN_ID = MOD(HEAD(1)%IDVM/TEN,TEN)
 
-      print *,' sfcpress_id=',sfcpress_id,' thermodyn_id=',
-     $ thermodyn_id
+      print *,'in sig sfcpress_id=',sfcpress_id,' thermodyn_id=',
+     $ thermodyn_id,' ntrac=',ntrac
+      print *,' idvc=',idvc,' idsl=',idsl,' idvm=',idvm,
+     $     ' nvcoord=',nvcoord
 
       DO IFILE=1,KFILES
          CALL SIGIO_ALDATS(HEAD(IFILE),DATS,IRETS)
@@ -2859,6 +2863,25 @@ C***********************************************************************
       enddo
       return
       end
+C***********************************************************************
+C***********************************************************************
+      subroutine gblevn11d(imax,jmax,grid) ! formerly subroutine n_s_swap
+      implicit none
+      integer imax, jmax
+      real(kind=8) grid(imax,jmax)
+      real(kind=8) temp (imax)
+      integer i, j, jj
+
+      do j=1,jmax/2
+        jj = jmax-j+1
+        do i=1,imax
+          temp(i)    = grid(i,j)
+          grid(i,j)  = grid(i,jj)
+          grid(i,jj) = temp(i)
+        enddo
+      enddo
+      return
+      end
 !---------------------------------------------------------
       SUBROUTINE GBLEVN12(IUNITF,IDATEP,IM,JM,IDRT) 
 !---------------------------------------------------------
@@ -2870,6 +2893,7 @@ C***********************************************************************
       USE nemsio_openclose
       USE nemsio_read
       USE nemsio_write
+      use sigio_module
 
       IMPLICIT NONE
       INTEGER IUNITF(2), IDATEP, IM, JM, IDRT
@@ -2885,7 +2909,7 @@ C***********************************************************************
      $ MDIMA,MDIMB,MDIMC,IROMB,MAXWV,IDIR,NS,I,J,K,L,II,JJ,IB,IE
 
       INTEGER(4) IDATE7(7),JCAP4,IDVC4,DIMZ4,K4,IM4,JM4,KINDREAL,KINDINT
-      INTEGER(4) NFHOUR,NFMINUTE,NFSECONDN,NFSECONDD
+      INTEGER(4) NFHOUR,NFMINUTE,NFSECONDN,NFSECONDD,idsl4,idvm4
       REAL(4) FHOUR4
       REAL(8) tfac
       REAL(4),ALLOCATABLE :: VCOORD4(:,:,:),CPI(:)
@@ -2896,6 +2920,9 @@ C***********************************************************************
       CHARACTER*6  COORD(3)
       CHARACTER*20 CFILE2
       REAL FHOUR,RINC(5)
+      REAL (KIND=4),ALLOCATABLE :: psfc(:,:), tv(:,:,:),
+     $                             wrk1(:,:), wrk2(:,:)
+
       DATA COORD /'SIGMA ','HYBRID','GENHYB'/
 
       IMAX  = IM
@@ -2935,24 +2962,24 @@ C  -----------------------------------------------------------------
          WRITE(CFILE2,'("fort.",I2.2)') IUNITF(IFILE)
 
          CALL NEMSIO_OPEN(GFILE(IFILE),trim(CFILE2),'read',iret=iret)
-         print *,' cfile2=',cfile2,'nemsio open,iret=',iret
+         print *,' cfile_nems2=',cfile2,'nemsio open,iret=',iret
 
          IDRTNEMS=IDRT
          CALL NEMSIO_GETFILEHEAD(GFILE(IFILE),IDATE=IDATE7,
      &        JCAP=JCAP4,DIMX=IM4,DIMY=JM4,
      &         DIMZ=DIMZ4,IDVC=IDVC4,NTRAC=NTRAC,IDRT=IDRTNEMS,
      &         NFHOUR=NFHOUR,NFMINUTE=NFMINUTE,NFSECONDN=NFSECONDN,
-     &         NFSECONDD=NFSECONDD,IRET=IRET)
+     &         NFSECONDD=NFSECONDD,idsl=idsl4,idvm=idvm4,IRET=IRET)
          JCAP=JCAP4
          IDVC=IDVC4
-         IDVM=22
+         idsl=idsl4
+         idvm=idvm4
          IMAX=IM4
          JMAX=JM4
          KMAX=DIMZ4
          if(IDRT==-9999) IDRT=4 ! default for gaussian grid
          IDATE(1:3,IFILE)=IDATE7(1:3)
          IDATE(5,IFILE)=IDATE7(4)
-         print *,'in nemsio ,imax,jmax,kmax,idrt',imax,jmax,kmax,idrt
 
          ALLOCATE(VCOORD(KMAX+1,3))
          VCOORD=0.0              
@@ -2964,6 +2991,8 @@ C  -----------------------------------------------------------------
              FHOUR=REAL(NFHOUR,8)+REAL(NFMINUTE/60.,8)
          ENDIF
 !           print *,' idate=',idate(:,ifile),' fhour=',fhour
+         print'("  idate=",I5,7I3.2,"  fhour=",F7.3)', idate(:,ifile),
+     $        fhour
 
          ALLOCATE(VCOORD4(KMAX+1,3,2))
          CALL NEMSIO_GETFILEHEAD(GFILE(IFILE),VCOORD=VCOORD4,IRET=IRET)
@@ -2976,11 +3005,6 @@ C  -----------------------------------------------------------------
          ENDIF
 
          VCOORD(1:KMAX+1,1:NVCOORD)=VCOORD4(1:KMAX+1,1:NVCOORD,1)
-         IF ( NVCOORD > 1) then
-          DO K=1,KMAX+1
-             VCOORD(K,1)=VCOORD(K,1)*0.01   !convert from Pa to hPa
-          ENDDO
-         ENDIF
          DEALLOCATE(VCOORD4)
 !
          ALLOCATE(CPI(NTRAC+1))
@@ -3045,8 +3069,6 @@ C------------------------------------------
          KMAXS = 2*KMAX + 2
          NTRAC = 1
       ENDIF
-!     print *,'in gblevent,sfcpress_id=',sfcpress_id,'therm_id=',
-!    &  thermodyn_id,'ntrac=',ntrac   
 
       ALLOCATE (iar12z(imax,jmax), iar13p(imax,jmax))
       ALLOCATE (iar14t(imax,jmax,kmax),  iar15u(imax,jmax,kmax),
@@ -3073,9 +3095,10 @@ C  --------------------------------------
       DLAT  = 180./(JMAX-1)
       DLON  = 360./IMAX
  
-      PRINT 2, JCAP,KMAX,kmaxs,DLAT,DLON,COORD(IDVC)
-    2 FORMAT(/' --> GBLEVENTS: GLOBAL MODEL SPECS: T',I5,' ',I3,
-     $ ' LEVELS ',I3,' SCALARS -------> ',F5.2,' X ',F5.2,' VERT. ',
+      PRINT 2, JCAP,IMAX,JMAX,KMAX,kmaxs,DLAT,DLON,COORD(IDVC)
+    2 FORMAT(/' --> GBLEVENTS: GLOBAL MODEL SPECS: T',I5,' ',
+     $ I5,' x ',I5,' GRID WITH ',I3,' LEVELS ',I3,
+     $' SCALARS -------> ',F5.2,' X ',F5.2,' VERT. ',
      $ 'COORD: ',A)
  
       GO TO 902
@@ -3118,6 +3141,11 @@ C***********************************************************************
          KFILES = 2
       ENDIF
 
+      print *,'in nem sfcpress_id=',sfcpress_id,' thermodyn_id=',
+     &     thermodyn_id,' ntrac=',ntrac
+      print *,' idvc=',idvc,' idsl=',idsl,' idvm=',idvm,
+     &     ' nvcoord=',nvcoord
+
         call w3kind(kindreal,kindint)
 !-----------------------------------------
         DO IFILE=1,KFILES
@@ -3134,7 +3162,7 @@ C***********************************************************************
            CALL NEMSIO_READRECV(GFILE(IFILE),'hgt','sfc',K4,tmp,
      &     iret=iret)
          endif
-         print *,'in getnemsio,hgtsfc,',maxval(tmp),minval(tmp),iret
+!         print *,'in getnemsio,hgtsfc,',maxval(tmp),minval(tmp),iret
          if(iret==0) THEN
           if( KFILES.EQ.1) THEN
            IAR12Z(:,:)=reshape(tmp,(/imax,jmax/))
@@ -3142,6 +3170,7 @@ C***********************************************************************
            IAR12Z(:,:)=(ABS(KINDX(2))*IAR12Z(:,:)+(KINDX(1)*
      &       reshape(tmp,(/imax,jmax/)) ))/3.
           ENDIF
+          call gblevn11d(imax,jmax,IAR12Z)
          ENDIF
 
 !sfc pres, input in Pa, out in hPa
@@ -3152,7 +3181,7 @@ C***********************************************************************
            CALL NEMSIO_READRECV(GFILE(IFILE),'pres','sfc',K4,tmp,
      &     iret=iret)
          endif
-       print *,'in getnemsio,pressfc,',maxval(tmp),minval(tmp),iret
+!       print *,'in getnemsio,pressfc,',maxval(tmp),minval(tmp),iret
          if(iret==0)THEN
           if( KFILES.EQ.1) THEN
            IAR13P(:,:)=reshape(tmp*0.01,(/imax,jmax/))
@@ -3160,6 +3189,7 @@ C***********************************************************************
            IAR13P(:,:)=(ABS(KINDX(2))*IAR13P(:,:)+(KINDX(1)*
      &       reshape(tmp*0.01,(/imax,jmax/)) ))/3.
           ENDIF
+          call gblevn11d(imax,jmax,IAR13P)
         ENDIF
 !dpres
 !        Do K4=1,KMAX
@@ -3209,7 +3239,7 @@ C***********************************************************************
            CALL NEMSIO_READRECV(GFILE(IFILE),'tmp','mid layer',K4,
      &          tmp,iret=iret)
          endif
-        print *,'in getnemsio,tmp,k4=',k4,maxval(tmp),minval(tmp),iret
+!        print *,'in getnemsio,tmp,k4=',k4,maxval(tmp),minval(tmp),iret
            if(iret==0) THEN
              if( IFILE.EQ.1) THEN
               IAR14T(:,:,K4)=reshape(tmp,(/imax,jmax/))
@@ -3217,6 +3247,7 @@ C***********************************************************************
               IAR14T(:,:,K4)=(ABS(KINDX(2))*IAR14T(:,:,K4)+(KINDX(1)*
      &          reshape(tmp,(/imax,jmax/)) ))/3.
              ENDIF
+             call gblevn11d(imax,jmax,IAR14T(1,1,K4))
             ENDIF
          ENDDO
 !u
@@ -3228,6 +3259,7 @@ C***********************************************************************
             CALL NEMSIO_READRECV(GFILE(IFILE),'ugrd','mid layer',K4,
      &           tmp,iret=iret)
           endif
+!        print *,'in getnemsio,utmp,k4=',k4,maxval(tmp),minval(tmp),iret
           if(iret==0) THEN
              if( KFILES.EQ.1) THEN
               IAR15U(:,:,k4)=reshape(tmp,(/imax,jmax/))
@@ -3235,8 +3267,15 @@ C***********************************************************************
               IAR15U(:,:,k4)=(ABS(KINDX(2))*IAR15U(:,:,k4)+(KINDX(1)*
      &          reshape(tmp,(/imax,jmax/)) ))/3.
              ENDIF
+             call gblevn11d(imax,jmax,IAR15U(1,1,K4))
            ENDIF
          ENDDO
+!         do k=1,kmax
+!            print *,'in getnemsio,i15u,k=',k,maxval(iar15u(:,:,k)),
+!     &           minval(iar15u(:,:,k)),iret
+!         end do
+!         print *,'in getnemsio,IAR15U.1,',maxval(IAR15U),minval(IAR15U)
+
 !v
          Do K4=1,kmax
           if(kindreal==4) then
@@ -3253,8 +3292,10 @@ C***********************************************************************
               IAR16V(:,:,K4)=(ABS(KINDX(2))*IAR16V(:,:,K4)+(KINDX(1)*
      &          reshape(tmp,(/imax,jmax/)) ))/3.
              ENDIF
+             call gblevn11d(imax,jmax,IAR16V(1,1,K4))
            ENDIF
          ENDDO
+!         print *,'in getnemsio,IAR15U.2,',maxval(IAR15U),minval(IAR15U)
 !q
          Do K4=1,kmax
           if(kindreal==4) then
@@ -3271,99 +3312,87 @@ C***********************************************************************
               IAR17Q(:,:,K4)=(ABS(KINDX(2))*IAR17Q(:,:,K4)/3.0
      &      +(KINDX(1)* max(0.0,reshape(tmp*1.0E6,(/imax,jmax/))))/3.0)
              ENDIF
+             call gblevn11d(imax,jmax,IAR17Q(1,1,K4))
            endif
          ENDDO
+!         print *,'in getnemsio,IAR15U.3,',maxval(IAR15U),minval(IAR15U)
+
 !
          deallocate(tmp)
          CALL NEMSIO_CLOSE(GFILE(IFILE),iret=iret)
-         print *,'end of nemsio, ifile=',ifile,'kfiles=',kfiles
+!        print *,'end of nemsio, ifile=',ifile,'kfiles=',kfiles
 !
 !-----------------------------------------
        ENDDO
 !-----------------------------------------
+
+!       print *,'in getnemsio,IAR15U.4,',maxval(IAR15U),minval(IAR15U)
 
 !--compute Tv from temp
        DO K=1,KMAX
         DO J=1,JMAX
          DO i=1,IMAX
-            TFAC=ONER+FV*MIN(IAR17Q(I,J,K)*1.0E-6,QMIN)
+            TFAC=ONER+FV*MAX(IAR17Q(I,J,K)*1.0E-6,QMIN)
             IAR14T(I,J,K)=IAR14T(I,J,K)*TFAC
          ENDDO
         ENDDO
        ENDDO
 
-!--COMPUTE PI,PM AND DP
-       CALL SPDP(IMAX,JMAX,KMAX,VCOORD(1:KMAX+1,1),
-     &           VCOORD(1:kmax+1,2),VCOORD(1:kmax+1,3),
-     &           IAR13P,IAR14T,IARPSI,IARPSD,IARPSL)
+!       print *,'in getnemsio,IAR15U.5,',maxval(IAR15U),minval(IAR15U)
+
+
+
+!--COMPUTE PM AND PD
+      ALLOCATE (psfc(imax,jmax), tv(imax,jmax,kmax))
+      ALLOCATE (WRK1(imax*jmax,KMAX),  WRK2(imax*jmax,KMAX+1))
+
+      imjm4=imax*jmax
+      km4=kmax
+      psfc(:,:) = iar13p(:,:)*100.
+      tv(:,:,:) = iar14t(:,:,:)
+
+      IF(THERMODYN_ID == 3 .AND. IDVC == 3) THEN
+         tv(:,:,:) = tv(:,:,:) / CPI(1)
+         print *,' cpi(1)=',cpi(1)
+      ENDIF
+
+      CALL SIGIO_MODPR(IMJM4,IMJM4,KM4,NVCOORD,IDVC,IDSL,VCOORD,IRET,
+     $                 psfc,tv,PM=WRK1,PD=WRK2(1,2))
+      DO J=1,JMAX
+         JJ = (J-1)*IMAX
+         DO I=1,IMAX
+            WRK2(I+JJ,1) = psfc(i,j)                     ! in Pa
+         ENDDO
+      ENDDO
+      DO L=1,KMAX
+         WRK2(:,L+1) = WRK2(:,L) - WRK2(:,L+1)             ! in Pa
+      ENDDO
+
+      DO L=1,KMAX
+         DO J=1,JMAX
+            JJ = (J-1)*IMAX
+            DO I=1,IMAX
+               IARPSL(I,J,L) = WRK1(I+JJ,L)*0.01    ! 3D layer pres(hPa)
+            ENDDO
+         ENDDO
+      ENDDO
+      DO L=1,KMAX+1
+         DO J=1,JMAX
+            JJ = (J-1)*IMAX
+            DO I=1,IMAX
+               IARPSI(I,J,L) = WRK2(I+JJ,L)*0.01 ! 3D interface pressure
+                                                  ! (hPa)
+            ENDDO
+         ENDDO
+      ENDDO
               
-      print*,'GBLEVN12 after SPDP,IARPSI,',maxval(IARPSI),minval(IARPSI)
-      print*,'GBLEVN12 after SPDP,IARPSL,',maxval(IARPSL),minval(IARPSL)
+!      print*,'GBLEVN12 IARPSI,',maxval(IARPSI),minval(IARPSI)
+!      print*,'GBLEVN12 IARPSL,',maxval(IARPSL),minval(IARPSL)
 
       CALL NEMSIO_FINALIZE()
 !
       CALL GETLATS(IDRT)
 
-
-      RETURN
-      END
-!-----------------------------------------------------------------HL
-      SUBROUTINE SPDP(IM,JM,KM,AK,BK,CK,PS,TP,PI,DP,PM)
-!
-!-- COMPUTE MODEL LAYER AND INTERFACE PRESSURES
-!
-!   INPUT ARGUMENT LIST:
-!     IM           INTEGER NUMBER OF LONGITUDE POINTS 
-!     JM           INTEGER NUMBER OF LATITUDE POINTS
-!     KM           INTEGER NUMBER OF LEVELS
-!     AK           REAL (KM+1) HYBRID INTERFACE A (hPa)
-!     BK           REAL (KM+1) HYBRID INTERFACE B
-!     CK           REAL (KM+1) HYBRID INTERFACE C
-!     TP           REAL (IM,JM,KM) VIRTUAL TEMPERATURE
-!     PS           REAL (IM,JM) SURFACE PRESSURE (hPa)
-!   OUTPUT ARGUMENT LIST:
-!     PI           REAL (IM,JM,KM+1) INTERFACE-LAYER PRESSURE (hPa)
-!     DP           REAL (IM,JM,KM)   THICKNEES OF PRESSURE LAYER (hPa)
-!     MP           REAL (IM,JM,KM)   INTERGER-LAYER PRESSURE (hPa)    
-
-      IMPLICIT NONE
-      INTEGER IM,JM,KM
-      REAL(KIND=8),PARAMETER:: CP=1.0046E+3,RD=2.8705E+2,ROCPR=CP/RD
-      REAL(KIND=4) AK(KM+1),BK(KM+1),CK(KM+1)
-      REAL(KIND=8) PS(IM,JM),TP(IM,JM,KM),QP(IM,JM,KM)
-      REAL(KIND=8) PI(IM,JM,KM+1),DP(IM,JM,KM),PM(IM,JM,KM)
-      REAL(KIND=8) TRK
-      INTEGER I,J,K
-!
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      
-       DO J=1,JM
-        DO I=1,IM
-         PI(I,J,1)=PS(I,J)
-         PI(I,J,KM+1)=0.0
-        ENDDO
-       ENDDO
-
-!$OMP PARALLEL DO DEFAULT(SHARED)
-!$OMP+ PRIVATE(K,I,J,TRK)
-        DO K=2,KM
-         DO J=1,JM
-          DO I=1,IM
-           TRK = (0.5*(TP(I,J,K)+TP(I,J,K-1))/300.)**ROCPR
-           PI(I,J,K)=AK(K)+BK(K)*PS(I,J)+CK(K)*TRK
-          ENDDO
-         ENDDO
-        ENDDO
-!$OMP END PARALLEL DO
-
-        DO K=1,KM
-         DO J=1,JM
-          DO I=1,IM
-            DP(I,J,K)=PI(I,J,K)-PI(I,J,K+1)
-            PM(I,J,K)=0.5*(PI(I,J,K)+PI(I,J,K+1))
-          ENDDO
-         ENDDO
-        ENDDO
 
       RETURN
       END
@@ -3380,7 +3409,7 @@ C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       real(4) slat(jmax),wlat(jmax),rad2deg
 !get gaussian or regular latitude array based on idrt
 
-      print *,'in getlats,idrt=',idrt
+!      print *,'in getlats,idrt=',idrt
       call splat(idrt,jmax,slat,wlat)
       rad2deg=180./acos(-1.)
       allocate(slats(jmax));

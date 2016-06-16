@@ -13,15 +13,18 @@ usage()
   echo "   Script to iterate the configuration script over the set of precision"
   echo "   versions of the w3emc library."
   echo
-  echo "   The w3emc library has a sigio library dependency. The location of the"
-  echo "   sigio include files and the fully specified library name are defined via"
+  echo "   The w3emc library has sigio and nemsio library dependencies. The location of the"
+  echo "   sigio and nemsio include files and the fully specified library name are defined via"
   echo "   the"
   echo "     SIGIO_INC4  (include files)"
+  echo "     NEMSIO_INC  (include files)"
   echo "   and"
   echo "     SIGIO_LIB4  (fully specified library name)"
+  echo "     NEMSIO_LIB  (fully specified library name)"
   echo "   environment variables. In NCO production, these variables are defined"
   echo "   via a"
-  echo "     module load sigio"
+  echo "     module load sigio on WCOSS, module load sigio-intel on CRAY)"
+  echo "     module load nemsio on WCOSS, module load nemsio-intel on CRAY)"
   echo "   command."
   echo
   echo '   The installation directory is ${PWD}'
@@ -52,8 +55,7 @@ SCRIPT_NAME=$(basename $0)
 SUCCESS=0
 FAILURE=1
 # ...Defaults
-#INSTALL_TYPE="nco"
-INSTALL_TYPE="GUN"
+INSTALL_TYPE="nco"
 
 
 # Parse the command line options
@@ -105,8 +107,7 @@ echo "==============================================================="
 echo "Checking for required environment variables"
 echo "==============================================================="
 echo
-source ./setlib.rc
-ENVAR_LIST="SIGIO_INC4 SIGIO_LIB4 NEMSIO_INC4 NEMSIO_LIB4"
+ENVAR_LIST="SIGIO_INC4 SIGIO_LIB4 NEMSIO_INC NEMSIO_LIB"
 for ENVAR_NAME in ${ENVAR_LIST}; do
   printf "  Checking %s..." "${ENVAR_NAME}"
   eval ENVAR=\$${ENVAR_NAME}
