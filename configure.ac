@@ -94,3 +94,17 @@ AC_LINK_IFELSE(
   [AC_MSG_FAILURE([Unable to link to sigio library],[1])])
 
 AC_OUTPUT
+
+# Append standard module environment variables for nemsio library
+AC_MSG_NOTICE([Using NEMSIO_INC value: "${NEMSIO_INC}"])
+AC_MSG_NOTICE([Using NEMSIO_LIB value: "${NEMSIO_LIB}"])
+FCFLAGS="${FCFLAGS} -I${NEMSIO_INC}"
+LIBS="${LIBS} ${NEMSIO_LIB}"
+# ...Check for nemsio library
+AC_MSG_CHECKING([for library containing nemsio_head definition])
+AC_LINK_IFELSE(
+  [AC_LANG_SOURCE([      program main; use nemsio_module; type(nemsio_gfile)::head; end])],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_FAILURE([Unable to link to nemsio library],[1])])
+
+AC_OUTPUT
