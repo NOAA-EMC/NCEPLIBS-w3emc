@@ -1,0 +1,13 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# PROD build settings for Intel ifort compiler
+#-------------------------------------------------------------------------------#
+
+export FC="ifort"
+
+export FCFLAGS=" \
+ -O3 \
+ -g \
+ -traceback \
+ -fixed \
+ -axCore-AVX2"
