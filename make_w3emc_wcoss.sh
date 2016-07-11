@@ -1,7 +1,7 @@
 #!/bin/sh
 ###############################################################################
 #
-# $Id$
+# $Id: make_w3emc_lib.sh 77634 2016-06-16 19:25:11Z fanglin.yang@noaa.gov $
 #
 ###############################################################################
 
@@ -93,6 +93,7 @@ esac
 
 
 # Source the build setup
+source ./setlib_wcoss.rc
 SETUP_FILE="./config-setup/$1"
 if [ ! -f ${SETUP_FILE} ]; then
   echo "${SCRIPT_NAME}: ERROR - Cannot find specified setup file ${SETUP_FILE}" >&2

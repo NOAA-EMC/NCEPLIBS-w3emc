@@ -1,4 +1,0 @@
-export SIGIO_LIB4=/nwprod2/lib/sigio/v2.0.1/libsigio_v2.0.1_4.a
-export SIGIO_INC4=/nwprod2/lib/sigio/v2.0.1/include/sigio_v2.0.1_4
-export NEMSIO_LIB4=/nwprod2/lib/nemsio/v2.2.2/libnemsio_v2.2.2.a
-export NEMSIO_INC4=/nwprod2/lib/nemsio/v2.2.2/include/nemsio_v2.2.2
