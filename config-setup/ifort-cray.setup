@@ -6,7 +6,8 @@
 export FC="ifort"
 
 export FCFLAGS=" \
- -O2 \
+ -O3 \
  -g \
  -traceback \
- -fixed"
+ -fixed \
+ -axCore-AVX2"

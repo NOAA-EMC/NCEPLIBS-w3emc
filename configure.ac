@@ -1,5 +1,5 @@
 ## Put version control id tag in output configure script
-AC_REVISION($Id$)
+AC_REVISION($Id: configure.ac 87582 2017-01-31 23:57:23Z eugene.mirvis@noaa.gov $)
 
 
 ## Initialise autoconf
@@ -92,5 +92,19 @@ AC_LINK_IFELSE(
   [AC_LANG_SOURCE([      program main; use sigio_module; type(sigio_head)::head; end])],
   [AC_MSG_RESULT([yes])],
   [AC_MSG_FAILURE([Unable to link to sigio library],[1])])
+
+AC_OUTPUT
+
+# Append standard module environment variables for nemsio library
+AC_MSG_NOTICE([Using NEMSIO_INC value: "${NEMSIO_INC}"])
+AC_MSG_NOTICE([Using NEMSIO_LIB value: "${NEMSIO_LIB}"])
+FCFLAGS="${FCFLAGS} -I${NEMSIO_INC}"
+LIBS="${LIBS} ${NEMSIO_LIB}"
+# ...Check for nemsio library
+AC_MSG_CHECKING([for library containing nemsio_head definition])
+AC_LINK_IFELSE(
+  [AC_LANG_SOURCE([      program main; use nemsio_module; type(nemsio_gfile)::head; end])],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_FAILURE([Unable to link to nemsio library],[1])])
 
 AC_OUTPUT

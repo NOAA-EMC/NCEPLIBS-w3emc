@@ -62,8 +62,8 @@ install:
 nco_install:
 	$(INSTALL) -d $(DESTDIR)$(nco_installdir)
 	$(INSTALL_DATA) $(LIBRARY) $(DESTDIR)$(nco_installdir)/lib$(distdir).a
-	$(INSTALL) -d $(DESTDIR)$(nco_installdir)/incmod/$(distdir)
-	$(INSTALL_DATA) *.mod $(DESTDIR)$(nco_installdir)/incmod/$(distdir)
+	$(INSTALL) -d $(DESTDIR)$(nco_installdir)/include/$(distdir)
+	$(INSTALL_DATA) *.mod $(DESTDIR)$(nco_installdir)/include/$(distdir)
 	$(INSTALL_DATA) ../config.log $(DESTDIR)$(nco_installdir)/config.log.$(distdir)
 
 # ...Gnu-style uninstallation

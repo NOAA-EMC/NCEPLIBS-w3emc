@@ -1,0 +1,30 @@
+Installation instructions:
+
+On the Cray system:
+- create module files for the new version in .../nwprod/lib/modulefiles/
+- cd into src folder 
+- module load PrgEnv-intel sigio-intel w3emc-intel craype-sandybridge
+- module list 2>compile-intel.log
+- ./make_w3emc_lib.sh wcoss-cray.setup &>>compile-intel.log
+- module switch PrgEnv-intel PrgEnv-cray
+- module switch sigio-intel sigio-cray-haswell
+- module switch w3emc-intel w3emc-cray-haswell
+- module switch craype-sandybridge craype-haswell
+- module list 2>compile-cray.log
+- ./make_w3emc_lib.sh wcoss-cray.setup &>>compile-cray.log
+
+On the Dell system:
+- create module files for the new versions in .../nwprod/lib/modulefiles/compiler_third/ips/18.0.1/w3emc
+- cd into src folder
+- module load ips/18.0.1.163 impi/18.0.1 sigio/2.0.1 nemsio/2.2.3 w3emc/2.3.0
+- module list 2>compile-ips-impi.log
+- ./make_w3emc_lib.sh wcoss.setup 2>&1 | tee -a compile-ips-impi.log
+- mkdir -p $(dirname $W3EMC_LIB4)
+- mv w3emc/v2.3.0/include w3emc/v2.3.0/*.a $(dirname $W3EMC_LIB4)/
+- module switch impi smpi/10.1.1.0
+- module list 2>compile-ips-smpi.log
+- ./make_w3emc_lib.sh wcoss.setup 2>&1 | tee -a compile-ips-smpi.log
+- mkdir -p $(dirname $W3EMC_LIB4)
+- mv w3emc/v2.3.0/include w3emc/v2.3.0/*.a $(dirname $W3EMC_LIB4)/
+- rm -rf w3emc
+
