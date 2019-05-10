@@ -2,7 +2,7 @@
  module load EnvVars/1.0.2
  module load ips/18.0.1.163
  module load impi/18.0.1
- module load w3emc/2.2.0    # NO 2.2.0 !!! ONLY 2.3.0 available
+ module load w3emc/2.3.0
  module load sigio/2.1.0
  module load nemsio/2.2.4
 
