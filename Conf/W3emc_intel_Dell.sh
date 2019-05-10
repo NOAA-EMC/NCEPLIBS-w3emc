@@ -1,8 +1,10 @@
 # *** for WCOSS Dell (intel) ***
  module load EnvVars/1.0.2
  module load ips/18.0.1.163
+ module load impi/18.0.1
+ module load w3emc/2.2.0    # NO 2.2.0 !!! ONLY 2.3.0 available
+ module load sigio/2.1.0
  module load nemsio/2.2.4
- module load nemsiogfs/v2.2.0 -------------------------
 
  export CC=icc
  export FC=ifort
@@ -13,17 +15,20 @@
  export MPIFC=mpiifort
 
  export DEBUG="-g -O0"
- export CFLAGS="-O3 -DUNDERSCORE -DLINUX -fPIC"
- export FFLAGS="-O3 -xHOST -traceback -fPIC"
+ export CFLAGS="-O3 -fPIC"
+ export FFLAGS="-O3 -fPIC"
+ export FPPCPP="-cpp"
+ export FREEFORM="-free"
  export CPPFLAGS="-P -traditional-cpp"
- export MPICFLAGS="-O3 -DUNDERSCORE -DLINUX -fPIC"
- export MPIFFLAGS="-O3 -xHOST -traceback -fPIC"
+ export MPICFLAGS="-O3 -fPIC"
+ export MPIFFLAGS="-O3 -fPIC"
+ export MODPATH="-module "
  export I4R4="-integer-size 32 -real-size 32"
  export I4R8="-integer-size 32 -real-size 64"
  export I8R8="-integer-size 64 -real-size 64"
 
  export CPPDEFS=""
- export CFLAGSDEFS=""
+ export CFLAGSDEFS="-DUNDERSCORE -DLINUX"
  export FFLAGSDEFS=""
 
  export USECC=""

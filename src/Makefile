@@ -20,10 +20,10 @@ dbg_build: override MPIFFLAGS += $(DEBUG)
 dbg_build: $(LIB)
 
 %.o: %.F
-	$(MPIFC) -c $(MPIFFLAGS) $(MPIFFLAGSDEFS) $<
+	$(MPIFC) -c $(FPPCPP) $(MPIFFLAGS) $(FFLAGSDEFS) $<
 
 %.o: %.f
-	$(MPIFC) -c $(MPIFFLAGS) $(MPIFFLAGSDEFS) $<
+	$(MPIFC) -c $(MPIFFLAGS) $(FFLAGSDEFS) $<
 
 message: $(MSGSRC)
 	$(CC) -c $(firstword $(MSGSRC))
