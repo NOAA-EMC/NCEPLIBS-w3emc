@@ -1,7 +1,7 @@
 # *** for WCOSS Cray (intel) ***
  module purge
  module load intel/18.1.163
- module load w3emc-intel/2.2.0
+ module load w3emc-intel/2.3.0
  module load sigio-intel/2.1.0
  
  module load nemsio-intel/2.2.3

@@ -3,11 +3,7 @@
  module load EnvVars/1.0.2
  module load ips/18.0.1.163
  module load impi/18.0.1
-
  module load w3emc/2.3.0
- new_ver=2.2.0
- reset_version w3emc $new_ver
-
  module load sigio/2.1.0
 
  module load nemsio/2.2.3
