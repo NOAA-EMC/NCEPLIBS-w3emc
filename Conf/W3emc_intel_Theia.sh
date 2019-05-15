@@ -1,7 +1,11 @@
 # *** for Theia (intel) ***
- module load intel/18.1.163
+ WORKDIR=/scratch3/NCEPDEV/nwprod/IPS
+ MODULEPATH=/apps/lmod/lmod/modulefiles/Core
+ module use -a $WORKDIR/modulefiles/core_third
+ module load EnvVars/1.0.2
+ module load ips/18.0.1.163
  module load impi/2018.0.1
- module load dev/w3emc/2.3.0
+ module load dev/w3emc/2.2.0
  module load dev/sigio/2.1.0
  module load dev/nemsio/2.2.4
 

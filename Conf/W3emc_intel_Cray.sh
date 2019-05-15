@@ -1,8 +1,12 @@
 # *** for WCOSS Cray (intel) ***
+ module purge
  module load intel/18.1.163
- module load w3emc/v2.3.0
- module load sigio/v2.1.0
- module load nemsio/v2.2.4
+ module load w3emc-intel/2.2.0
+ module load sigio-intel/2.1.0
+ 
+ module load nemsio-intel/2.2.3
+ new_ver=2.2.4
+ reset_version nemsio $new_ver
 
  export CC=icc
  export FC=ifort

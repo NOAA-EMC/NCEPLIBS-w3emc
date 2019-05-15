@@ -31,6 +31,11 @@
    [[ ${3,,} == installonly ]] && { inst=true; skip=true; }
    [[ ${3,,} == localinstallonly ]] && { local=true; inst=true; skip=true; }
  }
+
+ source ./Conf/Collect_info.sh
+ source ./Conf/Gen_cfunction.sh
+ source ./Conf/Reset_version.sh
+
  if [[ ${sys} == "intel_general" ]]; then
    sys6=${sys:6}
    source ./Conf/W3emc_${sys:0:5}_${sys6^}.sh
@@ -44,9 +49,6 @@
    echo "??? W3EMC: module/environment not set."
    exit 1
  }
-
- source ./Conf/Collect_info.sh
- source ./Conf/Gen_cfunction.sh
 
 set -x
  w3emcLib4=$(basename $W3EMC_LIB4)
@@ -112,23 +114,30 @@ set -x
               LIB_DIR4=..
               LIB_DIR8=..
               LIB_DIRd=..
+              INCP_DIR4=..
+              INCP_DIR8=..
+              INCP_DIRd=..
+              SRC_DIR=
              } || {
-                   LIB_DIR4=$(dirname ${W3EMC_LIB4})
-                   LIB_DIR8=$(dirname ${W3EMC_LIB8})
-                   LIB_DIRd=$(dirname ${W3EMC_LIBd})
-                  }
-   [ -d $LIB_DIR4 ] || mkdir -p $LIB_DIR4
-   [ -d $LIB_DIR8 ] || mkdir -p $LIB_DIR8
-   [ -d $LIB_DIRd ] || mkdir -p $LIB_DIRd
-   INCP_DIR4=$(dirname $W3EMC_INC4)
-   [ -d $W3EMC_INC4 ] && rm -rf $W3EMC_INC4 || mkdir -p $INCP_DIR4
-   INCP_DIR8=$(dirname $W3EMC_INC8)
-   [ -d $W3EMC_INC8 ] && rm -rf $W3EMC_INC8 || mkdir -p $INCP_DIR8
-   INCP_DIRd=$(dirname $W3EMC_INCd)
-   [ -d $W3EMC_INCd ] && rm -rf $W3EMC_INCd || mkdir -p $INCP_DIRd
-   SRC_DIR=$W3EMC_SRC
-   $local && SRC_DIR=
-   [ -d $SRC_DIR ] || mkdir -p $SRC_DIR
+              LIB_DIR4=$(dirname $W3EMC_LIB4)
+              LIB_DIR8=$(dirname $W3EMC_LIB8)
+              LIB_DIRd=$(dirname $W3EMC_LIBd)
+              INCP_DIR4=$(dirname $W3EMC_INC4)
+              INCP_DIR8=$(dirname $W3EMC_INC8)
+              INCP_DIRd=$(dirname $W3EMC_INCd)
+              SRC_DIR=$W3EMC_SRC
+              [ -d $LIB_DIR4 ] || mkdir -p $LIB_DIR4
+              [ -d $LIB_DIR8 ] || mkdir -p $LIB_DIR8
+              [ -d $LIB_DIRd ] || mkdir -p $LIB_DIRd
+              [ -d $W3EMC_INC4 ] && { rm -rf $W3EMC_INC4; } \
+                              || { mkdir -p $INCP_DIR4; }
+              [ -d $W3EMC_INC8 ] && { rm -rf $W3EMC_INC8; } \
+                              || { mkdir -p $INCP_DIR8; }
+              [ -d $W3EMC_INCd ] && { rm -rf $W3EMC_INCd; } \
+                              || { mkdir -p $INCP_DIRd; }
+              [ -z $SRC_DIR ] || { [ -d $SRC_DIR ] || mkdir -p $SRC_DIR; }
+             }
+
    make clean LIB=
    make install LIB=$w3emcLib4 MOD=$w3emcInc4 \
                 LIB_DIR=$LIB_DIR4 INC_DIR=$INCP_DIR4 SRC_DIR=
