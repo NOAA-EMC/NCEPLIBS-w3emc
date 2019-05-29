@@ -7,7 +7,7 @@
 
  ANCHORDIR=..
  export COMP=gnu/impi
- export W3EMC_VER=v2.3.0
+ export W3EMC_VER=v2.2.0
  export W3EMC_SRC=
  export W3EMC_INC4=$ANCHORDIR/${COMP#*/}/include/w3emc_${W3EMC_VER}_4
  export W3EMC_INC8=$ANCHORDIR/${COMP#*/}/include/w3emc_${W3EMC_VER}_8
@@ -29,7 +29,7 @@
  export OMPCC="$CC -fopenmp"
  export OMPFC="$FC -fopenmp"
  export MPICC=mpigcc
- export MPIFC=mpigfortran
+ export MPIFC=mpif90
 
  export DEBUG="-g -O0"
  export CFLAGS="-O3 -fPIC"

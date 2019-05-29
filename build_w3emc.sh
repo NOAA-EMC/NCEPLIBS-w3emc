@@ -114,9 +114,10 @@ set -x
               LIB_DIR4=..
               LIB_DIR8=..
               LIB_DIRd=..
-              INCP_DIR4=..
-              INCP_DIR8=..
-              INCP_DIRd=..
+              INCP_DIR=../include
+              INCP_DIR4=$INCP_DIR
+              INCP_DIR8=$INCP_DIR
+              INCP_DIRd=$INCP_DIR
               SRC_DIR=
              } || {
               LIB_DIR4=$(dirname $W3EMC_LIB4)
