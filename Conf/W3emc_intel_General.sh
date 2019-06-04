@@ -1,12 +1,22 @@
 # *** manually set environments (for intel compiler) of w3emc ***
 
-# !!! module environment (*THEIA*) !!!
- module load intel/18.1.163
- module load impi/2018.0.1
+ : ${USERMODE:=false}  # user mode (USERMODE) is closed by default
+                       # set env var USERMODE to "true" to active it
+ ${USERMODE} && {
+    echo "Environment set by user"
+# On theia/cray, user can load environment
+#   module load intel/18.0.1.163
+#   module load impi/2018.0.1
+# Or set environment on specific platform
+    intel_version=2018.1.163
+    intel_topdir=/apps/intel/compilers_and_libraries_$intel_version
+    source $intel_topdir/linux/bin/compilervars.sh intel64
+    source $intel_topdir/linux/mpi/bin64/mpivars.sh
+ }
 
  ANCHORDIR=..
  export COMP=ips/impi
- export W3EMC_VER=v2.3.0
+ export W3EMC_VER=v2.2.0
  export W3EMC_SRC=
  export W3EMC_INC4=$ANCHORDIR/${COMP#*/}/include/w3emc_${W3EMC_VER}_4
  export W3EMC_INC8=$ANCHORDIR/${COMP#*/}/include/w3emc_${W3EMC_VER}_8

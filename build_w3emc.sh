@@ -1,14 +1,14 @@
 #!/bin/sh
 
  (( $# == 0 )) && {
-   echo "*** Usage: $0 wcoss|dell|cray|theia|intel_general|gnu_general [debug|build] [[local]install[only]]"
+   echo "*** Usage: $0 wcoss|dell|cray|theia|intel_general|gnu_general [debug|build] [[local]install[only]]" >&2
    exit 1
  }
 
  sys=${1,,}
  [[ $sys == wcoss || $sys == dell || $sys == cray ||\
     $sys == theia || $sys == intel_general || $sys == gnu_general ]] || {
-   echo "*** Usage: $0 wcoss|dell|cray|theia|intel_general|gnu_general [debug|build] [[local]install[only]]"
+   echo "*** Usage: $0 wcoss|dell|cray|theia|intel_general|gnu_general [debug|build] [[local]install[only]]" >&2
    exit 1
  }
  debg=false
@@ -45,8 +45,12 @@
  else
    source ./Conf/W3emc_intel_${sys^}.sh
  fi
+ $CC --version &> /dev/null || {
+   echo "??? W3EMC: compilers not set." >&2
+   exit 1
+ }
  [[ -z $W3EMC_VER || -z $W3EMC_LIB4 ]] && {
-   echo "??? W3EMC: module/environment not set."
+   echo "??? W3EMC: module/environment not set." >&2
    exit 1
  }
 
@@ -115,6 +119,7 @@ set -x
               LIB_DIR8=..
               LIB_DIRd=..
               INCP_DIR=../include
+              [ -d $INCP_DIR ] || { mkdir -p $INCP_DIR; }
               INCP_DIR4=$INCP_DIR
               INCP_DIR8=$INCP_DIR
               INCP_DIRd=$INCP_DIR
