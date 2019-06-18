@@ -1,22 +1,23 @@
 C$$$  SUBPROGRAM DOCUMENTATION BLOCK
 C
 C SUBPROGRAM:    GBLEVENTS   PRE/POST PROCESSING OF PREPBUFR EVENTS 
-C   PRGMMR: J.Whiting        ORG: EMC        DATE: 2014-05-08
+C   PRGMMR: DENNIS KEYSER    ORG: EMC        DATE: 2017-02-22
 C
 C ABSTRACT: RUNS IN TWO MODES: "PREVENTS" AND "POSTEVENTS".  IN THE
 C   PREVENTS MODE, PREPARES OBSERVATIONAL PREPBUFR REPORTS FOR
 C   SUBSEQUENT QUALITY CONTROL AND ANALYSIS PROGRAMS.  THIS IS DONE
-C   THROUGH THE FOLLOWING: INTERPOLATION OF GLOBAL SPECTRAL SIMGA
-C   FIRST GUESS TO PREPBUFR OBSERVATION LOCATIONS WITH ENCODING OF
-C   FIRST GUESS VALUES INTO PREPBUFR REPORTS; ENCODING OF "PREVENT"
-C   AND/OR "VIRTMP" EVENTS INTO PREPBUFR REPORTS; IN CERTAIN CASES,
-C   ENCODING OF A DERIVED PMSL INTO SURFACE PREPBUFR REPORTS; AND
-C   ENCODING OF OBSERVATION ERRORS FROM THE ERROR SPECIFICATION FILE
-C   INTO PREPBUFR REPORTS.  IN THE POSTEVENTS MODE, AFTER ALL QUALITY
-C   CONTROL AND ANALYSIS PROGRAMS HAVE RUN, INTERPOLATES THE GLOBAL
-C   SPECTRAL SIMGA ANALYSIS TO PREPBUFR OBSERVATION LOCATIONS AND
-C   ENCODES THESE ANALYZED VALUES INTO PREPBUFR REPORTS.  THE
-C   REMAINDER OF THIS ABSTRACT APPLIES ONLY TO THE PREVENTS MODE.
+C   THROUGH THE FOLLOWING: INTERPOLATION OF GLOBAL FIRST GUESS {FROM
+C   EITHER SIGIO (SIGMA OR HYBRID) OR NEMSIO INPUT} TO PREPBUFR
+C   OBSERVATION LOCATIONS WITH ENCODING OF FIRST GUESS VALUES INTO
+C   PREPBUFR REPORTS; ENCODING OF "PREVENT" AND/OR "VIRTMP" EVENTS INTO
+C   PREPBUFR REPORTS; IN CERTAIN CASES, ENCODING OF A DERIVED PMSL INTO
+C   SURFACE PREPBUFR REPORTS; AND ENCODING OF OBSERVATION ERRORS FROM
+C   THE ERROR SPECIFICATION FILE INTO PREPBUFR REPORTS.  IN THE
+C   POSTEVENTS MODE, AFTER ALL QUALITY CONTROL AND ANALYSIS PROGRAMS
+C   HAVE RUN, INTERPOLATES THE GLOBAL ANALYSIS {FROM EITHER SIGIO
+C   (SIGMA OR HYBRID) INPUT OR NEMSIO INPUT} TO PREPBUFR OBSERVATION
+C   LOCATIONS AND ENCODES THESE ANALYZED VALUES INTO PREPBUFR REPORTS.
+C   THE REMAINDER OF THIS ABSTRACT APPLIES ONLY TO THE PREVENTS MODE.
 C   THE "PREVENT" EVENT CAN CHANGE A QUALITY MARKER TO FLAG AN
 C   OBSERVATION DATUM FOR NON-USE BY SUBSEQUENT QC AND ANALYSIS
 C   PROGRAMS (FILTERING).  EXAMPLES WHERE THIS SUBROUTINE WILL WRITE
@@ -246,26 +247,48 @@ C     FLAGGED WITH Q.M. 8 (EVENT PGM "PREVENT", REASON CODE 8).
 C 2014-05-08 JWhiting -- altered print statement (2 format) in GBLEVN10 
 C     subroutine; increased field width for spectral resolution to 
 C     accommodate models w/ up to 5-digit resolution (I3 to I5).
-C
+C 2016-06-13 FANGLIN YANG AND RUSS TREADON -- HANG LEI ADDED NEMSIO 
+C     TO SUBROUTINE GBLEVN10 AND REMOVED ALL SIGIO CAPABILITY.
+C     THIS UPDATE RESTORES GBLEVN10 FOR PROCESSING SIGIO INPUT, AND 
+C     ADDS A NEW GBLEVN12 FOR PROCESSING NEMSIO INPUT. THE INPUT GFS 
+C     FILE TYPE SIGIO VS NEMSIO IS NOW DETERMINED IN THE MAIN PROGRAM. 
+C     THE CODE IS ALSO UPDATED TO REMOVE BUGS. SUBROUTINE SIGIO_MODPR
+C     IS USED TO COMPUTE LAYER AND INTERFACE PRESSURE FOR NEMSIO INPUT.
+C 2017-02-17 D Keyser & J Whiting -- In subroutine GBLEVN12, removed
+C     references to multiple input files, since only 1 nemsio formatted
+C     input is needed (no interpolation is attempted; c.f.; what is
+C     done with sigio formatted inputs); GBLEVN12 routine still retains
+c     some structures (esp array references) left over from multi file
+C     input. Updated comments and docblock to account for new NEMSIO
+C     input.
+C 2017-02-22 D. Keyser -- Further changes to subr. GBLEVN12 to remove
+C     array and logic references to multiple input files.
 C
 C USAGE:    CALL GBLEVENTS(IDATEP,IUNITF,IUNITE,IUNITP,IUNITS,SUBSET,
 C          $               NEWTYP)
+C
 C   INPUT ARGUMENT LIST:
 C     IDATEP   - CENTER DATE FOR PREPBUFR FILE IN THE FORM YYYYMMDDHH
 C     IUNITF   - 2-WORD ARRAY:
-C              - WORD 1 - UNIT NUMBER OF FIRST INPUT SPECTRAL (GLOBAL)
-C              - SIGMA OR HYBRID FILE (EITHER FIRST GUESS OR ANALYSIS);
-C              - IF HH IN IDATEP IS A MULTIPLE OF 3 THEN THIS FILE IS
-C              - VALID AT THE DATE IN IDATEP, IF HH IN IDATEP IS NOT A
-C              - MULTIPLE OF 3 THEN THIS FILE IS VALID AT THE CLOSEST
-C              - TIME PRIOR TO THE DATE IN IDATEP THAT IS A MULTIPLE
-C              - OF 3
-C              - WORD 2 - UNIT NUMBER OF SECOND INPUT SPECTRAL (GLOBAL)
-C              - SIGMA OR HYBRID FILE (EITHER FIRST GUESS OR ANALYSIS);
-C              - IF HH IN IDATEP IS A MULTIPLE OF 3 THEN THIS FILE IS
-C              - EMPTY, IF HH IN IDATEP IS NOT A MULTIPLE OF 3 THEN
-C              - THIS FILE IS VALID AT THE CLOSEST TIME AFTER THE DATE
-C              - IN IDATEP THAT IS A MULTIPLE OF 3
+C        For SIGIO input:
+C              - WORD 1 - UNIT NUMBER OF FIRST INPUT SIGIO-BASED GLOBAL
+C                (SIGMA OR HYBRID) FILE (EITHER FIRST GUESS OR
+C                ANALYSIS); IF HH IN IDATEP IS A MULTIPLE OF 3 THEN
+C                THIS FILE IS VALID AT THE DATE IN IDATEP, IF HH IN
+C                IDATEP IS NOT A MULTIPLE OF 3 THEN THIS FILE IS VALID
+C                AT THE CLOSEST TIME PRIOR TO THE DATE IN IDATEP THAT
+C                IS A MULTIPLE OF 3
+C              - WORD 2 - UNIT NUMBER OF SECOND INPUT SIGIO-BASED GLOBAL
+C                (SIGMA OR HYBRID) FILE (EITHER FIRST GUESS OR
+C                ANALYSIS); IF HH IN IDATEP IS A MULTIPLE OF 3 THEN
+C                THIS FILE IS EMPTY, IF HH IN IDATEP IS NOT A MULTIPLE
+C                OF 3 THEN THIS FILE IS VALID AT THE CLOSEST TIME AFTER
+C                THE DATE IN IDATEP THAT IS A MULTIPLE OF 3
+C        For NEMSIO input:
+C              - WORD 1 - UNIT NUMBER OF INPUT NEMSIO-BASED GLOBAL FILE
+C                (EITHER FIRST GUESS OR ANALYSIS); ALWAYS VALID AT AT
+C                THE DATE IN IDATEP
+C              - WORD 2 - NOT USED, SHOULD BE A NULL FILE
 C     IUNITE   - UNIT NUMBER OF INPUT OBSERVATION ERROR FILE
 C              - (USED ONLY IN PREVENTS MODE)
 C     IUNITP   - UNIT NUMBER OF OUTPUT PREPBUFR DATA SET
@@ -285,39 +308,48 @@ C                DOCUMENTATION BELOW)
 C                (NOTE: IF STANDARD INPUT FILE IS NULL, THEN THIS
 C                       SUBROUTINE RUNS IN POSTEVENTS MODE)
 C     UNIT AA  - PREPBUFR DATA SET
-C              - (WHERE AA IS UNIT NUMBER DEFINED AS IUNITP IN
-C              - INPUT ARGUMENT LIST)
-C     UNIT BB  - SPECTRAL (GLOBAL) SIGMA OR HYBRID GUESS (PREVENTS
-C              - MODE) OR ANALYSIS (POSTEVENTS MODE) FILE
-C              - (WHERE BB IS UNIT NUMBER DEFINED AS IUNITF(1) IN
-C              - INPUT ARGUMENT LIST)
-C     UNIT CC  - SPECTRAL (GLOBAL) SIGMA OR HYBRID GUESS (PREVENTS
-C              - MODE) OR ANALYSIS (POSTEVENTS MODE) FILE
-C              - (WHERE CC IS UNIT NUMBER DEFINED AS IUNITF(2) IN
-C              - INPUT ARGUMENT LIST)
+C                (WHERE AA IS UNIT NUMBER DEFINED AS IUNITP IN
+C                INPUT ARGUMENT LIST)
+C     UNIT BB  - GUESS (PREVENTS MODE) OR ANALYSIS (POSTEVENTS MODE)
+C                FILE
+C                (WHERE BB IS UNIT NUMBER DEFINED AS IUNITF(1) IN
+C                INPUT ARGUMENT LIST)
+C     UNIT CC  - GUESS (PREVENTS MODE) OR ANALYSIS (POSTEVENTS MODE)
+C                FILE
+C                (WHERE CC IS UNIT NUMBER DEFINED AS IUNITF(2) IN
+C                INPUT ARGUMENT LIST)
+C                NOTE: only valid for SIGIO input
 C     UNIT DD  - OBSERVATION ERROR FILE (WHERE DD IS UNIT NUMBER
-C              - DEFINED AS IUNITE IN INPUT ARGUMENT LIST)
-C              - (USED ONLY IN PREVENTS MODE)
+C                DEFINED AS IUNITE IN INPUT ARGUMENT LIST)
+C                (USED ONLY IN PREVENTS MODE)
 C
 C   OUTPUT FILES:
 C     UNIT 06  - STANDARD OUTPUT PRINT
 C     UNIT AA  - PREPBUFR DATA SET
-C              - (WHERE AA IS UNIT NUMBER DEFINED AS IUNITP IN
-C              - INPUT ARGUMENT LIST)
+C                (WHERE AA IS UNIT NUMBER DEFINED AS IUNITP IN
+C                INPUT ARGUMENT LIST)
 C     UNIT DD  - "PREVENT" EVENTS DATA FILTERING SUMMARY PRINT FILE
-C              - (WHERE DD IS UNIT NUMBER DEFINED AS IUNITS IN
-C              - INPUT ARGUMENT LIST)
-C              - (USED ONLY IN PREVENTS MODE)
+C                (WHERE DD IS UNIT NUMBER DEFINED AS IUNITS IN
+C                INPUT ARGUMENT LIST)
+C                (USED ONLY IN PREVENTS MODE)
 C
 C   SUBPROGRAMS CALLED:
-C     UNIQUE:      GBLEVN02 GBLEVN03   GBLEVN04
-C                  GBLEVN06 OEFG01      
-C                  GBLEVN08 GBLEVN10   GBLEVN11
-C                  MODULE: GBLEVN_MODULE
+C     UNIQUE:      GBLEVN02  GBLEVN03  GBLEVN04  GBLEVN06  OEFG01
+C                  GBLEVN08  GBLEVN10  GBLEVN11  GBLEVN11D GBLEVN12
+C                  GETLATS
+C                  MODULES: GBLEVN_MODULE SIGIO_MODULE     SIGIO_R_MODULE
+C                           NEMSIO_MODULE NEMSIO_OPENCLOSE NEMSIO_READ
+C                           NEMSIO_WRITE
 C     LIBRARY:
-C       SPLIB    - SPTEZM   SPTEZMV
-C       W3NCO    - W3MOVDAT ERREXIT
-C       BUFRLIB  - UFBINT   UFBQCD   GETBMISS ibfms
+C       SIGIO    - SIGIO_RROPEN       SIGIO_RRHEAD    SIGIO_SCLOSE  SIGIO_ALDATS
+C                  SIGIO_ALDATM       SIGIO_RRDATS    SIGIO_RRDATM  SIGIO_AXDATS
+C                  SIGIO_AXDATM       SIGIO_MODPR     SIGIO_CNVTDV
+C       SPLIB    - SPTEZM             SPTEZMV         SPLAT
+C       W3NCO    - W3MOVDAT           ERREXIT
+C       BUFRLIB  - UFBINT             UFBQCD          GETBMISS      IBFMS
+C       NEMSIO   - NEMSIO_OPEN        NEMSIO_CLOSE    NEMSIO_INIT
+C                  NEMSIO_GETFILEHEAD NEMSIO_READRECV NEMSIO_FINALIZE
+C                  NEMSIO_GETHEADVAR  NEMSIO_READRECVw34
 C
 C   EXIT STATES:
 C     COND =   0 - SUCCESSFUL RUN
@@ -326,12 +358,14 @@ C     COND =  61 - VARIABLE NLTD .NE. VARIABLE NLEV
 C     COND =  62 - VARIABLE NLTQ .NE. VARIABLE NLEV
 C     COND =  63 - VARIABLE NLQQ .NE. VARIABLE NLEV
 C     COND =  68 - DATE OF FIRST GUESS/ANALYSIS FILE(S) DOES NOT MATCH,
-C                - OR AT LEAST SPAN, THE CENTER DATE FOR THE PREPBUFR
-C                - FILE
-C     COND =  69 - VARIABLE KMAX TOO BIG - UNABLE TO TRANSFORM FIRST
-C                - GUESS OR ANALYSIS FILE(S)
-C     COND =  70 - CALL TO SIGIO_RROPEN RETURNED WITH NON-ZERO R.C.
-C     COND =  71 - CALL TO SIGIO_RRHEAD RETURNED WITH NON-ZERO R.C.
+C                  OR AT LEAST SPAN, THE CENTER DATE FOR THE PREPBUFR
+C                  FILE
+C     COND =  69 - FOR SIGIO INPUT GLOBAL FILES, VARIABLE KMAX TOO BIG
+C                 - UNABLE TO TRANSFORM FIRST GUESS OR ANALYSIS FILE(S)
+C     COND =  70 - FOR SIGIO INPUT GLOBAL FILES, CALL TO SIGIO_RROPEN
+C                  RETURNED WITH NON-ZERO R.C.
+C     COND =  71 - FOR SIGIO INPUT GLOBAL FILES, CALL TO SIGIO_RRHEAD
+C                  RETURNED WITH NON-ZERO R.C.
 C
 C
 C REMARKS: THIS SUBROUTINE MAY NOT WORK CORRECTLY IN THE EIGHT BYTE
@@ -343,7 +377,7 @@ C     CALLING PROGRAM HAS ALREADY ENCODED THE REPORT INTO THE PREPBUFR
 C     FILE VIA THE UFBINT OR UFBCPY ROUTINES.  THE CALLING PROGRAM
 C     SHOULD THEN CALL THIS ROUTINE AND, UPON ITS RETURN, THE CALLING
 C     PROGRAM SHOULD CALL WRITSB TO ACTUALLY WRITE THE UPDATED SUBSET
-C    (REPORT) INTO THE BUFR MESSAGE.
+C     (REPORT) INTO THE BUFR MESSAGE.
 CC
 C  ***** VARIABLES IN NAMELIST PREVDATA READ IN BY THIS SUBROUTINE *****
 C               (NOTE: IF STANDARD INPUT FILE IS NULL, THEN THIS
@@ -398,10 +432,10 @@ C      (NOTE5: IF DOVTMP=TRUE, THEN RECALC_Q IS MEANINGLESS.)
 C      (NOTE6: RECALC_Q DEFAULTS TO TRUE.)
 C
 C    DOFCST & SOME_FCST:
-C      DOFCST  - ENCODE FORECAST (FIRST GUESS) VALUES, INTERPOLATED
-C                FROM THE SPECTRAL SIGMA OR HYBRID GUESS FILE, INTO THE
-C                PREPBUFR FILE FOR ALL MESSAGE TYPES OR AT LEAST SOME
-C                MESSAGE TYPES?
+C      DOFCST  - ENCODE FORECAST (FIRST GUESS) VALUES, INTERPOLATED FROM
+C                EITHER A SIGIO (SIGMA OR HYBRID) INPUT OR NEMSIO INPUT
+C                GLOBAL FILE, INTO THE PREPBUFR FILE FOR ALL MESSAGE
+C                TYPES OR AT LEAST SOME MESSAGE TYPES?
 C                DOFCST = .TRUE.  ---> YES, ENCODE FORECST FOR ALL
 C                                       MESSAGE TYPES          (DEFAULT)
 C                DOFCST = .FALSE.
@@ -427,8 +461,9 @@ C              MESSAGE TYPE.)
 C      (NOTE4: IF DOFCST=TRUE, THEN SOME_FCST IS MEANINGLESS.)
 C      (NOTE5: SOME_FCST DEFAULTS TO TRUE.)
 C
-C    DOANLS  - ENCODE ANALYZED VALUES, INTERPOLATED FROM THE SPECTRAL
-C              SIGMA OR HYBRID ANALYSIS FILE, INTO THE PREPBUFR FILE -
+C    DOANLS  - ENCODE ANALYZED VALUES, INTERPOLATED FROM EITHER A SIGIO
+C    (SIGMA OR HYBRID)  INPUT OR NEMSIO INPUT GLOBAL FILE,
+C              INTO THE PREPBUFR FILE -
 C              POSTEVENTS MODE - ?
 C              DOANLS = .TRUE.  ---> YES, FOR ALL MESSAGE TYPES
 C              DOANLS = .FALSE. ---> NO,  FOR ALL MESSAGE TYPES
@@ -475,7 +510,7 @@ CC
 C
 C ATTRIBUTES:
 C   LANGUAGE: FORTRAN 90
-C   MACHINE:  NCEP WCOSS
+C   MACHINE:  NCEP WCOSS (iDataPlex and Cray-XC40)
 C
 C$$$
       MODULE GBLEVN_MODULE
@@ -489,7 +524,8 @@ C$$$
       REAL (KIND=8), ALLOCATABLE :: IAR14T(:,:,:), IAR15U(:,:,:),
      $                              IAR16V(:,:,:), IAR17Q(:,:,:),
      $                              IAR12Z(:,:),   IAR13P(:,:),
-     $                              IARPSI(:,:,:), IARPSL(:,:,:)
+     $                              IARPSI(:,:,:), IARPSL(:,:,:),
+     $                              IARPSD(:,:,:)
       REAL (KIND=4), ALLOCATABLE :: VCOORD(:,:)
       REAL DLAT,DLON
 
@@ -497,6 +533,13 @@ C$$$
 
       SUBROUTINE GBLEVENTS(IDATEP,IUNITF,IUNITE,IUNITP,IUNITS,SUBSET,
      $                     NEWTYP)
+
+      USE SIGIO_MODULE
+      USE SIGIO_R_MODULE
+      USE NEMSIO_MODULE
+      USE NEMSIO_OPENCLOSE
+      USE NEMSIO_READ
+      USE GBLEVN_MODULE
 
       INTEGER, PARAMETER :: IM=384, JM=IM/2+1, IDRT=0
 
@@ -506,8 +549,12 @@ C$$$
       REAL(8)      BMISS,GETBMISS
       LOGICAL      DOVTMP,DOFCST,SOME_FCST,DOBERR,FCST,VIRT,DOANLS,
      $             SATMQC,ADPUPA_VIRT,RECALC_Q,DOPREV,dopmsl
+      INTEGER*4 IRET,IRET1
+      INTEGER*4    IUNITF(2)
 
-      DIMENSION    IUNITF(2)
+      CHARACTER*20 CFILE1
+      TYPE(SIGIO_HEAD) :: HEAD1
+      TYPE(NEMSIO_GFILE) :: GFILE1  
 
       COMMON /GBEVAA/ SID_8,OBS_8(13,255),QMS_8(12,255),BAK_8(12,255),
      $ XOB,YOB,DHR,TYP,NLEV
@@ -549,7 +596,7 @@ C -------------------------------
          IFIRST = 1
          PRINT 700
   700 FORMAT(/1X,100('#')/' =====> SUBROUTINE GBLEVENTS INVOKED FOR ',
-     $ 'THE FIRST TIME - VERSION LAST UPDATED 2014-03-25'/)
+     $ 'THE FIRST TIME - VERSION LAST UPDATED 2017-02-22'/)
 
          BMISS = GETBMISS()
          print *
@@ -634,10 +681,26 @@ C  ------------------------------------------------------------------
      $ 'TRANSFORM THE ANALYSIS'/)
          ENDIF
 
-         IF(DOFCST .OR. SOME_FCST .OR. DOANLS)
-     $    CALL GBLEVN10(IUNITF,IDATEP,IM,JM,IDRT)
+         IF(DOFCST .OR. SOME_FCST .OR. DOANLS) THEN
+            WRITE(CFILE1,'("fort.",I2.2)') IUNITF(1)
+            CALL SIGIO_RROPEN(IUNITF(1),CFILE1,IRET)
+            CALL SIGIO_SRHEAD(IUNITF(1),HEAD1,IRET1)
+            IF(IRET == 0 .AND. IRET1 == 0) THEN
+               print *,' ===> GLOBAL FCST/ANAL INPUT IS SIGIO'
+               CALL SIGIO_SCLOSE(IUNITF(1),IRET)
+               CALL GBLEVN10(IUNITF,IDATEP,IM,JM,IDRT)
+            ELSE
+               CALL NEMSIO_OPEN(GFILE1,trim(CFILE1),'read',IRET=IRET)
+               IF(IRET == 0) THEN
+                  CALL NEMSIO_CLOSE(GFILE1,IRET=IRET)
+                  print *,' ===> GFS FCST/ANAL INPUT IS NEMSIO'
+                  CALL GBLEVN12(IUNITF,IDATEP,IM,JM,IDRT)
+               ENDIF
+            ENDIF 
+         ENDIF
 
-         print *,' after returning from GBLEVN10',' idrt=',idrt
+         print*,'after returning from either GBLEVN10 or GBLEVN12',
+     $    ' idrt=',idrt
 
          IF(DOBERR)  THEN
 
@@ -2409,18 +2472,18 @@ C***********************************************************************
          KINDX = 0
          PRINT 331, MOD(IDATEP,100)
   331    FORMAT(/' --> GBLEVENTS: THE PREPBUFR CENTER HOUR (',I2.2,
-     $    ') IS A MULTIPLE OF 3 - ONLY ONE GLOBAL SIGMA OR HYBRID FILE',
-     $    ' IS READ,'/16X,'NO INTERPOLATION OF SPECTRAL COEFFICIENTS ',
-     $    'IS PERFORMED'/)
+     $    ') IS A MULTIPLE OF 3 - ONLY ONE SIGIO (SIGMA OR HYBRID) ',
+     $    'INPUT GLOBAL FILE IS READ,'/16X,'NO TIME INTERPOLATION OF ',
+     $    'SPECTRAL COEFFICIENTS IS PERFORMED'/)
       ELSE
          KFILES = 2
          KINDX(1) = MOD(MOD(IDATEP,100),3)
          KINDX(2) = KINDX(1) - 3
          PRINT 332, MOD(IDATEP,100)
   332    FORMAT(/' --> GBLEVENTS: THE PREPBUFR CENTER HOUR (',I2.2,
-     $    ') IS NOT A MULTIPLE OF 3 - TWO SPANNING GLOBAL SIGMA OR ',
-     $    'HYBRID FILES'/16X,'ARE READ AND THE SPECTRAL COEFFICIENTS ',
-     $    'ARE INTERPOLATED TO THE PREPBUFR CENTER TIME'/)
+     $    ') IS NOT A MULTIPLE OF 3 - TWO SPANNING SIGIO (SIGMA OR ',
+     $    'HYBRID) INPUT GLOBAL FILES'/16X,'ARE READ AND THE SPECTRAL ',
+     $    'COEFFICIENTS ARE INTERPOLATED TO THE PREPBUFR CENTER TIME'/)
       ENDIF
 
 C  GET VALID-TIME DATE OF SIGMA OR HYBRID FILE(S), ALSO READ HEADERS
@@ -2433,10 +2496,10 @@ C  -----------------------------------------------------------------
 
          WRITE(CFILE,'("fort.",I2.2)') IUNITF(IFILE)
 
-         print *,' cfile=',cfile
-
          CALL SIGIO_RROPEN(IUNIT4(IFILE),CFILE,IRET)
          CALL SIGIO_RRHEAD(IUNIT4(IFILE),HEAD(IFILE),IRET1)
+         print *,' cfile_sig=',cfile,'sigio_rropen: iret=',iret,
+     $   'sigio_rrhead: iret1=',iret1
 
          IF(IRET.NE.0)  GO TO 903
          IF(IRET1.NE.0) GO TO 904
@@ -2460,8 +2523,8 @@ C  WRITING OF A 4-DIGIT YEAR HERE.  PRIOR TO THIS, THE YEAR HERE WAS
 C  2-DIGIT.)
 
             PRINT'(" ##GBLEVENTS/GBLEVN10 - 2-DIGIT YEAR FOUND IN ",
-     $       "GLOBAL SIGMA OR HYBRID FILE ",I0,"; INITIAL DATE (YEAR ",
-     $       "IS: ",I0,")")', IFILE,idate(1,IFILE)
+     $       "SIGIO (SIGMA OR HYBRID) INPUT GLOBAL FILE ",I0,
+     $       "; INITIAL DATE (YEAR IS: ",I0,")")', IFILE,idate(1,IFILE)
             PRINT'("      - USE WINDOWING TECHNIQUE TO OBTAIN 4-DIGIT",
      $       " YEAR")'
             IF(IDATE(1,IFILE).GT.20)  THEN
@@ -2479,9 +2542,9 @@ C  2-DIGIT.)
          PRINT 1, IFILE,HEAD(IFILE)%FHOUR,
      $    (IDATE(II,IFILE),II=1,3),IDATE(5,IFILE),(JDATE(II,IFILE),
      $    II=1,3),JDATE(5,IFILE)
-    1    FORMAT(' --> GBLEVENTS: GLOBAL SIGMA OR HYBRID FILE',I2,
-     $    ' HERE IS A ',F5.1,' HOUR FORECAST FROM ',I5.4,3I3.2,' VALID',
-     $    ' AT ',I5.4,3I3.2)
+    1    FORMAT(' --> GBLEVENTS: SIGIO (SIGMA OR HYBRID) INPUT GLOBAL ',
+     $    'FILE',I2,' HERE IS A ',F5.1,' HOUR FORECAST FROM ',I5.4,
+     $    3I3.2,' VALID AT ',I5.4,3I3.2)
 
          KDATE(:,IFILE) = JDATE(:,IFILE)
 
@@ -2508,10 +2571,12 @@ C  -------------------
       KMAX    = HEAD(1)%LEVS
       KM4     = KMAX
       IDVC    = HEAD(1)%IDVC
+      IDSL    = head(1)%IDSL
       IDVM    = HEAD(1)%IDVM
       NTRAC   = HEAD(1)%NTRAC
       NVCOORD = HEAD(1)%NVCOORD
       ALLOCATE (VCOORD(KMAX+1,NVCOORD))
+      VCOORD  = 0.0
       VCOORD  = HEAD(1)%VCOORD
 
       SFCPRESS_ID  = MOD(HEAD(1)%IDVM,TEN)
@@ -2550,11 +2615,12 @@ C  --------------------------------------
       DLAT  = 180./(JMAX-1)
       DLON  = 360./IMAX
  
-      PRINT 2, JCAP,KMAX,kmaxs,DLAT,DLON,COORD(IDVC)
-    2 FORMAT(/' --> GBLEVENTS: GLOBAL MODEL SPECS: T',I5,' ',I3,
-     $ ' LEVELS ',I3,' SCALARS -------> ',F5.2,' X ',F5.2,' VERT. ',
+      PRINT 2, JCAP,IMAX,JMAX,KMAX,kmaxs,DLAT,DLON,COORD(IDVC)
+    2 FORMAT(/' --> GBLEVENTS: GLOBAL MODEL SPECS: T',I5,' ',
+     $ I5,' x ',I5,' GRID WITH ',I3,' LEVELS ',I3,
+     $' SCALARS -------> ',F5.2,' X ',F5.2,' VERT. ',
      $ 'COORD: ',A)
- 
+
       GO TO 902
 
   901 CONTINUE
@@ -2647,8 +2713,10 @@ C  -----------------------
       SFCPRESS_ID  = MOD(HEAD(1)%IDVM,TEN)
       THERMODYN_ID = MOD(HEAD(1)%IDVM/TEN,TEN)
 
-      print *,' sfcpress_id=',sfcpress_id,' thermodyn_id=',
-     $ thermodyn_id
+      print *,'in sig sfcpress_id=',sfcpress_id,' thermodyn_id=',
+     $ thermodyn_id,' ntrac=',ntrac
+      print *,' idvc=',idvc,' idsl=',idsl,' idvm=',idvm,
+     $     ' nvcoord=',nvcoord
 
       DO IFILE=1,KFILES
          CALL SIGIO_ALDATS(HEAD(IFILE),DATS,IRETS)
@@ -2823,5 +2891,437 @@ C***********************************************************************
           grid(i,jj) = temp(i)
         enddo
       enddo
+      return
+      end
+C***********************************************************************
+C***********************************************************************
+      subroutine gblevn11d(imax,jmax,grid)
+      implicit none
+      integer imax, jmax
+      real(kind=8) grid(imax,jmax)
+      real(kind=8) temp (imax)
+      integer i, j, jj
+
+      do j=1,jmax/2
+        jj = jmax-j+1
+        do i=1,imax
+          temp(i)    = grid(i,j)
+          grid(i,j)  = grid(i,jj)
+          grid(i,jj) = temp(i)
+        enddo
+      enddo
+      return
+      end
+!---------------------------------------------------------
+      SUBROUTINE GBLEVN12(IUNITF,IDATEP,IM,JM,IDRT) 
+!---------------------------------------------------------
+!--INITIALLY DEVELOPED BY HANG LEI BASED ON GBLEVN10 FOR NEMSIO
+!--AND SUBSEQUENTLY MODIFIED BY FANGLIN YANG AND RUSS TREADON
+                                                   
+      USE GBLEVN_MODULE
+      USE NEMSIO_MODULE       
+      USE nemsio_openclose
+      USE nemsio_read
+      USE nemsio_write
+      use sigio_module
+
+      IMPLICIT NONE
+      INTEGER IUNITF(2), IDATEP, IM, JM, IDRT
+      REAL(KIND=8),PARAMETER:: CON_RV=4.6150E+2,CON_RD=2.8705E+2,
+     $          FV=CON_RV/CON_RD-1.,ONER=1.0,QMIN=1.0E-10         
+      INTEGER*4, PARAMETER :: TEN=10
+
+      INTEGER*4 IDRTNEMS
+      INTEGER*4 IRET,IMJM4,KM4,IDVM,NTRAC
+
+      INTEGER IDATGS_COR,JCAP,JCAP1,JCAP2,JCAP1X2,MDIMA,MDIMB,MDIMC,
+     $ IROMB,MAXWV,IDIR,I,J,K,L,II,JJ
+
+      INTEGER(4) IDATE7(7),JCAP4,IDVC4,DIMZ4,K4,IM4,JM4,KINDREAL,KINDINT
+      INTEGER(4) NFHOUR,NFMINUTE,NFSECONDN,NFSECONDD,idsl4,idvm4
+      REAL(8) tfac
+      REAL(4),ALLOCATABLE :: VCOORD4(:,:,:),CPI(:)
+      REAL,ALLOCATABLE :: tmp(:)
+      TYPE(NEMSIO_GFILE) :: GFILE
+
+      INTEGER IDATE(8),JDATE(8)
+      CHARACTER*20 CFILE2
+      REAL FHOUR,RINC(5)
+      REAL (KIND=4),ALLOCATABLE :: psfc(:,:), tv(:,:,:),
+     $                             wrk1(:,:), wrk2(:,:)
+
+      IMAX  = IM
+      JMAX  = JM
+      IMJM4 = IM*JM
+
+! no time interpolation needed for nemsio input since files are
+!  available every hour - original logic to perform time interpolation
+!  is flawed and has been removed in this revision
+! --------------------------------------------------------------------
+
+      print 331, mod(idatep,100)
+  331 format(/' --> GBLEVENTS: ONLY ONE NEMSIO INPUT GLOBAL FILE IS ',
+     $ 'READ SINCE FILES ARE AVAILABLE EACH HOUR (NO NEED TO ',
+     $ 'INTERPOLATE'/16X,'SPANNING FILES WHEN THE PREPBUFR CENTER HOUR',
+     $ ' (',I2.2,') IS NOT A MULTIPLE OF 3)'/)
+
+C  GET VALID-TIME DATE OF NEMSIO INPUT FILE, ALSO READ HEADERS
+C  -----------------------------------------------------------
+      CALL NEMSIO_INIT()     
+
+      RINC  = 0
+      IDATE = 0
+      WRITE(CFILE2,'("fort.",I2.2)') IUNITF(1)
+
+      CALL NEMSIO_OPEN(GFILE,trim(CFILE2),'read',iret=iret)
+      print *,' cfile_nems2=',cfile2,'nemsio open,iret=',iret
+
+         IDRTNEMS=IDRT
+         CALL NEMSIO_GETFILEHEAD(GFILE,IDATE=IDATE7,
+     &        JCAP=JCAP4,DIMX=IM4,DIMY=JM4,
+     &         DIMZ=DIMZ4,IDVC=IDVC4,NTRAC=NTRAC,IDRT=IDRTNEMS,
+     &         NFHOUR=NFHOUR,NFMINUTE=NFMINUTE,NFSECONDN=NFSECONDN,
+     &         NFSECONDD=NFSECONDD,idsl=idsl4,idvm=idvm4,IRET=IRET)
+      JCAP=JCAP4
+      IDVC=IDVC4
+      idsl=idsl4
+      idvm=idvm4
+      IMAX=IM4
+      JMAX=JM4
+      KMAX=DIMZ4
+      if(IDRT==-9999) IDRT=4 ! default for gaussian grid
+      IDATE(1:3)=IDATE7(1:3)
+      IDATE(5)=IDATE7(4)
+
+      ALLOCATE(VCOORD(KMAX+1,3))
+      VCOORD=0.0              
+
+      IF(NFSECONDD/=0.AND. NFSECONDD/=-9999) THEN
+         FHOUR=REAL(NFHOUR,8)+REAL(NFMINUTE/60.,8)+
+     $    REAL(NFSECONDN*1./(NFSECONDD*360.),8)
+      ELSE
+         FHOUR=REAL(NFHOUR,8)+REAL(NFMINUTE/60.,8)
+      ENDIF
+      print'("  idate=",I5,7I3.2,"  fhour=",F7.3)', idate,fhour
+
+      ALLOCATE(VCOORD4(KMAX+1,3,2))
+      CALL NEMSIO_GETFILEHEAD(GFILE,VCOORD=VCOORD4,IRET=IRET)
+      NVCOORD=3
+      IF(MAXVAL(VCOORD4(:,3,1))==0..AND.MINVAL(VCOORD4(:,3,1))==0.) THEN
+         NVCOORD=2
+         IF(MAXVAL(VCOORD4(:,2,1))==0..AND.MINVAL(VCOORD4(:,2,1))==0.)
+     $    NVCOORD=1
+      ENDIF
+
+      VCOORD(1:KMAX+1,1:NVCOORD)=VCOORD4(1:KMAX+1,1:NVCOORD,1)
+      DEALLOCATE(VCOORD4)
+
+      ALLOCATE(CPI(NTRAC+1))
+      CALL NEMSIO_GETHEADVAR(GFILE,'CPI',CPI,IRET=IRET)
+
+      RINC(2) = FHOUR
+      CALL W3MOVDAT(RINC,IDATE,JDATE)
+
+      PRINT 1, FHOUR,(IDATE(II),II=1,3),IDATE(5),(JDATE(II),II=1,3),
+     $ JDATE(5)
+    1 FORMAT(' --> GBLEVENTS: GLOBAL NEMSIO FILE: HERE IS A ',F5.1,
+     $ ' HOUR FORECAST FROM ',I5.4,3I3.2,' VALID AT ',I5.4,3I3.2)
+
+      IDATGS_COR = (JDATE(1) * 1000000) + (JDATE(2) * 10000) +
+     $ (JDATE(3) * 100) + JDATE(5)
+
+C  VALID DATES MUST MATCH
+C  ----------------------
+
+      IF(IDATEP.NE.IDATGS_COR)  GO TO 901
+
+C------------------------------------------
+
+      SFCPRESS_ID  = MOD(IDVM,TEN)
+      THERMODYN_ID = MOD(IDVM/TEN,TEN)   
+
+      IF(IDVC == 3 .AND. THERMODYN_ID == 3) THEN
+         KMAXS = (NTRAC+1)*KMAX + 2
+      ELSE
+         KMAXS = 2*KMAX + 2
+         NTRAC = 1
+      ENDIF
+
+      ALLOCATE (iar12z(imax,jmax), iar13p(imax,jmax))
+      ALLOCATE (iar14t(imax,jmax,kmax),  iar15u(imax,jmax,kmax),
+     $          iar16v(imax,jmax,kmax),  iar17q(imax,jmax,kmax),
+     $          iarpsl(imax,jmax,kmax),  iarpsi(imax,jmax,kmax+1),
+     $          iarpsd(imax,jmax,kmax))
+
+!!! DAK: is this right???????
+      if(idvc.eq.0)  idvc = 1  ! Reset IDVC=0 to 1 (sigma coord.)
+      IF(IDVC < 0 .or. IDVC > 3) THEN
+         PRINT *, '##GBLEVENTS/GBLEVN12: INVALID VERT COORD ID (=',IDVC
+      ENDIF
+
+
+C  DEFINE THE OTHER RESOLUTION PARAMETERS
+C  --------------------------------------
+ 
+      JCAP1   = JCAP+1
+      JCAP2   = JCAP+2
+      JCAP1X2 = JCAP1*2
+      MDIMA   = JCAP1*JCAP2
+      MDIMB   = MDIMA/2+JCAP1
+      MDIMC   = MDIMB*2
+ 
+      DLAT  = 180./(JMAX-1)
+      DLON  = 360./IMAX
+ 
+      PRINT 2, JCAP,IMAX,JMAX,KMAX,kmaxs,DLAT,DLON,idvc
+
+! DAK: is below correct??????????
+    2 FORMAT(/' --> GBLEVENTS: GLOBAL MODEL SPECS: T',I5,' ',
+     $ I5,' x ',I5,' GRID WITH ',I3,' LEVELS ',I3,
+     $' SCALARS -------> ',F5.2,' X ',F5.2,' VERT. ',
+     $ 'COORD ID IS: ',I0,' (not sure what this means!')
+ 
+C***********************************************************************
+
+      IROMB = 0
+      MAXWV = JCAP
+      if (idrt < 0 .or. idrt > 256) IDRT  = 0
+      IDIR  = 1
+
+      print *,'in nem sfcpress_id=',sfcpress_id,' thermodyn_id=',
+     $ thermodyn_id,' ntrac=',ntrac
+      print *,' idvc=',idvc,' idsl=',idsl,' idvm=',idvm,' nvcoord=',
+     $ nvcoord
+
+      call w3kind(kindreal,kindint)
+
+!     print *,'in gblevent, get fields,imax,jmax
+      allocate(tmp(imax*jmax))
+!
+! hgt
+      K4=1
+      if(kindreal==4) then
+         CALL NEMSIO_READRECVw34(GFILE,'hgt','sfc',K4,tmp,iret=iret)
+      else
+         CALL NEMSIO_READRECV(GFILE,'hgt','sfc',K4,tmp,iret=iret)
+      endif
+!     print *,'in getnemsio,hgtsfc,',maxval(tmp),minval(tmp),iret
+      if(iret==0) THEN
+         IAR12Z(:,:)=reshape(tmp,(/imax,jmax/))
+         call gblevn11d(imax,jmax,IAR12Z)
+      ENDIF
+
+!sfc pres, input in Pa, out in hPa
+      if(kindreal==4) then
+         CALL NEMSIO_READRECVw34(GFILE,'pres','sfc',K4,tmp,iret=iret)
+      else
+         CALL NEMSIO_READRECV(GFILE,'pres','sfc',K4,tmp,iret=iret)
+      endif
+!     print *,'in getnemsio,pressfc,',maxval(tmp),minval(tmp),iret
+      if(iret==0) THEN
+         IAR13P(:,:)=reshape(tmp*0.01,(/imax,jmax/))
+         call gblevn11d(imax,jmax,IAR13P)
+      ENDIF
+!dpres
+!     DO K4=1,KMAX
+!        if(kindreal==4) then
+!           CALL NEMSIO_READRECVw34(GFILE,'dpres','mid layer',K4,tmp,
+!    $       iret=iret)
+!        else
+!           CALL NEMSIO_READRECV(GFILE,'dpres','mid layer',K4,tmp,
+!    $       iret=iret)
+!        endif
+!        print *,'in getnemsio,dpres,k4=',k4,maxval(tmp),minval(tmp),
+!    $    iret
+!        if(iret==0) THEN
+!           IARPSI(:,:,K4+1)=reshape(tmp*0.01,(/imax,jmax/))
+!        ENDIF
+!     ENDDO
+
+!pres
+!     DO K4=1,KMAX
+!        if(kindreal==4) then
+!           CALL NEMSIO_READRECVw34(GFILE,'pres','mid layer',K4,tmp,
+!    $       iret=iret)
+!        else
+!           CALL NEMSIO_READRECV(GFILE,'pres','mid layer',K4,tmp,
+!    $       iret=iret)
+!        endif
+!        print *,'in getnemsio,pres,k4=',k4,maxval(tmp),minval(tmp),iret
+!        if(iret==0) THEN
+!           IARPSL(:,:,k4)=reshape(tmp*0.01,(/imax,jmax/))
+!        ENDIF
+!     ENDDO
+! tmp
+      DO K4=1,kmax
+         if(kindreal==4) then
+            CALL NEMSIO_READRECVw34(GFILE,'tmp','mid layer',K4,tmp,
+     $       iret=iret)
+         else
+            CALL NEMSIO_READRECV(GFILE,'tmp','mid layer',K4,tmp,
+     $       iret=iret)
+         endif
+!        print *,'in getnemsio,tmp,k4=',k4,maxval(tmp),minval(tmp),iret
+         if(iret==0) THEN
+            IAR14T(:,:,K4)=reshape(tmp,(/imax,jmax/))
+            call gblevn11d(imax,jmax,IAR14T(1,1,K4))
+         ENDIF
+      ENDDO
+!u
+      DO K4=1,kmax
+         if(kindreal==4) then
+            CALL NEMSIO_READRECVw34(GFILE,'ugrd','mid layer',K4,tmp,
+     $       iret=iret)
+         else
+            CALL NEMSIO_READRECV(GFILE,'ugrd','mid layer',K4,tmp,
+     $       iret=iret)
+         endif
+!        print *,'in getnemsio,utmp,k4=',k4,maxval(tmp),minval(tmp),iret
+         if(iret==0) THEN
+            IAR15U(:,:,k4)=reshape(tmp,(/imax,jmax/))
+            call gblevn11d(imax,jmax,IAR15U(1,1,K4))
+         ENDIF
+      ENDDO
+!     do k=1,kmax
+!        print *,'in getnemsio,i15u,k=',k,maxval(iar15u(:,:,k)),
+!    $    minval(iar15u(:,:,k)),iret
+!     end do
+!     print *,'in getnemsio,IAR15U.1,',maxval(IAR15U),minval(IAR15U)
+
+!v
+      DO K4=1,kmax
+         if(kindreal==4) then
+            CALL NEMSIO_READRECVw34(GFILE,'vgrd','mid layer',K4,tmp,
+     $       iret=iret)
+         else
+            CALL NEMSIO_READRECV(GFILE,'vgrd','mid layer',K4,tmp,
+     $       iret=iret)
+         endif
+         if(iret==0) THEN
+            IAR16V(:,:,K4)=reshape(tmp,(/imax,jmax/))
+            call gblevn11d(imax,jmax,IAR16V(1,1,K4))
+         ENDIF
+      ENDDO
+!     print *,'in getnemsio,IAR15U.2,',maxval(IAR15U),minval(IAR15U)
+!q
+      DO K4=1,kmax
+         if(kindreal==4) then
+            CALL NEMSIO_READRECVw34(GFILE,'spfh','mid layer',K4,tmp,
+     $       iret=iret)
+         else
+            CALL NEMSIO_READRECV(GFILE,'spfh','mid layer',K4,tmp,
+     $       iret=iret)
+         endif
+         if(iret==0) THEN
+            IAR17Q(:,:,K4)=max(0.0,reshape(tmp*1.0E6,(/imax,jmax/)) )
+            call gblevn11d(imax,jmax,IAR17Q(1,1,K4))
+         endif
+      ENDDO
+!     print *,'in getnemsio,IAR15U.3,',maxval(IAR15U),minval(IAR15U)
+
+!
+      deallocate(tmp)
+      CALL NEMSIO_CLOSE(GFILE,iret=iret)
+!     print *,'end of nemsio'
+!
+
+!     print *,'in getnemsio,IAR15U.4,',maxval(IAR15U),minval(IAR15U)
+
+!--compute Tv from temp
+      DO K=1,KMAX
+         DO J=1,JMAX
+            DO i=1,IMAX
+               TFAC=ONER+FV*MAX(IAR17Q(I,J,K)*1.0E-6,QMIN)
+               IAR14T(I,J,K)=IAR14T(I,J,K)*TFAC
+            ENDDO
+         ENDDO
+      ENDDO
+
+!     print *,'in getnemsio,IAR15U.5,',maxval(IAR15U),minval(IAR15U)
+
+
+
+!--COMPUTE PM AND PD
+      ALLOCATE (psfc(imax,jmax), tv(imax,jmax,kmax))
+      ALLOCATE (WRK1(imax*jmax,KMAX),  WRK2(imax*jmax,KMAX+1))
+
+      imjm4=imax*jmax
+      km4=kmax
+      psfc(:,:) = iar13p(:,:)*100.
+      tv(:,:,:) = iar14t(:,:,:)
+
+      IF(THERMODYN_ID == 3 .AND. IDVC == 3) THEN
+         tv(:,:,:) = tv(:,:,:) / CPI(1)
+         print *,' cpi(1)=',cpi(1)
+      ENDIF
+
+      CALL SIGIO_MODPR(IMJM4,IMJM4,KM4,NVCOORD,IDVC,IDSL,VCOORD,IRET,
+     $ psfc,tv,PM=WRK1,PD=WRK2(1,2))
+      DO J=1,JMAX
+         JJ = (J-1)*IMAX
+         DO I=1,IMAX
+            WRK2(I+JJ,1) = psfc(i,j)                       ! in Pa
+         ENDDO
+      ENDDO
+      DO L=1,KMAX
+         WRK2(:,L+1) = WRK2(:,L) - WRK2(:,L+1)             ! in Pa
+      ENDDO
+
+      DO L=1,KMAX
+         DO J=1,JMAX
+            JJ = (J-1)*IMAX
+            DO I=1,IMAX
+               IARPSL(I,J,L) = WRK1(I+JJ,L)*0.01    ! 3D layer pres(hPa)
+            ENDDO
+         ENDDO
+      ENDDO
+      DO L=1,KMAX+1
+         DO J=1,JMAX
+            JJ = (J-1)*IMAX
+            DO I=1,IMAX
+               IARPSI(I,J,L) = WRK2(I+JJ,L)*0.01 ! 3D interface pressure
+                                                 !  (hPa)
+            ENDDO
+         ENDDO
+      ENDDO
+              
+!     print*,'GBLEVN12 IARPSI,',maxval(IARPSI),minval(IARPSI)
+!     print*,'GBLEVN12 IARPSL,',maxval(IARPSL),minval(IARPSL)
+
+      CALL NEMSIO_FINALIZE()
+!
+      CALL GETLATS(IDRT)
+
+      RETURN
+
+  901 CONTINUE
+      PRINT 9901, (JDATE(II),II=1,3),JDATE(5),IDATEP
+ 9901 FORMAT(/' ##GBLEVENTS/GBLEVN12 - NEMSIO INPUT GLOBAL FILE DATE',
+     $ ' (',I4.4,3(I2.2),'), DOES NOT MATCH PREPBUFR FILE CENTER ',
+     $ 'DATE (',I10,') -STOP 68'/)
+      CALL ERREXIT(68)
+
+      END
+
+!-----------------------------------------------------------------
+!-----------------------------------------------------------------
+      subroutine getlats(idrt)
+
+      USE GBLEVN_MODULE
+!      integer :: jmax
+!      real,allocatable :: slat(:),wlat(:)
+!      real :: rad2deg
+      real,allocatable :: slats(:)
+      real(4) slat(jmax),wlat(jmax),rad2deg
+!get gaussian or regular latitude array based on idrt
+
+!      print *,'in getlats,idrt=',idrt
+      call splat(idrt,jmax,slat,wlat)
+      rad2deg=180./acos(-1.)
+      allocate(slats(jmax));
+      rad2deg=180./acos(-1.)
+      slats(:)=-asin(slat(:))*rad2deg
+      dlat=180./float(jmax-1)
+
       return
       end
