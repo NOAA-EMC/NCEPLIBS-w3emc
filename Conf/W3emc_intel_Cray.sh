@@ -2,11 +2,11 @@
  module purge
  module load PrgEnv-intel
  module load craype-sandybridge
- module load w3emc-intel/2.2.0
+ module load w3emc-intel/2.3.0
  module load sigio-intel/2.1.0
  
  module load nemsio-intel/2.2.3
- new_ver=v2.2.4
+ new_ver=2.2.4
  reset_version nemsio $new_ver
 
  export CC=cc
