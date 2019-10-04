@@ -1,14 +1,4 @@
 # *** for WCOSS Dell (intel) ***
- module purge
- module load EnvVars/1.0.2
- module load ips/18.0.1.163
- module load impi/18.0.1
- module load w3emc/2.3.0
- module load sigio/2.1.0
-
- module load nemsio/2.2.3
- new_ver=2.2.4
- reset_version nemsio $new_ver
 
  export CC=icc
  export FC=ifort
