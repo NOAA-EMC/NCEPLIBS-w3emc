@@ -1,0 +1,15 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# DEBUG build settings for Linux gfortran compiler
+#-------------------------------------------------------------------------------#
+
+export FC="gfortran"
+
+export FCFLAGS=" \
+ -fbounds-check \
+ -ffpe-trap=overflow,zero,invalid \
+ -ffixed-form \
+ -fPIC \
+ -fno-range-check \
+ -ggdb \
+ -Wall"

@@ -1,0 +1,146 @@
+w3emc_release_notes.txt
+  History of updates and changes to w3emc library.
+  
+  $Revision: 90629 $
+  $Date: 2017-03-31 19:14:03 +0000 (Fri, 31 Mar 2017) $
+  $URL: https://svnemc.ncep.noaa.gov/projects/nceplibs/w3emc/tags/w3emc.tkt102.nemsio.re_release2/w3emc_release_notes.txt $
+
+Modification history
+ 29 Apr 2014 - original file (created w/ release of v2.2.0)
+---
+
+  The w3emc library was created by the splitting of the production w3lib into 
+separate w3nco and w3emc libraries (c. 27 Dec 2012).
+
+  As of the first authoring of these release notes (c. April 2014) the version 
+of the w3emc library in use in production was v2.0.5.
+
+---- History of Releases:
+
+*** w3emc_v2.0.5 --> released c. 16 Apr 2013
+ In production use thru April 2014.
+
+*** w3emc_v2.1.0 --> tagged 06 May 2013
+ This version was never separately implemented into production; it was included w/ the 
+release of build v2.2.0 in April 2014.
+ The changes for this library tag were mostly build-procedure related.
+ 
+ Build procedure changes.
+ ---- See nceplibs trac ticket #16, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/16
+ * All source code was moved into the /libsrc directory.
+ * An Autoconf configuration script, configure, was created.
+ * A generic build script, make_w3emc_lib.sh, was created to build the three different
+   precisions of the w3emc library.
+ * A set of "standard" environment variable setup files were created and placed in the
+   config-setup directory.
+ * A README file for the new build procedure was created.
+ ---- See nceplibs trac ticket #56, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/56
+ * Corrected a problem with if-block syntax in the "configure.ac" script.
+ * Updated the gfortran compiler setup files to prevent integer overflow compile errors.
+ 
+ Code changes.
+ ---- See nceplibs trac ticket #36, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/36
+ * Removed "C$" comment characters from affected w3emc code as these are the sentinel
+   characters for fixed source form conditional compilation in OpenMP.
+ ---- See nceplibs trac ticket #50, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/50
+ * Modified the "start.f" source code to allow preprocessing so the correct 
+   subroutine name is used for non-AIX systems (not really an issue now the CCS 
+   has been retired.)
+ ---- See nceplibs trac ticket #51, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/51
+ * This updated the nceplibs repository copy of "gblevents.f" to be brought up to date
+   with an implementation by NCO via the ObsProc group.
+ ---- See nceplibs trac ticket #56, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/56
+ * Defined the iargc() function as an external in "args_mod.f" to prevent recursive
+   call compile errors when gfortran is used.
+ 
+
+*** w3emc_v2.2.0 --> released c. Apr 2014
+ Implemented into production c. April 2014; Changes include modifications to build 
+procedures, as well as source code updates in support of prepobs_prepdata release v3.0.0.
+
+ Build procedure changes.
+ ---- See nceplibs trac ticket #68, https://svnemc.ncep.noaa.gov/trac/nceplibs/ticket/68
+ * The build procedure was updated to use both the new vertical structure for the
+   library implementations as well as use the module-load-defined environment
+   variables, SIGIO_INC4 and SIGIO_LIB4, for the location of the dependent sigio
+   include files and static library. 
+ 
+ Code changes.
+ 4 April 2014  DKeyser and SMelchior Updated gblevents
+   * Added new namelist switch "DOPMSL" which, when true, derives PMSL
+     (mnemonic PMO), from station pressure (POB), station elevation (ZOB), and
+     computed virtual temperature for surface reports in cases when reported
+     PMSL is missing.  The drived PMSL either gets a quality mark (PMQ) of 3
+     or inherits the station pressure quality mark (PQM), whichever is
+     greater. The value of the PMSL indicator (new mnemonic "PMIN") is set to
+     1 to denote PMSL was derived rather than observed.  The default for
+     DOPMSL is false (normally only true in RTMA and URMA runs).
+   * Reject calm surface marine winds if background u- or v- winds are
+     greater than or equal to 5 m/s. 
+   * Retain reports that lack observed station pressure.  A majority of the
+     changes for this feature are in prepobs_prepdata.fd and in individual
+     network prepobs_prepdata parm cards. 
+
+
+*** w3emc_v2.3.0 --> released c. March 2017
+ Expected production implemented c. May 2017; Updates support GFS/GDAS implementation
+v14.0.0;  Source code changes are limited to gblevents.f routines so as to enable NEMSio
+i/o;  Build changes are necessary to support use on Cray platforms.
+
+ This upgrade affects only the gblevents.f subroutine, which is invoked in production via
+the obsproc_prepdata program.  That program reads the GFS/GDAS forecast and writes its
+values into prepbufr files for various network models.  Testing the use of the NEMSio
+formatted inputs for these models was completed and found to have expected and acceptable
+differences.
+
+
+ Build procedure changes.
+ ---- No coordinating nceplibs trac ticket, modifications occurred in nceplibs 
+ development branch (see https://svnemc.ncep.noaa.gov/trac/nceplibs/browser/...
+ ...w3emc/branches/Fanglin.Yang/w3emc_v2.3.0).
+
+ * The build procedure was updated to accomodate use on Cray platforms. See 
+   BUILD.INSTRUCTIONS file for details.
+
+ * On Cray systems, only the intel-sandybridge build is planned.  No
+   instructions for cray-haswell build is listed here. (This is in support of the GFS cray 
+   installation only, which doesn't reference cray-haswell libraries.)
+
+   File changes and updates are summarized below.
+
+   In root library directory ( N=new, M=modified):
+
+   N  config-setup/wcoss-cray.setup  :: support for compilation on Cray
+   N  config-setup/ifort-cray.setup  :: support for ifort compilation on Cray
+   M  configure                      :: updated w/ v2.3.0 version specification
+   M  configure.ac                   :: updated w/ NEMSIO_* (library, include) info
+   N  make_w3emc_lib_wcoss.sh        :: replaces make_w3emc_lib.sh, adds NEMSIO content
+   N  make_w3emc_lib_cray.sh         :: new build script for Cray environment, based on 
+                                         make_w3emc_lib_wcoss.sh (uses setlib_cray.rc file)
+   N  setlib_wcoss.rc                :: new resource file for make_w3emc_lib_wcoss.sh script
+   N  setlib_cray.rc                 :: new resource file for make_w3emc_lib_cray.sh script
+   M  README                         :: info on NEMSio content added
+
+ * Library usage module files are contained in the ./modulefiles subdirectory.
+
+   In ./modulefiles/
+
+   N  w3emc/v2.3.0                   :: wcoss phase2 library usage modulefile
+   N  w3emc/w3emc-intel/2.3.0        :: intel-sandybridge library usage modulefile
+
+ Code changes.
+ 13 June 2016  Fanglin Yang, Russ Treadon updated gblevents.f
+    * Hang Lei added NEMSIO to subroutine gblevn10 and removed all sigio capability.
+      This update restroes GBLEVN10 for processing sigio input, and adds a new GBLEVN12
+      for processing nemsio input. the input gfs file type sigio vs nemsio is now
+      determined in the main program.  the code is also updated to remove bugs.
+      subroutine SIGIO_MODPR is used to compute layer and interface pressure for NEMSIO
+      input.
+ 22 February 2017  D Keyser & J Whiting 
+    * In subroutine GBLEVN12, removed references to multiple input files, since only 1
+      nemsio formatted input is needed (no interpolation is attempted; c.f.; what is
+      done with sigio formatted inputs). 
+    
+ 
+---end of w3emc_release_notes.txt
+

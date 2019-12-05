@@ -1,0 +1,16 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# DEBUG build settings for Intel ifort compiler
+#-------------------------------------------------------------------------------#
+
+export FC="ifort"
+
+export FCFLAGS=" \
+ -g \
+ -O0 \
+ -traceback \
+ -fPIC \
+ -check bounds \
+ -fp-stack-check \
+ -mieee-fp \
+ -fixed"

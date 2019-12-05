@@ -1,0 +1,50 @@
+#%Module######################################################################
+## Eugene Mirvis RAL/NCAR-EMC/NOAA
+## Xiaoxue Wang NCO-PMB/NOAA modified to vertical structure
+## Kit Menlove NCO-PMB/NOAA modified for phase 2
+## JWhiting EMC  mod'd wcoss /nwprod2/lib/modulefiles/w3emc/v2.2.0 for v2.3.0
+##    w3emc v2.3.0
+
+proc ModulesHelp { } {
+  puts "Set environment variables for w3emc library, including W3EMC_SRC, W3EMC_INC4, W3EMC_INC8, W3EMC_INCd, W3EMC_LIB4, W3EMC_LIB8, and W3EMC_LIBd"
+}
+
+# Obtain the package name and version
+if { [ regexp {([^/]+)/(v\d+\.\d+\.\d+)$} [module-info name] -> lname ver ] != 1 } {
+  global ModulesCurrentModulefile
+  if { [ regexp {([^/]+)/(v\d+\.\d+\.\d+)$} $ModulesCurrentModulefile -> lname ver ] != 1 } {
+    puts stderr "Error: unable to parse module name and version from '$module_name'"
+    puts stderr "Module path:  $ModulesCurrentModulefile"
+    break
+  }
+}
+
+# Make sure another version of the same package is not already loaded
+conflict $lname
+
+# Determine the root directory of the module being loaded
+global ModulesCurrentModulefile
+if { [ regexp {/(nw[^/]+)} $ModulesCurrentModulefile -> NCEPROOT ] != 1 } {
+  puts stderr "Error: unable to determine library's root directory"
+  break
+}
+set NCEPLIBS /$NCEPROOT/lib
+
+# Set other necessary variables
+#set sys    [uname sysname]
+set dlib   $NCEPLIBS/$lname/$ver
+set dinc   $dlib/include
+set bname  [string toupper $lname] 
+
+# Export environment variables
+setenv COMP intel
+setenv ${bname}_SRC  $dlib/src/libsrc
+setenv ${bname}_INC4 $dinc/${lname}_${ver}_4
+setenv ${bname}_INC8 $dinc/${lname}_${ver}_8
+setenv ${bname}_INCd $dinc/${lname}_${ver}_d
+setenv ${bname}_LIB4 $dlib/lib${lname}_${ver}_4.a 
+setenv ${bname}_LIB8 $dlib/lib${lname}_${ver}_8.a
+setenv ${bname}_LIBd $dlib/lib${lname}_${ver}_d.a
+#setenv LIB_NAME ${bname} 
+setenv ${bname}_VER $ver
+

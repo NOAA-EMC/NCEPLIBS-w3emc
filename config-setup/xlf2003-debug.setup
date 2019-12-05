@@ -1,0 +1,16 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# DEBUG build settings for AIX xlf2003 compiler
+#-------------------------------------------------------------------------------#
+
+export FC="xlf2003"
+
+export FCFLAGS=" \
+ -qarch=auto \
+ -qcheck \
+ -qdbg \
+ -qfixed \
+ -qflttrap=ov:zero:en \
+ -qinitauto \
+ -qmaxmem=-1 \
+ -qnosave"

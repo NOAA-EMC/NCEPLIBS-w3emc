@@ -1,0 +1,874 @@
+Script started on Mon 04 Nov 2019 11:11:56 AM UTC
+]2;emc.glopara@v72a2]0;emc.glopara@v72a2[?1034h[0;1;31m[ [0;1;35m=0[0;1;31m 11:12:05 1001 [0;1;34memc.glopara@v72a2[0;1;31m ][0m
+[0;1;34m.../emc.glopara/git/obsproc/netcdf/w3emc[0;1;31m>[0m source setlib_dell.rc
+]2;emc.glopara@v72a2]0;emc.glopara@v72a2[0;1;31m[ [0;1;35m=0[0;1;31m 11:12:08 1002 [0;1;34memc.glopara@v72a2[0;1;31m ][0m
+[0;1;34m.../emc.glopara/git/obsproc/netcdf/w3emc[0;1;31m>[0m make_w3emc_lib.sh ifort.setup
+
+
+===============================================================
+Checking for required environment variables
+===============================================================
+
+  Checking SIGIO_INC4...defined as /gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4
+  Checking SIGIO_LIB4...defined as /gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/libsigio_v2.0.1_4.a
+  Checking NEMSIO_INC...defined as /gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3
+  Checking NEMSIO_LIB...defined as /gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/libnemsio_v2.2.3.a
+  Checking NETCDF_INC...defined as /usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
+  Checking NETCDF_LIB...defined as /usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib/libnetcdf.a
+
+
+
+
+===============================================================
+===============================================================
+Configuring for precision 4 build
+===============================================================
+===============================================================
+
+configure: nceplibs w3emc v2.3.0
+checking for Fortran compiler default output file name... a.out
+checking whether the Fortran compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU Fortran compiler... no
+checking whether ifort accepts -g... yes
+checking for a BSD-compatible install... /bin/install -c
+checking for ranlib... ranlib
+checking for ar... ar
+checking for Fortran flag to compile .f files... none
+configure: Building precision 4 version.
+configure: Using SIGIO_INC4 value: "/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4"
+configure: Using SIGIO_LIB4 value: "/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/libsigio_v2.0.1_4.a"
+configure: Using NEMSIO_INC value: "/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3"
+configure: Using NEMSIO_LIB value: "/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/libnemsio_v2.2.3.a"
+configure: Using NETCDF_INC value: "/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include"
+configure: Using NETCDF_LIB value: "/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib/libnetcdf.a"
+checking for library containing sigio_head and nemsio_gfile definition... yes
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating libsrc/Makefile
+
+
+===============================================================
+Starting precision 4 build
+===============================================================
+
+cd libsrc && make clean
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm *.o *.mod *.a >/dev/null 2>&1
+make[1]: [clean] Error 1 (ignored)
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+cd libsrc && make all
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c args_mod.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c gblevents.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c getgbens.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c isrchne.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c iw3mat.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c mersenne_twister.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c mova2i.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c orders.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c putgbens.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c summary.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ai40.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ai41.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ctzdat.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa01.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa03.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa03v.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa04.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa06.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa09.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa11.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa12.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa13.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb00.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb01.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb02.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb03.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb04.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb05.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb06.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb07.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb08.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb09.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb10.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb11.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb12.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc02.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc05.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc06.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc07.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc08.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi02.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi03.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi18.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi19.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi20.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi32.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi47.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi48.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi52.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi61.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi65.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi66.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi67.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi70.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi78.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi85.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fm07.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fm08.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp04.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp05.f
+w3fp05.f(105): remark #7960: The floating overflow condition was detected while evaluating this operation; the result is an Infinity.   [10.E70]
+       DATA  CRMX  /10.E70/
+--------------------^
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp06.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp10.f
+w3fp10.f(118): remark #7960: The floating overflow condition was detected while evaluating this operation; the result is an Infinity.   [10.E70]
+       DATA  CRMX  /10.E70/
+--------------------^
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fq07.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft00.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft01.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft02.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft03.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft05.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft05v.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft06.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft06v.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft07.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft08.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft09.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft10.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft11.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft12.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft16.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft17.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft201.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft202.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft203.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft204.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft205.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft206.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft207.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft208.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft209.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft210.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft211.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft212.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft213.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft214.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft21.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft26.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft33.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft38.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft39.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft40.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft41.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft43v.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3log.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3miscan.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c xdopen.f
+ifort  -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c  start.F
+ar crvs libw3emc.a args_mod.o gblevents.o getgbens.o isrchne.o iw3mat.o mersenne_twister.o mova2i.o orders.o putgbens.o summary.o w3ai40.o w3ai41.o w3ctzdat.o w3fa01.o w3fa03.o w3fa03v.o w3fa04.o w3fa06.o w3fa09.o w3fa11.o w3fa12.o w3fa13.o w3fb00.o w3fb01.o w3fb02.o w3fb03.o w3fb04.o w3fb05.o w3fb06.o w3fb07.o w3fb08.o w3fb09.o w3fb10.o w3fb11.o w3fb12.o w3fc02.o w3fc05.o w3fc06.o w3fc07.o w3fc08.o w3fi02.o w3fi03.o w3fi18.o w3fi19.o w3fi20.o w3fi32.o w3fi47.o w3fi48.o w3fi52.o w3fi61.o w3fi65.o w3fi66.o w3fi67.o w3fi70.o w3fi78.o w3fi85.o w3fm07.o w3fm08.o w3fp04.o w3fp05.o w3fp06.o w3fp10.o w3fq07.o w3ft00.o w3ft01.o w3ft02.o w3ft03.o w3ft05.o w3ft05v.o w3ft06.o w3ft06v.o w3ft07.o w3ft08.o w3ft09.o w3ft10.o w3ft11.o w3ft12.o w3ft16.o w3ft17.o w3ft201.o w3ft202.o w3ft203.o w3ft204.o w3ft205.o w3ft206.o w3ft207.o w3ft208.o w3ft209.o w3ft210.o w3ft211.o w3ft212.o w3ft213.o w3ft214.o w3ft21.o w3ft26.o w3ft33.o w3ft38.o w3ft39.o w3ft40.o w3ft41.o w3ft43v.o w3log.o w3miscan.o xdopen.o start.o
+a - args_mod.o
+a - gblevents.o
+a - getgbens.o
+a - isrchne.o
+a - iw3mat.o
+a - mersenne_twister.o
+a - mova2i.o
+a - orders.o
+a - putgbens.o
+a - summary.o
+a - w3ai40.o
+a - w3ai41.o
+a - w3ctzdat.o
+a - w3fa01.o
+a - w3fa03.o
+a - w3fa03v.o
+a - w3fa04.o
+a - w3fa06.o
+a - w3fa09.o
+a - w3fa11.o
+a - w3fa12.o
+a - w3fa13.o
+a - w3fb00.o
+a - w3fb01.o
+a - w3fb02.o
+a - w3fb03.o
+a - w3fb04.o
+a - w3fb05.o
+a - w3fb06.o
+a - w3fb07.o
+a - w3fb08.o
+a - w3fb09.o
+a - w3fb10.o
+a - w3fb11.o
+a - w3fb12.o
+a - w3fc02.o
+a - w3fc05.o
+a - w3fc06.o
+a - w3fc07.o
+a - w3fc08.o
+a - w3fi02.o
+a - w3fi03.o
+a - w3fi18.o
+a - w3fi19.o
+a - w3fi20.o
+a - w3fi32.o
+a - w3fi47.o
+a - w3fi48.o
+a - w3fi52.o
+a - w3fi61.o
+a - w3fi65.o
+a - w3fi66.o
+a - w3fi67.o
+a - w3fi70.o
+a - w3fi78.o
+a - w3fi85.o
+a - w3fm07.o
+a - w3fm08.o
+a - w3fp04.o
+a - w3fp05.o
+a - w3fp06.o
+a - w3fp10.o
+a - w3fq07.o
+a - w3ft00.o
+a - w3ft01.o
+a - w3ft02.o
+a - w3ft03.o
+a - w3ft05.o
+a - w3ft05v.o
+a - w3ft06.o
+a - w3ft06v.o
+a - w3ft07.o
+a - w3ft08.o
+a - w3ft09.o
+a - w3ft10.o
+a - w3ft11.o
+a - w3ft12.o
+a - w3ft16.o
+a - w3ft17.o
+a - w3ft201.o
+a - w3ft202.o
+a - w3ft203.o
+a - w3ft204.o
+a - w3ft205.o
+a - w3ft206.o
+a - w3ft207.o
+a - w3ft208.o
+a - w3ft209.o
+a - w3ft210.o
+a - w3ft211.o
+a - w3ft212.o
+a - w3ft213.o
+a - w3ft214.o
+a - w3ft21.o
+a - w3ft26.o
+a - w3ft33.o
+a - w3ft38.o
+a - w3ft39.o
+a - w3ft40.o
+a - w3ft41.o
+a - w3ft43v.o
+a - w3log.o
+a - w3miscan.o
+a - xdopen.o
+a - start.o
+ranlib libw3emc.a
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+
+
+===============================================================
+Performing NCO-type install of precision 4 build
+===============================================================
+
+cd libsrc && make nco_install
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+/bin/install -c -d /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0
+/bin/install -c -m 644 libw3emc.a /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/libw3emc_v2.3.0_4.a
+/bin/install -c -d /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/include/w3emc_v2.3.0_4
+/bin/install -c -m 644 *.mod /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/include/w3emc_v2.3.0_4
+/bin/install -c -m 644 ../config.log /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/config.log.w3emc_v2.3.0_4
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+cd libsrc && make clean
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm *.o *.mod *.a >/dev/null 2>&1
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+cd libsrc && make distclean
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm Makefile >/dev/null 2>&1
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm Makefile config.log* config.status
+
+
+
+
+===============================================================
+===============================================================
+Configuring for precision 8 build
+===============================================================
+===============================================================
+
+configure: nceplibs w3emc v2.3.0
+checking for Fortran compiler default output file name... a.out
+checking whether the Fortran compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU Fortran compiler... no
+checking whether ifort accepts -g... yes
+checking for a BSD-compatible install... /bin/install -c
+checking for ranlib... ranlib
+checking for ar... ar
+checking for Fortran flag to compile .f files... none
+configure: Building precision 8 version.
+configure: Using SIGIO_INC4 value: "/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4"
+configure: Using SIGIO_LIB4 value: "/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/libsigio_v2.0.1_4.a"
+configure: Using NEMSIO_INC value: "/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3"
+configure: Using NEMSIO_LIB value: "/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/libnemsio_v2.2.3.a"
+configure: Using NETCDF_INC value: "/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include"
+configure: Using NETCDF_LIB value: "/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib/libnetcdf.a"
+checking for library containing sigio_head and nemsio_gfile definition... yes
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating libsrc/Makefile
+
+
+===============================================================
+Starting precision 8 build
+===============================================================
+
+cd libsrc && make clean
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm *.o *.mod *.a >/dev/null 2>&1
+make[1]: [clean] Error 1 (ignored)
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+cd libsrc && make all
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c args_mod.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c gblevents.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c getgbens.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c isrchne.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c iw3mat.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c mersenne_twister.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c mova2i.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c orders.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c putgbens.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c summary.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ai40.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ai41.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ctzdat.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa01.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa03.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa03v.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa04.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa06.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa09.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa11.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa12.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa13.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb00.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb01.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb02.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb03.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb04.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb05.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb06.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb07.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb08.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb09.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb10.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb11.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb12.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc02.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc05.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc06.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc07.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc08.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi02.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi03.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi18.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi19.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi20.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi32.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi47.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi48.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi52.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi61.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi65.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi66.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi67.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi70.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi78.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi85.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fm07.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fm08.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp04.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp05.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp06.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp10.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fq07.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft00.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft01.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft02.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft03.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft05.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft05v.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft06.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft06v.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft07.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft08.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft09.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft10.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft11.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft12.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft16.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft17.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft201.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft202.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft203.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft204.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft205.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft206.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft207.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft208.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft209.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft210.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft211.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft212.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft213.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft214.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft21.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft26.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft33.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft38.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft39.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft40.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft41.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft43v.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3log.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3miscan.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c xdopen.f
+ifort  -r8 -i8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c  start.F
+ar crvs libw3emc.a args_mod.o gblevents.o getgbens.o isrchne.o iw3mat.o mersenne_twister.o mova2i.o orders.o putgbens.o summary.o w3ai40.o w3ai41.o w3ctzdat.o w3fa01.o w3fa03.o w3fa03v.o w3fa04.o w3fa06.o w3fa09.o w3fa11.o w3fa12.o w3fa13.o w3fb00.o w3fb01.o w3fb02.o w3fb03.o w3fb04.o w3fb05.o w3fb06.o w3fb07.o w3fb08.o w3fb09.o w3fb10.o w3fb11.o w3fb12.o w3fc02.o w3fc05.o w3fc06.o w3fc07.o w3fc08.o w3fi02.o w3fi03.o w3fi18.o w3fi19.o w3fi20.o w3fi32.o w3fi47.o w3fi48.o w3fi52.o w3fi61.o w3fi65.o w3fi66.o w3fi67.o w3fi70.o w3fi78.o w3fi85.o w3fm07.o w3fm08.o w3fp04.o w3fp05.o w3fp06.o w3fp10.o w3fq07.o w3ft00.o w3ft01.o w3ft02.o w3ft03.o w3ft05.o w3ft05v.o w3ft06.o w3ft06v.o w3ft07.o w3ft08.o w3ft09.o w3ft10.o w3ft11.o w3ft12.o w3ft16.o w3ft17.o w3ft201.o w3ft202.o w3ft203.o w3ft204.o w3ft205.o w3ft206.o w3ft207.o w3ft208.o w3ft209.o w3ft210.o w3ft211.o w3ft212.o w3ft213.o w3ft214.o w3ft21.o w3ft26.o w3ft33.o w3ft38.o w3ft39.o w3ft40.o w3ft41.o w3ft43v.o w3log.o w3miscan.o xdopen.o start.o
+a - args_mod.o
+a - gblevents.o
+a - getgbens.o
+a - isrchne.o
+a - iw3mat.o
+a - mersenne_twister.o
+a - mova2i.o
+a - orders.o
+a - putgbens.o
+a - summary.o
+a - w3ai40.o
+a - w3ai41.o
+a - w3ctzdat.o
+a - w3fa01.o
+a - w3fa03.o
+a - w3fa03v.o
+a - w3fa04.o
+a - w3fa06.o
+a - w3fa09.o
+a - w3fa11.o
+a - w3fa12.o
+a - w3fa13.o
+a - w3fb00.o
+a - w3fb01.o
+a - w3fb02.o
+a - w3fb03.o
+a - w3fb04.o
+a - w3fb05.o
+a - w3fb06.o
+a - w3fb07.o
+a - w3fb08.o
+a - w3fb09.o
+a - w3fb10.o
+a - w3fb11.o
+a - w3fb12.o
+a - w3fc02.o
+a - w3fc05.o
+a - w3fc06.o
+a - w3fc07.o
+a - w3fc08.o
+a - w3fi02.o
+a - w3fi03.o
+a - w3fi18.o
+a - w3fi19.o
+a - w3fi20.o
+a - w3fi32.o
+a - w3fi47.o
+a - w3fi48.o
+a - w3fi52.o
+a - w3fi61.o
+a - w3fi65.o
+a - w3fi66.o
+a - w3fi67.o
+a - w3fi70.o
+a - w3fi78.o
+a - w3fi85.o
+a - w3fm07.o
+a - w3fm08.o
+a - w3fp04.o
+a - w3fp05.o
+a - w3fp06.o
+a - w3fp10.o
+a - w3fq07.o
+a - w3ft00.o
+a - w3ft01.o
+a - w3ft02.o
+a - w3ft03.o
+a - w3ft05.o
+a - w3ft05v.o
+a - w3ft06.o
+a - w3ft06v.o
+a - w3ft07.o
+a - w3ft08.o
+a - w3ft09.o
+a - w3ft10.o
+a - w3ft11.o
+a - w3ft12.o
+a - w3ft16.o
+a - w3ft17.o
+a - w3ft201.o
+a - w3ft202.o
+a - w3ft203.o
+a - w3ft204.o
+a - w3ft205.o
+a - w3ft206.o
+a - w3ft207.o
+a - w3ft208.o
+a - w3ft209.o
+a - w3ft210.o
+a - w3ft211.o
+a - w3ft212.o
+a - w3ft213.o
+a - w3ft214.o
+a - w3ft21.o
+a - w3ft26.o
+a - w3ft33.o
+a - w3ft38.o
+a - w3ft39.o
+a - w3ft40.o
+a - w3ft41.o
+a - w3ft43v.o
+a - w3log.o
+a - w3miscan.o
+a - xdopen.o
+a - start.o
+ranlib libw3emc.a
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+
+
+===============================================================
+Performing NCO-type install of precision 8 build
+===============================================================
+
+cd libsrc && make nco_install
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+/bin/install -c -d /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0
+/bin/install -c -m 644 libw3emc.a /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/libw3emc_v2.3.0_8.a
+/bin/install -c -d /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/include/w3emc_v2.3.0_8
+/bin/install -c -m 644 *.mod /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/include/w3emc_v2.3.0_8
+/bin/install -c -m 644 ../config.log /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/config.log.w3emc_v2.3.0_8
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+cd libsrc && make clean
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm *.o *.mod *.a >/dev/null 2>&1
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+cd libsrc && make distclean
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm Makefile >/dev/null 2>&1
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm Makefile config.log* config.status
+
+
+
+
+===============================================================
+===============================================================
+Configuring for precision d build
+===============================================================
+===============================================================
+
+configure: nceplibs w3emc v2.3.0
+checking for Fortran compiler default output file name... a.out
+checking whether the Fortran compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU Fortran compiler... no
+checking whether ifort accepts -g... yes
+checking for a BSD-compatible install... /bin/install -c
+checking for ranlib... ranlib
+checking for ar... ar
+checking for Fortran flag to compile .f files... none
+configure: Building precision d version.
+configure: Using SIGIO_INC4 value: "/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4"
+configure: Using SIGIO_LIB4 value: "/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/libsigio_v2.0.1_4.a"
+configure: Using NEMSIO_INC value: "/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3"
+configure: Using NEMSIO_LIB value: "/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/libnemsio_v2.2.3.a"
+configure: Using NETCDF_INC value: "/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include"
+configure: Using NETCDF_LIB value: "/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib/libnetcdf.a"
+checking for library containing sigio_head and nemsio_gfile definition... yes
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating libsrc/Makefile
+
+
+===============================================================
+Starting precision d build
+===============================================================
+
+cd libsrc && make clean
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm *.o *.mod *.a >/dev/null 2>&1
+make[1]: [clean] Error 1 (ignored)
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+cd libsrc && make all
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c args_mod.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c gblevents.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c getgbens.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c isrchne.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c iw3mat.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c mersenne_twister.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c mova2i.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c orders.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c putgbens.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c summary.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ai40.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ai41.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ctzdat.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa01.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa03.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa03v.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa04.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa06.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa09.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa11.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa12.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fa13.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb00.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb01.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb02.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb03.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb04.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb05.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb06.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb07.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb08.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb09.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb10.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb11.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fb12.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc02.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc05.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc06.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc07.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fc08.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi02.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi03.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi18.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi19.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi20.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi32.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi47.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi48.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi52.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi61.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi65.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi66.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi67.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi70.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi78.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fi85.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fm07.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fm08.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp04.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp05.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp06.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fp10.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3fq07.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft00.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft01.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft02.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft03.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft05.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft05v.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft06.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft06v.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft07.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft08.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft09.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft10.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft11.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft12.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft16.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft17.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft201.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft202.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft203.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft204.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft205.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft206.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft207.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft208.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft209.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft210.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft211.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft212.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft213.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft214.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft21.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft26.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft33.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft38.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft39.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft40.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft41.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3ft43v.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3log.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c w3miscan.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c xdopen.f
+ifort  -r8   -O2  -g  -traceback  -fixed -I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include -I/gpfs/dell1/nco/ops/nwprod/lib/nemsio/v2.2.3/ips/18.0.1/impi/18.0.1/include/nemsio_v2.2.3 -I/gpfs/dell1/nco/ops/nwprod/lib/sigio/v2.0.1/ips/18.0.1/include/sigio_v2.0.1_4 -c  start.F
+ar crvs libw3emc.a args_mod.o gblevents.o getgbens.o isrchne.o iw3mat.o mersenne_twister.o mova2i.o orders.o putgbens.o summary.o w3ai40.o w3ai41.o w3ctzdat.o w3fa01.o w3fa03.o w3fa03v.o w3fa04.o w3fa06.o w3fa09.o w3fa11.o w3fa12.o w3fa13.o w3fb00.o w3fb01.o w3fb02.o w3fb03.o w3fb04.o w3fb05.o w3fb06.o w3fb07.o w3fb08.o w3fb09.o w3fb10.o w3fb11.o w3fb12.o w3fc02.o w3fc05.o w3fc06.o w3fc07.o w3fc08.o w3fi02.o w3fi03.o w3fi18.o w3fi19.o w3fi20.o w3fi32.o w3fi47.o w3fi48.o w3fi52.o w3fi61.o w3fi65.o w3fi66.o w3fi67.o w3fi70.o w3fi78.o w3fi85.o w3fm07.o w3fm08.o w3fp04.o w3fp05.o w3fp06.o w3fp10.o w3fq07.o w3ft00.o w3ft01.o w3ft02.o w3ft03.o w3ft05.o w3ft05v.o w3ft06.o w3ft06v.o w3ft07.o w3ft08.o w3ft09.o w3ft10.o w3ft11.o w3ft12.o w3ft16.o w3ft17.o w3ft201.o w3ft202.o w3ft203.o w3ft204.o w3ft205.o w3ft206.o w3ft207.o w3ft208.o w3ft209.o w3ft210.o w3ft211.o w3ft212.o w3ft213.o w3ft214.o w3ft21.o w3ft26.o w3ft33.o w3ft38.o w3ft39.o w3ft40.o w3ft41.o w3ft43v.o w3log.o w3miscan.o xdopen.o start.o
+a - args_mod.o
+a - gblevents.o
+a - getgbens.o
+a - isrchne.o
+a - iw3mat.o
+a - mersenne_twister.o
+a - mova2i.o
+a - orders.o
+a - putgbens.o
+a - summary.o
+a - w3ai40.o
+a - w3ai41.o
+a - w3ctzdat.o
+a - w3fa01.o
+a - w3fa03.o
+a - w3fa03v.o
+a - w3fa04.o
+a - w3fa06.o
+a - w3fa09.o
+a - w3fa11.o
+a - w3fa12.o
+a - w3fa13.o
+a - w3fb00.o
+a - w3fb01.o
+a - w3fb02.o
+a - w3fb03.o
+a - w3fb04.o
+a - w3fb05.o
+a - w3fb06.o
+a - w3fb07.o
+a - w3fb08.o
+a - w3fb09.o
+a - w3fb10.o
+a - w3fb11.o
+a - w3fb12.o
+a - w3fc02.o
+a - w3fc05.o
+a - w3fc06.o
+a - w3fc07.o
+a - w3fc08.o
+a - w3fi02.o
+a - w3fi03.o
+a - w3fi18.o
+a - w3fi19.o
+a - w3fi20.o
+a - w3fi32.o
+a - w3fi47.o
+a - w3fi48.o
+a - w3fi52.o
+a - w3fi61.o
+a - w3fi65.o
+a - w3fi66.o
+a - w3fi67.o
+a - w3fi70.o
+a - w3fi78.o
+a - w3fi85.o
+a - w3fm07.o
+a - w3fm08.o
+a - w3fp04.o
+a - w3fp05.o
+a - w3fp06.o
+a - w3fp10.o
+a - w3fq07.o
+a - w3ft00.o
+a - w3ft01.o
+a - w3ft02.o
+a - w3ft03.o
+a - w3ft05.o
+a - w3ft05v.o
+a - w3ft06.o
+a - w3ft06v.o
+a - w3ft07.o
+a - w3ft08.o
+a - w3ft09.o
+a - w3ft10.o
+a - w3ft11.o
+a - w3ft12.o
+a - w3ft16.o
+a - w3ft17.o
+a - w3ft201.o
+a - w3ft202.o
+a - w3ft203.o
+a - w3ft204.o
+a - w3ft205.o
+a - w3ft206.o
+a - w3ft207.o
+a - w3ft208.o
+a - w3ft209.o
+a - w3ft210.o
+a - w3ft211.o
+a - w3ft212.o
+a - w3ft213.o
+a - w3ft214.o
+a - w3ft21.o
+a - w3ft26.o
+a - w3ft33.o
+a - w3ft38.o
+a - w3ft39.o
+a - w3ft40.o
+a - w3ft41.o
+a - w3ft43v.o
+a - w3log.o
+a - w3miscan.o
+a - xdopen.o
+a - start.o
+ranlib libw3emc.a
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+
+
+===============================================================
+Performing NCO-type install of precision d build
+===============================================================
+
+cd libsrc && make nco_install
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+/bin/install -c -d /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0
+/bin/install -c -m 644 libw3emc.a /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/libw3emc_v2.3.0_d.a
+/bin/install -c -d /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/include/w3emc_v2.3.0_d
+/bin/install -c -m 644 *.mod /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/include/w3emc_v2.3.0_d
+/bin/install -c -m 644 ../config.log /gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/w3emc/v2.3.0/config.log.w3emc_v2.3.0_d
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+cd libsrc && make clean
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm *.o *.mod *.a >/dev/null 2>&1
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+cd libsrc && make distclean
+make[1]: Entering directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm Makefile >/dev/null 2>&1
+make[1]: Leaving directory `/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/obsproc/netcdf/w3emc/libsrc'
+rm Makefile config.log* config.status
+]2;emc.glopara@v72a2]0;emc.glopara@v72a2[0;1;31m[ [0;1;35m=0[0;1;31m 11:13:31 1003 [0;1;34memc.glopara@v72a2[0;1;31m ][0m
+[0;1;34m.../emc.glopara/git/obsproc/netcdf/w3emc[0;1;31m>[0m exit
+exit
+
+Script done on Mon 04 Nov 2019 11:14:28 AM UTC

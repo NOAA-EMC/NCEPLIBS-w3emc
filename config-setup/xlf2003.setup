@@ -1,0 +1,14 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------#
+# PROD build settings for AIX xlf2003 compiler
+#-------------------------------------------------------------------------------#
+
+export FC="xlf2003"
+
+export FCFLAGS=" \
+ -qarch=auto \
+ -qdbg \
+ -qfixed \
+ -qnosave \
+ -qoptimize=3 \
+ -qstrict"
