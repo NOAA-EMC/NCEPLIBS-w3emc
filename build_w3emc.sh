@@ -57,7 +57,7 @@ set -x
  echo
    make clean LIB=$w3emcLib4 MOD=$w3emcInc4
    mkdir -p $w3emcInc4
-   MPIFFLAGS4="$I4R4 $MPIFFLAGS -I${NEMSIO_INC} -I${SIGIO_INC4} ${MODPATH}$w3emcInc4"
+   MPIFFLAGS4="$I4R4 $MPIFFLAGS -I${NETCDF_INC} -I${NEMSIO_INC} -I${SIGIO_INC4} ${MODPATH}$w3emcInc4"
    collect_info w3emc 4 OneLine4 LibInfo4
    w3emcInfo4=w3emc_info_and_log4.txt
    $debg && make debug MPIFFLAGS="$MPIFFLAGS4" LIB=$w3emcLib4 &> $w3emcInfo4 \
@@ -70,7 +70,7 @@ set -x
  echo
    make clean LIB=$w3emcLib8 MOD=$w3emcInc8
    mkdir -p $w3emcInc8
-   MPIFFLAGS8="$I8R8 $MPIFFLAGS -I${NEMSIO_INC} -I${SIGIO_INC4} ${MODPATH}$w3emcInc8"
+   MPIFFLAGS8="$I8R8 $MPIFFLAGS -I${NETCDF_INC} -I${NEMSIO_INC} -I${SIGIO_INC4} ${MODPATH}$w3emcInc8"
    collect_info w3emc 8 OneLine8 LibInfo8
    w3emcInfo8=w3emc_info_and_log8.txt
    $debg && make debug MPIFFLAGS="$MPIFFLAGS8" LIB=$w3emcLib8 &> $w3emcInfo8 \
@@ -83,7 +83,7 @@ set -x
  echo
    make clean LIB=$w3emcLibd MOD=$w3emcIncd
    mkdir -p $w3emcIncd
-   MPIFFLAGSd="$I4R8 $MPIFFLAGS -I${NEMSIO_INC} -I${SIGIO_INC4} ${MODPATH}$w3emcIncd"
+   MPIFFLAGSd="$I4R8 $MPIFFLAGS -I${NETCDF_INC} -I${NEMSIO_INC} -I${SIGIO_INC4} ${MODPATH}$w3emcIncd"
    collect_info w3emc d OneLined LibInfod
    w3emcInfod=w3emc_info_and_logd.txt
    $debg && make debug MPIFFLAGS="$MPIFFLAGSd" LIB=$w3emcLibd &> $w3emcInfod \
@@ -141,7 +141,7 @@ set -x
                        || { mkdir -p $INCP_DIR8; }
        [ -d $W3EMC_INCd ] && { rm -rf $W3EMC_INCd; } \
                        || { mkdir -p $INCP_DIRd; }
-       SRC_DIR=$instloc/src
+       SRC_DIR=$instloc/src/${libver}
        [[ $instloc == .. ]] && SRC_DIR=
      }
      [ -d $LIB_DIR4 ] || mkdir -p $LIB_DIR4
