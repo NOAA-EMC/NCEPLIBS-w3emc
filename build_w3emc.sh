@@ -44,7 +44,7 @@ set -x
  w3emcInc4=$(basename $W3EMC_INC4)
  w3emcInc8=$(basename $W3EMC_INC8)
  w3emcIncd=$(basename $W3EMC_INCd)
-
+ NETCDF_INC=${NETCDF}/include
 #################
  cd src
 #################
