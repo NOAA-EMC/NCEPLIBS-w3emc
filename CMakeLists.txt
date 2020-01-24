@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.15)
 project(w3emc VERSION 2.2.0)
 enable_language (Fortran)
 
@@ -9,7 +9,6 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-  message("setting intel true")
   set(IntelComp true )
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU*" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang*")
   set(GNUComp true )
@@ -40,13 +39,13 @@ if( (BUILD_RELEASE) OR (BUILD_PRODUCTION) )
   endif()
 endif()
 
-
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG true)
 if(NOT TARGET nemsio)
-  find_package(nemsio REQUIRED CONFIG)
+  find_package(nemsio REQUIRED)
 endif()
 
 if(NOT TARGET sigio)
-  find_package(sigio REQUIRED CONFIG)
+  find_package(sigio REQUIRED)
 endif()
 
 file(GLOB fortran_src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.f90 ${CMAKE_CURRENT_SOURCE_DIR}/src/*.F)
