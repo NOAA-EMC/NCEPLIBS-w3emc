@@ -48,7 +48,7 @@ if(NOT TARGET sigio)
   find_package(sigio REQUIRED)
 endif()
 
-file(GLOB fortran_src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.f90 ${CMAKE_CURRENT_SOURCE_DIR}/src/*.F)
+file(GLOB fortran_src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.f90 ${CMAKE_CURRENT_SOURCE_DIR}/src/*.F ${CMAKE_CURRENT_SOURCE_DIR}/src/*.f)
 
 set(kinds "4" "8" "d")
 foreach(kind ${kinds})
