@@ -44,7 +44,7 @@ if(NOT TARGET nemsio)
   find_package(nemsio REQUIRED)
 endif()
 
-if(NOT TARGET sigio)
+if(NOT TARGET sigio_4)
   find_package(sigio REQUIRED)
 endif()
 
@@ -59,7 +59,7 @@ foreach(kind ${kinds})
   set_target_properties(${lib_name} PROPERTIES OUTPUT_NAME "${versioned_lib_name}")
 
   target_compile_options(${lib_name} PRIVATE "${shared_fortran_flags};${fortran_${kind}_flags}")
-  
+
   set(module_dir "${CMAKE_CURRENT_BINARY_DIR}/include_${kind}")
   set_target_properties(${lib_name} PROPERTIES Fortran_MODULE_DIRECTORY "${module_dir}")
 
@@ -67,7 +67,9 @@ foreach(kind ${kinds})
     $<BUILD_INTERFACE:${module_dir}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include_${kind}>)
 
-  target_link_libraries(${lib_name} nemsio sigio)
+  # DH* NOTE - is hardcoding to sigio_4 correct??? or should it be sigio_${kind}
+  target_link_libraries(${lib_name} nemsio sigio_4)
+  # *DH
 
   install(TARGETS ${lib_name}
     EXPORT ${PROJECT_NAME}-config
