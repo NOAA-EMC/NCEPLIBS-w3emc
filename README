@@ -1,7 +1,22 @@
 Instructions for building and installing w3emc on Unix
 ******************************************************
 
-$Revision: 87582 $
+=======
+Code Manager: Boi Vuong
+
+libver=w3emc_v2.4.0
+
+
+Instructions for building and installing w3emc on Unix
+******************************************************
+dependent library: NEMSIO, SIGIO, and NetCDF must be load before build
+
+./build_w3emc.sh dell|cray|wcoss|theia|hera|gaea|jet|intel_general|gnu_general libver=<lib_ver> [debug] [compileonly] [prefix=<installpath>]
+
+======================================================
+History
+======================================================
+
 nceplibs support email: ncep.list.emc.nceplibs.support@noaa.gov
 
 
