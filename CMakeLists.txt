@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 
+file(STRINGS "VERSION" pVersion)
+
 project(
   w3emc
-  VERSION 2.2.0
+  VERSION ${pVersion}
   LANGUAGES Fortran)
 
 if(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel)$")
@@ -26,8 +28,9 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(fortran_8_flags "-i8 -r8")
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
   set(CMAKE_Fortran_FLAGS
-      "-g -ggdb -fno-range-check -fbacktrace -funroll-loops -ffixed-form")
+      "-g -fno-range-check -fbacktrace -funroll-loops -ffixed-form")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-ggdb -Wall")
   set(fortran_d_flags "-fdefault-real-8")
   set(fortran_8_flags "-fdefault-integer-8 -fdefault-real-8")
 endif()
