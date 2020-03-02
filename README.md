@@ -1,6 +1,6 @@
 # W3EMC
 
-Several utilities
+Several utilities, including the core code for obspro_prep.
 
 Code manager: Boi Vuong
 
