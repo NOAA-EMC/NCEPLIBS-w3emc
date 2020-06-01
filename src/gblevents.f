@@ -3402,10 +3402,10 @@ C  ----------------------
       error=nf90_inquire_attribute(ncid, id_var, "units", len=len)
 !      ALLOCATE (attone(len))
       error=nf90_get_att(ncid, id_var, "units", attone)
-        read(attone(len-18:len-15),'(i)') yyyy
-        read(attone(len-13:len-12),'(i)') mm
-        read(attone(len-10:len-9),'(i)') dd
-        read(attone(len-7:len-6),'(i)') hh
+        read(attone(len-18:len-15),'(i4)') yyyy
+        read(attone(len-13:len-12),'(i2)') mm
+        read(attone(len-10:len-9),'(i2)') dd
+        read(attone(len-7:len-6),'(i2)') hh
       IF(attone(1:5) .NE. "hours") THEN
       print*, "checkout the time unit, not hourly",attone
       ELSE
