@@ -7,6 +7,8 @@ project(
   VERSION ${pVersion}
   LANGUAGES Fortran)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+
 if(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel)$")
   message(STATUS "Setting build type to 'Release' as none was specified.")
   set(CMAKE_BUILD_TYPE
@@ -44,6 +46,8 @@ if(NOT TARGET sigio_4)
   find_package(sigio REQUIRED)
 endif()
 
+find_package(NetCDF REQUIRED C Fortran)
+
 add_subdirectory(src)
 
 set(kinds "4" "8" "d")
@@ -67,7 +71,7 @@ foreach(kind ${kinds})
            $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include_${kind}>)
 
   # DH* NOTE - is hardcoding to sigio_4 correct??? or should it be sigio_${kind}
-  target_link_libraries(${lib_name} nemsio sigio_4)
+  target_link_libraries(${lib_name} nemsio sigio_4 NetCDF::NetCDF_Fortran)
   # *DH
 
   install(
