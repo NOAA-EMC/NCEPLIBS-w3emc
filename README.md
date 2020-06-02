@@ -11,7 +11,7 @@ Compilers: GNU | Intel | Clang | AppleClang | PGI
 ### Installing
 ```
 Download W3EMC Code from GitHub.com
-git clone w3emc_v2.4.0 --recursive https://github.com/NOAA-EMC/NCEPLIBS-w3emc.git
+git clone -b w3emc_v2.4.0 --recursive https://github.com/NOAA-EMC/NCEPLIBS-w3emc.git
 cd NCEPLIBS-w3emc
 ```
 #### Create a directory where to build W3NCO library
