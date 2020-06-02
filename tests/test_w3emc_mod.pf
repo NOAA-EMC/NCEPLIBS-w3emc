@@ -1,0 +1,17 @@
+module test_w3emc_mod
+  use funit
+  use iso_fortran_env, only: real32, real64
+    
+contains
+  
+    @test
+    subroutine test_iw3mat()
+      logical :: match
+      match = iw3mat([2], [2], 1)
+      @assertTrue(match, "2 should equal 2")
+
+      match = iw3mat([2], [1], 1)
+      @assertFalse(match, "2 should not equal 1")
+    end subroutine test_iw3mat
+    
+end module test_w3emc_mod
