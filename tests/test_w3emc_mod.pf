@@ -1,0 +1,12 @@
+module test_w3emc_mod
+  use funit
+  implicit none
+  
+contains
+  
+    @test
+    subroutine test_splat()
+      @assertTrue(.true., "always true")
+    end subroutine test_splat
+    
+end module test_w3emc_mod
