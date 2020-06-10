@@ -14,6 +14,11 @@ Download W3EMC Code from GitHub.com
 git clone -b w3emc_v2.4.0 --recursive https://github.com/NOAA-EMC/NCEPLIBS-w3emc.git
 cd NCEPLIBS-w3emc
 ```
+#### Create a directory where to build W3NCO library
+```
+mkdir build
+cd build
+```
 #### Load the following modules 
 ```
 module load intel/18.0.1.163
@@ -38,8 +43,6 @@ Note: Windows systems is not supported at this time.
 ```
 #### Run cmake
 ```
-mkdir build
-cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=path_to_install (where you want to install W3EMC)
 
 If -DCMAKE_INSTALL_PREFIX= is omitted, the libraries will be installed in directory 
