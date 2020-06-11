@@ -29,7 +29,7 @@ find_package(nemsio REQUIRED)
 find_package(sigio REQUIRED)
 find_package(MPI REQUIRED COMPONENTS Fortran)
 
-find_package(NetCDF REQUIRED C Fortran)
+find_package(NetCDF REQUIRED Fortran)
 
 add_subdirectory(src)
 
