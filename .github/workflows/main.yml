@@ -120,13 +120,6 @@ jobs:
         path: nemsio
         ref: develop
 
-    - name: cache-nemsio
-      id: cache-nemsio
-      uses: actions/cache@v2
-      with:
-        path: ~/nemsio
-        key: nemsio-${{ runner.os }}-${{ hashFiles('nemsio/VERSION') }}
-
     - name: build-nemsio
       if: steps.cache-nemsio.outputs.cache-hit != 'true'
       run: |
