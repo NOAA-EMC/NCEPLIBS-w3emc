@@ -9,35 +9,32 @@ project(
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
+include(GNUInstallDirs)
+
+option(ENABLE_TESTS "Build pfunit tests?" OFF)
+
 if(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel)$")
   message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE
-      "Release"
-      CACHE STRING "Choose the type of build." FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-                                               "MinSizeRel" "RelWithDebInfo")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
 if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel|GNU|Clang|AppleClang)$")
-  message(
-    WARNING "Compiler not officially supported: ${CMAKE_Fortran_COMPILER_ID}")
+  message(WARNING "Compiler not officially supported: ${CMAKE_Fortran_COMPILER_ID}")
 endif()
 
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG true)
-if(NOT TARGET nemsio)
-  find_package(nemsio REQUIRED)
-endif()
-
-if(NOT TARGET sigio_4)
-  find_package(sigio REQUIRED)
-endif()
+find_package(bacio REQUIRED)
+find_package(nemsio REQUIRED)
+find_package(sigio REQUIRED)
+find_package(w3nco REQUIRED)
+find_package(MPI REQUIRED COMPONENTS Fortran)
 
 find_package(NetCDF REQUIRED C Fortran)
 
-
 add_subdirectory(src)
 
-if (${ENABLE_TESTS})
+if (ENABLE_TESTS)
   find_package(PFUNIT REQUIRED)
   enable_testing()
   add_subdirectory(tests)
