@@ -94,7 +94,7 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-sigio
         path: sigio
-        ref: deveop
+        ref: develop
 
     - name: cache-sigio
       id: cache-sigio
