@@ -20,6 +20,8 @@ foreach(kind ${kinds})
   set(module_dir "${CMAKE_CURRENT_BINARY_DIR}/include_${kind}")
 
   add_library(${lib_name} STATIC ${fortran_src})
+  add_library(${PROJECT_NAME}::${lib_name} ALIAS ${lib_name})
+  
   set_target_properties(${lib_name} PROPERTIES COMPILE_FLAGS
     "${fortran_${kind}_flags}")
   set_target_properties(${lib_name} PROPERTIES Fortran_MODULE_DIRECTORY
