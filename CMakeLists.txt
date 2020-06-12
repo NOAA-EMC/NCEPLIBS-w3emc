@@ -23,7 +23,6 @@ if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel|GNU|Clang|AppleClang)$")
   message(WARNING "Compiler not officially supported: ${CMAKE_Fortran_COMPILER_ID}")
 endif()
 
-find_package(bacio CONFIG REQUIRED)
 find_package(nemsio CONFIG REQUIRED)
 find_package(sigio CONFIG REQUIRED)
 

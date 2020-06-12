@@ -30,7 +30,7 @@ foreach(kind ${kinds})
   target_include_directories(${lib_name} INTERFACE
     $<BUILD_INTERFACE:${module_dir}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include_${kind}>)
-  target_link_libraries(${lib_name} PRIVATE MPI::MPI_Fortran nemsio::nemsio sigio::sigio
+  target_link_libraries(${lib_name} PRIVATE nemsio::nemsio sigio::sigio
     NetCDF::NetCDF_Fortran)
   list(APPEND LIB_TARGETS ${lib_name})
   
