@@ -21,19 +21,19 @@ foreach(kind ${kinds})
 
   add_library(${lib_name} STATIC ${fortran_src})
   add_library(${PROJECT_NAME}::${lib_name} ALIAS ${lib_name})
-  
+
   set_target_properties(${lib_name} PROPERTIES COMPILE_FLAGS
     "${fortran_${kind}_flags}")
   set_target_properties(${lib_name} PROPERTIES Fortran_MODULE_DIRECTORY
     ${module_dir})
-  
+
   target_include_directories(${lib_name} INTERFACE
     $<BUILD_INTERFACE:${module_dir}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include_${kind}>)
   target_link_libraries(${lib_name} PRIVATE nemsio::nemsio sigio::sigio
     NetCDF::NetCDF_Fortran)
   list(APPEND LIB_TARGETS ${lib_name})
-  
+
   install(DIRECTORY ${module_dir} DESTINATION ${CMAKE_INSTALL_PREFIX})
 endforeach()
 
@@ -53,7 +53,7 @@ export(EXPORT ${PROJECT_NAME}Exports
   FILE ${PROJECT_NAME}-targets.cmake)
 
 configure_package_config_file(
-  ${CMAKE_SOURCE_DIR}/PackageConfig.cmake.in ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+  ${CMAKE_SOURCE_DIR}/cmake/PackageConfig.cmake.in ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config.cmake
   INSTALL_DESTINATION ${CONFIG_INSTALL_DESTINATION})
 install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config.cmake
   DESTINATION ${CONFIG_INSTALL_DESTINATION})
