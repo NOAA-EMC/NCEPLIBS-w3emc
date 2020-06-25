@@ -43,7 +43,7 @@ Note: Windows systems is not supported at this time.
 ```
 #### Run cmake
 ```
-cmake .. -DCMAKE_INSTALL_PREFIX=path_to_install (where you want to install W3EMC)
+cmake .. -DCMAKE_INSTALL_PREFIX=myw3emc (where you want to install W3EMC)
 
 If -DCMAKE_INSTALL_PREFIX= is omitted, the libraries will be installed in directory 
 install underneath the build directory.
