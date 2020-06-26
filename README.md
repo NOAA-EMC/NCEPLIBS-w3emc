@@ -54,7 +54,7 @@ make install
 ```
 ### Version
 
-2.4.0
+2.6.0
 
 ### Authors
 
