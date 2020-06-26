@@ -6,292 +6,39 @@ Code Manager: Boi Vuong
 
 libver=w3emc_v2.4.0
 
-
 Instructions for building and installing w3emc on Unix
 ******************************************************
-dependent library: NEMSIO, SIGIO, and NetCDF must be load before build
+1. Required Software:
+--------------------
+   - CMake version 3.15 or newer.
+   - Libraries: NEMSIO, SIGIO, and NetCDF must be load before build
 
-./build_w3emc.sh dell|cray|wcoss|theia|hera|gaea|jet|intel_general|gnu_general libver=<lib_ver> [debug] [compileonly] [prefix=<installpath>]
+   -on WOCSS: these envars can be set via the command:
+module load ips/18.0.1.163
+module load impi/18.0.1
+module load cmake/3.16.2
 
-======================================================
-History
-======================================================
+module use -a /usrx/local/nceplibs/dev/NCEPLIBS/modulefiles
+module load nemsio/2.2.4
+module load hdf5_parallel/1.10.6
+module load netcdf_parallel/4.7.4
+module load sigio/2.1.1
 
-nceplibs support email: ncep.list.emc.nceplibs.support@noaa.gov
+export FC=ifort
+export CC=icc
+export CXX=icpc
 
-
-         Contents
-         ========
-  A. The easy (I hope) way...
-    1. Defining the SIGIO_INC4, NEMSIO_INC, SIGIO_LIB4, 
-       and NEMSIO_LIB variables
-    2. Running the master build script
-  B. The more flexible way
-    1. Configuration
-    2. Building the library
-    3. Testing the library
-    4. Installing the library
-       - NCO Install
-       - GNU Install
-       - Uninstalling the library
-    5. Cleaning up
-
-
-
-A. The easy (I hope) way...
-===========================
-
-The "make_w3emc_lib.sh" script builds the single (_4), double (_8), and
-mixed (_d) precision w3emc libraries using the sigio and nemsio include 
-and library values defined in the SIGIO_INC4, NEMSIO_INC, SIGIO_LIB4, and
-NEMSIO_LIB  environment variables (envars).
-
-
-1. Defining the SIGIO_INC4, NEMSIO_INC, SIGIO_LIB4, and NEMSIO_LIB variables
----------------------------------------------------
-
-On WCOSS these envars can be set via the command,
-
-  $ module load sigio
-  $ module load nemsio
-
-On CRAY these envars can be set via the command,
-
-  $ module load sigio-intel
-  $ module load nemsio-intel
-
-
-You can get access to the production modulefiles via the following command
-on WCOSS:
-
-  $ module use -a /nwprod/lib/modulefiles
-  
-If you want to use different envar values you can specify them explicity, e.g.
-
-  $ export SIGIO_INC4="-I/path/to/incmod"
-  $ export SIGIO_LIB4="/path/to/libsigio_to-use.a"
-  $ export NEMSIO_INC="-I/path/to/incmod"
-  $ export NEMSIO_LIB="/path/to/libnemsio_to-use.a"
-
-
-
-2. Running the master build script
-----------------------------------
-
-Once the sigio and nemsio library envars have been defined, you can use the
-"make_w3emc_lib.sh" script specifying the build configuration. To get
-usage information for the script, type
-
-  $ make_w3emc_lib.sh -h
-
-The available build configurations are:
-
-  gfortran-debug.setup  ifort-debug.setup  pgf95-debug.setup  xlf2003-debug.setup
-  gfortran.setup        ifort.setup        pgf95.setup        xlf2003.setup
-  wcoss.setup
-
-The "wcoss.setup" is simply a link to the "ifort.setup" file.
-
-So, on WCOSS you would type:
-
-  $ make_w3emc_lib.sh wcoss.setup
-
-
-This script iterates over the single (_4), double (_8), and mixed (_d) precision
-build configurations setting the appropriate default real and integer precision
-promotion compiler switches.
-
-Some additional points:
-- The "NCO-type" install is performed by default.
-- The libraries are installed relative to the current directory. After
-  running the script you should see two new directories containing the
-  single (4), double (8), and mixed (d) precision libraries.
-- See section B.4 below for information about the installation directory
-  structure
-
-You can tailor the build process using this "make_w3emc_lib.sh" script by
-modifying the relevant build configuration setup file in the "config-setup/"
-subdirectory.
-
-Or, if you are going to be testing library builds multiple times, you can
-create your own configuration setup file.
-
-
-
-B. The more flexible way
-========================
-
-1. Configuration
-----------------
-
-If you need more flexibility in the library build you can specify the necessary
-information directly to the configure script that generates the makefiles. For
-example, on WCOSS:
-
-  $ module load sigio
-  # module load nemsio
-  $ ./configure --prefix=${PWD} \
-                --enable-promote=4|8|d \
-                FC="ifort" \
-                FCFLAGS="-O2 -g -traceback -fixed"
-
-The --prefix switch sets the installation directory and defaults to /usr/local so
-make sure you set it to a directory in which you have write access.
-
-The --enable-promote switch allows you to specify the type of precision build be it
-single (4), double (8), or mixed (d) precision. To build the mixed precision library
-you would use:
-
-  --enable-promote=d
-
-Not specifying this switch is equivalent to "--enable-promote=4".
-
-The definition of the "FC" enviroment variable is not strictly necessary as it defaults
-to "ifort" on linux systems if available (followed by "gfortran" and "pgf95" if not), and
-to "xlf2003" on AIX systems.
-
-You can also specify the sigio and nemsio library information on the command line if you
-need that flexibility. For example:
-
-  $ ./configure --prefix=${PWD} \
-                FC="ifort" \
-                FCFLAGS="-O2 -g -traceback -fixed" \
-                SIGIO_INC4="-I/path/to/incmod" \
-                SIGIO_LIB4="/path/to/libsigio_to-use.a" \
-                NEMSIO_INC="-I/path/to/incmod" \
-                NEMSIO_LIB="/path/to/libnemsio_to-use.a"
-
-
-
+If the chosen compiler is not the default compiler on the system,
+set the environment variables: export CC=..., export CXX=..., 
+export FC=..., before invoking cmake.
 
 2. Building the library
 -----------------------
 
-To start the library build for a particular configuration, simply type
+cmake .. -DCMAKE_INSTALL_PREFIX=path_to_install
 
-  $ make
+make
+make install
 
-If you are building multiple precision versions of the library by hand (i.e. not using the
-"make_w3emc_lib.sh" script, see Section A) then make sure to clean out all the previous
-build's products first by invoking hte clean target first, i.e.:
-
-  $ make clean; make
-
-
-
-
-3. Testing the library
-----------------------
-
-We don't have any package-level tests for w3emc yet. Sorry! They're coming...
-
-
-
-
-4. Installing the library
--------------------------
-
-Installation of the library *always* occurs into its own directory within the
-directory specified by the --prefix switch.
-
-
-
-NCO Install
-...........
-
-To install the library conforming to the NCO organisation and naming conventions,
-type:
-
-  $ make nco_install
-
-For a library version (say, v2.1.0) and the default precision (4), this will create
-a directory called "w3emc". That directory is organised in the so-called vertical
-structure on WCOSS in /nwprod/lib, as shown below:
-
-  w3emc/
-    |
-    `--v2.1.0/
-        |
-        |--libw3emc_v2.1.0_4.a
-        |
-        `--incmod/
-            |
-            `--w3emc_v2.1.0_4
-
-If you subsequently build and "nco_install" the other w3emc precision libraries
-("8" and "d"), the "w3emc" directory structure will look like:
-
-  w3emc/
-    |
-    `--v2.1.0/
-        |
-        |--libw3emc_v2.1.0_4.a
-        |--libw3emc_v2.1.0_8.a
-        |--libw3emc_v2.1.0_d.a
-        |
-        `--incmod/
-            |
-            |--w3emc_v2.1.0_4
-            |--w3emc_v2.1.0_8
-            `--w3emc_v2.1.0_d
-
-The version subdirectory (v2.1.0) can then be moved into the official
-/nwprod/lib/w3emc location as needed.
-
-NOTE: The "make_w3emc_lib.sh" script (see Section A) does all of this building and
-installing of the multiple libraries for you.
-
-
-
-GNU Install
-...........
-
-To perform a GNU-type install, type:
-
-  $ make install
-
-For a library version (say, v2.1.0) and the default precision (4), this will create
-a directory called "w3emc_v2.1.0_4". That directory structure is shown below:
-
-  w3emc_v2.1.0_4/
-    |
-    |--include/
-    |
-    `--lib/
-         |
-         `--libw3emc.a
-
-Note that the only versioned item in this type of install is the name of the
-installation directory itself.
-
-
-
-Uninstalling the library
-........................
-
-To uninstall the library (assuming you haven't moved the installation directory
-contents somewhere else) you can type:
-
-  $ make nco_uninstall
-
-to roll-back an NCO-type install, or:
-
-  $ make uninstall
-
-to roll back a Gnu-type install.
-
-These target will delete the created installation directory.
-
-
-
-5. Cleaning up
---------------
-
-Two targets are provided for cleaning up after the build. To remove all the
-build products type
-
-  $ make clean
-
-To also remove all the configuration products (i.e. the makefiles) type
-
-  $ make distclean
+If -DCMAKE_INSTALL_PREFIX= is omitted, the libraries will be installed in directory 
+install underneath the build directory.
