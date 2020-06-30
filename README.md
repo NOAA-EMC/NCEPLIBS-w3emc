@@ -25,7 +25,7 @@ module load intel/18.0.1.163
 module load impi/18.0.1
 module load cmake/3.16.2
 module use -a /usrx/local/nceplibs/dev/NCEPLIBS/modulefiles
-module load w3nco/2.2.0
+module load nemsio/2.2.4
 module load hdf5_parallel/1.10.6
 module load netcdf_parallel/4.7.4
 module load sigio/2.1.1
