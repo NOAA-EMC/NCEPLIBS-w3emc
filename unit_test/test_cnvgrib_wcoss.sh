@@ -66,7 +66,6 @@ fi
 
 #
 # These two executable (cnvgrib and degrib2) files (below)
-# have comipled with G2 v3.2.0 and  W3NCO v2.2.0 and W3EMC v2.4.0
 #
 cnvgrib_test=$dir/sorc/cnvgrib
 degrib2_test=$dir/sorc/degrib2
@@ -127,7 +126,6 @@ export count=` expr $count + 1 `
 #
 echo ""
 echo "${count}. - Testing NEW cnvgrib with $file file at forecast hour $fhr "
-echo " (it compiled with G2 v3.2.0 and W3NCO v2.2.0)"
 echo ""
 echo "Please wait ... CNVGRIB is converting from GRIB2 to GRIB1 "
 echo ""

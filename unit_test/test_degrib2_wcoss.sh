@@ -124,7 +124,6 @@ export count=` expr $count + 1 `
 #
 echo ""
 echo "${count}. - Testing NEW degrib2 with $file file at forecast hour $fhr "
-echo " (it compiled with G2 v3.2.0 and W3NCO v2.2.0)"
 echo ""
 echo "Please wait ... DEGRIB2 is generating the inventory for $file file "
 echo " "
