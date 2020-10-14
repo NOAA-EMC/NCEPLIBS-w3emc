@@ -5,7 +5,7 @@ file(STRINGS "VERSION" pVersion)
 project(
   w3emc
   VERSION ${pVersion}
-  LANGUAGES Fortran)
+  LANGUAGES C Fortran)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/Modules")
 
@@ -23,8 +23,8 @@ if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel|GNU|Clang|AppleClang)$")
   message(WARNING "Compiler not officially supported: ${CMAKE_Fortran_COMPILER_ID}")
 endif()
 
-find_package(nemsio CONFIG REQUIRED)
-find_package(sigio CONFIG REQUIRED)
+find_package(nemsio REQUIRED)
+find_package(sigio REQUIRED)
 
 find_package(NetCDF REQUIRED Fortran)
 
