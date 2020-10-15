@@ -18,8 +18,8 @@ Code manager: Boi Vuong
 
 ```
 Download W3EMC Code from GitHub.com
-git clone -b w3emc_v2.4.0 --recursive https://github.com/NOAA-EMC/NCEPLIBS-w3emc.git
-cd NCEPLIBS-w3emc
+git clone -b w3_v2.4.0 --recursive https://github.com/NOAA-EMC/NCEPLIBS-w3.git
+cd NCEPLIBS-w3
 ```
 #### Create a directory where to build W3NCO library
 
@@ -51,7 +51,7 @@ Note: Windows systems is not supported at this time.
 ```
 #### Run cmake
 ```
-cmake .. -DCMAKE_INSTALL_PREFIX=myw3emc (where you want to install W3EMC)
+cmake .. -DCMAKE_INSTALL_PREFIX=myw3 (where you want to install W3EMC)
 
 If -DCMAKE_INSTALL_PREFIX= is omitted, the libraries will be installed in directory 
 install underneath the build directory.

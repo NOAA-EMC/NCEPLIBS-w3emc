@@ -1,12 +1,12 @@
-Instructions for building and installing w3emc on Unix
+Instructions for building and installing w3 on Unix
 ******************************************************
 
 =======
 Code Manager: Boi Vuong
 
-libver=w3emc_v2.4.0
+libver=w3_v2.4.0
 
-Instructions for building and installing w3emc on Unix
+Instructions for building and installing w3 on Unix
 ******************************************************
 1. Required Software:
 --------------------

@@ -1,4 +1,4 @@
-module test_w3emc_mod
+module test_w3_mod
   use funit
   use iso_fortran_env, only: real32, real64
     
@@ -14,4 +14,4 @@ contains
       @assertFalse(match, "2 should not equal 1")
     end subroutine test_iw3mat
     
-end module test_w3emc_mod
+end module test_w3_mod
