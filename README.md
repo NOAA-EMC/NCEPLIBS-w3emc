@@ -1,6 +1,6 @@
 ![Status](https://github.com/NOAA-EMC/NCEPLIBS-sp/workflows/Build%20and%20Test/badge.svg)
 
-# W3EMC
+# W3
 
 This library contains Fortran 90 decoder/encoder
 routines for GRIB edition 1.
@@ -14,11 +14,19 @@ NCEP/EMC developers.
 
 Code manager: Boi Vuong
 
+## Prerequisites
+
+This package requires the following libraries:
+- [NCEPLIBS-bacio](https://github.com/NOAA-EMC/NCEPLIBS-bacio)
+- [NCEPLIBS-w3nco](https://github.com/NOAA-EMC/NCEPLIBS-w3nco)
+- [NCEPLIBS-sigio](https://github.com/NOAA-EMC/NCEPLIBS-sigio)
+- [NCEPLIBS-nemsio](https://github.com/NOAA-EMC/NCEPLIBS-nemsio)
+
 ## Installing
 
 ```
-Download W3EMC Code from GitHub.com
-git clone -b w3_v2.4.0 --recursive https://github.com/NOAA-EMC/NCEPLIBS-w3.git
+Download W3 Code from GitHub.com
+git clone -b w3_v2.4.0 --recursive https://github.com/NOAA-EMC/NCEPLIBS-w3emc.git
 cd NCEPLIBS-w3
 ```
 #### Create a directory where to build W3NCO library
@@ -51,7 +59,7 @@ Note: Windows systems is not supported at this time.
 ```
 #### Run cmake
 ```
-cmake .. -DCMAKE_INSTALL_PREFIX=myw3 (where you want to install W3EMC)
+cmake .. -DCMAKE_INSTALL_PREFIX=myw3 (where you want to install W3)
 
 If -DCMAKE_INSTALL_PREFIX= is omitted, the libraries will be installed in directory 
 install underneath the build directory.
