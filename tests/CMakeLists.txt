@@ -1,7 +1,8 @@
-#set(test_srcs test_w3emc.pf)
+# This is the CMake build file for the test directory of NCEPLIBS-w3emc.
 
-# link to bacio and w3nco as dependencies of nemsio manually because they can't be transitive
-# add_pfunit_ctest (w3emc_test
-#   TEST_SOURCES test_w3emc_mod.pf
-#   LINK_LIBRARIES w3emc::w3emc_d bacio::bacio_4 w3nco::w3nco_d
-# )
+# Kyle Gerheiser, Ed Hartnett
+
+add_executable (tst_w3emc tst_w3emc.F)
+add_test(tst_w3emc tst_w3emc)
+target_link_libraries (tst_w3emc w3emc_d)
+
