@@ -112,6 +112,11 @@ jobs:
         cd build
         cmake .. -DCMAKE_PREFIX_PATH="~/"
         make -j2
-    
+
+    - name: test-w3emc
+      run: |
+        cd $GITHUB_WORKSPACE/w3emc/build
+        make test
+
 
 
