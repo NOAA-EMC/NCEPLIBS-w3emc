@@ -1,5 +1,19 @@
 include("list_of_files.cmake")
 
+if(APPLE)
+  add_compile_definitions(APPLE)
+elseif(UNIX)
+  add_compile_definitions(LINUX)
+endif()
+
+if(CMAKE_C_COMPILER_ID MATCHES "^(Intel)$")
+  set(CMAKE_C_FLAGS "-g ${CMAKE_C_FLAGS}")
+  set(CMAKE_C_FLAGS_RELEASE "-O3")
+elseif(CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
+  set(CMAKE_C_FLAGS "-ggdb ${CMAKE_C_FLAGS}")
+  set(CMAKE_C_FLAGS_RELEASE "-O3")
+endif()
+
 if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS "-g -traceback -fixed ${CMAKE_Fortran_FLAGS}")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
@@ -17,6 +31,7 @@ endif()
 if(${CMAKE_Fortran_COMPILER_ID} MATCHES "^(GNU)$" AND ${CMAKE_Fortran_COMPILER_VERSION} VERSION_GREATER_EQUAL 10)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -w -fallow-argument-mismatch -fallow-invalid-boz")
 endif()
+set_source_files_properties(${c_src} PROPERTIES COMPILE_OPTIONS "${c_flags}")
  
 set(kinds "4" "8" "d")
 foreach(kind ${kinds})
@@ -30,6 +45,10 @@ foreach(kind ${kinds})
     "${fortran_${kind}_flags}")
   set_target_properties(${lib_name} PROPERTIES Fortran_MODULE_DIRECTORY
     ${module_dir})
+add_library(${lib_name}_c OBJECT ${c_src})
+
+#  add_library(${lib_name} STATIC $<TARGET_OBJECTS:${lib_name}_f>
+#    $<TARGET_OBJECTS:${lib_name}_c>)
 
   target_include_directories(${lib_name} INTERFACE
     $<BUILD_INTERFACE:${module_dir}>
