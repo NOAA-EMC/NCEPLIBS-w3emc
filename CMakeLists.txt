@@ -9,7 +9,7 @@ file(STRINGS "VERSION" pVersion)
 project(
   w3emc
   VERSION ${pVersion}
-  LANGUAGES Fortran)
+  LANGUAGES C Fortran)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
