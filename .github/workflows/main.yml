@@ -104,7 +104,6 @@ jobs:
       uses: actions/checkout@v2
       with: 
         path: w3emc
-        submodules: true
 
     - name: build-w3emc
       run: |
