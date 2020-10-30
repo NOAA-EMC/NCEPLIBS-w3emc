@@ -3,7 +3,7 @@
 # W3EMC
 
 This library contains Fortran 90 decoder/encoder
-routines for GRIB edition 1.
+routines for GRIB edition 1. This version has combined the w3emc and w3nco libraries.
 
 This is part of
 the [NCEPLIBS](https://github.com/NOAA-EMC/NCEPLIBS) project.
@@ -13,6 +13,14 @@ the [NCEPLIBS](https://github.com/NOAA-EMC/NCEPLIBS) project.
 NCEP/EMC developers.
 
 Code manager: Boi Vuong
+
+## Prerequisites
+
+This package requires the following libraries:
+- [NCEPLIBS-bacio](https://github.com/NOAA-EMC/NCEPLIBS-bacio)
+- [NCEPLIBS-w3nco](https://github.com/NOAA-EMC/NCEPLIBS-w3nco)
+- [NCEPLIBS-sigio](https://github.com/NOAA-EMC/NCEPLIBS-sigio)
+- [NCEPLIBS-nemsio](https://github.com/NOAA-EMC/NCEPLIBS-nemsio)
 
 ## Installing
 
