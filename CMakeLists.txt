@@ -11,6 +11,9 @@ project(
   VERSION ${pVersion}
   LANGUAGES C Fortran)
 
+# Handle user options.
+option(ENABLE_DOCS "Enable generation of doxygen-based documentation." OFF)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(GNUInstallDirs)
@@ -35,8 +38,7 @@ enable_testing()
 add_subdirectory(tests)
 
 # Determine whether or not to generate documentation.
-option(ENABLE_DOCS "Enable generation of doxygen-based documentation." OFF)
 if(ENABLE_DOCS)
   find_package(Doxygen REQUIRED)
+  add_subdirectory(docs)  
 endif()
-add_subdirectory(docs)  
