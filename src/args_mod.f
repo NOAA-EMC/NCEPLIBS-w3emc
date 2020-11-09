@@ -1,25 +1,12 @@
 C> @file
 C
-C>                .      .    .                                       .
-C> SUBPROGRAM:    args_mod    Wrapper for routines iargc and getarg
-C>   PRGMMR: Iredell          ORG: W/NMC23    DATE: 98-11-DD
+C> Wrapper for routines iargc and getarg
+C> @author Iredell @date 98-11-DD
 C>
-C> ABSTRACT: This Fortran Module acts as a wrapper to the system
-C>   routines IARGC and GETARG.  Use of this module allows IARGC and
-C>   GETARG to work properly with 4-byte or 8-byte integer arguments.
+C> This Fortran Module acts as a wrapper to the system
+C> routines IARGC and GETARG.  Use of this module allows IARGC and
+C> GETARG to work properly with 4-byte or 8-byte integer arguments.
 C>
-C> PROGRAM HISTORY LOG:
-C>   98-11-DD  Iredell
-C>
-C> USAGE:    use args_mod
-C>
-C> REMARKS: None
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: XL Fortran 
-C>   MACHINE:  IBM SP
-C>
-
       module args_mod
         interface iargc
           module procedure iargc_8
