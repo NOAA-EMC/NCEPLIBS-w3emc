@@ -22,12 +22,29 @@ for the JavaScript code in this file
 */
 var NAVTREE =
 [
-  [ "NCEPLIBS-w3emc", "index.html", ]
+  [ "NCEPLIBS-w3emc", "index.html", [
+    [ "Modules", "namespaces.html", [
+      [ "NCEPLIBS-w3emc", "index.html#autotoc_md0", null ],
+      [ "Modules List", "namespaces.html", "namespaces_dup" ]
+    ] ],
+    [ "Data Types List", "annotated.html", [
+      [ "Data Types List", "annotated.html", "annotated_dup" ]
+    ] ],
+    [ "Files", "files.html", [
+      [ "File List", "files.html", "files_dup" ],
+      [ "Globals", "globals.html", [
+        [ "All", "globals.html", null ],
+        [ "Functions/Subroutines", "globals_func.html", null ]
+      ] ]
+    ] ]
+  ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"index.html"
+"aea_8f.html",
+"w3fa09_8f.html#a97cb87ce42a1cba4c96dd80fefb9eafe",
+"w3fp06_8f_source.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
