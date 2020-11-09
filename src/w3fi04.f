@@ -1,42 +1,41 @@
+C> @file
+C
+C> SUBPROGRAM: W3FI04         FIND WORD SIZE, ENDIAN, CHARACTER SET
+C>   PRGMNR: JONES,R.E.       ORG: W/NMC42       DATE: 94-10-07
+C>
+C> ABSTRACT: SUBROUTINE COMPUTES WORD SIZE, THE TYPE OF CHARACTER
+C>   SET, ASCII OR EBCDIC, AND IF THE COMPUTER IS BIG-ENDIAN, OR
+C>   LITTLE-ENDIAN.
+C>
+C> PROGRAM HISTORY LOG:
+C>   94-10-07  R.E.JONES
+C>   98-07-08  Gilbert    -  Removed the Fortran SAVE Statement.
+C>                           The SAVE statement is not needed for this
+C>                           routine, and may have been causing errors
+C>                           using the f90 compiler under the 2.0
+C>                           Programming Environment.
+C>   02-10-15  Vuong         Replaced Function ICHAR with mova2i
+C>
+C> USAGE:  CALL W3FI04 (IENDN, ITYPEC, LW)
+C>
+C>   OUTPUT ARGUMENT LIST:
+C>     IENDN     -  INTEGER FOR BIG-ENDIAN OR LITTLE-ENDIAN
+C>                  = 0   BIG-ENDIAN
+C>                  = 1   LITTLE-ENDIAN
+C>                  = 2   CANNOT COMPUTE
+C>     ITYPEC    -  INTEGER FOR TYPE OF CHARACTER SET
+C>                  = 0   ASCII  CHARACTER SET
+C>                  = 1   EBCDIC CHARACTER SET
+C>                  = 2   NOT ASCII OR EBCDIC
+C>     LW        -  INTEGER FOR WORDS SIZE OF COMPUTER IN BYTES 
+C>                  = 4   FOR 32 BIT COMPUTERS
+C>                  = 8   FOR 64 BIT COMPUTERS  
+C>
+C> ATTRIBUTES:
+C>  LANGUAGE: CRAY CFT77 FORTRAN
+C>  MACHINE:  CRAY C916/256, Y-MP8/64, Y-MP EL92/256, J916/2048
+C>
       SUBROUTINE W3FI04(IENDN,ITYPEC,LW)
-C$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-C
-C SUBPROGRAM: W3FI04         FIND WORD SIZE, ENDIAN, CHARACTER SET
-C   PRGMNR: JONES,R.E.       ORG: W/NMC42       DATE: 94-10-07
-C
-C ABSTRACT: SUBROUTINE COMPUTES WORD SIZE, THE TYPE OF CHARACTER
-C   SET, ASCII OR EBCDIC, AND IF THE COMPUTER IS BIG-ENDIAN, OR
-C   LITTLE-ENDIAN.
-C
-C PROGRAM HISTORY LOG:
-C   94-10-07  R.E.JONES
-C   98-07-08  Gilbert    -  Removed the Fortran SAVE Statement.
-C                           The SAVE statement is not needed for this
-C                           routine, and may have been causing errors
-C                           using the f90 compiler under the 2.0
-C                           Programming Environment.
-C   02-10-15  Vuong         Replaced Function ICHAR with mova2i
-C
-C USAGE:  CALL W3FI04 (IENDN, ITYPEC, LW)
-C
-C   OUTPUT ARGUMENT LIST:
-C     IENDN     -  INTEGER FOR BIG-ENDIAN OR LITTLE-ENDIAN
-C                  = 0   BIG-ENDIAN
-C                  = 1   LITTLE-ENDIAN
-C                  = 2   CANNOT COMPUTE
-C     ITYPEC    -  INTEGER FOR TYPE OF CHARACTER SET
-C                  = 0   ASCII  CHARACTER SET
-C                  = 1   EBCDIC CHARACTER SET
-C                  = 2   NOT ASCII OR EBCDIC
-C     LW        -  INTEGER FOR WORDS SIZE OF COMPUTER IN BYTES 
-C                  = 4   FOR 32 BIT COMPUTERS
-C                  = 8   FOR 64 BIT COMPUTERS  
-C
-C ATTRIBUTES:
-C  LANGUAGE: CRAY CFT77 FORTRAN
-C  MACHINE:  CRAY C916/256, Y-MP8/64, Y-MP EL92/256, J916/2048
-C
-C$$$
 C
       INTEGER       ITEST1
       INTEGER       ITEST2
