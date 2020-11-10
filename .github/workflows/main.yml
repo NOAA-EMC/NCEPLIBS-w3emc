@@ -13,7 +13,7 @@ jobs:
     - name: install-netcdf
       run: |
         sudo apt-get update
-        sudo apt-get install libnetcdf-dev libnetcdff-dev netcdf-bin pkg-config         
+        sudo apt-get install libnetcdf-dev libnetcdff-dev netcdf-bin pkg-config doxygen
 
     - name: install-mpi
       run: |
@@ -110,7 +110,7 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake .. -DCMAKE_PREFIX_PATH="~/"
+        cmake .. -DCMAKE_PREFIX_PATH="~/" -DENABLE_DOCS=ON
         make -j2
 
     - name: test-w3emc

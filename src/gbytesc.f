@@ -1,15 +1,17 @@
-      SUBROUTINE GBYTESC(IN,IOUT,ISKIP,NBYTE,NSKIP,N)
-C          Get bytes - unpack bits:  Extract arbitrary size values from a
-C          packed bit string, right justifying each value in the unpacked
-C          array.
-C            IN    = character*1 array input
-C            IOUT  = unpacked array output
-C            ISKIP = initial number of bits to skip
-C            NBYTE = number of bits to take
-C            NSKIP = additional number of bits to skip on each iteration
-C            N     = number of iterations
-C v1.1
+C> @file
 C
+C> Get bytes - unpack bits:  Extract arbitrary size values from a
+C> packed bit string, right justifying each value in the unpacked
+C> array. v1.1
+C>
+C> @param[in] IN    = character*1 array input
+C> @param[out] IOUT  = unpacked array output
+C> @param[in] ISKIP = initial number of bits to skip
+C> @param[in] NBYTE = number of bits to take
+C> @param[in] NSKIP = additional number of bits to skip on each iteration
+C> @param[in] N     = number of iterations
+C>
+      SUBROUTINE GBYTESC(IN,IOUT,ISKIP,NBYTE,NSKIP,N)
       character*1 in(*)
       integer iout(*)
       integer ones(8), tbit, bitcnt
