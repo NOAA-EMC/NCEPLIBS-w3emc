@@ -1,78 +1,77 @@
-      SUBROUTINE W3TRNARG(SUBDIR,LSUBDR,TANKID,LTNKID,APPCHR,LAPCHR,
-     1                    TLFLAG,IYMDHB,IYMDHE,IERR)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK                                    
+C> @file
 C                .      .    .                                       .  
-C SUBPROGRAM:    W3TRNARG    TRANSLATES ARG LINE FROM STANDARD INPUT 
-C   PRGMMR: KEYSER           ORG: NP22       DATE: 2002-02-11           
-C                                                                       
-C ABSTRACT: READS ARGUMENT LINES FROM STANDARD INPUT AND OBTAINS      ,
-C   SUBDIRECTORY, BUFR TANKNAME, CHARACTERS TO APPEND FOR ADDING
-C   AN ORBIT, AND OPTIONS FOR LIMITING THE TIME WINDOW.
-C                                                                       
-C PROGRAM HISTORY LOG:                                                  
-C 1996-09-03  B. KATZ   -- ORIGINAL AUTHOR
-C 1998-11-27  B. KATZ   -- CHANGES FOR Y2K AND FORTRAN 90 COMPLIANCE
-C 2002-02-11  D. KEYSER -- IF "TLFLAG" IS NOT SPECIFIED, IT DEFAULTS
-C                          TO "NOTIMLIM" RATHER THAN "TIMLIM" AND
-C                          GROSS TIME LIMITS WILL NOT BE CALCULATED
-C                          AND RETURNED IN "IYMDHB" AND "IYMDHE"
-C                                                                       
-C USAGE:    CALL W3TRNARG(SUBDIR,LSUBDR,TANKID,LTNKID,APPCHR,LAPCHR,
-C                         TLFLAG,IYMDHB,IYMDHE,IERR)
-C   OUTPUT ARGUMENT LIST:                                               
-C     SUBDIR   - NAME OF SUB-DIRECTORY INCLUDING BUFR DATA TYPE WHERE
-C                BUFR DATA TANK IS LOCATED.
-C     LSUBDR   - NUMBER OF CHARACTERS IN 'SUBDIR'.
-C     TANKID   - NAME OF FILE INCLUDING BUFR DATA SUB-TYPE CONTAINING
-C                BUFR DATA TANK.
-C     LTNKID   - NUMBER OF CHARACTERS IN 'TANKID'.
-C     APPCHR   - CHARACTERS TO BE APPENDED TO 'TANKID' GIVING A
-C                UNIQUELY NAMED FILE TO CONTAIN THE ORIGINAL TANK
-C                WITH ONE ORBIT APPENDED TO IT. 
-C     LAPCHR   - NUMBER OF CHARACTERS IN 'APPCHR'.
-C     TLFLAG   - 8 CHARACTER FLAG INDICATING WHETHER TIME ACCEPTANCE
-C                CHECKS ATRE TO BE PERFORMED.
-C                = 'TIMLIM  ' : PERFORM TIME ACCEPTANCE CHECKS.
-C                = 'NOTIMLIM' : DO NOT PERFORM TIME ACCEPTANCE CHECKS.
-C                               JDATE AND KDATE ARE DISREGARDED.
-C     IYMDHB   - START OF TIME ACCEPTANCE WINDOW, IN FORM YYYYMMDDHH.
-C     IYMDHE   - END OF TIME ACCEPTANCE WINDOW, IN FORM YYYYMMDDHH.
-C
-C   INPUT FILES :
-C     UNIT 05  - STANDARD INPUT FOR PASSING IN ARGUMENTS. ARGUMENTS
-C                (FOR LIST-DIRECTED I/O) ARE AS FOLLOWS : 
-C                RECORD 1 - (1) SUBDIRECTORY. CONTAINS BUFR DATA TYPE
-C                           (2) TANKFILE. CONTAINS BUFR DATA SUB-TYPE
-C                           (3) APPEND CHARACTERS. APPENDED TO TANKFILE
-C                               TO GIVE UNIQUE OUTPUT FILE NAME.
-C                           (4) DATE IN YYYYMMDDHH FORMAT.
-C                NEXT THREE RECORDS ARE OPTIONAL :
-C                RECORD 2 - (1) TIME LIMIT FLAG. MAY BE EITHER
-C                               'TIMLIM  ' OR 'NOTIMLIM'.  SEE
-C                               DESCRIPTION OF 'TLFLAG' ABOVE.
-C                               (DEFAULT IS 'NOTIMLIM')
-C                RECORD 3 - (1) HOURS BEFORE CURRENT TIME.
-C                RECORD 4 - (1) HOURS AFTER CURRENT TIME.
-C                IF 'TIMLIM  ' IS SPECIFIED IN RECORD 2, THE 
-C                QUANTITIES IN RECORDS 3 AND 4 ARE USED TO 
-C                COMPUTE THE LIMITS OF THE TIME ACCEPTANCE WINDOW.
-C                IF RECORDS 3 AND 4 ARE OMITTED, THE VALUES
-C                DEFAULT TO -48 (48 HOURS BEFORE CURRENT TIME)
-C                AND +12 (12 HOURS AFTER CURRENT TIME).
-C                IF 'NOTIMLIM  ' IS SPECIFIED IN RECORD 2, THEN
-C                THESE QUANTITIES ARE NOT USED REGARDLESS OF WHETHER
-C                OR NOT THEY WERE SPECIFIED.
-C
-C   SUBPROGRAMS CALLED :
-C       W3LIB  - W3MOVDAT
-C
-C REMARKS:                                                              
-C                                                                       
-C ATTRIBUTES:                                                           
-C   LANGUAGE: FORTRAN 90                                                
-C   MACHINE:  IBM-SP
-C                                                                       
-C$$$                                                                    
+C> SUBPROGRAM:    W3TRNARG    TRANSLATES ARG LINE FROM STANDARD INPUT 
+C>   PRGMMR: KEYSER           ORG: NP22       DATE: 2002-02-11           
+C>                                                                       
+C> ABSTRACT: READS ARGUMENT LINES FROM STANDARD INPUT AND OBTAINS      ,
+C>   SUBDIRECTORY, BUFR TANKNAME, CHARACTERS TO APPEND FOR ADDING
+C>   AN ORBIT, AND OPTIONS FOR LIMITING THE TIME WINDOW.
+C>                                                                       
+C> PROGRAM HISTORY LOG:                                                  
+C> 1996-09-03  B. KATZ   -- ORIGINAL AUTHOR
+C> 1998-11-27  B. KATZ   -- CHANGES FOR Y2K AND FORTRAN 90 COMPLIANCE
+C> 2002-02-11  D. KEYSER -- IF "TLFLAG" IS NOT SPECIFIED, IT DEFAULTS
+C>                          TO "NOTIMLIM" RATHER THAN "TIMLIM" AND
+C>                          GROSS TIME LIMITS WILL NOT BE CALCULATED
+C>                          AND RETURNED IN "IYMDHB" AND "IYMDHE"
+C>                                                                       
+C> USAGE:    CALL W3TRNARG(SUBDIR,LSUBDR,TANKID,LTNKID,APPCHR,LAPCHR,
+C>                         TLFLAG,IYMDHB,IYMDHE,IERR)
+C>   OUTPUT ARGUMENT LIST:                                               
+C>     SUBDIR   - NAME OF SUB-DIRECTORY INCLUDING BUFR DATA TYPE WHERE
+C>                BUFR DATA TANK IS LOCATED.
+C>     LSUBDR   - NUMBER OF CHARACTERS IN 'SUBDIR'.
+C>     TANKID   - NAME OF FILE INCLUDING BUFR DATA SUB-TYPE CONTAINING
+C>                BUFR DATA TANK.
+C>     LTNKID   - NUMBER OF CHARACTERS IN 'TANKID'.
+C>     APPCHR   - CHARACTERS TO BE APPENDED TO 'TANKID' GIVING A
+C>                UNIQUELY NAMED FILE TO CONTAIN THE ORIGINAL TANK
+C>                WITH ONE ORBIT APPENDED TO IT. 
+C>     LAPCHR   - NUMBER OF CHARACTERS IN 'APPCHR'.
+C>     TLFLAG   - 8 CHARACTER FLAG INDICATING WHETHER TIME ACCEPTANCE
+C>                CHECKS ATRE TO BE PERFORMED.
+C>                = 'TIMLIM  ' : PERFORM TIME ACCEPTANCE CHECKS.
+C>                = 'NOTIMLIM' : DO NOT PERFORM TIME ACCEPTANCE CHECKS.
+C>                               JDATE AND KDATE ARE DISREGARDED.
+C>     IYMDHB   - START OF TIME ACCEPTANCE WINDOW, IN FORM YYYYMMDDHH.
+C>     IYMDHE   - END OF TIME ACCEPTANCE WINDOW, IN FORM YYYYMMDDHH.
+C>
+C>   INPUT FILES :
+C>     UNIT 05  - STANDARD INPUT FOR PASSING IN ARGUMENTS. ARGUMENTS
+C>                (FOR LIST-DIRECTED I/O) ARE AS FOLLOWS : 
+C>                RECORD 1 - (1) SUBDIRECTORY. CONTAINS BUFR DATA TYPE
+C>                           (2) TANKFILE. CONTAINS BUFR DATA SUB-TYPE
+C>                           (3) APPEND CHARACTERS. APPENDED TO TANKFILE
+C>                               TO GIVE UNIQUE OUTPUT FILE NAME.
+C>                           (4) DATE IN YYYYMMDDHH FORMAT.
+C>                NEXT THREE RECORDS ARE OPTIONAL :
+C>                RECORD 2 - (1) TIME LIMIT FLAG. MAY BE EITHER
+C>                               'TIMLIM  ' OR 'NOTIMLIM'.  SEE
+C>                               DESCRIPTION OF 'TLFLAG' ABOVE.
+C>                               (DEFAULT IS 'NOTIMLIM')
+C>                RECORD 3 - (1) HOURS BEFORE CURRENT TIME.
+C>                RECORD 4 - (1) HOURS AFTER CURRENT TIME.
+C>                IF 'TIMLIM  ' IS SPECIFIED IN RECORD 2, THE 
+C>                QUANTITIES IN RECORDS 3 AND 4 ARE USED TO 
+C>                COMPUTE THE LIMITS OF THE TIME ACCEPTANCE WINDOW.
+C>                IF RECORDS 3 AND 4 ARE OMITTED, THE VALUES
+C>                DEFAULT TO -48 (48 HOURS BEFORE CURRENT TIME)
+C>                AND +12 (12 HOURS AFTER CURRENT TIME).
+C>                IF 'NOTIMLIM  ' IS SPECIFIED IN RECORD 2, THEN
+C>                THESE QUANTITIES ARE NOT USED REGARDLESS OF WHETHER
+C>                OR NOT THEY WERE SPECIFIED.
+C>
+C>   SUBPROGRAMS CALLED :
+C>       W3LIB  - W3MOVDAT
+C>
+C> REMARKS:                                                              
+C>                                                                       
+C> ATTRIBUTES:                                                           
+C>   LANGUAGE: FORTRAN 90                                                
+C>   MACHINE:  IBM-SP
+C>
+      SUBROUTINE W3TRNARG(SUBDIR,LSUBDR,TANKID,LTNKID,APPCHR,LAPCHR,
+     1                    TLFLAG,IYMDHB,IYMDHE,IERR)                                                                    
       CHARACTER*(*) SUBDIR,TANKID,APPCHR,TLFLAG
       INTEGER IDATIN(8),IDTOUT(8)
       REAL TIMINC(5)

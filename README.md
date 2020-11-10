@@ -2,8 +2,10 @@
 
 # W3EMC
 
-This library contains Fortran 90 decoder/encoder
-routines for GRIB edition 1. This version has combined the w3emc and w3nco libraries.
+This library contains Fortran 90 decoder/encoder routines for GRIB
+edition 1. This version has combined the w3emc and w3nco
+libraries. For more detailed documentation see
+https://noaa-emc.github.io/NCEPLIBS-w3emc/.
 
 This is part of
 the [NCEPLIBS](https://github.com/NOAA-EMC/NCEPLIBS) project.

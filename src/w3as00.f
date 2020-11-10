@@ -1,72 +1,71 @@
-       subroutine W3AS00(nch_parm,cparm,iret_parm)                              
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK                                            
+C> @file
 C                .      .    .                                       .          
-C SUBPROGRAM:    W3AS00      GET PARM FIELD FROM COMMAND-LINE                   
-C   PRGMMR: SHIMOMURA        ORG: W/NMC41    DATE: 95-05-23                     
-C                                                                               
-C ABSTRACT: TO GET THE ONE COMMAND-LINE ARGUMENT WHICH STARTS WITH              
-C   "PARM="; RETURNING THE PARM FIELD (WITHOUT THE KEYWORD "PARM=")             
-C   AS A NULL-TERMINATED STRING IN THE CHARACTER STRING:CPARM.                  
-C                                                                               
-C PROGRAM HISTORY LOG:                                                          
-C   95-05-23  DAVID SHIMOMURA                                                   
-C   98-03-10  B. VUONG         REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
-C                                                                               
-C USAGE:    CALL W3AS00(NCH_PARM, CPARM, iret_parm)                             
-C                            1       2       3                                  
-C                                                                               
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)                          
-C     (1.) NCH_PARM - NO. OF CHARACTERS IN THE PARM FIELD                       
-C     (2.) CPARM    - C*(*) CPARM -- THE DESTINATION FOR THE PARMFIELD          
-C                       OBTAINED FROM THE COMMAND LINE;                         
-C                       USER SHOULD DEFINE THE CHARACTER STRING FOR             
-C                       A SIZE .LE. 101-BYTES, WHICH WOULD BE                   
-C                       BIG ENOUGH FOR THE 100-CHAR IBM LIMIT PLUS              
-C                       ONE EXTRA BYTE FOR MY NULL-TERMINATOR.                  
-C                                                                               
-C     (3.) iret_parm - RETURN CODE                                              
-C                    = 0;  NORMAL RETURN                                        
-C                    = -1; ABNORMAL EXIT.  THE USER HAS FAILED                  
-C                           TO DEFINE THE CPARM DESTINATION                     
-C                           AS A CHARACTER STRING.                              
-C                                                                               
-C                    = +1; A WARNING:                                           
-C                           THE GIVEN ARG IN THE COMMAND LINE WAS               
-C                           TOO LONG TO FIT IN THE DESTINATION: CPARM,          
-C                           SO I HAVE TRUNCATED IT.                             
-C                                                                               
-C                    = +2; A WARNING:  NO ARGS AT ALL ON COMMAND LINE,          
-C                           SO I COULD NOT FETCH THE PARM FIELD.                
-C                                                                               
-C                    = +3; A WARNING:  NO "PARM="-ARGUMENT EXISTS               
-C                           AMONG THE ARGS ON THE COMMAND LINE,                 
-C                           SO I COULD NOT FETCH THE PARM FIELD.                
-C                                                                               
-C   OUTPUT FILES:                                                               
-C     FT06F001 - SOME CHECKOUT PRINTOUT                                         
-C                                                                               
-C REMARKS:                                                                      
-C                                                                               
-C     TO EMULATE THE IBM PARM FIELD, THE USER SHOULD KEY_IN ON THE              
-C        COMMAND LINE:                                                          
-C              PARM='IN BETWEEN THE SINGLE_QUOTES IS THE PARM FIELD'            
-C        WHAT IS RETURNED FROM W3AS00() FROM THE PARM= ARG IS                   
-C        THE PARM FIELD: WHICH STARTS WITH THE LOCATION BEYOND THE              
-C        EQUAL_SIGN OF THE KEYWORD "PARM=", AND INCLUDES EVERYTHING             
-C        WHICH WAS WITHIN THE BOUNDS OF THE SINGLE-QUOTE SIGNS.                 
-C        BUT THE QUOTE SIGNS THEMSELVES WILL DISAPPEAR; AND A NULL-             
-C        TERMINATOR WILL BE ADDED.                                              
-C        THE STARTING "PARM=" IS A KEY WORD FOR THE PARMS, AND SHOULD           
-C        NOT BE USED TO START ANY OTHER ARGUMENT.                               
-C                                                                               
-C     CAUTION:  I HAVE CHANGED THE CALL SEQUENCE BY ADDING A RETURN CODE        
-C                                                                               
-C                                                                               
-C ATTRIBUTES:                                                                   
-C   LANGUAGE: CRAY FORTRAN77                                                    
-C   MACHINE:  CRAY2                                                             
-C                                                                               
-C$$$                                                                            
+C> SUBPROGRAM:    W3AS00      GET PARM FIELD FROM COMMAND-LINE                   
+C>   PRGMMR: SHIMOMURA        ORG: W/NMC41    DATE: 95-05-23                     
+C>                                                                               
+C> ABSTRACT: TO GET THE ONE COMMAND-LINE ARGUMENT WHICH STARTS WITH              
+C>   "PARM="; RETURNING THE PARM FIELD (WITHOUT THE KEYWORD "PARM=")             
+C>   AS A NULL-TERMINATED STRING IN THE CHARACTER STRING:CPARM.                  
+C>                                                                               
+C> PROGRAM HISTORY LOG:                                                          
+C>   95-05-23  DAVID SHIMOMURA                                                   
+C>   98-03-10  B. VUONG         REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
+C>                                                                               
+C> USAGE:    CALL W3AS00(NCH_PARM, CPARM, iret_parm)                             
+C>                            1       2       3                                  
+C>                                                                               
+C>   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)                          
+C>     (1.) NCH_PARM - NO. OF CHARACTERS IN THE PARM FIELD                       
+C>     (2.) CPARM    - C*(*) CPARM -- THE DESTINATION FOR THE PARMFIELD          
+C>                       OBTAINED FROM THE COMMAND LINE;                         
+C>                       USER SHOULD DEFINE THE CHARACTER STRING FOR             
+C>                       A SIZE .LE. 101-BYTES, WHICH WOULD BE                   
+C>                       BIG ENOUGH FOR THE 100-CHAR IBM LIMIT PLUS              
+C>                       ONE EXTRA BYTE FOR MY NULL-TERMINATOR.                  
+C>                                                                               
+C>     (3.) iret_parm - RETURN CODE                                              
+C>                    = 0;  NORMAL RETURN                                        
+C>                    = -1; ABNORMAL EXIT.  THE USER HAS FAILED                  
+C>                           TO DEFINE THE CPARM DESTINATION                     
+C>                           AS A CHARACTER STRING.                              
+C>                                                                               
+C>                    = +1; A WARNING:                                           
+C>                           THE GIVEN ARG IN THE COMMAND LINE WAS               
+C>                           TOO LONG TO FIT IN THE DESTINATION: CPARM,          
+C>                           SO I HAVE TRUNCATED IT.                             
+C>                                                                               
+C>                    = +2; A WARNING:  NO ARGS AT ALL ON COMMAND LINE,          
+C>                           SO I COULD NOT FETCH THE PARM FIELD.                
+C>                                                                               
+C>                    = +3; A WARNING:  NO "PARM="-ARGUMENT EXISTS               
+C>                           AMONG THE ARGS ON THE COMMAND LINE,                 
+C>                           SO I COULD NOT FETCH THE PARM FIELD.                
+C>                                                                               
+C>   OUTPUT FILES:                                                               
+C>     FT06F001 - SOME CHECKOUT PRINTOUT                                         
+C>                                                                               
+C> REMARKS:                                                                      
+C>                                                                               
+C>     TO EMULATE THE IBM PARM FIELD, THE USER SHOULD KEY_IN ON THE              
+C>        COMMAND LINE:                                                          
+C>              PARM='IN BETWEEN THE SINGLE_QUOTES IS THE PARM FIELD'            
+C>        WHAT IS RETURNED FROM W3AS00() FROM THE PARM= ARG IS                   
+C>        THE PARM FIELD: WHICH STARTS WITH THE LOCATION BEYOND THE              
+C>        EQUAL_SIGN OF THE KEYWORD "PARM=", AND INCLUDES EVERYTHING             
+C>        WHICH WAS WITHIN THE BOUNDS OF THE SINGLE-QUOTE SIGNS.                 
+C>        BUT THE QUOTE SIGNS THEMSELVES WILL DISAPPEAR; AND A NULL-             
+C>        TERMINATOR WILL BE ADDED.                                              
+C>        THE STARTING "PARM=" IS A KEY WORD FOR THE PARMS, AND SHOULD           
+C>        NOT BE USED TO START ANY OTHER ARGUMENT.                               
+C>                                                                               
+C>     CAUTION:  I HAVE CHANGED THE CALL SEQUENCE BY ADDING A RETURN CODE        
+C>                                                                               
+C>                                                                               
+C> ATTRIBUTES:                                                                   
+C>   LANGUAGE: CRAY FORTRAN77                                                    
+C>   MACHINE:  CRAY2                                                             
+C>
+      subroutine W3AS00(nch_parm,cparm,iret_parm)                                                                                                          
 C                                                                               
        integer    kbytpwrd                                                      
        parameter (kbytpwrd=8)                                                   

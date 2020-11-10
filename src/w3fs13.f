@@ -1,43 +1,42 @@
-       SUBROUTINE W3FS13(IYR,IMO,IDA,JDY)
-C$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
+C> @file
 C
-C SUBPROGRAM: W3FS13         YEAR, MONTH, AND DAY TO DAY OF YEAR
-C   AUTHOR: CHASE, P.        ORG: W345       DATE: 85-07-31
-C
-C ABSTRACT: CONVERTS YEAR, MONTH AND DAY TO DAY OF YEAR.
-C
-C PROGRAM HISTORY LOG:
-C   85-07-31  R.E.JONES
-C   89-11-02  R.E.JONES  CONVERT TO CRAY CFT77 FORTRAN
-C
-C USAGE:  CALL W3FS13(IYR, IMO, IDA, JDY)
-C
-C   INPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     IYR    ARG LIST  INTEGER YEAR OF CENTURY, 00-99 OR YEAR OF ERA,
-C                      1901-2099
-C     IMO    ARG LIST  INTEGER MONTH OF YEAR, 1-12
-C     IDA    ARG LIST  INTEGER DAY OF MONTH,  1-31
-C
-C   OUTPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     JDY    ARG LIST  INTEGER DAY OF YEAR,  1-366
-C
-C   SUBPROGRAMS CALLED:
-C     NAMES                                                   LIBRARY
-C     ------------------------------------------------------- --------
-C     IAND                                                    SYSTEM
-C
-C   REMARKS: THIS PROCEDURE IS VALID ONLY FROM THE YEARS 1901-2099
-C            INCLUSIVE.
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
+C> SUBPROGRAM: W3FS13         YEAR, MONTH, AND DAY TO DAY OF YEAR
+C>   AUTHOR: CHASE, P.        ORG: W345       DATE: 85-07-31
+C>
+C> ABSTRACT: CONVERTS YEAR, MONTH AND DAY TO DAY OF YEAR.
+C>
+C> PROGRAM HISTORY LOG:
+C>   85-07-31  R.E.JONES
+C>   89-11-02  R.E.JONES  CONVERT TO CRAY CFT77 FORTRAN
+C>
+C> USAGE:  CALL W3FS13(IYR, IMO, IDA, JDY)
+C>
+C>   INPUT VARIABLES:
+C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
+C>     ------ --------- -----------------------------------------------
+C>     IYR    ARG LIST  INTEGER YEAR OF CENTURY, 00-99 OR YEAR OF ERA,
+C>                      1901-2099
+C>     IMO    ARG LIST  INTEGER MONTH OF YEAR, 1-12
+C>     IDA    ARG LIST  INTEGER DAY OF MONTH,  1-31
+C>
+C>   OUTPUT VARIABLES:
+C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
+C>     ------ --------- -----------------------------------------------
+C>     JDY    ARG LIST  INTEGER DAY OF YEAR,  1-366
+C>
+C>   SUBPROGRAMS CALLED:
+C>     NAMES                                                   LIBRARY
+C>     ------------------------------------------------------- --------
+C>     IAND                                                    SYSTEM
+C>
+C>   REMARKS: THIS PROCEDURE IS VALID ONLY FROM THE YEARS 1901-2099
+C>            INCLUSIVE.
+C>
+C> ATTRIBUTES:
+C>   LANGUAGE: CRAY CFT77 FORTRAN
+C>   MACHINE:  CRAY Y-MP8/832
+C>
+      SUBROUTINE W3FS13(IYR,IMO,IDA,JDY)
 C
        INTEGER JTABLE(24)
 C

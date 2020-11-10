@@ -1,78 +1,77 @@
+C> @file
+C
+C> SUBPROGRAM: W3AI00         REAL ARRAY TO 16 BIT PACKED FORMAT
+C>   AUTHOR: JONES,R.E.       ORG: W342       DATE: 85-07-31
+C>
+C> ABSTRACT: CONVERTS IEEE FLOATING POINT NUMBERS TO 16 BIT
+C>   PACKED OFFICE NOTE 84 FORMAT. THE FLOATING POINT NUMBER ARE
+C>   CONVERTED TO 16 BIT SIGNED SCALED INTEGERS.
+C>
+C> PROGRAM HISTORY LOG:
+C>   89-10-20  R.E.JONES  CONVERT CYBER 205 VERSION OF W3AI00 TO CRAY
+C>   90-03-18  R.E.JONES  CHANGE TO USE CRAY INTEGER*2 PACKER
+C>   90-10-11  R.E.JONES  SPECIAL VERSION TO PACK GRIDS LARGER THAN
+C>                        32743 WORDS. WILL DO OLD AND NEW VERSION.
+C>   91-02-16  R.E.JONES  CHANGES SO EQUIVALENCE OF PACK AND REAL8
+C>                        ARRAYS WILL WORK.
+C>   93-06-10  R.E.JONES  CHANGES FOR ARRAY SIZE (512,512) 262144 WORDS.
+C>   98-03-10  B. VUONG   REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
+C>   98-11-18  Gilbert    Changed to pack IEEE values for the IBM SP
+C>
+C> USAGE:  CALL W3AI00 (REAL8, PACK, LABEL)
+C>
+C>   INPUT VARIABLES:
+C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
+C>     ------ --------- -----------------------------------------------
+C>     REAL8  ARG LIST  ARRAY OF CRAY FLOATING POINT NUMBERS
+C>     LABEL  ARG LIST  SIX 8-BYTE INTEGER WORDS.
+C>                      MUST HAVE FIRST 8 OF 12 32 BIT
+C>                      WORD OFFICE NOTE 84 LABEL. WORD 6 MUST HAVE
+C>                      IN BITS 31-00 THE NUMBER OF REAL WORDS IN ARRAY
+C>                      REAL8 IF J IS GREATER THAN 32743. J IN BITS
+C>                      15-0 OF THE 4TH ID WORD IS SET ZERO.
+C>
+C>   OUTPUT VARIABLES:
+C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
+C>     ------ --------- -----------------------------------------------
+C>     PACK   ARG LIST  PACKED OUTPUT ARRAY OF INTEGER WORDS OF
+C>                      SIZE 6 + (J+3)/4 , J = NO. POINTS IN LABEL
+C>                      (FROM WORD 4 BITS 15-00).
+C>                      LABEL WILL BE COPIED TO PACK WORDS 1-4. PACK
+C>                      WILL CONTAIN THE FOLLOWING IN WORDS 5-6
+C>                      WORD 5  BITS 63-48  NUMBER OF BYTES IN WHOLE
+C>                                          RECORD. WILL NOT BE
+C>                                          CORRECT IF J > 32743.
+C>                      WORD 5  BITS 47-32  EXCLUSIVE-OR CHECKSUM BY 16
+C>                                          BIT WORDS OF WHOLE ARRAY PACK
+C>                                          EXCLUDING CHECKSUM ITSELF.
+C>                      WORD 5  BITS 31-00  CENTER VALUE A = MEAN OF
+C>                                          MAX AND MIN VALUES.
+C>                                          CONVERTED TO IBM 32
+C>                                          FLOATING POINT NUMBER.
+C>                      WORD  6 BITS 63-48  ZERO.
+C>                      WORD  6 BITS 47-32  16 BIT SHIFT VALUE N. THE
+C>                                          LEAST INTEGER SUCH THAT
+C>                                          ABS(X-A)/2**N LT 1 FOR
+C>                                          ALL X IN REAL8. LIMITED
+C>                                          TO +-127.
+C>                      WORD  6 BITS 31-00  NUMBER OF WORDS IN REAL8
+C>                                          IF > 32743, RIGHT ADJUSTED
+C>                                          IF <= 32743 SET ZERO.
+C>
+C>   SUBPROGRAMS CALLED:
+C>     NAMES                                                   LIBRARY
+C>     ------------------------------------------------------- --------
+C>     IAND    IOR    BTEST                                    SYSTEM
+C>
+C>   REMARKS: PACK AND LABEL MAY BE EQUIVALENCED.  N, THE NUMBER OF
+C>     POINTS IN A GRID IS NOW IN 32 BIT ID WORD 12.
+C>
+C> ATTRIBUTES:
+C>   LANGUAGE: IBM XL FORTRAN.
+C>   MACHINE:  IBM SP
+C>
       SUBROUTINE W3AI00(REAL8,PACK,LABEL)
-C$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-C
-C SUBPROGRAM: W3AI00         REAL ARRAY TO 16 BIT PACKED FORMAT
-C   AUTHOR: JONES,R.E.       ORG: W342       DATE: 85-07-31
-C
-C ABSTRACT: CONVERTS IEEE FLOATING POINT NUMBERS TO 16 BIT
-C   PACKED OFFICE NOTE 84 FORMAT. THE FLOATING POINT NUMBER ARE
-C   CONVERTED TO 16 BIT SIGNED SCALED INTEGERS.
-C
-C PROGRAM HISTORY LOG:
-C   89-10-20  R.E.JONES  CONVERT CYBER 205 VERSION OF W3AI00 TO CRAY
-C   90-03-18  R.E.JONES  CHANGE TO USE CRAY INTEGER*2 PACKER
-C   90-10-11  R.E.JONES  SPECIAL VERSION TO PACK GRIDS LARGER THAN
-C                        32743 WORDS. WILL DO OLD AND NEW VERSION.
-C   91-02-16  R.E.JONES  CHANGES SO EQUIVALENCE OF PACK AND REAL8
-C                        ARRAYS WILL WORK.
-C   93-06-10  R.E.JONES  CHANGES FOR ARRAY SIZE (512,512) 262144 WORDS.
-C   98-03-10  B. VUONG   REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
-C   98-11-18  Gilbert    Changed to pack IEEE values for the IBM SP
-C
-C USAGE:  CALL W3AI00 (REAL8, PACK, LABEL)
-C
-C   INPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     REAL8  ARG LIST  ARRAY OF CRAY FLOATING POINT NUMBERS
-C     LABEL  ARG LIST  SIX 8-BYTE INTEGER WORDS.
-C                      MUST HAVE FIRST 8 OF 12 32 BIT
-C                      WORD OFFICE NOTE 84 LABEL. WORD 6 MUST HAVE
-C                      IN BITS 31-00 THE NUMBER OF REAL WORDS IN ARRAY
-C                      REAL8 IF J IS GREATER THAN 32743. J IN BITS
-C                      15-0 OF THE 4TH ID WORD IS SET ZERO.
-C
-C   OUTPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     PACK   ARG LIST  PACKED OUTPUT ARRAY OF INTEGER WORDS OF
-C                      SIZE 6 + (J+3)/4 , J = NO. POINTS IN LABEL
-C                      (FROM WORD 4 BITS 15-00).
-C                      LABEL WILL BE COPIED TO PACK WORDS 1-4. PACK
-C                      WILL CONTAIN THE FOLLOWING IN WORDS 5-6
-C                      WORD 5  BITS 63-48  NUMBER OF BYTES IN WHOLE
-C                                          RECORD. WILL NOT BE
-C                                          CORRECT IF J > 32743.
-C                      WORD 5  BITS 47-32  EXCLUSIVE-OR CHECKSUM BY 16
-C                                          BIT WORDS OF WHOLE ARRAY PACK
-C                                          EXCLUDING CHECKSUM ITSELF.
-C                      WORD 5  BITS 31-00  CENTER VALUE A = MEAN OF
-C                                          MAX AND MIN VALUES.
-C                                          CONVERTED TO IBM 32
-C                                          FLOATING POINT NUMBER.
-C                      WORD  6 BITS 63-48  ZERO.
-C                      WORD  6 BITS 47-32  16 BIT SHIFT VALUE N. THE
-C                                          LEAST INTEGER SUCH THAT
-C                                          ABS(X-A)/2**N LT 1 FOR
-C                                          ALL X IN REAL8. LIMITED
-C                                          TO +-127.
-C                      WORD  6 BITS 31-00  NUMBER OF WORDS IN REAL8
-C                                          IF > 32743, RIGHT ADJUSTED
-C                                          IF <= 32743 SET ZERO.
-C
-C   SUBPROGRAMS CALLED:
-C     NAMES                                                   LIBRARY
-C     ------------------------------------------------------- --------
-C     IAND    IOR    BTEST                                    SYSTEM
-C
-C   REMARKS: PACK AND LABEL MAY BE EQUIVALENCED.  N, THE NUMBER OF
-C     POINTS IN A GRID IS NOW IN 32 BIT ID WORD 12.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM XL FORTRAN.
-C   MACHINE:  IBM SP
-C
-C$$$
 C
        REAL           REAL8(*)
        REAL           XX(262144)
