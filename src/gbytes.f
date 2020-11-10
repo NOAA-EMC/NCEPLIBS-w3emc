@@ -1,60 +1,43 @@
+C> @file
+C> THIS IS THE FORTRAN VERSION OF GBYTES.
+C
+C> THIS IS THE FORTRAN VERSION OF GBYTES.
+C> @author DR. ROBERT C. GAMMILL, CONSULTANT, NATIONAL CENTER FOR ATMOSPHERIC RESEARCH
+C> @date MAY 1972
+C>
+C> CHANGES FOR SiliconGraphics IRIS-4D/25
+C> SiliconGraphics 3.3 FORTRAN 77
+C> MARCH 1991, RUSSELL E. JONES
+C> NATIONAL WEATHER SERVICE
+C>
+C> SUBROUTINE GBYTES (IPACKD,IUNPKD,NOFF,NBITS,ISKIP,ITER)
+C>
+C> TO UNPACK A SERIES OF BYTES INTO A TARGET
+C> ARRAY.  EACH UNPACKED BYTE IS RIGHT-JUSTIFIED
+C> IN ITS TARGET WORD, AND THE REMAINDER OF THE
+C> WORD IS ZERO-FILLED.
+C>
+C> @param[in] IPACKD THE WORD OR ARRAY CONTAINING THE PACKED
+C>               BYTES.
+C>
+C> @param[out] IUNPKD THE ARRAY WHICH WILL CONTAIN THE UNPACKED
+C>                           BYTES.
+C>
+C> @param[in] NOFF THE INITIAL NUMBER OF BITS TO SKIP, LEFT
+C>                           TO RIGHT, IN 'IPACKD' IN ORDER TO LOCATE
+C>                           THE FIRST BYTE TO UNPACK.
+C>
+C> @param[in] NBITS NUMBER OF BITS IN THE BYTE TO BE UNPACKED.
+C>                          MAXIMUM OF 64 BITS ON 64 BIT MACHINE, 32
+C>                          BITS ON 32 BIT MACHINE.
+C>
+C> @param[in] ISKIP THE NUMBER OF BITS TO SKIP BETWEEN EACH BYTE
+C>                           IN 'IPACKD' IN ORDER TO LOCATE THE NEXT BYTE
+C>                           TO BE UNPACKED.
+C>
+C> @param[in] ITER THE NUMBER OF BYTES TO BE UNPACKED.
+C>
       SUBROUTINE GBYTES(IPACKD,IUNPKD,NOFF,NBITS,ISKIP,ITER)
-C
-C THIS PROGRAM WRITTEN BY.....
-C             DR. ROBERT C. GAMMILL, CONSULTANT
-C             NATIONAL CENTER FOR ATMOSPHERIC RESEARCH
-C             MAY 1972
-C
-C             CHANGES FOR SiliconGraphics IRIS-4D/25
-C             SiliconGraphics 3.3 FORTRAN 77
-C             MARCH 1991, RUSSELL E. JONES
-C             NATIONAL WEATHER SERVICE
-C
-C THIS IS THE FORTRAN VERSION OF GBYTES.
-C
-C***********************************************************************
-C
-C SUBROUTINE GBYTES (IPACKD,IUNPKD,NOFF,NBITS,ISKIP,ITER)
-C
-C PURPOSE                TO UNPACK A SERIES OF BYTES INTO A TARGET
-C                        ARRAY.  EACH UNPACKED BYTE IS RIGHT-JUSTIFIED
-C                        IN ITS TARGET WORD, AND THE REMAINDER OF THE
-C                        WORD IS ZERO-FILLED.
-C
-C USAGE                  CALL GBYTES (IPACKD,IUNPKD,NOFF,NBITS,NSKIP,
-C                                     ITER)
-C
-C ARGUMENTS
-C ON INPUT                IPACKD
-C                           THE WORD OR ARRAY CONTAINING THE PACKED
-C                           BYTES.
-C
-C                         IUNPKD
-C                           THE ARRAY WHICH WILL CONTAIN THE UNPACKED
-C                           BYTES.
-C
-C                         NOFF
-C                           THE INITIAL NUMBER OF BITS TO SKIP, LEFT
-C                           TO RIGHT, IN 'IPACKD' IN ORDER TO LOCATE
-C                           THE FIRST BYTE TO UNPACK.
-C
-C                        NBITS
-C                          NUMBER OF BITS IN THE BYTE TO BE UNPACKED.
-C                          MAXIMUM OF 64 BITS ON 64 BIT MACHINE, 32
-C                          BITS ON 32 BIT MACHINE.
-C
-C                         ISKIP
-C                           THE NUMBER OF BITS TO SKIP BETWEEN EACH BYTE
-C                           IN 'IPACKD' IN ORDER TO LOCATE THE NEXT BYTE
-C                           TO BE UNPACKED.
-C
-C                         ITER
-C                           THE NUMBER OF BYTES TO BE UNPACKED.
-C
-C ARGUMENTS
-C ON OUTPUT               IUNPKD
-C                           CONTAINS THE REQUESTED UNPACKED BYTES.
-C***********************************************************************
 
       INTEGER    IPACKD(*)
 
