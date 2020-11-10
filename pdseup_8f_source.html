@@ -136,10 +136,10 @@ $(document).ready(function(){initNavTree('pdseup_8f_source.html',''); initResiza
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;      <span class="keywordflow">GO TO</span> 333</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="keywordflow">      ENDIF</span></div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="comment">C    UNPACKING FIRST SECTION (GENERAL INFORMATION)</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;      <span class="keyword">CALL </span>gbytesc(msga,kens,40*8,8,0,5)</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a>(msga,kens,40*8,8,0,5)</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">C    UNPACKING 2ND SECTION (PROBABILITY SECTION)</span></div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;      <span class="keywordflow">IF</span>(ilast.GE.46) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;      <span class="keyword">CALL </span>gbytesc(msga,kprob,45*8,8,0,2)</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a>(msga,kprob,45*8,8,0,2)</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;      <span class="keyword">CALL </span>gbytec (msga,jsgn,47*8,1)</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;      <span class="keyword">CALL </span>gbytec (msga,jexp,47*8+1,7)</div>
@@ -153,15 +153,16 @@ $(document).ready(function(){initNavTree('pdseup_8f_source.html',''); initResiza
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keywordflow">      ENDIF</span></div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">C    UNPACKING 3RD SECTION (CLUSTERING INFORMATION)</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;      <span class="keywordflow">IF</span>(ilast.GE.61) <span class="keyword">CALL </span>gbytesc(msga,kclust,60*8,8,0,16)</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;      <span class="keywordflow">IF</span>(ilast.GE.61) <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a>(msga,kclust,60*8,8,0,16)</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment">C  UNPACKING 4TH SECTION (CLUSTERMEMBERSHIP INFORMATION)</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      <span class="keywordflow">IF</span>(ilast.GE.77) <span class="keyword">CALL </span>gbytesc(msga,kmembr,76*8,1,0,80)</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      <span class="keywordflow">IF</span>(ilast.GE.77) <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a>(msga,kmembr,76*8,1,0,80)</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; 333  <span class="keywordflow">CONTINUE</span></div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;      <span class="keywordflow">RETURN</span></div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;      <span class="keyword">END</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
+<div class="ttc" id="agbytesc_8f_html_a8fd2d6beeef9feaf3ef1e927f66678db"><div class="ttname"><a href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a></div><div class="ttdeci">subroutine gbytesc(IN, IOUT, ISKIP, NBYTE, NSKIP, N)</div><div class="ttdoc">Get bytes - unpack bits: Extract arbitrary size values from a packed bit string, right justifying eac...</div><div class="ttdef"><b>Definition:</b> <a href="gbytesc_8f_source.html#l00015">gbytesc.f:15</a></div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>

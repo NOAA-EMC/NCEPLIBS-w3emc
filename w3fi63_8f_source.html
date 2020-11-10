@@ -1266,7 +1266,7 @@ $(document).ready(function(){initNavTree('w3fi63_8f_source.html',''); initResiza
 <div class="line"><a name="l01178"></a><span class="lineno"> 1178</span>&#160;                  isiz    = kptr(3) - 40</div>
 <div class="line"><a name="l01179"></a><span class="lineno"> 1179</span>&#160;                  iter    = isiz / lw</div>
 <div class="line"><a name="l01180"></a><span class="lineno"> 1180</span>&#160;                  <span class="keywordflow">IF</span> (mod(isiz,lw).NE.0) iter = iter + 1</div>
-<div class="line"><a name="l01181"></a><span class="lineno"> 1181</span>&#160;                  <span class="keyword">CALL </span>gbytesc (msga,kpds(36),kptr(8),mwdbit,0,iter)</div>
+<div class="line"><a name="l01181"></a><span class="lineno"> 1181</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a> (msga,kpds(36),kptr(8),mwdbit,0,iter)</div>
 <div class="line"><a name="l01182"></a><span class="lineno"> 1182</span>&#160;                  kptr(8)  = kptr(8) + isiz * 8</div>
 <div class="line"><a name="l01183"></a><span class="lineno"> 1183</span>&#160;<span class="keywordflow">              END IF</span></div>
 <div class="line"><a name="l01184"></a><span class="lineno"> 1184</span>&#160;<span class="keywordflow">          END IF</span></div>
@@ -1858,7 +1858,7 @@ $(document).ready(function(){initNavTree('w3fi63_8f_source.html',''); initResiza
 <div class="line"><a name="l01770"></a><span class="lineno"> 1770</span>&#160;        <span class="keywordflow">IF</span> (kgds(20).NE.255) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l01771"></a><span class="lineno"> 1771</span>&#160;          isum  = 0</div>
 <div class="line"><a name="l01772"></a><span class="lineno"> 1772</span>&#160;          kptr(8)  = nsave + (kgds(20) - 1) * 8</div>
-<div class="line"><a name="l01773"></a><span class="lineno"> 1773</span>&#160;          <span class="keyword">CALL </span>gbytesc (msga,kgds(22),kptr(8),16,0,kgds(3))</div>
+<div class="line"><a name="l01773"></a><span class="lineno"> 1773</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a> (msga,kgds(22),kptr(8),16,0,kgds(3))</div>
 <div class="line"><a name="l01774"></a><span class="lineno"> 1774</span>&#160;          <span class="keywordflow">DO</span> 910 j = 1, kgds(3)</div>
 <div class="line"><a name="l01775"></a><span class="lineno"> 1775</span>&#160;              isum  = isum + kgds(21+j)</div>
 <div class="line"><a name="l01776"></a><span class="lineno"> 1776</span>&#160;  910     <span class="keywordflow">CONTINUE</span></div>
@@ -2955,7 +2955,7 @@ $(document).ready(function(){initNavTree('w3fi63_8f_source.html',''); initResiza
 <div class="line"><a name="l02867"></a><span class="lineno"> 2867</span>&#160;      <span class="keywordtype">LOGICAL*1</span>     KBMS(NPTS)</div>
 <div class="line"><a name="l02868"></a><span class="lineno"> 2868</span>&#160;      <span class="keywordtype">INTEGER</span>       ICHK(NPTS)</div>
 <div class="line"><a name="l02869"></a><span class="lineno"> 2869</span>&#160;<span class="comment">C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span></div>
-<div class="line"><a name="l02870"></a><span class="lineno"> 2870</span>&#160;      <span class="keyword">CALL </span>gbytesc(msga,ichk,nskp,1,0,npts)</div>
+<div class="line"><a name="l02870"></a><span class="lineno"> 2870</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a>(msga,ichk,nskp,1,0,npts)</div>
 <div class="line"><a name="l02871"></a><span class="lineno"> 2871</span>&#160;      kbms=ichk.NE.0</div>
 <div class="line"><a name="l02872"></a><span class="lineno"> 2872</span>&#160;<span class="comment">C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span></div>
 <div class="line"><a name="l02873"></a><span class="lineno"> 2873</span>&#160;      <span class="keyword">END</span></div>
@@ -3474,7 +3474,7 @@ $(document).ready(function(){initNavTree('w3fi63_8f_source.html',''); initResiza
 <div class="line"><a name="l03386"></a><span class="lineno"> 3386</span>&#160;          <span class="keywordflow">ELSE</span></div>
 <div class="line"><a name="l03387"></a><span class="lineno"> 3387</span>&#160;              kadd    = 37</div>
 <div class="line"><a name="l03388"></a><span class="lineno"> 3388</span>&#160;<span class="keywordflow">          END IF</span></div>
-<div class="line"><a name="l03389"></a><span class="lineno"> 3389</span>&#160;          <span class="keyword">CALL </span>gbytesc (msga,ksave,kptr(8),kbits,0,knr)</div>
+<div class="line"><a name="l03389"></a><span class="lineno"> 3389</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a> (msga,ksave,kptr(8),kbits,0,knr)</div>
 <div class="line"><a name="l03390"></a><span class="lineno"> 3390</span>&#160;          kptr(8)   = kptr(8) + kbits * knr</div>
 <div class="line"><a name="l03391"></a><span class="lineno"> 3391</span>&#160;          ii        = 1</div>
 <div class="line"><a name="l03392"></a><span class="lineno"> 3392</span>&#160;          kentry    = kptr(10)</div>
@@ -3491,7 +3491,7 @@ $(document).ready(function(){initNavTree('w3fi63_8f_source.html',''); initResiza
 <div class="line"><a name="l03403"></a><span class="lineno"> 3403</span>&#160; 4002     <span class="keywordflow">CONTINUE</span></div>
 <div class="line"><a name="l03404"></a><span class="lineno"> 3404</span>&#160;      <span class="keywordflow">ELSE</span> <span class="keywordflow">IF</span> (kpds(3).EQ.21.OR.kpds(3).EQ.22.OR.kpds(3).EQ.25.</div>
 <div class="line"><a name="l03405"></a><span class="lineno"> 3405</span>&#160;     *            or.kpds(3).EQ.61.OR.kpds(3).EQ.62) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l03406"></a><span class="lineno"> 3406</span>&#160;          <span class="keyword">CALL </span>gbytesc (msga,ksave,kptr(8),kbits,0,knr)</div>
+<div class="line"><a name="l03406"></a><span class="lineno"> 3406</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a> (msga,ksave,kptr(8),kbits,0,knr)</div>
 <div class="line"><a name="l03407"></a><span class="lineno"> 3407</span>&#160;          ii    = 1</div>
 <div class="line"><a name="l03408"></a><span class="lineno"> 3408</span>&#160;          kentry = kptr(10)</div>
 <div class="line"><a name="l03409"></a><span class="lineno"> 3409</span>&#160;          <span class="keywordflow">DO</span> 4011 i = 1, kentry</div>
@@ -3514,7 +3514,7 @@ $(document).ready(function(){initNavTree('w3fi63_8f_source.html',''); initResiza
 <div class="line"><a name="l03426"></a><span class="lineno"> 3426</span>&#160;              <span class="keyword">DATA</span>(i) = <span class="keyword">DATA</span>(lastp)</div>
 <div class="line"><a name="l03427"></a><span class="lineno"> 3427</span>&#160; 4012     <span class="keywordflow">CONTINUE</span></div>
 <div class="line"><a name="l03428"></a><span class="lineno"> 3428</span>&#160;      <span class="keywordflow">ELSE</span></div>
-<div class="line"><a name="l03429"></a><span class="lineno"> 3429</span>&#160;          <span class="keyword">CALL </span>gbytesc (msga,ksave,kptr(8),kbits,0,knr)</div>
+<div class="line"><a name="l03429"></a><span class="lineno"> 3429</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a> (msga,ksave,kptr(8),kbits,0,knr)</div>
 <div class="line"><a name="l03430"></a><span class="lineno"> 3430</span>&#160;          ii    = 1</div>
 <div class="line"><a name="l03431"></a><span class="lineno"> 3431</span>&#160;          kentry = kptr(10)</div>
 <div class="line"><a name="l03432"></a><span class="lineno"> 3432</span>&#160;          <span class="keywordflow">DO</span> 500 i = 1, kentry</div>
@@ -3550,7 +3550,7 @@ $(document).ready(function(){initNavTree('w3fi63_8f_source.html',''); initResiza
 <div class="line"><a name="l03462"></a><span class="lineno"> 3462</span>&#160;          <span class="keywordflow">IF</span> (jsgn.NE.0) realkk  = -realkk</div>
 <div class="line"><a name="l03463"></a><span class="lineno"> 3463</span>&#160;<span class="keywordflow">      END IF</span></div>
 <div class="line"><a name="l03464"></a><span class="lineno"> 3464</span>&#160;      <span class="keyword">DATA</span>(1)  = realkk</div>
-<div class="line"><a name="l03465"></a><span class="lineno"> 3465</span>&#160;      <span class="keyword">CALL </span>gbytesc (msga,ksave,kptr(8),kbits,0,knr)</div>
+<div class="line"><a name="l03465"></a><span class="lineno"> 3465</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a> (msga,ksave,kptr(8),kbits,0,knr)</div>
 <div class="line"><a name="l03466"></a><span class="lineno"> 3466</span>&#160;<span class="comment">C  --------------</span></div>
 <div class="line"><a name="l03467"></a><span class="lineno"> 3467</span>&#160;      <span class="keywordflow">DO</span> 6000 i = 1, kentry</div>
 <div class="line"><a name="l03468"></a><span class="lineno"> 3468</span>&#160;          <span class="keyword">DATA</span>(i+1)  = refnce + float(ksave(i)) * scale</div>
@@ -4151,6 +4151,7 @@ $(document).ready(function(){initNavTree('w3fi63_8f_source.html',''); initResiza
 <div class="line"><a name="l04063"></a><span class="lineno"> 4063</span>&#160;      <span class="keyword">END</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
+<div class="ttc" id="agbytesc_8f_html_a8fd2d6beeef9feaf3ef1e927f66678db"><div class="ttname"><a href="gbytesc_8f.html#a8fd2d6beeef9feaf3ef1e927f66678db">gbytesc</a></div><div class="ttdeci">subroutine gbytesc(IN, IOUT, ISKIP, NBYTE, NSKIP, N)</div><div class="ttdoc">Get bytes - unpack bits: Extract arbitrary size values from a packed bit string, right justifying eac...</div><div class="ttdef"><b>Definition:</b> <a href="gbytesc_8f_source.html#l00015">gbytesc.f:15</a></div></div>
 <div class="ttc" id="aw3fi83_8f_html_abaae8db75615b215003d0b2591b4e49d"><div class="ttname"><a href="w3fi83_8f.html#abaae8db75615b215003d0b2591b4e49d">w3fi83</a></div><div class="ttdeci">subroutine w3fi83(DATA, NPTS, FVAL1, FDIFF1, ISCAL2, ISC10, KPDS, KGDS)</div><div class="ttdoc">SUBPROGRAM: W3FI83 RESTORE DELTA PACKED DATA TO ORIGINAL PRGMMR: CAVANAUGH ORG: NMC421 DATE:93-08-18.</div><div class="ttdef"><b>Definition:</b> <a href="w3fi83_8f_source.html#l00041">w3fi83.f:41</a></div></div>
 <div class="ttc" id="aw3fi63_8f_html_aa59740e4c6a30f9c5f201204603d302f"><div class="ttname"><a href="w3fi63_8f.html#aa59740e4c6a30f9c5f201204603d302f">w3fi63</a></div><div class="ttdeci">subroutine w3fi63(MSGA, KPDS, KGDS, KBMS, DATA, KPTR, KRET)</div><div class="ttdoc">SUBPROGRAM: W3FI63 UNPK GRIB FIELD TO GRIB GRID PRGMMR: FARLEY ORG: NMC421 DATE:94-11-22.</div><div class="ttdef"><b>Definition:</b> <a href="w3fi63_8f_source.html#l00363">w3fi63.f:363</a></div></div>
 <div class="ttc" id="aw3fi01_8f_html_a10ac20498f7eca8e2281cad1218bede4"><div class="ttname"><a href="w3fi01_8f.html#a10ac20498f7eca8e2281cad1218bede4">w3fi01</a></div><div class="ttdeci">subroutine w3fi01(LW)</div><div class="ttdoc">SUBPROGRAM: W3FI01 DETERMINES MACHINE WORD LENGTH IN BYTES PRGMMR: KEYSER ORG: W/NMC22 DATE: 06-29-92...</div><div class="ttdef"><b>Definition:</b> <a href="w3fi01_8f_source.html#l00027">w3fi01.f:27</a></div></div>

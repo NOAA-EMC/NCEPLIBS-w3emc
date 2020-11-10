@@ -677,11 +677,11 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;<span class="comment">C                        FIND &#39;BUFR&#39; IN FIRST 125 CHARACTERS</span></div>
 <div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;      <span class="keywordflow">DO</span> 1000 knofst = 0, 999, 8</div>
 <div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;          inofst     = knofst</div>
-<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;          <span class="keywordflow">IF</span> (ivals(1).EQ.66) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;              iptr(19)   = inofst</div>
 <div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;              inofst     = inofst + 8</div>
-<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;              <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,24)</div>
+<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,24)</div>
 <div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;              <span class="keywordflow">IF</span> (ivals(1).EQ.5588562) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;<span class="comment">C                 PRINT *,&#39;FOUND BUFR AT&#39;,IPTR(19)</span></div>
 <div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160;                  inofst     = inofst + 24</div>
@@ -696,49 +696,49 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;      ident(1)   = 0</div>
 <div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;<span class="comment">C                            TEST FOR EDITION NUMBER</span></div>
 <div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;<span class="comment">C  ======================</span></div>
-<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ident(1),inofst+24,8)</div>
+<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ident(1),inofst+24,8)</div>
 <div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160;<span class="comment">C     PRINT *,&#39;THIS IS AN EDITION&#39;,IDENT(1),&#39; BUFR MESSAGE&#39;</span></div>
 <div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;      <span class="keywordflow">IF</span> (ident(1).GE.2) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00615"></a><span class="lineno">  615</span>&#160;<span class="comment">C                           GET TOTAL COUNT</span></div>
-<div class="line"><a name="l00616"></a><span class="lineno">  616</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,24)</div>
+<div class="line"><a name="l00616"></a><span class="lineno">  616</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,24)</div>
 <div class="line"><a name="l00617"></a><span class="lineno">  617</span>&#160;          itotal   = ivals(1)</div>
 <div class="line"><a name="l00618"></a><span class="lineno">  618</span>&#160;          kender   = itotal * 8 - 32 + iptr(19)</div>
-<div class="line"><a name="l00619"></a><span class="lineno">  619</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ilast,kender,32)</div>
+<div class="line"><a name="l00619"></a><span class="lineno">  619</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ilast,kender,32)</div>
 <div class="line"><a name="l00620"></a><span class="lineno">  620</span>&#160;<span class="comment">C         IF (ILAST.EQ.926365495) THEN</span></div>
 <div class="line"><a name="l00621"></a><span class="lineno">  621</span>&#160;<span class="comment">C             PRINT *,&#39;HAVE TOTAL COUNT FROM SEC 0&#39;,IVALS(1)</span></div>
 <div class="line"><a name="l00622"></a><span class="lineno">  622</span>&#160;<span class="comment">C         END IF</span></div>
 <div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160;          inofst     = inofst + 32</div>
 <div class="line"><a name="l00624"></a><span class="lineno">  624</span>&#160;<span class="comment">C                           GET SECTION 1 COUNT</span></div>
 <div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;          iptr(3)  = inofst</div>
-<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,24)</div>
+<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,24)</div>
 <div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;<span class="comment">C         PRINT *,&#39;SECTION 1 STARTS AT&#39;,INOFST,&#39;  SIZE&#39;,IVALS(1)</span></div>
 <div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;          inofst     = inofst + 24</div>
 <div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;          iptr( 2)   = ivals(1)</div>
 <div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160;<span class="comment">C                           GET MASTER TABLE</span></div>
-<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00632"></a><span class="lineno">  632</span>&#160;          inofst     = inofst + 8</div>
 <div class="line"><a name="l00633"></a><span class="lineno">  633</span>&#160;          ident(17)  = ivals(1)</div>
 <div class="line"><a name="l00634"></a><span class="lineno">  634</span>&#160;<span class="comment">C         PRINT *,&#39;BUFR MASTER TABLE NR&#39;,IDENT(17)</span></div>
 <div class="line"><a name="l00635"></a><span class="lineno">  635</span>&#160;      <span class="keywordflow">ELSE</span></div>
 <div class="line"><a name="l00636"></a><span class="lineno">  636</span>&#160;          iptr(3)    = inofst</div>
 <div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;<span class="comment">C                           GET SECTION 1 COUNT</span></div>
-<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,24)</div>
+<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,24)</div>
 <div class="line"><a name="l00639"></a><span class="lineno">  639</span>&#160;<span class="comment">C         PRINT *,&#39;SECTION 1 STARTS AT&#39;,INOFST,&#39;  SIZE&#39;,IVALS(1)</span></div>
 <div class="line"><a name="l00640"></a><span class="lineno">  640</span>&#160;          inofst     = inofst + 32</div>
 <div class="line"><a name="l00641"></a><span class="lineno">  641</span>&#160;          iptr( 2)   = ivals(1)</div>
 <div class="line"><a name="l00642"></a><span class="lineno">  642</span>&#160;<span class="keywordflow">      END IF</span></div>
 <div class="line"><a name="l00643"></a><span class="lineno">  643</span>&#160;<span class="comment">C  ======================</span></div>
 <div class="line"><a name="l00644"></a><span class="lineno">  644</span>&#160;<span class="comment">C                            ORIGINATING CENTER</span></div>
-<div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,16)</div>
+<div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,16)</div>
 <div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;      inofst     = inofst + 16</div>
 <div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;      ident(2)   = ivals(1)</div>
 <div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160;<span class="comment">C                            UPDATE SEQUENCE</span></div>
-<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;      inofst     = inofst + 8</div>
 <div class="line"><a name="l00651"></a><span class="lineno">  651</span>&#160;      ident(3)   = ivals(1)</div>
 <div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;<span class="comment">C                            OPTIONAL SECTION FLAG</span></div>
-<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,1)</div>
+<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,1)</div>
 <div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;      ident(4)   = ivals(1)</div>
 <div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;      <span class="keywordflow">IF</span> (ident(4).GT.0) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160;          sec2       = .true.</div>
@@ -748,11 +748,11 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160;<span class="keywordflow">      END IF</span></div>
 <div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160;      inofst     = inofst + 8</div>
 <div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;<span class="comment">C                            MESSAGE TYPE</span></div>
-<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;      ident(5)   = ivals(1)</div>
 <div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160;      inofst     = inofst + 8</div>
 <div class="line"><a name="l00666"></a><span class="lineno">  666</span>&#160;<span class="comment">C                            MESSAGE SUBTYPE</span></div>
-<div class="line"><a name="l00667"></a><span class="lineno">  667</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00667"></a><span class="lineno">  667</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160;      ident(6)   = ivals(1)</div>
 <div class="line"><a name="l00669"></a><span class="lineno">  669</span>&#160;      inofst     = inofst + 8</div>
 <div class="line"><a name="l00670"></a><span class="lineno">  670</span>&#160;<span class="comment">cdak KEYSER fix 02/02/2001 VVVVV</span></div>
@@ -791,39 +791,39 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00703"></a><span class="lineno">  703</span>&#160;<span class="comment">C                               BYTE 11 IS VER NR OF MASTER TABLE</span></div>
 <div class="line"><a name="l00704"></a><span class="lineno">  704</span>&#160;<span class="comment">C                               BYTE 12 IS VER NR OF LOCAL TABLE</span></div>
 <div class="line"><a name="l00705"></a><span class="lineno">  705</span>&#160;      <span class="keywordflow">IF</span> (ident(1).LT.2) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l00706"></a><span class="lineno">  706</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,16)</div>
+<div class="line"><a name="l00706"></a><span class="lineno">  706</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,16)</div>
 <div class="line"><a name="l00707"></a><span class="lineno">  707</span>&#160;          ident(7)   = ivals(1)</div>
 <div class="line"><a name="l00708"></a><span class="lineno">  708</span>&#160;          inofst     = inofst + 16</div>
 <div class="line"><a name="l00709"></a><span class="lineno">  709</span>&#160;      <span class="keywordflow">ELSE</span></div>
 <div class="line"><a name="l00710"></a><span class="lineno">  710</span>&#160;<span class="comment">C                               BYTE 11 IS VER NR OF MASTER TABLE</span></div>
-<div class="line"><a name="l00711"></a><span class="lineno">  711</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00711"></a><span class="lineno">  711</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00712"></a><span class="lineno">  712</span>&#160;          ident(18)  = ivals(1)</div>
 <div class="line"><a name="l00713"></a><span class="lineno">  713</span>&#160;          inofst     = inofst + 8</div>
 <div class="line"><a name="l00714"></a><span class="lineno">  714</span>&#160;<span class="comment">C                               BYTE 12 IS VER NR OF LOCAL TABLE</span></div>
-<div class="line"><a name="l00715"></a><span class="lineno">  715</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00715"></a><span class="lineno">  715</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00716"></a><span class="lineno">  716</span>&#160;          ident(19)  = ivals(1)</div>
 <div class="line"><a name="l00717"></a><span class="lineno">  717</span>&#160;          inofst     = inofst + 8</div>
 <div class="line"><a name="l00718"></a><span class="lineno">  718</span>&#160; </div>
 <div class="line"><a name="l00719"></a><span class="lineno">  719</span>&#160;<span class="keywordflow">      END IF</span></div>
 <div class="line"><a name="l00720"></a><span class="lineno">  720</span>&#160;<span class="comment">C                            YEAR OF CENTURY</span></div>
-<div class="line"><a name="l00721"></a><span class="lineno">  721</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00721"></a><span class="lineno">  721</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00722"></a><span class="lineno">  722</span>&#160;      ident(8)   = ivals(1)</div>
 <div class="line"><a name="l00723"></a><span class="lineno">  723</span>&#160;      inofst     = inofst + 8</div>
 <div class="line"><a name="l00724"></a><span class="lineno">  724</span>&#160;<span class="comment">C                            MONTH</span></div>
-<div class="line"><a name="l00725"></a><span class="lineno">  725</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00725"></a><span class="lineno">  725</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00726"></a><span class="lineno">  726</span>&#160;      ident(9)   = ivals(1)</div>
 <div class="line"><a name="l00727"></a><span class="lineno">  727</span>&#160;      inofst     = inofst + 8</div>
 <div class="line"><a name="l00728"></a><span class="lineno">  728</span>&#160;<span class="comment">C                            DAY</span></div>
 <div class="line"><a name="l00729"></a><span class="lineno">  729</span>&#160;<span class="comment">C     PRINT *,&#39;DAY AT &#39;,INOFST</span></div>
-<div class="line"><a name="l00730"></a><span class="lineno">  730</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00730"></a><span class="lineno">  730</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00731"></a><span class="lineno">  731</span>&#160;      ident(10)  = ivals(1)</div>
 <div class="line"><a name="l00732"></a><span class="lineno">  732</span>&#160;      inofst     = inofst + 8</div>
 <div class="line"><a name="l00733"></a><span class="lineno">  733</span>&#160;<span class="comment">C                            HOUR</span></div>
-<div class="line"><a name="l00734"></a><span class="lineno">  734</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00734"></a><span class="lineno">  734</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00735"></a><span class="lineno">  735</span>&#160;      ident(11)  = ivals(1)</div>
 <div class="line"><a name="l00736"></a><span class="lineno">  736</span>&#160;      inofst     = inofst + 8</div>
 <div class="line"><a name="l00737"></a><span class="lineno">  737</span>&#160;<span class="comment">C                            MINUTE</span></div>
-<div class="line"><a name="l00738"></a><span class="lineno">  738</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,8)</div>
+<div class="line"><a name="l00738"></a><span class="lineno">  738</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,8)</div>
 <div class="line"><a name="l00739"></a><span class="lineno">  739</span>&#160;      ident(12)  = ivals(1)</div>
 <div class="line"><a name="l00740"></a><span class="lineno">  740</span>&#160;<span class="comment">C                            RESET POINTER (INOFST) TO START OF</span></div>
 <div class="line"><a name="l00741"></a><span class="lineno">  741</span>&#160;<span class="comment">C                                NEXT SECTION</span></div>
@@ -833,24 +833,24 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00745"></a><span class="lineno">  745</span>&#160;      iptr(5)    = inofst</div>
 <div class="line"><a name="l00746"></a><span class="lineno">  746</span>&#160;      <span class="keywordflow">IF</span> (sec2) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00747"></a><span class="lineno">  747</span>&#160;<span class="comment">C                            SECTION 2 COUNT</span></div>
-<div class="line"><a name="l00748"></a><span class="lineno">  748</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,iptr(4),inofst,24)</div>
+<div class="line"><a name="l00748"></a><span class="lineno">  748</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,iptr(4),inofst,24)</div>
 <div class="line"><a name="l00749"></a><span class="lineno">  749</span>&#160;          inofst   = inofst + 32</div>
 <div class="line"><a name="l00750"></a><span class="lineno">  750</span>&#160;<span class="comment">C         PRINT *,&#39;SECTION 2 STARTS AT&#39;,INOFST,&#39; BYTES=&#39;,IPTR(4)</span></div>
 <div class="line"><a name="l00751"></a><span class="lineno">  751</span>&#160;          kentry  = (iptr(4) - 4) / 14</div>
 <div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;<span class="comment">C         PRINT *,&#39;SHOULD BE A MAX OF&#39;,KENTRY,&#39; REPORTS&#39;</span></div>
 <div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;          <span class="keywordflow">IF</span> (ident(2).EQ.7) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160;              <span class="keywordflow">DO</span> 2000 i = 1, kentry</div>
-<div class="line"><a name="l00755"></a><span class="lineno">  755</span>&#160;                  <span class="keyword">CALL </span>gbyte (msga,kdspl ,inofst,16)</div>
+<div class="line"><a name="l00755"></a><span class="lineno">  755</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,kdspl ,inofst,16)</div>
 <div class="line"><a name="l00756"></a><span class="lineno">  756</span>&#160;                  inofst  = inofst + 16</div>
-<div class="line"><a name="l00757"></a><span class="lineno">  757</span>&#160;                  <span class="keyword">CALL </span>gbyte (msga,lat   ,inofst,16)</div>
+<div class="line"><a name="l00757"></a><span class="lineno">  757</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,lat   ,inofst,16)</div>
 <div class="line"><a name="l00758"></a><span class="lineno">  758</span>&#160;                  inofst  = inofst + 16</div>
-<div class="line"><a name="l00759"></a><span class="lineno">  759</span>&#160;                  <span class="keyword">CALL </span>gbyte (msga,lon   ,inofst,16)</div>
+<div class="line"><a name="l00759"></a><span class="lineno">  759</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,lon   ,inofst,16)</div>
 <div class="line"><a name="l00760"></a><span class="lineno">  760</span>&#160;                  inofst  = inofst + 16</div>
-<div class="line"><a name="l00761"></a><span class="lineno">  761</span>&#160;                  <span class="keyword">CALL </span>gbyte (msga,kdahr ,inofst,16)</div>
+<div class="line"><a name="l00761"></a><span class="lineno">  761</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,kdahr ,inofst,16)</div>
 <div class="line"><a name="l00762"></a><span class="lineno">  762</span>&#160;                  inofst  = inofst + 16</div>
-<div class="line"><a name="l00763"></a><span class="lineno">  763</span>&#160;                  <span class="keyword">CALL </span>gbyte (msga,dirid(1),inofst,32)</div>
+<div class="line"><a name="l00763"></a><span class="lineno">  763</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,dirid(1),inofst,32)</div>
 <div class="line"><a name="l00764"></a><span class="lineno">  764</span>&#160;                  inofst  = inofst + 32</div>
-<div class="line"><a name="l00765"></a><span class="lineno">  765</span>&#160;                  <span class="keyword">CALL </span>gbyte (msga,dirid(2),inofst,16)</div>
+<div class="line"><a name="l00765"></a><span class="lineno">  765</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,dirid(2),inofst,16)</div>
 <div class="line"><a name="l00766"></a><span class="lineno">  766</span>&#160;                  inofst  = inofst + 16</div>
 <div class="line"><a name="l00767"></a><span class="lineno">  767</span>&#160;<span class="comment">C                 PRINT *,KDSPL,LAT,LON,KDAHR,DIRID(1),DIRID(2)</span></div>
 <div class="line"><a name="l00768"></a><span class="lineno">  768</span>&#160; 2000         <span class="keywordflow">CONTINUE</span></div>
@@ -862,13 +862,13 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00774"></a><span class="lineno">  774</span>&#160;<span class="comment">C                            BIT OFFSET TO START OF SECTION 3</span></div>
 <div class="line"><a name="l00775"></a><span class="lineno">  775</span>&#160;      iptr( 7)   = inofst</div>
 <div class="line"><a name="l00776"></a><span class="lineno">  776</span>&#160;<span class="comment">C                            SECTION 3 COUNT</span></div>
-<div class="line"><a name="l00777"></a><span class="lineno">  777</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,iptr(6),inofst,24)</div>
+<div class="line"><a name="l00777"></a><span class="lineno">  777</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,iptr(6),inofst,24)</div>
 <div class="line"><a name="l00778"></a><span class="lineno">  778</span>&#160;<span class="comment">C     PRINT *,&#39;SECTION 3 STARTS AT&#39;,INOFST,&#39; BYTES=&#39;,IPTR(6)</span></div>
 <div class="line"><a name="l00779"></a><span class="lineno">  779</span>&#160;      inofst     = inofst + 24</div>
 <div class="line"><a name="l00780"></a><span class="lineno">  780</span>&#160;<span class="comment">C                           SKIP RESERVED BYTE</span></div>
 <div class="line"><a name="l00781"></a><span class="lineno">  781</span>&#160;      inofst     = inofst + 8</div>
 <div class="line"><a name="l00782"></a><span class="lineno">  782</span>&#160;<span class="comment">C                            NUMBER OF DATA SUBSETS</span></div>
-<div class="line"><a name="l00783"></a><span class="lineno">  783</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ident(14),inofst,16)</div>
+<div class="line"><a name="l00783"></a><span class="lineno">  783</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ident(14),inofst,16)</div>
 <div class="line"><a name="l00784"></a><span class="lineno">  784</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l00785"></a><span class="lineno">  785</span>&#160;      <span class="keywordflow">IF</span> (ident(14).GT.maxr) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00786"></a><span class="lineno">  786</span>&#160;          print *,<span class="stringliteral">&#39;THE NUMBER OF SUBSETS EXCEEDS THE MAXIMUM OF&#39;</span>,maxr</div>
@@ -881,11 +881,11 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00793"></a><span class="lineno">  793</span>&#160;<span class="keywordflow">      END IF</span></div>
 <div class="line"><a name="l00794"></a><span class="lineno">  794</span>&#160;      inofst     = inofst + 16</div>
 <div class="line"><a name="l00795"></a><span class="lineno">  795</span>&#160;<span class="comment">C                            OBSERVED DATA FLAG</span></div>
-<div class="line"><a name="l00796"></a><span class="lineno">  796</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,1)</div>
+<div class="line"><a name="l00796"></a><span class="lineno">  796</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,1)</div>
 <div class="line"><a name="l00797"></a><span class="lineno">  797</span>&#160;      ident(15)  = ivals(1)</div>
 <div class="line"><a name="l00798"></a><span class="lineno">  798</span>&#160;      inofst     = inofst + 1</div>
 <div class="line"><a name="l00799"></a><span class="lineno">  799</span>&#160;<span class="comment">C                            COMPRESSED DATA FLAG</span></div>
-<div class="line"><a name="l00800"></a><span class="lineno">  800</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,1)</div>
+<div class="line"><a name="l00800"></a><span class="lineno">  800</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,1)</div>
 <div class="line"><a name="l00801"></a><span class="lineno">  801</span>&#160;      ident(16)  = ivals(1)</div>
 <div class="line"><a name="l00802"></a><span class="lineno">  802</span>&#160;      inofst     = inofst + 7</div>
 <div class="line"><a name="l00803"></a><span class="lineno">  803</span>&#160;<span class="comment">C                            CALCULATE NUMBER OF DESCRIPTORS</span></div>
@@ -893,7 +893,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00805"></a><span class="lineno">  805</span>&#160;      iptr(12)   = nrdesc</div>
 <div class="line"><a name="l00806"></a><span class="lineno">  806</span>&#160;      iptr(13)   = nrdesc</div>
 <div class="line"><a name="l00807"></a><span class="lineno">  807</span>&#160;<span class="comment">C                            EXTRACT DESCRIPTORS</span></div>
-<div class="line"><a name="l00808"></a><span class="lineno">  808</span>&#160;      <span class="keyword">CALL </span>gbytes (msga,istack,inofst,16,0,nrdesc)</div>
+<div class="line"><a name="l00808"></a><span class="lineno">  808</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbytes_8f.html#ac957b0c87f1261d8460c52bfec7d0308">gbytes</a> (msga,istack,inofst,16,0,nrdesc)</div>
 <div class="line"><a name="l00809"></a><span class="lineno">  809</span>&#160;<span class="comment">C     PRINT *,&#39;INITIAL DESCRIPTOR LIST OF&#39;,NRDESC,&#39; DESCRIPTORS&#39;</span></div>
 <div class="line"><a name="l00810"></a><span class="lineno">  810</span>&#160;      <span class="keywordflow">DO</span> 10 l = 1, nrdesc</div>
 <div class="line"><a name="l00811"></a><span class="lineno">  811</span>&#160;          iwork(l)   = istack(l)</div>
@@ -926,7 +926,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00838"></a><span class="lineno">  838</span>&#160;<span class="comment">C                            BIT OFFSET TO START OF SECTION 4</span></div>
 <div class="line"><a name="l00839"></a><span class="lineno">  839</span>&#160;      iptr( 9)   = inofst</div>
 <div class="line"><a name="l00840"></a><span class="lineno">  840</span>&#160;<span class="comment">C                            SECTION 4 COUNT</span></div>
-<div class="line"><a name="l00841"></a><span class="lineno">  841</span>&#160;      <span class="keyword">CALL </span>gbyte (msga,ivals,inofst,24)</div>
+<div class="line"><a name="l00841"></a><span class="lineno">  841</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,inofst,24)</div>
 <div class="line"><a name="l00842"></a><span class="lineno">  842</span>&#160;<span class="comment">C     PRINT *,&#39;SECTION 4 STARTS AT&#39;,INOFST,&#39; VALUE&#39;,IVALS(1)</span></div>
 <div class="line"><a name="l00843"></a><span class="lineno">  843</span>&#160;      iptr( 8)   = ivals(1)</div>
 <div class="line"><a name="l00844"></a><span class="lineno">  844</span>&#160;      inofst     = inofst + 32</div>
@@ -934,7 +934,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l00846"></a><span class="lineno">  846</span>&#160;      iptr(25)   = inofst</div>
 <div class="line"><a name="l00847"></a><span class="lineno">  847</span>&#160;<span class="comment">C                            FIND OUT IF &#39;7777&#39; TERMINATOR IS THERE</span></div>
 <div class="line"><a name="l00848"></a><span class="lineno">  848</span>&#160;      inofst     = iptr(9) + iptr(8) * 8</div>
-<div class="line"><a name="l00849"></a><span class="lineno">  849</span>&#160;      <span class="keyword">CALL </span>gbyte  (msga,ivals,inofst,32)</div>
+<div class="line"><a name="l00849"></a><span class="lineno">  849</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a>  (msga,ivals,inofst,32)</div>
 <div class="line"><a name="l00850"></a><span class="lineno">  850</span>&#160;<span class="comment">C     PRINT *,&#39;SECTION 5 STARTS AT&#39;,INOFST,&#39; VALUE&#39;,IVALS(1)</span></div>
 <div class="line"><a name="l00851"></a><span class="lineno">  851</span>&#160;      <span class="keywordflow">IF</span> (ivals(1).NE.926365495) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00852"></a><span class="lineno">  852</span>&#160;          print *,<span class="stringliteral">&#39;BAD SECTION COUNT&#39;</span></div>
@@ -1634,10 +1634,10 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01546"></a><span class="lineno"> 1546</span>&#160;              iptr(31)   = iptr(31) + 1</div>
 <div class="line"><a name="l01547"></a><span class="lineno"> 1547</span>&#160;              kprm       = iptr(31) + iptr(24)</div>
 <div class="line"><a name="l01548"></a><span class="lineno"> 1548</span>&#160;<span class="comment">C                        GET LOWEST</span></div>
-<div class="line"><a name="l01549"></a><span class="lineno"> 1549</span>&#160;              <span class="keyword">CALL </span>gbyte (msga,lowest,iptr(25),iptr(29))</div>
+<div class="line"><a name="l01549"></a><span class="lineno"> 1549</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,lowest,iptr(25),iptr(29))</div>
 <div class="line"><a name="l01550"></a><span class="lineno"> 1550</span>&#160;              iptr(25)   = iptr(25) + iptr(29)</div>
 <div class="line"><a name="l01551"></a><span class="lineno"> 1551</span>&#160;<span class="comment">C                        GET NBINC</span></div>
-<div class="line"><a name="l01552"></a><span class="lineno"> 1552</span>&#160;              <span class="keyword">CALL </span>gbyte (msga,nbinc,iptr(25),6)</div>
+<div class="line"><a name="l01552"></a><span class="lineno"> 1552</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,nbinc,iptr(25),6)</div>
 <div class="line"><a name="l01553"></a><span class="lineno"> 1553</span>&#160;              iptr(25)   = iptr(25) + 6</div>
 <div class="line"><a name="l01554"></a><span class="lineno"> 1554</span>&#160;<span class="comment">C             PRINT *,&#39;LOWEST=&#39;,LOWEST,&#39; NBINC=&#39;,NBINC</span></div>
 <div class="line"><a name="l01555"></a><span class="lineno"> 1555</span>&#160;              <span class="keywordflow">IF</span> (nbinc.GT.32) <span class="keywordflow">THEN</span></div>
@@ -1646,7 +1646,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01558"></a><span class="lineno"> 1558</span>&#160;<span class="keywordflow">              END IF</span></div>
 <div class="line"><a name="l01559"></a><span class="lineno"> 1559</span>&#160;<span class="comment">C                        EXTRACT DATA FOR ASSOCIATED FIELD</span></div>
 <div class="line"><a name="l01560"></a><span class="lineno"> 1560</span>&#160;              <span class="keywordflow">IF</span> (nbinc.GT.0) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l01561"></a><span class="lineno"> 1561</span>&#160;                  <span class="keyword">CALL </span>gbytes (msga,ivals,iptr(25),nbinc,0,iptr(21))</div>
+<div class="line"><a name="l01561"></a><span class="lineno"> 1561</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbytes_8f.html#ac957b0c87f1261d8460c52bfec7d0308">gbytes</a> (msga,ivals,iptr(25),nbinc,0,iptr(21))</div>
 <div class="line"><a name="l01562"></a><span class="lineno"> 1562</span>&#160;                  iptr(25)   = iptr(25) + nbinc * iptr(21)</div>
 <div class="line"><a name="l01563"></a><span class="lineno"> 1563</span>&#160;                  <span class="keywordflow">DO</span> 50 i = 1, ident(14)</div>
 <div class="line"><a name="l01564"></a><span class="lineno"> 1564</span>&#160;                      kdata(i,kprm) = ivals(i) + lowest</div>
@@ -1686,11 +1686,11 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01598"></a><span class="lineno"> 1598</span>&#160;          nrvals    = 1</div>
 <div class="line"><a name="l01599"></a><span class="lineno"> 1599</span>&#160;<span class="comment">C                                       LOWEST</span></div>
 <div class="line"><a name="l01600"></a><span class="lineno"> 1600</span>&#160;<span class="comment">C         PRINT *,&#39;PARAM&#39;,KPRM</span></div>
-<div class="line"><a name="l01601"></a><span class="lineno"> 1601</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,lowest,iptr(25),jwide)</div>
+<div class="line"><a name="l01601"></a><span class="lineno"> 1601</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,lowest,iptr(25),jwide)</div>
 <div class="line"><a name="l01602"></a><span class="lineno"> 1602</span>&#160;<span class="comment">C         PRINT *,&#39;            LOWEST=&#39;,LOWEST,&#39; AT BIT LOC &#39;,IPTR(25)</span></div>
 <div class="line"><a name="l01603"></a><span class="lineno"> 1603</span>&#160;          iptr(25)  = iptr(25) + jwide</div>
 <div class="line"><a name="l01604"></a><span class="lineno"> 1604</span>&#160;<span class="comment">C                                       ISOLATE COMPRESSED BIT WIDTH</span></div>
-<div class="line"><a name="l01605"></a><span class="lineno"> 1605</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,nbinc,iptr(25),6)</div>
+<div class="line"><a name="l01605"></a><span class="lineno"> 1605</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,nbinc,iptr(25),6)</div>
 <div class="line"><a name="l01606"></a><span class="lineno"> 1606</span>&#160;<span class="comment">C         PRINT *,&#39;            NBINC=&#39;,NBINC,&#39; AT BIT LOC&#39;,IPTR(25)</span></div>
 <div class="line"><a name="l01607"></a><span class="lineno"> 1607</span>&#160;          <span class="keywordflow">IF</span> (nbinc.GT.32) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l01608"></a><span class="lineno"> 1608</span>&#160;<span class="comment">C                                NBINC TOO LARGE</span></div>
@@ -1721,7 +1721,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01633"></a><span class="lineno"> 1633</span>&#160;          iptr(31)  = iptr(31) + 1</div>
 <div class="line"><a name="l01634"></a><span class="lineno"> 1634</span>&#160;          kprm      = iptr(31) + iptr(24)</div>
 <div class="line"><a name="l01635"></a><span class="lineno"> 1635</span>&#160;          <span class="keywordflow">IF</span> (nbinc.NE.0) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l01636"></a><span class="lineno"> 1636</span>&#160;              <span class="keyword">CALL </span>gbytes (msga,ivals,iptr(25),nbinc,0,nrvals)</div>
+<div class="line"><a name="l01636"></a><span class="lineno"> 1636</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbytes_8f.html#ac957b0c87f1261d8460c52bfec7d0308">gbytes</a> (msga,ivals,iptr(25),nbinc,0,nrvals)</div>
 <div class="line"><a name="l01637"></a><span class="lineno"> 1637</span>&#160;              iptr(25)  = iptr(25) + nbinc * nrvals</div>
 <div class="line"><a name="l01638"></a><span class="lineno"> 1638</span>&#160;<span class="comment">C                                       RECALCULATE TO ORIGINAL VALUES</span></div>
 <div class="line"><a name="l01639"></a><span class="lineno"> 1639</span>&#160;              <span class="keywordflow">DO</span> 100 i = 1, nrvals</div>
@@ -1769,7 +1769,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01681"></a><span class="lineno"> 1681</span>&#160;<span class="comment">C                                   GET LOWEST</span></div>
 <div class="line"><a name="l01682"></a><span class="lineno"> 1682</span>&#160;<span class="comment">C         PRINT *,&#39; PICKED UP LOWEST&#39;,(KLOW(K),K=1,IPTR(40))</span></div>
 <div class="line"><a name="l01683"></a><span class="lineno"> 1683</span>&#160;          <span class="keywordflow">DO</span> 1906 k = 1, iptr(40)</div>
-<div class="line"><a name="l01684"></a><span class="lineno"> 1684</span>&#160;              <span class="keyword">CALL </span>gbyte (msga,klow,iptr(25),8)</div>
+<div class="line"><a name="l01684"></a><span class="lineno"> 1684</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,klow,iptr(25),8)</div>
 <div class="line"><a name="l01685"></a><span class="lineno"> 1685</span>&#160;              iptr(25)   = iptr(25) + 8</div>
 <div class="line"><a name="l01686"></a><span class="lineno"> 1686</span>&#160;              <span class="keywordflow">IF</span> (klow(k).NE.0) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l01687"></a><span class="lineno"> 1687</span>&#160;                  iptr(1)   = 27</div>
@@ -1779,7 +1779,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01691"></a><span class="lineno"> 1691</span>&#160; 1906     <span class="keywordflow">CONTINUE</span></div>
 <div class="line"><a name="l01692"></a><span class="lineno"> 1692</span>&#160;<span class="comment">C         PRINT *,&#39;TEXT - LOWEST = 0&#39;</span></div>
 <div class="line"><a name="l01693"></a><span class="lineno"> 1693</span>&#160;<span class="comment">C                                   GET NBINC</span></div>
-<div class="line"><a name="l01694"></a><span class="lineno"> 1694</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,nbinc,iptr(25),6)</div>
+<div class="line"><a name="l01694"></a><span class="lineno"> 1694</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,nbinc,iptr(25),6)</div>
 <div class="line"><a name="l01695"></a><span class="lineno"> 1695</span>&#160;          iptr(25)     = iptr(25) + 6</div>
 <div class="line"><a name="l01696"></a><span class="lineno"> 1696</span>&#160;          <span class="keywordflow">IF</span> (nbinc.NE.iptr(40)) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l01697"></a><span class="lineno"> 1697</span>&#160;              iptr(1)  = 28</div>
@@ -1799,7 +1799,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01711"></a><span class="lineno"> 1711</span>&#160; 1700         <span class="keywordflow">CONTINUE</span></div>
 <div class="line"><a name="l01712"></a><span class="lineno"> 1712</span>&#160;<span class="comment">C             PRINT *,N,IDENT(14),&#39;KPRM-B=&#39;,KPRM,IPTR(24),NBITS</span></div>
 <div class="line"><a name="l01713"></a><span class="lineno"> 1713</span>&#160;              <span class="keywordflow">IF</span> (nbits.GT.mwdbit) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l01714"></a><span class="lineno"> 1714</span>&#160;                  <span class="keyword">CALL </span>gbyte (msga,idata,iptr(25),mwdbit)</div>
+<div class="line"><a name="l01714"></a><span class="lineno"> 1714</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,idata,iptr(25),mwdbit)</div>
 <div class="line"><a name="l01715"></a><span class="lineno"> 1715</span>&#160;                  iptr(25)     = iptr(25) + mwdbit</div>
 <div class="line"><a name="l01716"></a><span class="lineno"> 1716</span>&#160;                  nbits        = nbits - mwdbit</div>
 <div class="line"><a name="l01717"></a><span class="lineno"> 1717</span>&#160;                  <span class="keywordflow">IF</span> (iptr(37).EQ.0) <span class="keywordflow">THEN</span></div>
@@ -1817,7 +1817,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01729"></a><span class="lineno"> 1729</span>&#160;<span class="comment">C1701             FORMAT (1X,I1,1X,6HKDATA=,A4,2X,I5,2X,I5,2X,I5,2X,I12)</span></div>
 <div class="line"><a name="l01730"></a><span class="lineno"> 1730</span>&#160;                  <span class="keywordflow">GO TO</span> 1700</div>
 <div class="line"><a name="l01731"></a><span class="lineno"> 1731</span>&#160;              <span class="keywordflow">ELSE</span> <span class="keywordflow">IF</span> (nbits.GT.0) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l01732"></a><span class="lineno"> 1732</span>&#160;                  <span class="keyword">CALL </span>gbyte (msga,idata,iptr(25),nbits)</div>
+<div class="line"><a name="l01732"></a><span class="lineno"> 1732</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,idata,iptr(25),nbits)</div>
 <div class="line"><a name="l01733"></a><span class="lineno"> 1733</span>&#160;                  iptr(25)     = iptr(25) + nbits</div>
 <div class="line"><a name="l01734"></a><span class="lineno"> 1734</span>&#160;                  ibuf         = (iptr(44) - nbits) / 8</div>
 <div class="line"><a name="l01735"></a><span class="lineno"> 1735</span>&#160;                  <span class="keywordflow">IF</span> (ibuf.GT.0) <span class="keywordflow">THEN</span></div>
@@ -1962,7 +1962,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01874"></a><span class="lineno"> 1874</span>&#160;                  kprm            = iptr(31) + iptr(24)</div>
 <div class="line"><a name="l01875"></a><span class="lineno"> 1875</span>&#160;                  mstack(1,kprm)  = 33792 + iptr(29)</div>
 <div class="line"><a name="l01876"></a><span class="lineno"> 1876</span>&#160;                  mstack(2,kprm)  = 0</div>
-<div class="line"><a name="l01877"></a><span class="lineno"> 1877</span>&#160;                  <span class="keyword">CALL </span>gbyte (msga,ivals,iptr(25),iptr(29))</div>
+<div class="line"><a name="l01877"></a><span class="lineno"> 1877</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,iptr(25),iptr(29))</div>
 <div class="line"><a name="l01878"></a><span class="lineno"> 1878</span>&#160;                  iptr(25)        = iptr(25) + iptr(29)</div>
 <div class="line"><a name="l01879"></a><span class="lineno"> 1879</span>&#160;                  kdata(iptr(17),kprm) = ivals(1)</div>
 <div class="line"><a name="l01880"></a><span class="lineno"> 1880</span>&#160;<span class="comment">C                 PRINT *,&#39;FI8804-A&#39;,KPRM,MSTACK(1,KPRM),</span></div>
@@ -1979,7 +1979,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01891"></a><span class="lineno"> 1891</span>&#160;<span class="comment">C         END IF</span></div>
 <div class="line"><a name="l01892"></a><span class="lineno"> 1892</span>&#160;<span class="comment">C                                       GET VALUES</span></div>
 <div class="line"><a name="l01893"></a><span class="lineno"> 1893</span>&#160;<span class="comment">C                                CALL TO GET DATA OF GIVEN BIT WIDTH</span></div>
-<div class="line"><a name="l01894"></a><span class="lineno"> 1894</span>&#160;          <span class="keyword">CALL </span>gbyte (msga,ivals,iptr(25),jwide)</div>
+<div class="line"><a name="l01894"></a><span class="lineno"> 1894</span>&#160;          <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,ivals,iptr(25),jwide)</div>
 <div class="line"><a name="l01895"></a><span class="lineno"> 1895</span>&#160;<span class="comment">C         PRINT *,&#39;DATA  TO&#39;,IPTR(17),KPRM,IVALS(1),JWIDE,IPTR(25)</span></div>
 <div class="line"><a name="l01896"></a><span class="lineno"> 1896</span>&#160;          iptr(25) = iptr(25) + jwide</div>
 <div class="line"><a name="l01897"></a><span class="lineno"> 1897</span>&#160;<span class="comment">C                                RETURN WITH SINGLE VALUE</span></div>
@@ -2020,7 +2020,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01932"></a><span class="lineno"> 1932</span>&#160;          kany  = kany + 1</div>
 <div class="line"><a name="l01933"></a><span class="lineno"> 1933</span>&#160;<span class="comment">C         PRINT *,&#39;          NR BITS THIS PASS&#39;,NRBITS</span></div>
 <div class="line"><a name="l01934"></a><span class="lineno"> 1934</span>&#160;          <span class="keywordflow">IF</span> (nrbits.GT.mwdbit) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l01935"></a><span class="lineno"> 1935</span>&#160;              <span class="keyword">CALL </span>gbyte (msga,idata,iptr(25),mwdbit)</div>
+<div class="line"><a name="l01935"></a><span class="lineno"> 1935</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,idata,iptr(25),mwdbit)</div>
 <div class="line"><a name="l01936"></a><span class="lineno"> 1936</span>&#160;<span class="comment">C             PRINT 1801,KANY,IDATA,IPTR(17),KPRM,NRBITS</span></div>
 <div class="line"><a name="l01937"></a><span class="lineno"> 1937</span>&#160; 1801         <span class="keyword">FORMAT</span> (1x,i2,4x,z8,2(4x,i4))</div>
 <div class="line"><a name="l01938"></a><span class="lineno"> 1938</span>&#160;<span class="comment">C                               CONVERTS ASCII TO EBCIDIC</span></div>
@@ -2039,7 +2039,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l01951"></a><span class="lineno"> 1951</span>&#160;              iptr(24)    = iptr(24) + 1</div>
 <div class="line"><a name="l01952"></a><span class="lineno"> 1952</span>&#160;              <span class="keywordflow">GO TO</span> 1800</div>
 <div class="line"><a name="l01953"></a><span class="lineno"> 1953</span>&#160;          <span class="keywordflow">ELSE</span> <span class="keywordflow">IF</span> (nrbits.GT.0) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l01954"></a><span class="lineno"> 1954</span>&#160;              <span class="keyword">CALL </span>gbyte (msga,idata,iptr(25),nrbits)</div>
+<div class="line"><a name="l01954"></a><span class="lineno"> 1954</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,idata,iptr(25),nrbits)</div>
 <div class="line"><a name="l01955"></a><span class="lineno"> 1955</span>&#160;              iptr(25)    = iptr(25) + nrbits</div>
 <div class="line"><a name="l01956"></a><span class="lineno"> 1956</span>&#160;<span class="comment">C                               CONVERTS ASCII TO EBCIDIC</span></div>
 <div class="line"><a name="l01957"></a><span class="lineno"> 1957</span>&#160;<span class="comment">C                               COMMENT OUT IF NOT IBM370 COMPUTER</span></div>
@@ -2192,7 +2192,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l02104"></a><span class="lineno"> 2104</span>&#160;              kprm      = iptr(31) + iptr(24)</div>
 <div class="line"><a name="l02105"></a><span class="lineno"> 2105</span>&#160;              mstack(1,kprm)  = jdesc</div>
 <div class="line"><a name="l02106"></a><span class="lineno"> 2106</span>&#160;              mstack(2,kprm)  = 0</div>
-<div class="line"><a name="l02107"></a><span class="lineno"> 2107</span>&#160;              <span class="keyword">CALL </span>gbyte (msga,kvals,iptr(25),jwide)</div>
+<div class="line"><a name="l02107"></a><span class="lineno"> 2107</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,kvals,iptr(25),jwide)</div>
 <div class="line"><a name="l02108"></a><span class="lineno"> 2108</span>&#160;              iptr(25)   = iptr(25) + jwide</div>
 <div class="line"><a name="l02109"></a><span class="lineno"> 2109</span>&#160;              kdata(iptr(17),kprm) = kvals(1)</div>
 <div class="line"><a name="l02110"></a><span class="lineno"> 2110</span>&#160;              <span class="keywordflow">RETURN</span></div>
@@ -2203,7 +2203,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l02115"></a><span class="lineno"> 2115</span>&#160;          <span class="keywordflow">IF</span> (ident(16).EQ.0) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l02116"></a><span class="lineno"> 2116</span>&#160; </div>
 <div class="line"><a name="l02117"></a><span class="lineno"> 2117</span>&#160;<span class="comment">C                               NON COMPRESSED</span></div>
-<div class="line"><a name="l02118"></a><span class="lineno"> 2118</span>&#160;              <span class="keyword">CALL </span>gbyte (msga,kvals,iptr(25),jwide)</div>
+<div class="line"><a name="l02118"></a><span class="lineno"> 2118</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,kvals,iptr(25),jwide)</div>
 <div class="line"><a name="l02119"></a><span class="lineno"> 2119</span>&#160;<span class="comment">C             PRINT *,LF,LX,LY,JDESC,&#39; NR OF REPLICATIONS&#39;,KVALS(1)</span></div>
 <div class="line"><a name="l02120"></a><span class="lineno"> 2120</span>&#160;              iptr(25)   = iptr(25) + jwide</div>
 <div class="line"><a name="l02121"></a><span class="lineno"> 2121</span>&#160;              iptr(31)  = iptr(31) + 1</div>
@@ -2216,7 +2216,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l02128"></a><span class="lineno"> 2128</span>&#160;<span class="comment">C    *                       MSTACK(2,KPRM),KDATA(IPTR(17),KPRM)</span></div>
 <div class="line"><a name="l02129"></a><span class="lineno"> 2129</span>&#160;          <span class="keywordflow">ELSE</span></div>
 <div class="line"><a name="l02130"></a><span class="lineno"> 2130</span>&#160;              nrvals     = ident(14)</div>
-<div class="line"><a name="l02131"></a><span class="lineno"> 2131</span>&#160;              <span class="keyword">CALL </span>gbytes (msga,kvals,iptr(25),jwide,0,nrvals)</div>
+<div class="line"><a name="l02131"></a><span class="lineno"> 2131</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbytes_8f.html#ac957b0c87f1261d8460c52bfec7d0308">gbytes</a> (msga,kvals,iptr(25),jwide,0,nrvals)</div>
 <div class="line"><a name="l02132"></a><span class="lineno"> 2132</span>&#160;              iptr(25)   = iptr(25) + jwide * nrvals</div>
 <div class="line"><a name="l02133"></a><span class="lineno"> 2133</span>&#160;              iptr(31)  = iptr(31) + 1</div>
 <div class="line"><a name="l02134"></a><span class="lineno"> 2134</span>&#160;              kprm       = iptr(31) + iptr(24)</div>
@@ -2403,7 +2403,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l02315"></a><span class="lineno"> 2315</span>&#160;<span class="comment">C                                  TURN ON SWITCH</span></div>
 <div class="line"><a name="l02316"></a><span class="lineno"> 2316</span>&#160;              irfvl1(2,lj) = 1</div>
 <div class="line"><a name="l02317"></a><span class="lineno"> 2317</span>&#160;<span class="comment">C                                 INSERT NEW REFERENCE VALUE</span></div>
-<div class="line"><a name="l02318"></a><span class="lineno"> 2318</span>&#160;              <span class="keyword">CALL </span>gbyte (msga,irfvl1(3,lj),iptr(25),kyyy)</div>
+<div class="line"><a name="l02318"></a><span class="lineno"> 2318</span>&#160;              <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,irfvl1(3,lj),iptr(25),kyyy)</div>
 <div class="line"><a name="l02319"></a><span class="lineno"> 2319</span>&#160;              <span class="keywordflow">GO TO</span> 300</div>
 <div class="line"><a name="l02320"></a><span class="lineno"> 2320</span>&#160;          <span class="keywordflow">ELSE</span> <span class="keywordflow">IF</span> (kyyy.EQ.0) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l02321"></a><span class="lineno"> 2321</span>&#160;<span class="comment">C                                      MUST TURN OFF ALL NEW</span></div>
@@ -2456,7 +2456,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l02368"></a><span class="lineno"> 2368</span>&#160; 1700             <span class="keywordflow">CONTINUE</span></div>
 <div class="line"><a name="l02369"></a><span class="lineno"> 2369</span>&#160;<span class="comment">C                 PRINT *,&#39;1700&#39;,KDATA(N,KPRM),N,KPRM,NBITS</span></div>
 <div class="line"><a name="l02370"></a><span class="lineno"> 2370</span>&#160;                  <span class="keywordflow">IF</span> (nbits.GT.mwdbit) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l02371"></a><span class="lineno"> 2371</span>&#160;                      <span class="keyword">CALL </span>gbyte (msga,idata,iptr(25),mwdbit)</div>
+<div class="line"><a name="l02371"></a><span class="lineno"> 2371</span>&#160;                      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,idata,iptr(25),mwdbit)</div>
 <div class="line"><a name="l02372"></a><span class="lineno"> 2372</span>&#160;                      iptr(25)     = iptr(25) + mwdbit</div>
 <div class="line"><a name="l02373"></a><span class="lineno"> 2373</span>&#160;                      nbits        = nbits - mwdbit</div>
 <div class="line"><a name="l02374"></a><span class="lineno"> 2374</span>&#160;<span class="comment">C                               CONVERTS ASCII TO EBCIDIC</span></div>
@@ -2475,7 +2475,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l02387"></a><span class="lineno"> 2387</span>&#160;<span class="comment">C    *                 I10)</span></div>
 <div class="line"><a name="l02388"></a><span class="lineno"> 2388</span>&#160;                      <span class="keywordflow">GO TO</span> 1700</div>
 <div class="line"><a name="l02389"></a><span class="lineno"> 2389</span>&#160;                  <span class="keywordflow">ELSE</span> <span class="keywordflow">IF</span> (nbits.EQ.mwdbit) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l02390"></a><span class="lineno"> 2390</span>&#160;                      <span class="keyword">CALL </span>gbyte (msga,idata,iptr(25),mwdbit)</div>
+<div class="line"><a name="l02390"></a><span class="lineno"> 2390</span>&#160;                      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,idata,iptr(25),mwdbit)</div>
 <div class="line"><a name="l02391"></a><span class="lineno"> 2391</span>&#160;                      iptr(25)     = iptr(25) + mwdbit</div>
 <div class="line"><a name="l02392"></a><span class="lineno"> 2392</span>&#160;                      nbits        = nbits - mwdbit</div>
 <div class="line"><a name="l02393"></a><span class="lineno"> 2393</span>&#160;<span class="comment">C                               CONVERTS ASCII TO EBCIDIC</span></div>
@@ -2491,7 +2491,7 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l02403"></a><span class="lineno"> 2403</span>&#160;                      kprm          = kprm + 1</div>
 <div class="line"><a name="l02404"></a><span class="lineno"> 2404</span>&#160;<span class="comment">C                     PRINT 1701,1,KDATA(N,KPRM),N,KPRM,NBITS,IDATA</span></div>
 <div class="line"><a name="l02405"></a><span class="lineno"> 2405</span>&#160;                  <span class="keywordflow">ELSE</span> <span class="keywordflow">IF</span> (nbits.GT.0) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l02406"></a><span class="lineno"> 2406</span>&#160;                      <span class="keyword">CALL </span>gbyte (msga,idata,iptr(25),nbits)</div>
+<div class="line"><a name="l02406"></a><span class="lineno"> 2406</span>&#160;                      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a> (msga,idata,iptr(25),nbits)</div>
 <div class="line"><a name="l02407"></a><span class="lineno"> 2407</span>&#160;                      iptr(25)     = iptr(25) + nbits</div>
 <div class="line"><a name="l02408"></a><span class="lineno"> 2408</span>&#160;                      ibuf         = (mwdbit - nbits) / 8</div>
 <div class="line"><a name="l02409"></a><span class="lineno"> 2409</span>&#160;                      <span class="keywordflow">IF</span> (ibuf.GT.0) <span class="keywordflow">THEN</span></div>
@@ -4467,18 +4467,18 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l04379"></a><span class="lineno"> 4379</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l04380"></a><span class="lineno"> 4380</span>&#160;<span class="comment">C                              ELEMENT NAME PART 1 - 32 BYTES/8 WDS</span></div>
 <div class="line"><a name="l04381"></a><span class="lineno"> 4381</span>&#160;<span class="comment">C</span></div>
-<div class="line"><a name="l04382"></a><span class="lineno"> 4382</span>&#160;                  <span class="keyword">CALL </span>gbytes (aname3(ixb+iz),kdata(k,iz),0,32,0,8)</div>
+<div class="line"><a name="l04382"></a><span class="lineno"> 4382</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbytes_8f.html#ac957b0c87f1261d8460c52bfec7d0308">gbytes</a> (aname3(ixb+iz),kdata(k,iz),0,32,0,8)</div>
 <div class="line"><a name="l04383"></a><span class="lineno"> 4383</span>&#160;                  ibflag   = ior(ibflag,16)</div>
 <div class="line"><a name="l04384"></a><span class="lineno"> 4384</span>&#160;              <span class="keywordflow">ELSE</span> <span class="keywordflow">IF</span> (jdesc.EQ.14) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l04385"></a><span class="lineno"> 4385</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l04386"></a><span class="lineno"> 4386</span>&#160;<span class="comment">C                              ELEMENT NAME PART 2 - 32 BYTES/8 WDS</span></div>
 <div class="line"><a name="l04387"></a><span class="lineno"> 4387</span>&#160;<span class="comment">C</span></div>
-<div class="line"><a name="l04388"></a><span class="lineno"> 4388</span>&#160;                 <span class="keyword">CALL </span>gbytes(aname3(ixb+iz)(33:33),kdata(k,iz),0,32,0,8)</div>
+<div class="line"><a name="l04388"></a><span class="lineno"> 4388</span>&#160;                 <span class="keyword">CALL </span><a class="code" href="gbytes_8f.html#ac957b0c87f1261d8460c52bfec7d0308">gbytes</a>(aname3(ixb+iz)(33:33),kdata(k,iz),0,32,0,8)</div>
 <div class="line"><a name="l04389"></a><span class="lineno"> 4389</span>&#160;              <span class="keywordflow">ELSE</span> <span class="keywordflow">IF</span> (jdesc.EQ.15) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l04390"></a><span class="lineno"> 4390</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l04391"></a><span class="lineno"> 4391</span>&#160;<span class="comment">C                              UNITS NAME - 24 BYTES/6 WDS</span></div>
 <div class="line"><a name="l04392"></a><span class="lineno"> 4392</span>&#160;<span class="comment">C</span></div>
-<div class="line"><a name="l04393"></a><span class="lineno"> 4393</span>&#160;                  <span class="keyword">CALL </span>gbytes (aunit3(ixb+iz)(1:1),kdata(k,iz),0,32,0,6)</div>
+<div class="line"><a name="l04393"></a><span class="lineno"> 4393</span>&#160;                  <span class="keyword">CALL </span><a class="code" href="gbytes_8f.html#ac957b0c87f1261d8460c52bfec7d0308">gbytes</a> (aunit3(ixb+iz)(1:1),kdata(k,iz),0,32,0,6)</div>
 <div class="line"><a name="l04394"></a><span class="lineno"> 4394</span>&#160;                  ibflag   = ior(ibflag,8)</div>
 <div class="line"><a name="l04395"></a><span class="lineno"> 4395</span>&#160;              <span class="keywordflow">ELSE</span> <span class="keywordflow">IF</span> (jdesc.EQ.16) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l04396"></a><span class="lineno"> 4396</span>&#160;<span class="comment">C</span></div>
@@ -4837,9 +4837,11 @@ $(document).ready(function(){initNavTree('w3fi88_8f_source.html',''); initResiza
 <div class="line"><a name="l04749"></a><span class="lineno"> 4749</span>&#160;      <span class="keyword">END</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
+<div class="ttc" id="agbytes_8f_html_ac957b0c87f1261d8460c52bfec7d0308"><div class="ttname"><a href="gbytes_8f.html#ac957b0c87f1261d8460c52bfec7d0308">gbytes</a></div><div class="ttdeci">subroutine gbytes(IPACKD, IUNPKD, NOFF, NBITS, ISKIP, ITER)</div><div class="ttdoc">THIS IS THE FORTRAN VERSION OF GBYTES.</div><div class="ttdef"><b>Definition:</b> <a href="gbytes_8f_source.html#l00041">gbytes.f:41</a></div></div>
 <div class="ttc" id="amova2i_8f_html_aed1be7b63ac5c89c04f701e75bb4fbe0"><div class="ttname"><a href="mova2i_8f.html#aed1be7b63ac5c89c04f701e75bb4fbe0">mova2i</a></div><div class="ttdeci">integer function mova2i(a)</div><div class="ttdoc">SUBPROGRAM: mova2i Moves a bit string from a char*1 to int PRGMMR: Gilbert ORG: W/NP11 DATE: 98-12-15</div><div class="ttdef"><b>Definition:</b> <a href="mova2i_8f_source.html#l00041">mova2i.f:41</a></div></div>
 <div class="ttc" id="aw3ai39_8f_html_a28ca73de8fec4c73859576d1d2e0a219"><div class="ttname"><a href="w3ai39_8f.html#a28ca73de8fec4c73859576d1d2e0a219">w3ai39</a></div><div class="ttdeci">subroutine w3ai39(NFLD, N)</div><div class="ttdoc">SUBPROGRAM: W3AI39 TRANSLATE 'ASCII' FIELD TO 'EBCDIC' PRGMMR: DESMARAIS ORG: W342 DATE: 93-10-06.</div><div class="ttdef"><b>Definition:</b> <a href="w3ai39_8f_source.html#l00035">w3ai39.f:35</a></div></div>
 <div class="ttc" id="aw3fc05_8f_html_ae77a21f468d05a34fa3a201c89b30530"><div class="ttname"><a href="w3fc05_8f.html#ae77a21f468d05a34fa3a201c89b30530">w3fc05</a></div><div class="ttdeci">subroutine w3fc05(U, V, DIR, SPD)</div><div class="ttdoc">SUBPROGRAM: W3FC05 EARTH U,V WIND COMPONENTS TO DIR AND SPD 11290000 PRGMMR: KEYSER ORG: W/NMC22 DATE...</div><div class="ttdef"><b>Definition:</b> <a href="w3fc05_8f_source.html#l00048">w3fc05.f:48</a></div></div>
+<div class="ttc" id="agbyte_8f_html_ad73b69048043b0e9876125b1d839e5c6"><div class="ttname"><a href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a></div><div class="ttdeci">subroutine gbyte(IPACKD, IUNPKD, NOFF, NBITS)</div><div class="ttdoc">THIS IS THE FORTRAN VERSION OF GBYTE.</div><div class="ttdef"><b>Definition:</b> <a href="gbyte_8f_source.html#l00035">gbyte.f:35</a></div></div>
 <div class="ttc" id="aw3fi01_8f_html_a10ac20498f7eca8e2281cad1218bede4"><div class="ttname"><a href="w3fi01_8f.html#a10ac20498f7eca8e2281cad1218bede4">w3fi01</a></div><div class="ttdeci">subroutine w3fi01(LW)</div><div class="ttdoc">SUBPROGRAM: W3FI01 DETERMINES MACHINE WORD LENGTH IN BYTES PRGMMR: KEYSER ORG: W/NMC22 DATE: 06-29-92...</div><div class="ttdef"><b>Definition:</b> <a href="w3fi01_8f_source.html#l00027">w3fi01.f:27</a></div></div>
 <div class="ttc" id="aw3fi88_8f_html_aaa3b36f853bace0e172b8191ce3a4f17"><div class="ttname"><a href="w3fi88_8f.html#aaa3b36f853bace0e172b8191ce3a4f17">w3fi88</a></div><div class="ttdeci">subroutine w3fi88(IPTR, IDENT, MSGA, ISTACK, MSTACK, KDATA, KNR, INDEX, LDATA, LSTACK, MAXR, MAXD, IUNITB, IUNITD)</div><div class="ttdoc">SUBPROGRAM: W3FI88 BUFR MESSAGE DECODER PRGMMR: KEYSER ORG: NP22 DATE: 2001-02-01.</div><div class="ttdef"><b>Definition:</b> <a href="w3fi88_8f_source.html#l00464">w3fi88.f:464</a></div></div>
 <!-- start footer part -->

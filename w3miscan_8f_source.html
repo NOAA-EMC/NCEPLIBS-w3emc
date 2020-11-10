@@ -1743,7 +1743,7 @@ $(document).ready(function(){initNavTree('w3miscan_8f_source.html',''); initResi
 <div class="line"><a name="l01655"></a><span class="lineno"> 1655</span>&#160;      nbyte = (180 * 8) + (lstpt/4 * 8)</div>
 <div class="line"><a name="l01656"></a><span class="lineno"> 1656</span>&#160;      nshft = (2 * (mod(lstpt,4) + 1)) - 2</div>
 <div class="line"><a name="l01657"></a><span class="lineno"> 1657</span>&#160;<span class="comment">C PULL OUT THE TAG</span></div>
-<div class="line"><a name="l01658"></a><span class="lineno"> 1658</span>&#160;      <span class="keyword">CALL </span>gbyte(lput,lstag,nbyte+nshft,2)</div>
+<div class="line"><a name="l01658"></a><span class="lineno"> 1658</span>&#160;      <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a>(lput,lstag,nbyte+nshft,2)</div>
 <div class="line"><a name="l01659"></a><span class="lineno"> 1659</span>&#160;      iflag = 0</div>
 <div class="line"><a name="l01660"></a><span class="lineno"> 1660</span>&#160;      <span class="keywordflow">RETURN</span></div>
 <div class="line"><a name="l01661"></a><span class="lineno"> 1661</span>&#160;<span class="comment">C-----------------------------------------------------------------------</span></div>
@@ -1947,6 +1947,7 @@ $(document).ready(function(){initNavTree('w3miscan_8f_source.html',''); initResi
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <div class="ttc" id="agetgb_8f_html_ab1cec03904b6e6c41840726cd53a69ce"><div class="ttname"><a href="getgb_8f.html#ab1cec03904b6e6c41840726cd53a69ce">getgb</a></div><div class="ttdeci">subroutine getgb(LUGB, LUGI, JF, J, JPDS, JGDS, KF, K, KPDS, KGDS, LB, F, IRET)</div><div class="ttdoc">SUBPROGRAM: GETGB FINDS AND UNPACKS A GRIB MESSAGE PRGMMR: IREDELL ORG: W/NMC23 DATE: 94-04-01.</div><div class="ttdef"><b>Definition:</b> <a href="getgb_8f_source.html#l00186">getgb.f:186</a></div></div>
+<div class="ttc" id="agbyte_8f_html_ad73b69048043b0e9876125b1d839e5c6"><div class="ttname"><a href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a></div><div class="ttdeci">subroutine gbyte(IPACKD, IUNPKD, NOFF, NBITS)</div><div class="ttdoc">THIS IS THE FORTRAN VERSION OF GBYTE.</div><div class="ttdef"><b>Definition:</b> <a href="gbyte_8f_source.html#l00035">gbyte.f:35</a></div></div>
 <div class="ttc" id="aw3fi04_8f_html_a43d8dd578a2f24d52b45332ed3ccc6c9"><div class="ttname"><a href="w3fi04_8f.html#a43d8dd578a2f24d52b45332ed3ccc6c9">w3fi04</a></div><div class="ttdeci">subroutine w3fi04(IENDN, ITYPEC, LW)</div><div class="ttdoc">SUBPROGRAM: W3FI04 FIND WORD SIZE, ENDIAN, CHARACTER SET PRGMNR: JONES,R.E.</div><div class="ttdef"><b>Definition:</b> <a href="w3fi04_8f_source.html#l00039">w3fi04.f:39</a></div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

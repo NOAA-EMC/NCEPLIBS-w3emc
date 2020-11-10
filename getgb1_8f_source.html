@@ -236,7 +236,7 @@ $(document).ready(function(){initNavTree('getgb1_8f_source.html',''); initResiza
 <div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;          <span class="keywordflow">IF</span>(lpdsp.GT.0) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;            cpds=cbuf((kj-1)*nlen+26:(kj-1)*nlen+53)</div>
 <div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;            kptr=0</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;            <span class="keyword">CALL </span>gbyte(cbuf,kptr(3),(kj-1)*nlen*8+25*8,3*8)</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;            <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a>(cbuf,kptr(3),(kj-1)*nlen*8+25*8,3*8)</div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;            <span class="keyword">CALL </span>fi632(cpds,kptr,kpds,iret)</div>
 <div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;            <span class="keywordflow">DO</span> i=1,lpdsp</div>
 <div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;              ip=ipdsp(i)</div>
@@ -255,8 +255,8 @@ $(document).ready(function(){initNavTree('getgb1_8f_source.html',''); initResiza
 <div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;<span class="comment">C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span></div>
 <div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;<span class="comment">C  READ AND UNPACK GRIB DATA</span></div>
 <div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;          <span class="keywordflow">IF</span>(lt.EQ.0) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;            <span class="keyword">CALL </span>gbyte(cbuf,lskip,(kj-1)*nlen*8,4*8)</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;            <span class="keyword">CALL </span>gbyte(cbuf,lgrib,(kj-1)*nlen*8+20*8,4*8)</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;            <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a>(cbuf,lskip,(kj-1)*nlen*8,4*8)</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;            <span class="keyword">CALL </span><a class="code" href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a>(cbuf,lgrib,(kj-1)*nlen*8+20*8,4*8)</div>
 <div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;            cgds=cbuf((kj-1)*nlen+54:(kj-1)*nlen+95)</div>
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;            kptr=0</div>
 <div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;            <span class="keyword">CALL </span>fi633(cgds,kptr,kgds,iret)</div>
@@ -288,6 +288,7 @@ $(document).ready(function(){initNavTree('getgb1_8f_source.html',''); initResiza
 </div><!-- doc-content -->
 <div class="ttc" id="aw3fi63_8f_html_aa59740e4c6a30f9c5f201204603d302f"><div class="ttname"><a href="w3fi63_8f.html#aa59740e4c6a30f9c5f201204603d302f">w3fi63</a></div><div class="ttdeci">subroutine w3fi63(MSGA, KPDS, KGDS, KBMS, DATA, KPTR, KRET)</div><div class="ttdoc">SUBPROGRAM: W3FI63 UNPK GRIB FIELD TO GRIB GRID PRGMMR: FARLEY ORG: NMC421 DATE:94-11-22.</div><div class="ttdef"><b>Definition:</b> <a href="w3fi63_8f_source.html#l00363">w3fi63.f:363</a></div></div>
 <div class="ttc" id="agetgb1_8f_html_a124fccd25cd6967ce2b5ba8629e3707c"><div class="ttname"><a href="getgb1_8f.html#a124fccd25cd6967ce2b5ba8629e3707c">getgb1</a></div><div class="ttdeci">subroutine getgb1(LUGB, LUGI, JF, J, JPDS, JGDS, GRIB, KF, K, KPDS, KGDS, LB, F, IRET)</div><div class="ttdoc">SUBPROGRAM: GETGB1 FINDS AND UNPACKS A GRIB MESSAGE PRGMMR: IREDELL ORG: W/NMC23 DATE: 94-04-01.</div><div class="ttdef"><b>Definition:</b> <a href="getgb1_8f_source.html#l00072">getgb1.f:72</a></div></div>
+<div class="ttc" id="agbyte_8f_html_ad73b69048043b0e9876125b1d839e5c6"><div class="ttname"><a href="gbyte_8f.html#ad73b69048043b0e9876125b1d839e5c6">gbyte</a></div><div class="ttdeci">subroutine gbyte(IPACKD, IUNPKD, NOFF, NBITS)</div><div class="ttdoc">THIS IS THE FORTRAN VERSION OF GBYTE.</div><div class="ttdef"><b>Definition:</b> <a href="gbyte_8f_source.html#l00035">gbyte.f:35</a></div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
