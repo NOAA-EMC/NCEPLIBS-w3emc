@@ -1,52 +1,37 @@
+C> @file
+C> THIS IS THE FORTRAN VERSION OF GBYTE      
+C      
+C> THIS IS THE FORTRAN VERSION OF GBYTE
+C> @author DR. ROBERT C. GAMMILL, CONSULTANT, NATIONAL CENTER FOR ATMOSPHERIC RESEARCH
+C> @date MAY 1972
+C>
+C> CHANGES FOR SiliconGraphics IRIS-4D/25
+C> SiliconGraphics 3.3 FORTRAN 77
+C> March 1991, RUSSELL E. JONES
+C> NATIONAL WEATHER SERVICE
+C>
+C> SUBROUTINE GBYTE (IPACKD,IUNPKD,NOFF,NBITS)
+C>
+C> TO UNPACK A BYTE INTO A TARGET WORD.  THE
+C> UNPACKED BYTE IS RIGHT-JUSTIFIED IN THE
+C> TARGET WORD, AND THE REMAINDER OF THE
+C> WORD IS ZERO-FILLED.
+C>
+C> @param[in] IPACKD THE WORD OR ARRAY CONTAINING THE BYTE TO BE
+C>                   UNPACKED.
+C>
+C> @param[out] IUNPKD THE WORD WHICH WILL CONTAIN THE UNPACKED
+C>                   BYTE.
+C>
+C> @param[in] NOFF THE NUMBER OF BITS TO SKIP, LEFT TO RIGHT,
+C>                 IN 'IPACKD' IN ORDER TO LOCATE THE BYTE
+C>                 TO BE UNPACKED.
+C>
+C> @param[in] NBITS NUMBER OF BITS IN THE BYTE TO BE UNPACKED.
+C>                  MAXIMUM OF 64 BITS ON 64 BIT MACHINE, 32
+C>                  BITS ON 32 BIT MACHINE.
+C>
       SUBROUTINE GBYTE(IPACKD,IUNPKD,NOFF,NBITS)
-C
-C THIS PROGRAM WRITTEN BY.....
-C             DR. ROBERT C. GAMMILL, CONSULTANT
-C             NATIONAL CENTER FOR ATMOSPHERIC RESEARCH
-C             MAY 1972
-C
-C             CHANGES FOR SiliconGraphics IRIS-4D/25
-C             SiliconGraphics 3.3 FORTRAN 77
-C             March 1991, RUSSELL E. JONES
-C             NATIONAL WEATHER SERVICE
-C
-C THIS IS THE FORTRAN VERSION OF GBYTE
-C
-C***********************************************************************
-C
-C SUBROUTINE GBYTE (IPACKD,IUNPKD,NOFF,NBITS)
-C
-C PURPOSE                TO UNPACK A BYTE INTO A TARGET WORD.  THE
-C                        UNPACKED BYTE IS RIGHT-JUSTIFIED IN THE
-C                        TARGET WORD, AND THE REMAINDER OF THE
-C                        WORD IS ZERO-FILLED.
-C
-C USAGE                  CALL GBYTE(IPACKD,IUNPKD,NOFF,NBITS)
-C
-C ARGUMENTS
-C
-C ON INPUT               IPACKD
-C                          THE WORD OR ARRAY CONTAINING THE BYTE TO BE
-C                          UNPACKED.
-C
-C                        IUNPKD
-C                          THE WORD WHICH WILL CONTAIN THE UNPACKED
-C                          BYTE.
-C
-C                        NOFF
-C                          THE NUMBER OF BITS TO SKIP, LEFT TO RIGHT,
-C                          IN 'IPACKD' IN ORDER TO LOCATE THE BYTE
-C                          TO BE UNPACKED.
-C
-C                        NBITS
-C                          NUMBER OF BITS IN THE BYTE TO BE UNPACKED.
-C                          MAXIMUM OF 64 BITS ON 64 BIT MACHINE, 32
-C                          BITS ON 32 BIT MACHINE.
-C
-C ON OUTPUT              IUNPKD
-C                          CONTAINS THE REQUESTED UNPACKED BYTE.
-C***********************************************************************
-
       INTEGER    IPACKD(*)
       INTEGER    IUNPKD
       INTEGER    MASKS(64)
