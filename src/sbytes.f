@@ -1,9 +1,9 @@
+C> @file
+C> @brief THIS IS THE FORTRAN VERSIONS OF SBYTES.
+C> @author DR. ROBERT C. GAMMILL, CONSULTANT, NATIONAL CENTER FOR ATMOSPHERIC RESEARCH
+C> @date JULY 1972 
       SUBROUTINE SBYTES(IOUT,IN,ISKIP,NBYTE,NSKIP,N)                            
-C THIS PROGRAM WRITTEN BY.....                                                  
-C             DR. ROBERT C. GAMMILL, CONSULTANT                                 
-C             NATIONAL CENTER FOR ATMOSPHERIC RESEARCH                          
-C             JULY 1972                                                         
-C THIS IS THE FORTRAN VERSIONS OF SBYTES.                                       
+C 
 C
 C             Changes for SiliconGraphics IRIS-4D/25  
 C             SiliconGraphics 3.3 FORTRAN 77

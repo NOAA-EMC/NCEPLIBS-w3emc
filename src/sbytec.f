@@ -1,3 +1,5 @@
+C> @file
+
       SUBROUTINE SBYTEC(OUT,IN,ISKIP,NBYTE)
       character*1 out(*)
       integer in(*)

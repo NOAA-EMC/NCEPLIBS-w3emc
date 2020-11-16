@@ -1,15 +1,16 @@
+C> @file
+C      
+C> Store bytes - pack bits:  Put arbitrary size values into a
+C> packed bit string, taking the low order bits from each value
+C> in the unpacked array.
+C> @param OUT = packed array output
+C> @param IN = unpacked array input
+C> @param ISKIP = initial number of bits to skip
+C> @param NBYTE = number of bits to pack
+C> @param NSKIP = additional number of bits to skip on each iteration
+C> @param N = number of iterations
+C> 
       SUBROUTINE SBYTESC(OUT,IN,ISKIP,NBYTE,NSKIP,N)
-C          Store bytes - pack bits:  Put arbitrary size values into a
-C          packed bit string, taking the low order bits from each value
-C          in the unpacked array.
-C            IOUT  = packed array output
-C            IN    = unpacked array input
-C            ISKIP = initial number of bits to skip
-C            NBYTE = number of bits to pack
-C            NSKIP = additional number of bits to skip on each iteration
-C            N     = number of iterations
-C v1.1
-C
       character*1 out(*)
       integer in(N), bitcnt, ones(8), tbit
       save ones
