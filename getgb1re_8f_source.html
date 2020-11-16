@@ -151,7 +151,7 @@ $(document).ready(function(){initNavTree('getgb1re_8f_source.html',''); initResi
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;      <span class="keywordflow">IF</span>(lread.EQ.lgrib) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keyword">CALL </span><a class="code" href="w3fi63_8f.html#aa59740e4c6a30f9c5f201204603d302f">w3fi63</a>(grib,kpds,kgds,lb,f,kptr,iret)</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keywordflow">IF</span>(iret.EQ.0.AND.kpds(23).EQ.2) <span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;          <span class="keyword">CALL </span>pdseup(kens,kprob,xprob,kclust,kmembr,86,grib(9))</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;          <span class="keyword">CALL </span><a class="code" href="pdseup_8f.html#a62cf775ad87c64a28b7e395792eabfca">pdseup</a>(kens,kprob,xprob,kclust,kmembr,86,grib(9))</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="keywordflow">        ENDIF</span></div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;      <span class="keywordflow">ELSE</span></div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        iret=97</div>
@@ -170,6 +170,7 @@ $(document).ready(function(){initNavTree('getgb1re_8f_source.html',''); initResi
 </div><!-- doc-content -->
 <div class="ttc" id="agetgb1re_8f_html_a964db1a320f7b795dd353fbd292c06d7"><div class="ttname"><a href="getgb1re_8f.html#a964db1a320f7b795dd353fbd292c06d7">getgb1re</a></div><div class="ttdeci">subroutine getgb1re(LUGB, LSKIP, LGRIB, KF, KPDS, KGDS, KENS, KPROB, XPROB, KCLUST, KMEMBR, LB, F, IRET)</div><div class="ttdoc">SUBPROGRAM: GETGB1RE READS AND UNPACKS A GRIB MESSAGE PRGMMR: IREDELL ORG: W/NMC23 DATE: 95-10-31.</div><div class="ttdef"><b>Definition:</b> <a href="getgb1re_8f_source.html#l00051">getgb1re.f:51</a></div></div>
 <div class="ttc" id="aw3fi63_8f_html_aa59740e4c6a30f9c5f201204603d302f"><div class="ttname"><a href="w3fi63_8f.html#aa59740e4c6a30f9c5f201204603d302f">w3fi63</a></div><div class="ttdeci">subroutine w3fi63(MSGA, KPDS, KGDS, KBMS, DATA, KPTR, KRET)</div><div class="ttdoc">SUBPROGRAM: W3FI63 UNPK GRIB FIELD TO GRIB GRID PRGMMR: FARLEY ORG: NMC421 DATE:94-11-22.</div><div class="ttdef"><b>Definition:</b> <a href="w3fi63_8f_source.html#l00363">w3fi63.f:363</a></div></div>
+<div class="ttc" id="apdseup_8f_html_a62cf775ad87c64a28b7e395792eabfca"><div class="ttname"><a href="pdseup_8f.html#a62cf775ad87c64a28b7e395792eabfca">pdseup</a></div><div class="ttdeci">subroutine pdseup(KENS, KPROB, XPROB, KCLUST, KMEMBR, ILAST, MSGA)</div><div class="ttdoc">UNPACKS GRIB PDS EXTENSION 41- FOR ENSEMBLE.</div><div class="ttdef"><b>Definition:</b> <a href="pdseup_8f_source.html#l00029">pdseup.f:29</a></div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>

@@ -198,7 +198,7 @@ $(document).ready(function(){initNavTree('w3fi59_8f_source.html',''); initResiza
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="comment">C     USE NCAR ARRAY BIT PACKER SBYTES  (GBYTES PACKAGE)</span></div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="comment">C</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;      <span class="keyword">CALL </span>sbytesc(npfld,nwork,koff,nbits,iskip,npts)</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;      <span class="keyword">CALL </span><a class="code" href="sbytesc_8f.html#aa527f56385adc86efba0d8605f251088">sbytesc</a>(npfld,nwork,koff,nbits,iskip,npts)</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="comment">C</span></div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="comment">C ADD 7 ZERO-BITS AT END OF PACKED DATA TO INSURE BYTE BOUNDARY.</span></div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;<span class="comment">C     USE NCAR WORD BIT PACKER SBYTE</span></div>
@@ -217,6 +217,7 @@ $(document).ready(function(){initNavTree('w3fi59_8f_source.html',''); initResiza
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <div class="ttc" id="aw3fi59_8f_html_ab4f28b2c5e95c681036ef83142a58601"><div class="ttname"><a href="w3fi59_8f.html#ab4f28b2c5e95c681036ef83142a58601">w3fi59</a></div><div class="ttdeci">subroutine w3fi59(FIELD, NPTS, NBITS, NWORK, NPFLD, ISCALE, LEN, RMIN)</div><div class="ttdoc">SUBPROGRAM: W3FI59 FORM AND PACK POSITIVE, SCALED DIFFERENCES PRGMMR: ALLARD, R.</div><div class="ttdef"><b>Definition:</b> <a href="w3fi59_8f_source.html#l00057">w3fi59.f:57</a></div></div>
+<div class="ttc" id="asbytesc_8f_html_aa527f56385adc86efba0d8605f251088"><div class="ttname"><a href="sbytesc_8f.html#aa527f56385adc86efba0d8605f251088">sbytesc</a></div><div class="ttdeci">subroutine sbytesc(OUT, IN, ISKIP, NBYTE, NSKIP, N)</div><div class="ttdoc">Store bytes - pack bits: Put arbitrary size values into a packed bit string, taking the low order bit...</div><div class="ttdef"><b>Definition:</b> <a href="sbytesc_8f_source.html#l00014">sbytesc.f:14</a></div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
