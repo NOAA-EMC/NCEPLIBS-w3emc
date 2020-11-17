@@ -1,15 +1,16 @@
-       SUBROUTINE SBYTE(IOUT,IN,ISKIP,NBYTE)                            
-C THIS PROGRAM WRITTEN BY.....                                                  
-C             DR. ROBERT C. GAMMILL, CONSULTANT                                 
-C             NATIONAL CENTER FOR ATMOSPHERIC RESEARCH
-C             JULY 1972 
-C
-C THIS IS THE FORTRAN 32 bit VERSION OF SBYTE.
-C             Changes for SiliconGraphics IRIS-4D/25
-C             SiliconGraphics 3.3 FORTRAN 77
-C             MARCH 1991  RUSSELL E. JONES
-C             NATIONAL WEATHER SERVICE
-C
+C> @file
+C> @brief THIS IS THE FORTRAN 32 bit VERSION OF SBYTE.
+C      
+C> @author DR. ROBERT C. GAMMILL, CONSULTANT, NATIONAL CENTER FOR ATMOSPHERIC RESEARCH
+C> @date JULY 1972 
+C>
+C> THIS IS THE FORTRAN 32 bit VERSION OF SBYTE.
+C> Changes for SiliconGraphics IRIS-4D/25
+C> SiliconGraphics 3.3 FORTRAN 77
+C> MARCH 1991  RUSSELL E. JONES
+C> NATIONAL WEATHER SERVICE
+C>
+      SUBROUTINE SBYTE(IOUT,IN,ISKIP,NBYTE)                            
       INTEGER    IN
       INTEGER    IOUT(*)
       INTEGER    MASKS(32)
