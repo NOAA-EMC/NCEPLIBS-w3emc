@@ -9,7 +9,6 @@ set(fortran_src
     ${CMAKE_CURRENT_SOURCE_DIR}/orders.f
     ${CMAKE_CURRENT_SOURCE_DIR}/putgbens.f
     ${CMAKE_CURRENT_SOURCE_DIR}/start.F
-    ${CMAKE_CURRENT_SOURCE_DIR}/summary.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3ai40.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3ai41.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3ctzdat.f
@@ -205,7 +204,6 @@ set(fortran_src
     ${CMAKE_CURRENT_SOURCE_DIR}/w3nogds.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3pradat.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3reddat.f
-    ${CMAKE_CURRENT_SOURCE_DIR}/w3tagb.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3trnarg.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3unpk77.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3utcdat.f
@@ -217,5 +215,4 @@ set(fortran_src
 
 set(c_src
   ${CMAKE_CURRENT_SOURCE_DIR}/mova2i.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/summary.c
   )
