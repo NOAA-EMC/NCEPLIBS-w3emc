@@ -33,9 +33,11 @@ find_package(NetCDF REQUIRED Fortran)
 # Compile the source code in the src directory.
 add_subdirectory(src)
 
-# Add tests.
-enable_testing()
-add_subdirectory(tests)
+include(CTest)
+if(BUILD_TESTING)
+  find_package(bacio)
+  add_subdirectory(tests)
+endif()
 
 # Determine whether or not to generate documentation.
 if(ENABLE_DOCS)
