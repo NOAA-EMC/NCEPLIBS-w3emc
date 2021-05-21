@@ -25,10 +25,10 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel)$")
 endif()
 
 # Find required packages.
-find_package(nemsio CONFIG REQUIRED)
-find_package(sigio CONFIG REQUIRED)
+find_package(nemsio 2.5.0 CONFIG REQUIRED)
+find_package(sigio 2.3.0 CONFIG REQUIRED)
 
-find_package(NetCDF REQUIRED Fortran)
+find_package(NetCDF 4.3.3 REQUIRED Fortran)
 
 # Compile the source code in the src directory.
 add_subdirectory(src)

@@ -14,7 +14,7 @@ the [NCEPLIBS](https://github.com/NOAA-EMC/NCEPLIBS) project.
 
 NCEP/EMC developers.
 
-Code manager: Boi Vuong
+Code manager: Kyle Gerheiser, Hang Lei
 
 ## Prerequisites
 
