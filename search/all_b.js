@@ -9,6 +9,5 @@ var searchData=
   ['sbytesc_2ef_126',['sbytesc.f',['../sbytesc_8f.html',1,'']]],
   ['skgb_127',['skgb',['../skgb_8f.html#a7654c30923c8fa28091b5cb300c93311',1,'skgb.f']]],
   ['skgb_2ef_128',['skgb.f',['../skgb_8f.html',1,'']]],
-  ['start_2ef_129',['start.F',['../start_8F.html',1,'']]],
-  ['summary_2ef_130',['summary.f',['../summary_8f.html',1,'']]]
+  ['start_2ef_129',['start.F',['../start_8F.html',1,'']]]
 ];
