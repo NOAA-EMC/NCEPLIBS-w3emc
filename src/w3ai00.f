@@ -164,7 +164,7 @@ C           CALL USDCTI(X,B,1,1,ISTAT)
            IF (BTEST(IB,53_8)) GO TO  30
            N = N - 1
  30      CONTINUE
-           N = MAX0(-127_8,MIN0(127_8,N))
+           N = MAX(-127_8,MIN(127_8,N))
          ELSE
 C
 C        FIELD IS ZERO OR A CONSTANT
@@ -191,7 +191,7 @@ C
            XX(I) = (REAL8(I) - A) * TWON
            KK(I) = XX(I) + SIGN(0.5,XX(I))
            IF (KK(I).GE.(-32767)) THEN
-             KK(I) = MIN0(32767_8,KK(I))
+             KK(I) = MIN(32767_8,KK(I))
            ELSE
              KK(I) = -32767
            ENDIF
