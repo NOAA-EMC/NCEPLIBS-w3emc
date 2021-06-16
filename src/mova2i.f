@@ -37,7 +37,7 @@ C> ATTRIBUTES:
 C>   LANGUAGE: IBM XL FORTRAN
 C>   MACHINE:  IBM SP                                                             
 C>
-      Integer Function mova2i(a)                                                                            
+      Integer Function mova2i(a) bind(c)                                                                            
 C                                                                               
        integer    mold                                                      
        character(len=1) a  
