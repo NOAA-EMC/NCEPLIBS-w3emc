@@ -1,6 +1,5 @@
 set(fortran_src
     ${CMAKE_CURRENT_SOURCE_DIR}/args_mod.f
-    ${CMAKE_CURRENT_SOURCE_DIR}/gblevents.f
     ${CMAKE_CURRENT_SOURCE_DIR}/getgbens.f
     ${CMAKE_CURRENT_SOURCE_DIR}/isrchne.f
     ${CMAKE_CURRENT_SOURCE_DIR}/iw3mat.f
@@ -213,6 +212,3 @@ set(fortran_src
     ${CMAKE_CURRENT_SOURCE_DIR}/xstore.f
     )
 
-set(c_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/mova2i.c
-  )

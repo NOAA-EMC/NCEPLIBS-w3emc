@@ -9,7 +9,7 @@ file(STRINGS "VERSION" pVersion)
 project(
   w3emc
   VERSION ${pVersion}
-  LANGUAGES C Fortran)
+  LANGUAGES Fortran)
 
 # Handle user options.
 option(ENABLE_DOCS "Enable generation of doxygen-based documentation." OFF)
@@ -23,12 +23,6 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel)$")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
-
-# Find required packages.
-find_package(nemsio 2.5.0 CONFIG REQUIRED)
-find_package(sigio 2.3.0 CONFIG REQUIRED)
-
-find_package(NetCDF 4.3.3 REQUIRED Fortran)
 
 # Compile the source code in the src directory.
 add_subdirectory(src)
