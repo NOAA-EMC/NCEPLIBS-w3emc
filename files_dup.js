@@ -6,7 +6,6 @@ var files_dup =
     [ "errmsg.f", "errmsg_8f.html", "errmsg_8f" ],
     [ "fparsei.f", "fparsei_8f.html", "fparsei_8f" ],
     [ "fparser.f", "fparser_8f.html", "fparser_8f" ],
-    [ "gblevents.f", "gblevents_8f.html", "gblevents_8f" ],
     [ "gbyte.f", "gbyte_8f.html", "gbyte_8f" ],
     [ "gbytec.f", "gbytec_8f.html", "gbytec_8f" ],
     [ "gbytes.f", "gbytes_8f.html", "gbytes_8f" ],
