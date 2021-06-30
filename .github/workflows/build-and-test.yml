@@ -1,0 +1,32 @@
+name: Build and Test
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    env:
+      FC: gfortran-9
+      CC: gcc-9
+
+    steps:
+
+    - name: checkout-w3emc
+      uses: actions/checkout@v2
+      with: 
+        path: w3emc
+
+    - name: build-w3emc
+      run: |
+        cd w3emc
+        mkdir build 
+        cd build
+        cmake .. -DCMAKE_PREFIX_PATH="~/" -DENABLE_DOCS=ON
+        make -j2
+
+    - name: test-w3emc
+      run: |
+        cd $GITHUB_WORKSPACE/w3emc/build
+        make test
+
+
+
