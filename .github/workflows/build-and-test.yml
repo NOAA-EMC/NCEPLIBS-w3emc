@@ -9,7 +9,11 @@ jobs:
       CC: gcc-9
 
     steps:
-
+    
+    - name: install-doxygen
+      run: |
+        sudo apt-get install doxygen
+        
     - name: checkout-w3emc
       uses: actions/checkout@v2
       with: 
