@@ -19,8 +19,8 @@ C>   Argument list:
 C>   @param[in, out] IA character*1 array of ascii data  if nc < 0
 C>   @param[in, out] IE character*1 array of ebcdic data if nc > 0
 C>   @param[in] NC integer,  contains character count to convert.
-C>                if nc .lt. 0,  convert ascii to ebcdic
-C>                if nc .gt. 0,  convert ebcdic to ascii
+C>     - if nc .lt. 0,  convert ascii to ebcdic
+C>     - if nc .gt. 0,  convert ebcdic to ascii
 C>
 C>   @note This subroutine can be replaced by cray utility subroutines
 C>   uscctc and uscctt. See manual sr-2079 page 3-15. Cray utility tr
