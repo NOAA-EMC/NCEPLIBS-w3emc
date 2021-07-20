@@ -1,45 +1,41 @@
 C> @file
-C
-C> ASCII TO EBCDIC, OR EBCDIC TO ASCII
-C> @author DESMARAIS @date 82-11-29
+C> @brief This subroutine converts ascii to ebcdic, or ebcdic to ascii
+C> @author desmarais @date 11-29-1982
+
+C> Program history log:
+C> @date 11-29-1982  @author desmarais
+C> @date 03-31-1988  @author r.e.jones
+C>    - change logic so it works like a ibm370 translate instruction.
+C> @date 08-22-1988  @author r.e.jones
+C>    - changes for microsoft fortran 4.10
+C> @date 09-04-1988  @author r.e.jones
+C>    - change tables to 128 character set
+C> @date 01-31-1990  @author r.e.jones
+C>    - convert to cray cft77 fortran cray does not allow char*1 to be set to hex
+C> @date 12-21-1998  @author gilbert
+C>    - replaced function ichar with mova2i.
 C>
-C> CONVERT ASCII TO EBCDIC, OR EBCDIC TO ASCII BY CHARACTER.
-C> THIS SUBROUTINE CAN BE REPLACED BY CRAY UTILITY SUBROUTINES
-C> USCCTC AND USCCTT. SEE MANUAL SR-2079 PAGE 3-15. CRAY UTILITY TR
-C> CAN ALSO BE USED FOR ASCII, EBCDIC CONVERSION. SEE MANUAL SR-2079
-C> PAGE 9-35.
+C>   Argument list:
+C>   @param[in, out] IA character*1 array of ascii data  if nc < 0
+C>   @param[in, out] IE character*1 array of ebcdic data if nc > 0
+C>   @param[in] NC integer,  contains character count to convert.
+C>                if nc .lt. 0,  convert ascii to ebcdic
+C>                if nc .gt. 0,  convert ebcdic to ascii
 C>
-C> PROGRAM HISTORY LOG:
-C> -  82-11-29  DESMARAIS
-C> -  88-03-31  R.E.JONES  CHANGE LOGIC SO IT WORKS LIKE A
-C>                        IBM370 TRANSLATE INSTRUCTION.
-C> -  88-08-22  R.E.JONES  CHANGES FOR MICROSOFT FORTRAN 4.10
-C> -  88-09-04  R.E.JONES  CHANGE TABLES TO 128 CHARACTER SET
-C> -  90-01-31  R.E.JONES  CONVERT TO CRAY CFT77 FORTRAN
-C>                        CRAY DOES NOT ALLOW CHAR*1 TO BE SET TO HEX
-C> -  98-12-21  Gilbert    Replaced Function ICHAR with mova2i.
-C>
-C>   INPUT ARGUMENT LIST:
-C>     IA       - CHARACTER*1 ARRAY OF ASCII DATA  IF NC < 0
-C>     IE       - CHARACTER*1 ARRAY OF EBCDIC DATA IF NC > 0
-C>     NC       - INTEGER,  CONTAINS CHARACTER COUNT TO CONVERT.
-C>                IF NC .LT. 0,  CONVERT ASCII TO EBCDIC
-C>                IF NC .GT. 0,  CONVERT EBCDIC TO ASCII
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     IA       - CHARACTER*1 ARRAY OF ASCII  DATA IF NC > 0
-C>     IE       - CHARACTER*1 ARRAY OF EBCDIC DATA IF NC < 0
-C>
-C> REMARKS: SOFTWARE VERSION OF IBM370 TRANSLATE INSTRUCTION, BY
-C>   CHANGING THE TWO TABLES WE COULD DO A  64, 96, 128  ASCII
-C>   CHARACTER SET, CHANGE LOWER CASE TO UPPER, ETC.
-C>   AEA CONVERTS DATA AT A RATE OF 1.5 MILLION CHARACTERS PER SEC.
-C>   CRAY UTILITY USCCTI CONVERT IBM EBCDIC TO ASCII
-C>   CRAY UTILITY USCCTC CONVERT ASCII TO IBM EBCDIC
-C>   THEY CONVERT DATA AT A RATE OF 2.1 MILLION CHARACTERS PER SEC.
-C>   CRAY UTILITY TR WILL ALSO DO A ASCII, EBCDIC CONVERSION.
-C>   TR CONVERT DATA AT A RATE OF 5.4 MILLION CHARACTERS PER SEC.
-C>   TR IS IN LIBRARY  /USR/LIB/LIBCOS.A   ADD TO SEGLDR CARD.
+C>   @note This subroutine can be replaced by cray utility subroutines
+C>   uscctc and uscctt. See manual sr-2079 page 3-15. Cray utility tr
+C>   can also be used for ascii, ebcdic conversion. See manual sr-2079
+C>   page 9-35.
+C>   @note Software version of ibm370 translate instruction, by
+C>   changing the two tables we could do a 64, 96, 128 ascii
+C>   character set, change lower case to upper, etc.
+C>   - aea converts data at a rate of 1.5 million characters per sec.
+C>   - cray utility usccti convert ibm ebcdic to ascii
+C>   - cray utility uscctc convert ascii to ibm ebcdic
+C>   - they convert data at a rate of 2.1 million characters per sec.
+C>   - cray utility tr will also do a ascii, ebcdic conversion.
+C>     tr convert data at a rate of 5.4 million characters per sec.
+C>     tr is in library  /usr/lib/libcos.a   add to segldr card.
 C>
         SUBROUTINE AEA (IA, IE, NC )
 C***   ASCII  CONTAINS ASCII CHARACTERS, AS PUNCHED ON IBM029
