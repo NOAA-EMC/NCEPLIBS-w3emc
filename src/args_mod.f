@@ -1,7 +1,7 @@
 C> @file
 C> @brief Wrapper for routines iargc and getarg.
 C> @author Mark Iredell @date 1998-11-DD
-C>
+
 C> This Fortran Module acts as a wrapper to the system
 C> routines IARGC and GETARG. Use of this module allows IARGC and
 C> GETARG to work properly with 4-byte or 8-byte integer arguments.

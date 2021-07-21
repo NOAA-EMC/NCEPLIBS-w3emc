@@ -1,14 +1,13 @@
 C> @file
 C> @brief Write a message to stderr.
 C> @author Mark Iredell @date 1995-10-31
-C>
+
 C> Write a message to stderr.
 C>
 C> Program history log:
 C>  - 1995-10-31  Mark Iredell
 C>
-C> Usage: call errmsg(cmsg)
-C> @param[in] cmsg character*(*) message to write.
+C> @param[in] CMSG character*(*) message to write.
 C>
 C> @note This is a machine-dependent subprogram for Cray.
 C>
