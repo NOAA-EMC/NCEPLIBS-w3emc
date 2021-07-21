@@ -2,23 +2,22 @@ C> @file
 C> @brief This subroutine converts ascii to ebcdic, or ebcdic to ascii
 C> @author desmarais @date 11-29-1982
 
-C> Program history log:
-C> @date 11-29-1982  @author desmarais
-C> @date 03-31-1988  @author r.e.jones
-C>    - change logic so it works like a ibm370 translate instruction.
-C> @date 08-22-1988  @author r.e.jones
-C>    - changes for microsoft fortran 4.10
-C> @date 09-04-1988  @author r.e.jones
-C>    - change tables to 128 character set
-C> @date 01-31-1990  @author r.e.jones
-C>    - convert to cray cft77 fortran cray does not allow char*1 to be set to hex
-C> @date 12-21-1998  @author gilbert
-C>    - replaced function ichar with mova2i.
+C>   Program history log:
+C>   - 11-29-1982  Desmarais
+C>   - 03-31-1988  R. E. Jones
+C>      - change logic so it works like a ibm370 translate instruction.
+C>   - 08-22-1988  R. E. Jones
+C>      - changes for microsoft fortran 4.10
+C>   - 09-04-1988  R. E. Jones
+C>      - change tables to 128 character set
+C>   - 01-31-1990  R. E. Jones
+C>      - convert to cray cft77 fortran cray does not allow char*1 to be set to hex
+C>   - 12-21-1998  Stephen Gilbert
+C>      - replaced function ichar with mova2i.
 C>
-C>   Argument list:
 C>   @param[in, out] IA character*1 array of ascii data  if nc < 0
 C>   @param[in, out] IE character*1 array of ebcdic data if nc > 0
-C>   @param[in] NC integer,  contains character count to convert.
+C>   @param[in] NC integer, contains character count to convert.
 C>     - if nc .lt. 0,  convert ascii to ebcdic
 C>     - if nc .gt. 0,  convert ebcdic to ascii
 C>
@@ -29,7 +28,7 @@ C>   page 9-35.
 C>   @note Software version of ibm370 translate instruction, by
 C>   changing the two tables we could do a 64, 96, 128 ascii
 C>   character set, change lower case to upper, etc.
-C>   - aea converts data at a rate of 1.5 million characters per sec.
+C>   - aea() converts data at a rate of 1.5 million characters per sec.
 C>   - cray utility usccti convert ibm ebcdic to ascii
 C>   - cray utility uscctc convert ascii to ibm ebcdic
 C>   - they convert data at a rate of 2.1 million characters per sec.
@@ -37,6 +36,7 @@ C>   - cray utility tr will also do a ascii, ebcdic conversion.
 C>     tr convert data at a rate of 5.4 million characters per sec.
 C>     tr is in library  /usr/lib/libcos.a   add to segldr card.
 C>
+C>   @author desmarais @date 11-29-1982
         SUBROUTINE AEA (IA, IE, NC )
 C***   ASCII  CONTAINS ASCII CHARACTERS, AS PUNCHED ON IBM029
 C
