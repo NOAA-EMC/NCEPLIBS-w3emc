@@ -1,23 +1,18 @@
 C> @file
-C
-C> SUBPROGRAM: ERRMSG         WRITE A MESSAGE TO STDERR
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 95-10-31
+C> @brief Write a message to stderr.
+C> @author Mark Iredell @date 1995-10-31
 C>
-C> ABSTRACT: WRITE A MESSAGE TO STDERR.
+C> Write a message to stderr.
 C>
-C> PROGRAM HISTORY LOG:
-C>   95-10-31  IREDELL
+C> Program history log:
+C>  - 1995-10-31  Mark Iredell
 C>
-C> USAGE:    CALL ERRMSG(CMSG)
-C>   INPUT ARGUMENTS:
-C>     CMSG         CHARACTER*(*) MESSAGE TO WRITE
+C> Usage: call errmsg(cmsg)
+C> @param[in] cmsg character*(*) message to write.
 C>
-C> REMARKS: THIS IS A MACHINE-DEPENDENT SUBPROGRAM.
+C> @note This is a machine-dependent subprogram for Cray.
 C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN
-C>   MACHINE:  CRAY
-C>
+C> @author Mark Iredell @date 1995-10-31
 C-----------------------------------------------------------------------
       SUBROUTINE ERRMSG(CMSG)
       CHARACTER*(*) CMSG

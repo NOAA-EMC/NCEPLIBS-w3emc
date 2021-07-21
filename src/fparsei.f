@@ -1,33 +1,27 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  FPARSER       PARSE INTEGERS FROM A CHARACTER STRING
-C>   PRGMMR: IREDELL          ORG: NP23        DATE:1998-09-03
+C> @brief Extract integers from a free-format character string.
+C> @author Mark Iredell @date 1998-09-03
 C>
-C> ABSTRACT: THIS SUBPROGRAM EXTRACTS INTEGERS FROM A FREE-FORMAT
-C>   CHARACTER STRING.  IT IS USEFUL FOR PARSING COMMAND ARGUMENTS.
+C> This subprogram extracts integers from a free-format
+C>  character string. It is useful for parsing command arguments.
 C>
-C> PROGRAM HISTORY LOG:
-C> 1998-09-03  IREDELL  
+C> Program history log:
+C> - 1998-09-03  Mark Iredell
 C>
-C> USAGE:  CALL FPARSEI(CARG,MARG,KARG)
+C> usage: call fparsei(carg, marg, karg)
 C>
-C>   INPUT ARGUMENT LIST:
-C>     CARG     - CHARACTER*(*) STRING OF ASCII DIGITS TO PARSE.
-C>                INTEGERS MAY BE SEPARATED BY A COMMA OR BY BLANKS.
-C>     MARG     - INTEGER MAXIMUM NUMBER OF INTEGERS TO PARSE.
+C> @param[in] carg character*(*) string of ascii digits to parse.
+C>            Integers may be separated by a comma or by blanks.
+C> @param[in] marg integer maximum number of integers to parse.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     KARG     - INTEGER (MARG) NUMBERS PARSED.
-C>                (FROM 0 TO MARG VALUES MAY BE RETURNED.)
+C> @param[out] karg integer (marg) numbers parsed.
+C>                  (from 0 to marg values may be returned.)
 C>
-C> REMARKS:
-C>   TO DETERMINE THE ACTUAL NUMBER OF INTEGERS FOUND IN THE STRING,
-C>   KARG SHOULD BE SET TO FILL VALUES BEFORE THE CALL TO FPARSEI AND
-C>   THE NUMBER OF NON-FILL VALUES SHOULD BE COUNTED AFTER THE CALL.
+C> @note To determine the actual number of integers found in the string,
+C>   karg should be set to fill values before the call to fparsei() and
+C>   the number of non-fill values should be counted after the call.
 C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 90
-C>
+C> @author Mark Iredell @date 1998-09-03
 C-----------------------------------------------------------------------
       SUBROUTINE FPARSEI(CARG,MARG,KARG)
       CHARACTER*(*) CARG
