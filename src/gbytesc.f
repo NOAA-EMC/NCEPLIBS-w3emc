@@ -1,9 +1,9 @@
 C> @file
-C> @brief Get bytes - unpack bits
+C> @brief Get bytes - unpack bits.
 C> @author Unknown
 
 C> Extract arbitrary size values from a packed bit string,
-C> right justifying each value in the unpacked array. v1.1
+C> right justifying each value in the unpacked array.
 C>
 C> @param[in] IN Character*1 array input.
 C> @param[out] IOUT Unpacked array output.

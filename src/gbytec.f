@@ -1,8 +1,8 @@
 C> @file
-C> @brief Wrapper for gbytesc() limiting NSKIP and N to 0 and 1
-C> @author Unknown
+C> @brief Wrapper for gbytesc() limiting NSKIP and N to 0 and 1.
+C> @author NOAA Programmer
 
-C> Wrapper for gbytesc() limiting NSKIP and N to 0 and 1
+C> Wrapper for gbytesc() limiting NSKIP and N to 0 and 1.
 C>
 C> @param[in] IN Character*1 array input.
 C> @param[out] IOUT Unpacked array output.

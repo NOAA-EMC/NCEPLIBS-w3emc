@@ -1,9 +1,9 @@
 C> @file
 C> @brief This is the fortran version of gbytes.
-C> @author Dr. Robert C. Gammill @date 1972-05-DD
+C> @author Dr. Robert C. Gammill @date 1972-05
 
 C> Program history log:
-C> - Russell E. Jones 1991-03-DD
+C> - Russell E. Jones 1991-03
 C> Changes for SiliconGraphics IRIS-4D/25
 C> SiliconGraphics 3.3 FORTRAN 77
 C>
