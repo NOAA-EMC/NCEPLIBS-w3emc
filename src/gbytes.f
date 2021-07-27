@@ -1,41 +1,26 @@
 C> @file
-C> THIS IS THE FORTRAN VERSION OF GBYTES.
-C
-C> THIS IS THE FORTRAN VERSION OF GBYTES.
-C> @author DR. ROBERT C. GAMMILL, CONSULTANT, NATIONAL CENTER FOR ATMOSPHERIC RESEARCH
-C> @date MAY 1972
-C>
-C> CHANGES FOR SiliconGraphics IRIS-4D/25
+C> @brief This is the fortran version of gbytes.
+C> @author Dr. Robert C. Gammill @date 1972-05
+
+C> Program history log:
+C> - Russell E. Jones 1991-03
+C> Changes for SiliconGraphics IRIS-4D/25
 C> SiliconGraphics 3.3 FORTRAN 77
-C> MARCH 1991, RUSSELL E. JONES
-C> NATIONAL WEATHER SERVICE
 C>
-C> SUBROUTINE GBYTES (IPACKD,IUNPKD,NOFF,NBITS,ISKIP,ITER)
+C> To unpack a series of bytes into a target
+C> array. Each unpacked byte is right-justified
+C> in its target word, and the remainder of the
+C> word is zero-filled.
 C>
-C> TO UNPACK A SERIES OF BYTES INTO A TARGET
-C> ARRAY.  EACH UNPACKED BYTE IS RIGHT-JUSTIFIED
-C> IN ITS TARGET WORD, AND THE REMAINDER OF THE
-C> WORD IS ZERO-FILLED.
-C>
-C> @param[in] IPACKD THE WORD OR ARRAY CONTAINING THE PACKED
-C>               BYTES.
-C>
-C> @param[out] IUNPKD THE ARRAY WHICH WILL CONTAIN THE UNPACKED
-C>                           BYTES.
-C>
-C> @param[in] NOFF THE INITIAL NUMBER OF BITS TO SKIP, LEFT
-C>                           TO RIGHT, IN 'IPACKD' IN ORDER TO LOCATE
-C>                           THE FIRST BYTE TO UNPACK.
-C>
-C> @param[in] NBITS NUMBER OF BITS IN THE BYTE TO BE UNPACKED.
-C>                          MAXIMUM OF 64 BITS ON 64 BIT MACHINE, 32
-C>                          BITS ON 32 BIT MACHINE.
-C>
-C> @param[in] ISKIP THE NUMBER OF BITS TO SKIP BETWEEN EACH BYTE
-C>                           IN 'IPACKD' IN ORDER TO LOCATE THE NEXT BYTE
-C>                           TO BE UNPACKED.
-C>
-C> @param[in] ITER THE NUMBER OF BYTES TO BE UNPACKED.
+C> @param[in] IPACKD The word or array containing the packed bytes.
+C> @param[out] IUNPKD The array which will contain the unpacked bytes.
+C> @param[in] NOFF The initial number of bits to skip, left to right,
+C> in 'IPACKD' in order to locate the first byte to unpack.
+C> @param[in] NBITS Number of bits in the byte to be unpacked.
+C> Maximum of 64 bits on 64 bit machine, 32 bits on 32 bit machine.
+C> @param[in] ISKIP The number of bits to skip between each byte in
+C> 'IPACKD' in order to locate the next byte to be unpacked.
+C> @param[in] ITER The number of bytes to be unpacked.
 C>
       SUBROUTINE GBYTES(IPACKD,IUNPKD,NOFF,NBITS,ISKIP,ITER)
 
@@ -59,14 +44,14 @@ C
          IFIRST = 0
       ENDIF
 C
-C NBITS MUST BE LESS THAN OR EQUAL TO NBITSW                                    
+C NBITS MUST BE LESS THAN OR EQUAL TO NBITSW
 C
       ICON   = NBITSW - NBITS
       IF (ICON.LT.0) RETURN
       MASK   = MASKS(NBITS)
 C
 C INDEX TELLS HOW MANY WORDS INTO THE ARRAY 'IPACKD' THE NEXT BYTE
-C APPEARS.         
+C APPEARS.
 C
       INDEX  = ISHFT(NOFF,JSHIFT)
 C
@@ -76,29 +61,29 @@ C
 C
 C ISTEP IS THE DISTANCE IN BITS FROM THE START OF ONE BYTE TO THE NEXT.
 C
-      ISTEP  = NBITS + ISKIP      
+      ISTEP  = NBITS + ISKIP
 C
-C IWORDS TELLS HOW MANY WORDS TO SKIP FROM ONE BYTE TO THE NEXT.                
+C IWORDS TELLS HOW MANY WORDS TO SKIP FROM ONE BYTE TO THE NEXT.
 C
-      IWORDS = ISTEP / NBITSW    
+      IWORDS = ISTEP / NBITSW
 C
-C IBITS TELLS HOW MANY BITS TO SKIP AFTER SKIPPING IWORDS.                      
+C IBITS TELLS HOW MANY BITS TO SKIP AFTER SKIPPING IWORDS.
 C
-      IBITS  = MOD(ISTEP,NBITSW) 
+      IBITS  = MOD(ISTEP,NBITSW)
 C
       DO 10 I = 1,ITER
 C
-C MOVER SPECIFIES HOW FAR TO THE RIGHT A BYTE MUST BE MOVED IN ORDER            
+C MOVER SPECIFIES HOW FAR TO THE RIGHT A BYTE MUST BE MOVED IN ORDER
 C
-C    TO BE RIGHT ADJUSTED.                                                      
+C    TO BE RIGHT ADJUSTED.
 C
       MOVER = ICON - II
-C                                                                               
-C THE BYTE IS SPLIT ACROSS A WORD BREAK.                 
-C                       
-      IF (MOVER.LT.0) THEN                                                  
-        MOVEL   = - MOVER                                                       
-        MOVER   = NBITSW - MOVEL                                                
+C
+C THE BYTE IS SPLIT ACROSS A WORD BREAK.
+C
+      IF (MOVER.LT.0) THEN
+        MOVEL   = - MOVER
+        MOVER   = NBITSW - MOVEL
         IUNPKD(I) = IAND(IOR(ISHFT(IPACKD(INDEX+1),MOVEL),
      &            ISHFT(IPACKD(INDEX+2),-MOVER)),MASK)
 C
@@ -106,13 +91,13 @@ C RIGHT ADJUST THE BYTE.
 C
       ELSE IF (MOVER.GT.0) THEN
         IUNPKD(I) = IAND(ISHFT(IPACKD(INDEX+1),-MOVER),MASK)
-C                                             
+C
 C THE BYTE IS ALREADY RIGHT ADJUSTED.
 C
       ELSE
         IUNPKD(I) = IAND(IPACKD(INDEX+1),MASK)
       ENDIF
-C                                                                               
+C
 C INCREMENT II AND INDEX.
 C
         II    = II + IBITS

@@ -1,15 +1,16 @@
 C> @file
-C
-C> Get bytes - unpack bits:  Extract arbitrary size values from a
-C> packed bit string, right justifying each value in the unpacked
-C> array. v1.1
+C> @brief Get bytes - unpack bits.
+C> @author Unknown
+
+C> Extract arbitrary size values from a packed bit string,
+C> right justifying each value in the unpacked array.
 C>
-C> @param[in] IN    = character*1 array input
-C> @param[out] IOUT  = unpacked array output
-C> @param[in] ISKIP = initial number of bits to skip
-C> @param[in] NBYTE = number of bits to take
-C> @param[in] NSKIP = additional number of bits to skip on each iteration
-C> @param[in] N     = number of iterations
+C> @param[in] IN Character*1 array input.
+C> @param[out] IOUT Unpacked array output.
+C> @param[in] ISKIP Initial number of bits to skip.
+C> @param[in] NBYTE Number of bits to take.
+C> @param[in] NSKIP Additional number of bits to skip on each iteration.
+C> @param[in] N Number of iterations.
 C>
       SUBROUTINE GBYTESC(IN,IOUT,ISKIP,NBYTE,NSKIP,N)
       character*1 in(*)
