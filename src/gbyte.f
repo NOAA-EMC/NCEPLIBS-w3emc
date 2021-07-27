@@ -9,24 +9,18 @@ C> - Russell E. Jones 1991-03-DD
 C> Changes for SiliconGraphics IRIS-4D/25
 C> SiliconGraphics 3.3 FORTRAN 77.
 C>
-C> To unpack a byte into a target word.  the
-C> unpacked byte is right-justified in the
-C> target word, and the remainder of the
-C> word is zero-filled.
+C> To unpack a byte into a target word. The unpacked byte is right-justified
+C> in the target word, and the remainder of the word is zero-filled.
 C>
-C> @param[in] IPACKD The word or array containing the byte to be
-C>                   unpacked.
+C> @param[in] IPACKD The word or array containing the byte to be unpacked.
 C>
-C> @param[out] IUNPKD The word which will contain the unpacked
-C>                   byte.
+C> @param[out] IUNPKD The word which will contain the unpacked byte.
 C>
-C> @param[in] NOFF The number of bits to skip, left to right,
-C>                 in IPACKD in order to locate the byte
-C>                 to be unpacked.
+C> @param[in] NOFF The number of bits to skip, left to right, in IPACKD
+C> in order to locate the byte to be unpacked.
 C>
-C> @param[in] NBITS Number of bits in the byte to be unpacked.
-C>                  Maximum of 64 bits on 64 bit machine, 32
-C>                  bits on 32 bit machine.
+C> @param[in] NBITS Number of bits in the byte to be unpacked. Maximum of
+C> 64 bits on 64 bit machine, 32 bits on 32 bit machine.
 C>
 C> @author Dr. Robert C. Gammill @date 1972-05-DD
       SUBROUTINE GBYTE(IPACKD,IUNPKD,NOFF,NBITS)
