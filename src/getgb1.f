@@ -1,72 +1,53 @@
 C> @file
-C
-C> SUBPROGRAM: GETGB1         FINDS AND UNPACKS A GRIB MESSAGE
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 94-04-01
+C> @brief Find and unpacks a grib message.
+C> @author Mark Iredell @date 1994-04-01
+
+C> Find and unpack a grib message.
+C> Read an associated grib index file (unless it already was read).
+C> Find in the index file a reference to the grib message requested.
+C> The grib message request specifies the number of messages to skip
+C> and the unpacked pds and gds parameters. (A requested parameter
+C> of -1 means to allow any value of this parameter to be found.)
+C> If the requested grib message is found, then it is read from the
+C> grib file and unpacked. Its message number is returned along with
+C> the unpacked pds and gds parameters, the unpacked bitmap (if any),
+C> and the unpacked data. If the grib message is not found, then the
+C> return code will be nonzero.
 C>
-C> ABSTRACT: FIND AND UNPACK A GRIB MESSAGE.
-C>   READ AN ASSOCIATED GRIB INDEX FILE (UNLESS IT ALREADY WAS READ).
-C>   FIND IN THE INDEX FILE A REFERENCE TO THE GRIB MESSAGE REQUESTED.
-C>   THE GRIB MESSAGE REQUEST SPECIFIES THE NUMBER OF MESSAGES TO SKIP
-C>   AND THE UNPACKED PDS AND GDS PARAMETERS.  (A REQUESTED PARAMETER
-C>   OF -1 MEANS TO ALLOW ANY VALUE OF THIS PARAMETER TO BE FOUND.)
-C>   IF THE REQUESTED GRIB MESSAGE IS FOUND, THEN IT IS READ FROM THE
-C>   GRIB FILE AND UNPACKED.  ITS MESSAGE NUMBER IS RETURNED ALONG WITH
-C>   THE UNPACKED PDS AND GDS PARAMETERS, THE UNPACKED BITMAP (IF ANY),
-C>   AND THE UNPACKED DATA.  IF THE GRIB MESSAGE IS NOT FOUND, THEN THE
-C>   RETURN CODE WILL BE NONZERO.
+C> Program history log:
+C>  - Mark Iredell 1994-04-01
+C>  - Ralph Jones 1995-05-10  Add one more parameter to getgb and
+C> change name to getgb1.
 C>
-C> PROGRAM HISTORY LOG:
-C>   94-04-01  IREDELL
-C>   95-05-10  R.E.JONES  ADD ONE MORE PARAMETER TO GETGB AND
-C>                        CHANGE NAME TO GETGB1 
+C> @param[in] lugb logical unit of the unblocked grib data file.
+C> @param[in] lugi logical unit of the unblocked grib index file.
+C> @param[in] jf integer maximum number of data points to unpack.
+C> @param[in] j integer number of messages to skip (=0 to search from beginning)
+C> (<0 to reopen index file and search from beginning).
+C> @param[in] jpds integer (25) pds parameters for which to search
+C> (=-1 for wildcard) look in doc block of w3fi63 for array kpds
+C> for list of order of unpacked pds values.
+C> In most cases you only need to set 4 or 5 values to pick up record.
+C> @param[in] jgds integer (22) gds parameters for which to search
+C> (only searched if jpds(3)=255) (=-1 for wildcard).
+C> @param[out] grib Grib data array before it is unpacked.
+C> @param[out] kf Integer number of data points unpacked.
+C> @param[out] k Integer message number unpacked
+C> (can be same as j in calling program
+C> in order to facilitate multiple searches).
+C> @param[out] kpds Integer (25) unpacked pds parameters.
+C> @param[out] kgds Integer (22) unpacked gds parameters.
+C> @param[out] lb Logical (kf) unpacked bitmap if present.
+C> @param[out] f Real (kf) unpacked data.
+C> @param[out] iret Integer return code.
+C>  - 0 All ok.
+C>  - 96 Error reading index file.
+C>  - 97 Error reading grib file.
+C>  - 98 Number of data points greater than jf.
+C>  - 99 Request not found.
+C>  - other w3fi63 grib unpacker return code.
 C>
-C> USAGE:    CALL GETGB1(LUGB,LUGI,JF,J,JPDS,JGDS,
-C>    &                       GRIB,KF,K,KPDS,KGDS,LB,F,IRET)
-C>   INPUT ARGUMENTS:
-C>     LUGB         LOGICAL UNIT OF THE UNBLOCKED GRIB DATA FILE
-C>     LUGI         LOGICAL UNIT OF THE UNBLOCKED GRIB INDEX FILE
-C>     JF           INTEGER MAXIMUM NUMBER OF DATA POINTS TO UNPACK
-C>     J            INTEGER NUMBER OF MESSAGES TO SKIP
-C>                  (=0 TO SEARCH FROM BEGINNING)
-C>                  (<0 TO REOPEN INDEX FILE AND SEARCH FROM BEGINNING)
-C>     JPDS         INTEGER (25) PDS PARAMETERS FOR WHICH TO SEARCH
-C>                  (=-1 FOR WILDCARD)
-C>                  LOOK IN DOC BLOCK OF W3FI63 FOR ARRAY KPDS 
-C>                  FOR LIST OF ORDER OF UNPACKED PDS VALUES. IN
-C>                  MOST CASES YOU ONLY NEED TO SET 4 OR 5 VALUES
-C>                  TO PICK UP RECORD.
-C>     JGDS         INTEGER (22) GDS PARAMETERS FOR WHICH TO SEARCH
-C>                  (ONLY SEARCHED IF JPDS(3)=255)
-C>                  (=-1 FOR WILDCARD)
-C>   OUTPUT ARGUMENTS:
-C>     GRIB         GRIB DATA ARRAY BEFORE IT IS UNPACKED
-C>     KF           INTEGER NUMBER OF DATA POINTS UNPACKED
-C>     K            INTEGER MESSAGE NUMBER UNPACKED
-C>                  (CAN BE SAME AS J IN CALLING PROGRAM
-C>                  IN ORDER TO FACILITATE MULTIPLE SEARCHES)
-C>     KPDS         INTEGER (25) UNPACKED PDS PARAMETERS
-C>     KGDS         INTEGER (22) UNPACKED GDS PARAMETERS
-C>     LB           LOGICAL (KF) UNPACKED BITMAP IF PRESENT
-C>     F            REAL (KF) UNPACKED DATA
-C>     IRET         INTEGER RETURN CODE
-C>                    0      ALL OK
-C>                    96     ERROR READING INDEX FILE
-C>                    97     ERROR READING GRIB FILE
-C>                    98     NUMBER OF DATA POINTS GREATER THAN JF
-C>                    99     REQUEST NOT FOUND
-C>                    OTHER  W3FI63 GRIB UNPACKER RETURN CODE
-C>   
-C> SUBPROGRAMS CALLED:
-C>   BAREAD         BYTE-ADDRESSABLE READ
-C>   GBYTE          UNPACK BYTES
-C>   FI632          UNPACK PDS
-C>   FI633          UNPACK GDS
-C>   W3FI63         UNPACK GRIB
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048
-C>
+C> @author Mark Iredell @date 1994-04-01
       SUBROUTINE GETGB1(LUGB,LUGI,JF,J,JPDS,JGDS,
      &                       GRIB,KF,K,KPDS,KGDS,LB,F,IRET)
 C

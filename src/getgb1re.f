@@ -1,50 +1,37 @@
 C> @file
-C
-C> SUBPROGRAM: GETGB1RE       READS AND UNPACKS A GRIB MESSAGE
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 95-10-31
-C>
-C> ABSTRACT: READ AND UNPACK A GRIB MESSAGE.
+C> @brief Reads and unpacks a grib message.
+C> @author Mark Iredell @date 1995-10-31
+
+C> Reads and unpacks a grib message.
 C>
 C> PROGRAM HISTORY LOG:
-C>   95-10-31  IREDELL
-C>   97-02-11  Y.ZHU       INCLUDED PROBABILITY AND CLUSTER ARGUMENTS
+C>   Mark Iredell 1995-10-31
+C>   Y. Zhu 1997-02-11 Included probability and cluster arguments.
 C>
-C> USAGE:    CALL GETGB1RE(LUGB,LSKIP,LGRIB,KF,KPDS,KGDS,KENS,
-C>    &                    KPROB,XPROB,KCLUST,KMEMBR,LB,F,IRET)
-C>   INPUT ARGUMENTS:
-C>     LUGB         INTEGER UNIT OF THE UNBLOCKED GRIB DATA FILE
-C>     LSKIP        INTEGER NUMBER OF BYTES TO SKIP
-C>     LGRIB        INTEGER NUMBER OF BYTES TO READ
-C>   OUTPUT ARGUMENTS:
-C>     KF           INTEGER NUMBER OF DATA POINTS UNPACKED
-C>     KPDS         INTEGER (200) UNPACKED PDS PARAMETERS
-C>     KGDS         INTEGER (200) UNPACKED GDS PARAMETERS
-C>     KENS         INTEGER (200) UNPACKED ENSEMBLE PDS PARMS
-C>     KPROB        INTEGER (2) PROBABILITY ENSEMBLE PARMS
-C>     XPROB        REAL    (2) PROBABILITY ENSEMBLE PARMS
-C>     KCLUST       INTEGER (16) CLUSTER ENSEMBLE PARMS
-C>     KMEMBR       INTEGER (8) CLUSTER ENSEMBLE PARMS
-C>     LB           LOGICAL*1 (KF) UNPACKED BITMAP IF PRESENT
-C>     F            REAL (KF) UNPACKED DATA
-C>     IRET         INTEGER RETURN CODE
-C>                    0      ALL OK
-C>                    97     ERROR READING GRIB FILE
-C>                    OTHER  W3FI63 GRIB UNPACKER RETURN CODE
+C> @param[in] LUGB Integer unit of the unblocked grib data file.
+C> @param[in] LSKIP Integer number of bytes to skip.
+C> @param[in] LGRIB Integer number of bytes to read.
+C> @param[out] KF Integer number of data points unpacked.
+C> @param[out] KPDS Integer (200) unpacked pds parameters.
+C> @param[out] KGDS Integer (200) unpacked gds parameters.
+C> @param[out] KENS Integer (200) unpacked ensemble pds parms.
+C> @param[out] KPROB Integer (2) probability ensemble parms.
+C> @param[out] XPROB Real (2) probability ensemble parms.
+C> @param[out] KCLUST Integer (16) cluster ensemble parms.
+C> @param[out] KMEMBR Integer (8) cluster ensemble parms.
+C> @param[out] LB Logical*1 (kf) unpacked bitmap if present.
+C> @param[out] F Real (kf) unpacked data.
+C> @param[out] IRET Integer return code.
+C> - 0 All ok.
+C> - 97 Error reading grib file.
+C> - other w3fi63 grib unpacker return code.
 C>
-C> SUBPROGRAMS CALLED:
-C>   BAREAD         BYTE-ADDRESSABLE READ
-C>   W3FI63         UNPACK GRIB
-C>   PDSEUP         UNPACK PDS EXTENSION
+C> @note There is no protection against unpacking too much data.
+C> Subprogram can be called from a multiprocessing environment.
+C> Do not engage the same logical unit from more than one processor.
+C> This subprogram is intended for private use by getgb routines only.
 C>
-C> REMARKS: THERE IS NO PROTECTION AGAINST UNPACKING TOO MUCH DATA.
-C>   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>   DO NOT ENGAGE THE SAME LOGICAL UNIT FROM MORE THAN ONE PROCESSOR.
-C>   THIS SUBPROGRAM IS INTENDED FOR PRIVATE USE BY GETGB ROUTINES ONLY.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 77
-C>   MACHINE:  CRAY, WORKSTATIONS
-C>
+C> @author Mark Iredell @date 1995-10-31
 C-----------------------------------------------------------------------
       SUBROUTINE GETGB1RE(LUGB,LSKIP,LGRIB,KF,KPDS,KGDS,KENS,
      &                    KPROB,XPROB,KCLUST,KMEMBR,LB,F,IRET)
