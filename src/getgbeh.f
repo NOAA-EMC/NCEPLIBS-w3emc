@@ -2,16 +2,16 @@ C> @file
 C> @brief Find a grib message.
 C> @author Mark Iredell @date 1995-10-31
 
-C>Read a grib index file (or optionally the grib file itself) to get
-C>the index buffer (i.e. table of contents) for the grib file. (The
-C>index buffer is saved for use by future prospective calls.) Find
-C>in the index buffer a reference to the grib message requested.
-C>The grib message request specifies the number of messages to skip
-C>and the unpacked pds and gds parameters. (A requested parameter of
-C>-1 means to allow any value of this parameter to be found.) If the
-C>requested grib message is found, then its message number is
-C>returned along with the unpacked pds and gds parameters. If the
-C>grib message is not found, then the return code will be nonzero.
+C> Read a grib index file (or optionally the grib file itself) to get
+C> the index buffer (i.e. table of contents) for the grib file. (The
+C> index buffer is saved for use by future prospective calls.) Find
+C> in the index buffer a reference to the grib message requested.
+C> The grib message request specifies the number of messages to skip
+C> and the unpacked pds and gds parameters. (A requested parameter of
+C> -1 means to allow any value of this parameter to be found.) If the
+C> requested grib message is found, then its message number is
+C> returned along with the unpacked pds and gds parameters. If the
+C> grib message is not found, then the return code will be nonzero.
 C>
 C> Program History:
 C> - 1995-10-31  Mark Iredell Modularized portions of code into subprograms

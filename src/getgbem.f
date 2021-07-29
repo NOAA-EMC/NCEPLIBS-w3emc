@@ -147,18 +147,14 @@ C>  - 3 ensemble identifier.
 C>  - 4 product identifier.
 C>  - 5 smoothing flag.
 C> @param[in] mbuf integer length of index buffer in bytes.
-C> @param[in] cbuf character*1 (mbuf) index buffer
+C> @param[inout] nnum integer number of index records
 C> (initialize by setting j=-1).
-C> @param[in] nlen integer length of each index record in bytes
+C> @param[inout] mnum integer number of index records skipped
 C> (initialize by setting j=-1).
-C> @param[in] nnum integer number of index records
+C> @param[inout] cbuf character*1 (mbuf) index buffer
 C> (initialize by setting j=-1).
-C> @param[in] mnum integer number of index records skipped
+C> @param[inout] nlen integer length of each index record in bytes.
 C> (initialize by setting j=-1).
-C> @param[out] cbuf character*1 (mbuf) index buffer.
-C> @param[out] nlen integer length of each index record in bytes.
-C> @param[out] nnum integer number of index records.
-C> @param[out] mnum integer number of index records skipped.
 C> @param[out] kf integer number of data points unpacked.
 C> @param[out] k integer message number unpacked
 C> (can be same as j in calling program
@@ -167,7 +163,7 @@ C> @param[out] kpds integer (200) unpacked pds parameters.
 C> @param[out] kgds integer (200) unpacked gds parameters.
 C> @param[out] kens integer (200) unpacked ensemble pds parms.
 C> @param[out] lb logical*1 (kf) unpacked bitmap if present.
-C> @param[out] @param[out] f real (kf) unpacked data.
+C> @param[out] f real (kf) unpacked data.
 C> @param[out] iret integer return code.
 C>  - 0 all ok.
 C>  - 96 error reading index file.
