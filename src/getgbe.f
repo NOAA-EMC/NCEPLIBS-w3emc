@@ -1,5 +1,5 @@
 C> @file
-C> @brief Finds and unpacks a grib message
+C> @brief Finds and unpacks a grib message.
 C> @author Mark Iredell @date 1994-04-01
 
 C> Find and unpack a grib message.
