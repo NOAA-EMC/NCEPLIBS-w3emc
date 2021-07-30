@@ -69,77 +69,77 @@ C> octet number of the list of numbers of points in each row or
 C> 255 if neither are present.
 C> - 21: for grids with pl, number of points in grid.
 C> - 22: number of words in each row.
-C> Latitude/longitude grids.
-C> - 2: n(i) nr points on latitude circle.
-C> - 3: n(j) nr points on longitude meridian.
-C> - 4: la(1) latitude of origin.
-C> - 5: lo(1) longitude of origin.
-C> - 6: resolution flag (right adj copy of octet 17).
-C> - 7: la(2) latitude of extreme point.
-C> - 8: lo(2) longitude of extreme point.
-C> - 9: di longitudinal direction of increment.
-C> - 10: dj latitudinal direction increment.
-C> - 11: scanning mode flag (right adj copy of octet 28).
-C> Gaussian  grids.
-C> - 2: n(i) nr points on latitude circle.
-C> - 3: n(j) nr points on longitude meridian.
-C> - 4: la(1) latitude of origin.
-C> - 5: lo(1) longitude of origin.
-C> - 6: resolution flag  (right adj copy of octet 17).
-C> - 7: la(2) latitude of extreme point.
-C> - 8: lo(2) longitude of extreme point.
-C> - 9: di longitudinal direction of increment.
-C> - 10: n - nr of circles pole to equator.
-C> - 11: scanning mode flag (right adj copy of octet 28).
-C> - 12: nv - nr of vert coord parameters.
-C> - 13:
-C>  - pv - octet nr of list of vert coord parameters or.
-C>  - pl - location of the list of numbers of points in each row
-C>  (if no vert coord parameters are present) or.
-C>  - 255 if neither are present.
-C> Polar stereographic grids.
-C> - 2: n(i) nr points along lat circle.
-C> - 3: n(j) nr points along lon circle.
-C> - 4: la(1) latitude of origin.
-C> - 5: lo(1) longitude of origin.
-C> - 6: resolution flag  (right adj copy of octet 17).
-C> - 7: lov grid orientation.
-C> - 8: dx - x direction increment.
-C> - 9: dy - y direction increment.
-C> - 10: projection center flag.
-C> - 11: scanning mode (right adj copy of octet 28).
-C> Spherical harmonic coefficients.
-C> - 2: j pentagonal resolution parameter.
-C> - 3: k pentagonal resolution parameter.
-C> - 4: m pentagonal resolution parameter.
-C> - 5: representation type.
-C> - 6: coefficient storage mode.
-C> Mercator grids.
-C> - 2: n(i) nr points on latitude circle.
-C> - 3: n(j) nr points on longitude meridian.
-C> - 4: la(1) latitude of origin.
-C> - 5: lo(1) longitude of origin.
-C> - 6: resolution flag (right adj copy of octet 17).
-C> - 7: la(2) latitude of last grid point.
-C> - 8: lo(2) longitude of last grid point.
-C> - 9: latit - latitude of projection intersection.
-C> - 10: reserved.
-C> - 11: scanning mode flag (right adj copy of octet 28).
-C> - 12: longitudinal dir grid length.
-C> - 13: latitudinal dir grid length.
-C> Lambert conformal grids.
-C> - 2: nx nr points along x-axis.
-C> - 3: ny nr points along y-axis.
-C> - 4: la1 lat of origin (lower left).
-C> - 5: lo1 lon of origin (lower left).
-C> - 6: resolution (right adj copy of octet 17).
-C> - 7: lov - orientation of grid.
-C> - 8: dx - x-dir increment.
-C> - 9: dy - y-dir increment.
-C> - 10: projection center flag.
-C> - 11: scanning mode flag (right adj copy of octet 28).
-C> - 12: latin 1 - first lat from pole of secant cone inter.
-C> - 13: latin 2 - second lat from pole of secant cone inter.
+C> - Latitude/longitude grids.
+C>  - 2: n(i) nr points on latitude circle.
+C>  - 3: n(j) nr points on longitude meridian.
+C>  - 4: la(1) latitude of origin.
+C>  - 5: lo(1) longitude of origin.
+C>  - 6: resolution flag (right adj copy of octet 17).
+C>  - 7: la(2) latitude of extreme point.
+C>  - 8: lo(2) longitude of extreme point.
+C>  - 9: di longitudinal direction of increment.
+C>  - 10: dj latitudinal direction increment.
+C>  - 11: scanning mode flag (right adj copy of octet 28).
+C> - Gaussian  grids.
+C>  - 2: n(i) nr points on latitude circle.
+C>  - 3: n(j) nr points on longitude meridian.
+C>  - 4: la(1) latitude of origin.
+C>  - 5: lo(1) longitude of origin.
+C>  - 6: resolution flag  (right adj copy of octet 17).
+C>  - 7: la(2) latitude of extreme point.
+C>  - 8: lo(2) longitude of extreme point.
+C>  - 9: di longitudinal direction of increment.
+C>  - 10: n - nr of circles pole to equator.
+C>  - 11: scanning mode flag (right adj copy of octet 28).
+C>  - 12: nv - nr of vert coord parameters.
+C>  - 13:
+C>   - pv - octet nr of list of vert coord parameters or.
+C>   - pl - location of the list of numbers of points in each row
+C>   (if no vert coord parameters are present) or.
+C>   - 255 if neither are present.
+C> - Polar stereographic grids.
+C>  - 2: n(i) nr points along lat circle.
+C>  - 3: n(j) nr points along lon circle.
+C>  - 4: la(1) latitude of origin.
+C>  - 5: lo(1) longitude of origin.
+C>  - 6: resolution flag  (right adj copy of octet 17).
+C>  - 7: lov grid orientation.
+C>  - 8: dx - x direction increment.
+C>  - 9: dy - y direction increment.
+C>  - 10: projection center flag.
+C>  - 11: scanning mode (right adj copy of octet 28).
+C> - Spherical harmonic coefficients.
+C>  - 2: j pentagonal resolution parameter.
+C>  - 3: k pentagonal resolution parameter.
+C>  - 4: m pentagonal resolution parameter.
+C>  - 5: representation type.
+C>  - 6: coefficient storage mode.
+C> - Mercator grids.
+C>  - 2: n(i) nr points on latitude circle.
+C>  - 3: n(j) nr points on longitude meridian.
+C>  - 4: la(1) latitude of origin.
+C>  - 5: lo(1) longitude of origin.
+C>  - 6: resolution flag (right adj copy of octet 17).
+C>  - 7: la(2) latitude of last grid point.
+C>  - 8: lo(2) longitude of last grid point.
+C>  - 9: latit - latitude of projection intersection.
+C>  - 10: reserved.
+C>  - 11: scanning mode flag (right adj copy of octet 28).
+C>  - 12: longitudinal dir grid length.
+C>  - 13: latitudinal dir grid length.
+C> - Lambert conformal grids.
+C>  - 2: nx nr points along x-axis.
+C>  - 3: ny nr points along y-axis.
+C>  - 4: la1 lat of origin (lower left).
+C>  - 5: lo1 lon of origin (lower left).
+C>  - 6: resolution (right adj copy of octet 17).
+C>  - 7: lov - orientation of grid.
+C>  - 8: dx - x-dir increment.
+C>  - 9: dy - y-dir increment.
+C>  - 10: projection center flag.
+C>  - 11: scanning mode flag (right adj copy of octet 28).
+C>  - 12: latin 1 - first lat from pole of secant cone inter.
+C>  - 13: latin 2 - second lat from pole of secant cone inter.
 C> @param[in] jens integer (200) ensemble pds parms for which to search
 C> (only searched if jpds(23)=2)
 C> (=-1 for wildcard).
