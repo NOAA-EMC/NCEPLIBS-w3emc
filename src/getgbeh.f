@@ -161,7 +161,7 @@ C> below, allocating a private copy of cbuf, nlen and nnum to each
 C> processor. Do not engage the same logical unit from more than one
 C> processor.
 C>
-C> @author Mark Iredell @date 1995-10-31
+C> @author Mark Iredell @date 94-04-01
       SUBROUTINE GETGBEH(LUGB,LUGI,J,JPDS,JGDS,JENS,
      &                   KG,KF,K,KPDS,KGDS,KENS,IRET)
       INTEGER JPDS(200),JGDS(200),JENS(200)
