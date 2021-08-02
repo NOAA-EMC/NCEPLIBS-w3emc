@@ -14,7 +14,7 @@
 !> Decompose return statistcs if statement
 !> - Boi Vuong 2020-04-02 Check for ka > 0 and modifiled ifblock statement
 !> into two separate ifblock statements.
-!> @param[in] K - Integer positive section number
+!> @param[in] K Integer positive section number
 !> or maximum section number in the first invocation
 !> or zero to reset all wall-clock statistics
 !> or negative section number to skip monitoring
