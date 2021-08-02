@@ -1,60 +1,50 @@
 C> @file
-C
-C> SUBPROGRAM: GETGI          READS A GRIB INDEX FILE
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 95-10-31
+C> @brief Read a grib index file and return its contents.
+C> @author Mark Iredell @date 1995-10-31
+
+C> Read a grib index file and return its contents.
+C> Version 1 of the index file has the following format:
+C> 81-byte s.lord header with 'gb1ix1' in columns 42-47 followed by
+C> 81-byte header with number of bytes to skip before index records,
+C> number of bytes in each index record, number of index records,
+C> and grib file basename written in format ('ix1form:',3i10,2x,a40).
+C> Each following index record corresponds to a grib message
+C> and has the internal format:
+C> - byte 001-004: bytes to skip in data file before grib message.
+C> - byte 005-008: bytes to skip in message before pds.
+C> - byte 009-012: bytes to skip in message before gds (0 if no gds).
+C> - byte 013-016: bytes to skip in message before bms (0 if no bms).
+C> - byte 017-020: bytes to skip in message before bds.
+C> - byte 021-024: bytes total in the message.
+C> - byte 025-025: grib version number.
+C> - byte 026-053: product definition section (pds).
+C> - byte 054-095: grid definition section (gds) (or nulls).
+C> - byte 096-101: first part of the bit map section (bms) (or nulls).
+C> - byte 102-112: first part of the binary data section (bds).
+C> - byte 113-172: (optional) bytes 41-100 of the pds.
+C> - byte 173-184: (optional) bytes 29-40 of the pds.
+C> - byte 185-320: (optional) bytes 43-178 of the gds.
 C>
-C> ABSTRACT: READ A GRIB INDEX FILE AND RETURN ITS CONTENTS.
-C>   VERSION 1 OF THE INDEX FILE HAS THE FOLLOWING FORMAT:
-C>     81-BYTE S.LORD HEADER WITH 'GB1IX1' IN COLUMNS 42-47 FOLLOWED BY
-C>     81-BYTE HEADER WITH NUMBER OF BYTES TO SKIP BEFORE INDEX RECORDS,
-C>     NUMBER OF BYTES IN EACH INDEX RECORD, NUMBER OF INDEX RECORDS,
-C>     AND GRIB FILE BASENAME WRITTEN IN FORMAT ('IX1FORM:',3I10,2X,A40).
-C>     EACH FOLLOWING INDEX RECORD CORRESPONDS TO A GRIB MESSAGE
-C>     AND HAS THE INTERNAL FORMAT:
-C>       BYTE 001-004: BYTES TO SKIP IN DATA FILE BEFORE GRIB MESSAGE
-C>       BYTE 005-008: BYTES TO SKIP IN MESSAGE BEFORE PDS
-C>       BYTE 009-012: BYTES TO SKIP IN MESSAGE BEFORE GDS (0 IF NO GDS)
-C>       BYTE 013-016: BYTES TO SKIP IN MESSAGE BEFORE BMS (0 IF NO BMS)
-C>       BYTE 017-020: BYTES TO SKIP IN MESSAGE BEFORE BDS
-C>       BYTE 021-024: BYTES TOTAL IN THE MESSAGE
-C>       BYTE 025-025: GRIB VERSION NUMBER
-C>       BYTE 026-053: PRODUCT DEFINITION SECTION (PDS)
-C>       BYTE 054-095: GRID DEFINITION SECTION (GDS) (OR NULLS)
-C>       BYTE 096-101: FIRST PART OF THE BIT MAP SECTION (BMS) (OR NULLS)
-C>       BYTE 102-112: FIRST PART OF THE BINARY DATA SECTION (BDS)
-C>       BYTE 113-172: (OPTIONAL) BYTES 41-100 OF THE PDS
-C>       BYTE 173-184: (OPTIONAL) BYTES 29-40 OF THE PDS
-C>       BYTE 185-320: (OPTIONAL) BYTES 43-178 OF THE GDS
+C> Program history log:
+C> - Mark Iredell  1995-10-31
+C> - Mark Iredell  1996-10-31 Augmented optional definitions to byte 320.
 C>
-C> PROGRAM HISTORY LOG:
-C>   95-10-31  IREDELL
-C>   96-10-31  IREDELL   AUGMENTED OPTIONAL DEFINITIONS TO BYTE 320
+C> @param[in] lugi integer unit of the unblocked grib index file.
+C> @param[in] mnum integer number of index records to skip (usually 0).
+C> @param[in] mbuf integer length of cbuf in bytes.
+C> @param[out] cbuf character*1 (mbuf) buffer to receive index data.
+C> @param[out] nlen integer length of each index record in bytes.
+C> @param[out] nnum integer number of index records.
+C> @param[out] iret integer return code.
+C> - 0: all ok.
+C> - 1: cbuf too small to hold index buffer.
+C> - 2: error reading index file buffer.
+C> - 3: error reading index file header.
 C>
-C> USAGE:    CALL GETGI(LUGI,MNUM,MBUF,CBUF,NLEN,NNUM,IRET)
-C>   INPUT ARGUMENTS:
-C>     LUGI         INTEGER UNIT OF THE UNBLOCKED GRIB INDEX FILE
-C>     MNUM         INTEGER NUMBER OF INDEX RECORDS TO SKIP (USUALLY 0)
-C>     MBUF         INTEGER LENGTH OF CBUF IN BYTES
-C>   OUTPUT ARGUMENTS:
-C>     CBUF         CHARACTER*1 (MBUF) BUFFER TO RECEIVE INDEX DATA
-C>     NLEN         INTEGER LENGTH OF EACH INDEX RECORD IN BYTES
-C>     NNUM         INTEGER NUMBER OF INDEX RECORDS
-C>     IRET         INTEGER RETURN CODE
-C>                    0      ALL OK
-C>                    1      CBUF TOO SMALL TO HOLD INDEX BUFFER
-C>                    2      ERROR READING INDEX FILE BUFFER
-C>                    3      ERROR READING INDEX FILE HEADER
+C> @note Subprogram can be called from a multiprocessing environment.
+C> Do not engage the same logical unit from more than one processor.
 C>
-C> SUBPROGRAMS CALLED:
-C>   BAREAD         BYTE-ADDRESSABLE READ
-C>
-C> REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>   DO NOT ENGAGE THE SAME LOGICAL UNIT FROM MORE THAN ONE PROCESSOR.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 77
-C>   MACHINE:  CRAY, WORKSTATIONS
-C>
+C> @author Mark Iredell @date 1995-10-31
 C-----------------------------------------------------------------------
       SUBROUTINE GETGI(LUGI,MNUM,MBUF,CBUF,NLEN,NNUM,IRET)
       CHARACTER CBUF(MBUF)
