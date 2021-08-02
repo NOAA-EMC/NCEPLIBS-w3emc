@@ -176,6 +176,7 @@ C> @note Specify an index file if feasible to increase speed.
 C> Subprogram can be called from a multiprocessing environment.
 C> Do not engage the same logical unit from more than one processor.
 C>
+C> @author Mark Iredell @date 1994-04-01
 C-----------------------------------------------------------------------
       SUBROUTINE GETGBEM(LUGB,LUGI,JF,J,JPDS,JGDS,JENS,
      &                   MBUF,CBUF,NLEN,NNUM,MNUM,
