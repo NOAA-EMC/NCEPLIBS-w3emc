@@ -1,284 +1,273 @@
 C> @file
-C
-C> 
-C> @author D. A. KEYSER @date 2013-03-20
+C> @brief Reads and unpacks one report into the unpacked office note
+C> 29/124 format
+C> @author D. A. Keyser @date 2013-03-20
+
+C> This routine has not been tested reading input data from any dump
+C> type in ON29/124 format on WCOSS.  It likely will not work when
+C> attempting to read ON29/124 format dumps on WCOSS.  It has also
+C> not been tested reading any dump file other than ADPUPA (BUFR
+C> input only) on WCOSS. It does work reading BUFR ADPUPA dump files
+C> on WCOSS. It will hopefully working reading other BUFR (only)
+C> dump files on WCOSS. Also, this routine is only known to work correctly
+C> when compiled using 8 byte machine words (real and integer).
 C>
-C> NOTICE:
-C>    This routine has not been tested reading input data from any dump
-C>    type in ON29/124 format on WCOSS.  It likely will not work when
-C>    attempting to read ON29/124 format dumps on WCOSS.  It has also
-C>    not been tested reading any dump file other than ADPUPA (BUFR
-C>    input only) on WCOSS. It does work reading BUFR ADPUPA dump files
-C>    on WCOSS. It will hopefully working reading other BUFR (only)
-C>    dump files on WCOSS.
+C> Reads and unpacks one report into the unpacked office note
+C> 29/124 format.  The input data may be packed into either bufr or
+C> true on29/124 format with a y2k compliant pseudo-on85 header label.
+C> (Note: as a temporary measure, this code will still operate on a
+C> true on29/124 format file with a non-y2k compliant on85 header
+C> label.  The code will use the "windowing" technique to obtain a
+C> 4-digit year.) This routine will determine the format of the
+C> input data and take the appropriate action. It returns the
+C> unpacked report to the calling program in the array 'obs'.
+C> Various contingencies are covered by return value of the function
+C> and parameter 'ier' - function and ier have same value.  Repeated
+C> calls of function will return a sequence of unpacked on29/124
+C> reports.  The calling program may switch to a new 'nunit' at any
+C> time, that dataset will then be read in sequence. If user
+C> switches back to a previous 'nunit', that data set will be read
+C> from the beginning, not from where the user left off (this is a
+C> 'software tool', not an entire i/o system).
 C>
-C>    Also, this routine is only known to work correctly when compiled
-C>    using 8 byte machine words (real and integer).
+C> Program history log:
+C> - J. S. Woollen 1996-12-13 (gsc) Note this new
+C> version of iw3gad incorporates the earlier version which
+C> was written by j. stackpole and dealt only with true
+C> on29/124 data as input - this option is still available
+C> but is a small part of the new routine which was written
+C> from scratch to read in bufr data.
+C> - D. A. Keyser 1997-01-27 Changes to more closely duplicate format
+C> obtained when reading from true on29/124 data sets.
+C> - D. A. Keyser 1997-02-04 Drops with missing stnid get stnid set to
+C> "drp88a"; satwnds with zero pressure are tossed.
+C> - D. A. Keyser 1997-02-12 To get around the 3-bit limitation to
+C> the on29 pressure q.m. mnemonic "qmpr", an sdmedit/quips
+C> purge or reject flag on pressure is changed from 12 or 14
+C> to 6 in order to fit into 3-bits, see function e35o29;
+C> interprets sdmedit and quips purge/keep/change flags
+C> properly for all data types; can now process cat. 6 and
+C> cat. 2/3 type flight-level reccos (before skipped these);
+C> tests for missing lat, lon, obtime decoded from bufr and
+C> retains missing value on these in unpacked on29/124
+C> format (before no missing check, led to possible non-
+C> missing but incorrect values for these); the check for
+C> drops with missing stnid removed since decoder fixed for
+C> this.
+C> - D. A. Keyser 1997-05-01 Looks for duplicate levels when
+C> processing on29 cat. 2, 3, and 4 (in all data on level)
+C> and removes duplicate level; in processing on29 cat. 3
+C> levels, removes all levels where wind is missing; fixed
+C> bug in aircraft (airep/pirep/amdar) quality mark
+C> assignment (was not assigning keep flag to report if
+C> pressure had a keep q.m. but temperature q.m. was
+C> missing).
+C> - D. A. Keyser 1997-05-30 For aircft: (only acars right now) -
+C> seconds are decoded (if avail.) and used to obtain
+C> report time; only asdar/amdar - new cat. 8 code figs.
+C> o-put 917 (char. 1 & 2 of actual stnid), 918 (char. 3 &
+C> 4 of actual stnid), 919 (char. 5 & 6 of actual stnid);
+C> asdar/amdar and acars - new cat. 8 code fig. o-put 920
+C> (char. 7 & 8 of actual stnid); only acars - new cat. 8
+C> code fig. o-put 921 (report time to nearest 1000'th of
+C> an hour); only some acars - new mnemonic "ialt" now
+C> exists and can (if line not commented out) be used to
+C> obtain unpacked on29 cat. 6.
+C> - D. A. Keyser 1997-07-02 Removed filtering of aircraft data as
+C> follows: air france amdars no longer filtered, amdar/
+C> asdar below 7500 ft. no longer filtered, airep/pirep
+C> below 100 meters no longer filtered, all aircraft with
+C> missing wind but valid temperature are no longer
+C> filtered; reprocesses u.s. satwnd stn. ids to conform
+C> with previous on29 appearance except now 8-char (tag
+C> char. 1 & 6 not changed from bufr stn. id) - never any
+C> dupl. ids now for u.s. satwnds decoded from a single
+C> bufr file; streamlined/eliminated some do loops to
+C> speed up a bit.
+C> - D. A. Keyser 1997-09-18 Corrected errors in reformatting surface
+C> data into unpacked on124, specifically-header: inst. type
+C> (synoptic fmt flg, auto stn. type, converted hrly flg),
+C> indicators (precip., wind speed, wx/auto stn), cat51:
+C> p-tend, horiz. viz., present/past wx, cloud info, max/
+C> min temp, cat52: precip., snow dpth, wave info, ship
+C> course/speed, cat8: code figs. 81-85,98; corrected
+C> problem which coded upper-air mandatory level winds
+C> as cat. 3 instead of cat. 1 when mass data (only) was
+C> reported on same mandatory level in a separate reported
+C> level in the raw bulletin.
+C> - D. A. Keyser 1997-10-06 Updated logic to read and process nesdis
+C> hi-density satellite winds properly.
+C> - D. A. Keyser 1997-10-30 Added gross check on u-air pressure, all
+C> levels with reported pressure .le. zero now tossed; sfc
+C> cat. 52 sea-sfc temperature now read from hierarchy of
+C> sst in bufr {1st choice - hi-res sst ('sst2'), 2nd
+C> choice - lo-res sst ('sst1'), 3rd choice - sea temp
+C> ('stmp')}, before only read 'sst1'.
+C> - D. A. Keyser 1998-01-26 Changed pqm processing for adpupa types
+C> such that sdmedit flags are now honored (before, pqm
+C> was always hardwired to 2 for adpupa types); bumped
+C> limit for number of levels that can be processed from
+C> 100 to 150 and added diagnostic print when the limit
+C> is exceeded.
+C> - D. A. Keyser 1998-05-19 Y2k compliant version of iw3gad routine
+C> accomplished by redefining original 32-character on85
+C> header label to be a 40-character label that contains a
+C> full 4-digit year, can still read "true" on29/124 data
+C> sets provided their header label is in this modified
+C> form.
+C> - D. A. Keyser 1998-07-22 Minor modifications to account for
+C> corrections in y2k/f90 bufrlib (mainly related to
+C> bufrlib routine dumpbf).
+C> - D. A. Keyser 1998-08-04 Fixed a bug that resulted in code being
+C> clobbered in certain situations for recco reports; minor
+C> modifications to give same answers on cray as on sgi;
+C> allowed code to read true on29/124 files with non-y2k
+C> compliant on85 label (a temporary measure during
+C> transition of main programs to y2k); added call to "aea"
+C> which converts ebcdic characters to ascii for input
+C> true on29/124 data set processing of sgi (which does
+C> not support "-cebcdic" in assign statement).
+C> - D. A. Keyser 1999-02-25 Added ability to read reprocessed ssm/i
+C> bufr data set (spssmi); added ability to read mean
+C> sea-level pressure bogus (paobs) data set (sfcbog).
+C> - D. A. Keyser 1999-05-14 Made changes necessary to port this
+C> routine to the ibm sp.
+C> - D. A. Keyser 1999-06-18 Can now process water vapor satwnds
+C> from foreign producers; stn. id for foreign satwnds
+C> now reprocessed in same way as for nesdis/goes satwnds,
+C> character 1 of stn. id now defines even vs. odd
+C> satellite while character 6 of stn. id now defines
+C> ir cloud-drft vs. visible cloud drft vs. water vapor.
+C> - D. A. Keyser 2002-03-05 Removed entry "e02o29", now performs
+C> height to press. conversion directly in code for cat. 7;
+C> test for missing "rpid" corrected for adpupa data (now
+C> checks ufbint return code rather than value=bmiss);
+C> accounts for changes in input adpupa, adpsfc, aircft
+C> and aircar bufr dump files after 3/2002: cat. 7 and cat.
+C> 51 use mnemonic "hblcs" to get height of cloud base if
+C> mnemonic "hocb" not available (and it will not be for all
+C> cat. 7 and some cat. 51 reports); mnemonic "tiwm"
+C> replaces "suws" in header for surface data; mnemonic
+C> "borg" replaces "icli" in cat. 8 for aircraft data (will
+C> still work properly for input adpupa, adpsfc, aircft and
+C> aircar dump files prior to 3/2002).
+C> - D. A. Keyser 2013-03-20 Changes to run on wcoss:  obtain value of
+C> bmiss set in calling program via call to bufrlib routine
+C> getbmiss rather than hardwiring it to 10e08 (or 10e10);
+C> use formatted print statements where previously
+C> unformatted print was used (wcoss splits unformatted
+C> print at 80 characters).
 C>
-C> READS AND UNPACKS ONE REPORT INTO THE UNPACKED OFFICE NOTE
-C>   29/124 FORMAT.  THE INPUT DATA MAY BE PACKED INTO EITHER BUFR OR
-C>   TRUE ON29/124 FORMAT WITH A Y2K COMPLIANT PSEUDO-ON85 HEADER LABEL.
-C>   (NOTE: AS A TEMPORARY MEASURE, THIS CODE WILL STILL OPERATE ON A
-C>   TRUE ON29/124 FORMAT FILE WITH A NON-Y2K COMPLIANT ON85 HEADER
-C>   LABEL.  THE CODE WILL USE THE "WINDOWING" TECHNIQUE TO OBTAIN A
-C>   4-DIGIT YEAR.)  THIS ROUTINE WILL DETERMINE THE FORMAT OF THE
-C>   INPUT DATA AND TAKE THE APPROPRIATE ACTION. IT RETURNS THE
-C>   UNPACKED REPORT TO THE CALLING PROGRAM IN THE ARRAY 'OBS'.
-C>   VARIOUS CONTINGENCIES ARE COVERED BY RETURN VALUE OF THE FUNCTION
-C>   AND PARAMETER 'IER' - FUNCTION AND IER HAVE SAME VALUE.  REPEATED
-C>   CALLS OF FUNCTION WILL RETURN A SEQUENCE OF UNPACKED ON29/124
-C>   REPORTS.  THE CALLING PROGRAM MAY SWITCH TO A NEW 'NUNIT' AT ANY
-C>   TIME, THAT DATASET WILL THEN BE READ IN SEQUENCE.  IF USER
-C>   SWITCHES BACK TO A PREVIOUS 'NUNIT', THAT DATA SET WILL BE READ
-C>   FROM THE BEGINNING, NOT FROM WHERE THE USER LEFT OFF (THIS IS A
-C>   'SOFTWARE TOOL', NOT AN ENTIRE I/O SYSTEM).
+C> @param[in] lunit fortran unit number for sequential data set containing
+C> packed bufr reports or packed and blocked office note 29/124 reports
+C> @param[out] obs array containing one report in unpacked office note
+C> 29/124 format. Format is mixed, user must equivalence
+C> integer and character arrays to this array (see
+C> docblock for w3fi64 in /nwprod/lib/sorc/w3nco
+C> or writeups on w3fi64, on29, on124 for help)
+C> the length of the array should be at least 1608.
+C> @param[out] ier return flag (equal to function value) - see remarks
 C>
-C> PROGRAM HISTORY LOG:
-C> -1996-12-13  J. S. WOOLLEN (GSC) -- ORIGINAL AUTHOR - NOTE THIS NEW
-C>             VERSION OF IW3GAD INCORPORATES THE EARLIER VERSION WHICH
-C>             WAS WRITTEN BY J. STACKPOLE AND DEALT ONLY WITH TRUE
-C>             ON29/124 DATA AS INPUT - THIS OPTION IS STILL AVAILABLE
-C>             BUT IS A SMALL PART OF THE NEW ROUTINE WHICH WAS WRITTEN
-C>             FROM SCRATCH TO READ IN BUFR DATA.
-C> -1997-01-27  D. A. KEYSER -- CHANGES TO MORE CLOSELY DUPLICATE FORMAT
-C>             OBTAINED WHEN READING FROM TRUE ON29/124 DATA SETS.
-C> -1997-02-04  D. A. KEYSER -- DROPS WITH MISSING STNID GET STNID SET TO
-C>             "DRP88A"; SATWNDS WITH ZERO PRESSURE ARE TOSSED
-C> -1997-02-12  D. A. KEYSER -- TO GET AROUND THE 3-BIT LIMITATION TO
-C>             THE ON29 PRESSURE Q.M. MNEMONIC "QMPR", AN SDMEDIT/QUIPS
-C>             PURGE OR REJECT FLAG ON PRESSURE IS CHANGED FROM 12 OR 14
-C>             TO 6 IN ORDER TO FIT INTO 3-BITS, SEE FUNCTION E35O29;
-C>             INTERPRETS SDMEDIT AND QUIPS PURGE/KEEP/CHANGE FLAGS
-C>             PROPERLY FOR ALL DATA TYPES; CAN NOW PROCESS CAT. 6 AND
-C>             CAT. 2/3 TYPE FLIGHT-LEVEL RECCOS (BEFORE SKIPPED THESE);
-C>             TESTS FOR MISSING LAT, LON, OBTIME DECODED FROM BUFR AND
-C>             RETAINS MISSING VALUE ON THESE IN UNPACKED ON29/124
-C>             FORMAT (BEFORE NO MISSING CHECK, LED TO POSSIBLE NON-
-C>             MISSING BUT INCORRECT VALUES FOR THESE); THE CHECK FOR
-C>             DROPS WITH MISSING STNID REMOVED SINCE DECODER FIXED FOR
-C>             THIS
-C> -1997-05-01  D. A. KEYSER -- LOOKS FOR DUPLICATE LEVELS WHEN
-C>             PROCESSING ON29 CAT. 2, 3, AND 4 (IN ALL DATA ON LEVEL)
-C>             AND REMOVES DUPLICATE LEVEL; IN PROCESSING ON29 CAT. 3
-C>             LEVELS, REMOVES ALL LEVELS WHERE WIND IS MISSING; FIXED
-C>             BUG IN AIRCRAFT (AIREP/PIREP/AMDAR) QUALITY MARK
-C>             ASSIGNMENT (WAS NOT ASSIGNING KEEP FLAG TO REPORT IF
-C>             PRESSURE HAD A KEEP Q.M. BUT TEMPERATURE Q.M. WAS
-C>             MISSING)
-C> -1997-05-30  D. A. KEYSER -- FOR AIRCFT: (ONLY ACARS RIGHT NOW) -
-C>             SECONDS ARE DECODED (IF AVAIL.) AND USED TO OBTAIN
-C>             REPORT TIME; ONLY ASDAR/AMDAR - NEW CAT. 8 CODE FIGS.
-C>             O-PUT 917 (CHAR. 1 & 2 OF ACTUAL STNID), 918 (CHAR. 3 &
-C>             4 OF ACTUAL STNID), 919 (CHAR. 5 & 6 OF ACTUAL STNID);
-C>             ASDAR/AMDAR AND ACARS - NEW CAT. 8 CODE FIG. O-PUT 920
-C>             (CHAR. 7 & 8 OF ACTUAL STNID); ONLY ACARS - NEW CAT. 8
-C>             CODE FIG. O-PUT 921 (REPORT TIME TO NEAREST 1000'TH OF
-C>             AN HOUR); ONLY SOME ACARS - NEW MNEMONIC "IALT" NOW
-C>             EXISTS AND CAN (IF LINE NOT COMMENTED OUT) BE USED TO
-C>             OBTAIN UNPACKED ON29 CAT. 6
-C> -1997-07-02  D. A. KEYSER -- REMOVED FILTERING OF AIRCRAFT DATA AS
-C>             FOLLOWS: AIR FRANCE AMDARS NO LONGER FILTERED, AMDAR/
-C>             ASDAR BELOW 7500 FT. NO LONGER FILTERED, AIREP/PIREP
-C>             BELOW 100 METERS NO LONGER FILTERED, ALL AIRCRAFT WITH
-C>             MISSING WIND BUT VALID TEMPERATURE ARE NO LONGER
-C>             FILTERED; REPROCESSES U.S. SATWND STN. IDS TO CONFORM
-C>             WITH PREVIOUS ON29 APPEARANCE EXCEPT NOW 8-CHAR (TAG
-C>             CHAR. 1 & 6 NOT CHANGED FROM BUFR STN. ID) - NEVER ANY
-C>             DUPL. IDS NOW FOR U.S. SATWNDS DECODED FROM A SINGLE
-C>             BUFR FILE; STREAMLINED/ELIMINATED SOME DO LOOPS TO
-C>             SPEED UP A BIT
-C> -1997-09-18  D. A. KEYSER -- CORRECTED ERRORS IN REFORMATTING SURFACE
-C>             DATA INTO UNPACKED ON124, SPECIFICALLY-HEADER: INST. TYPE
-C>             (SYNOPTIC FMT FLG, AUTO STN. TYPE, CONVERTED HRLY FLG),
-C>             INDICATORS (PRECIP., WIND SPEED, WX/AUTO STN), CAT51:
-C>             P-TEND, HORIZ. VIZ., PRESENT/PAST WX, CLOUD INFO, MAX/
-C>             MIN TEMP, CAT52: PRECIP., SNOW DPTH, WAVE INFO, SHIP
-C>             COURSE/SPEED, CAT8: CODE FIGS. 81-85,98; CORRECTED
-C>             PROBLEM WHICH CODED UPPER-AIR MANDATORY LEVEL WINDS
-C>             AS CAT. 3 INSTEAD OF CAT. 1 WHEN MASS DATA (ONLY) WAS
-C>             REPORTED ON SAME MANDATORY LEVEL IN A SEPARATE REPORTED
-C>             LEVEL IN THE RAW BULLETIN
-C> -1997-10-06  D. A. KEYSER -- UPDATED LOGIC TO READ AND PROCESS NESDIS
-C>             HI-DENSITY SATELLITE WINDS PROPERLY
-C> -1997-10-30  D. A. KEYSER -- ADDED GROSS CHECK ON U-AIR PRESSURE, ALL
-C>             LEVELS WITH REPORTED PRESSURE .LE. ZERO NOW TOSSED; SFC
-C>             CAT. 52 SEA-SFC TEMPERATURE NOW READ FROM HIERARCHY OF
-C>             SST IN BUFR {1ST CHOICE - HI-RES SST ('SST2'), 2ND
-C>             CHOICE - LO-RES SST ('SST1'), 3RD CHOICE - SEA TEMP
-C>             ('STMP')}, BEFORE ONLY READ 'SST1'
-C> -1998-01-26  D. A. KEYSER -- CHANGED PQM PROCESSING FOR ADPUPA TYPES
-C>             SUCH THAT SDMEDIT FLAGS ARE NOW HONORED (BEFORE, PQM
-C>             WAS ALWAYS HARDWIRED TO 2 FOR ADPUPA TYPES); BUMPED
-C>             LIMIT FOR NUMBER OF LEVELS THAT CAN BE PROCESSED FROM
-C>             100 TO 150 AND ADDED DIAGNOSTIC PRINT WHEN THE LIMIT
-C>             IS EXCEEDED
-C> -1998-05-19  D. A. KEYSER -- Y2K COMPLIANT VERSION OF IW3GAD ROUTINE
-C>             ACCOMPLISHED BY REDEFINING ORIGINAL 32-CHARACTER ON85
-C>             HEADER LABEL TO BE A 40-CHARACTER LABEL THAT CONTAINS A
-C>             FULL 4-DIGIT YEAR, CAN STILL READ "TRUE" ON29/124 DATA
-C>             SETS PROVIDED THEIR HEADER LABEL IS IN THIS MODIFIED
-C>             FORM
-C> -1998-07-22  D. A. KEYSER -- MINOR MODIFICATIONS TO ACCOUNT FOR
-C>             CORRECTIONS IN Y2K/F90 BUFRLIB (MAINLY RELATED TO
-C>             BUFRLIB ROUTINE DUMPBF)
-C> -1998-08-04  D. A. KEYSER -- FIXED A BUG THAT RESULTED IN CODE BEING
-C>             CLOBBERED IN CERTAIN SITUATIONS FOR RECCO REPORTS; MINOR
-C>             MODIFICATIONS TO GIVE SAME ANSWERS ON CRAY AS ON SGI;
-C>             ALLOWED CODE TO READ TRUE ON29/124 FILES WITH NON-Y2K
-C>             COMPLIANT ON85 LABEL (A TEMPORARY MEASURE DURING
-C>             TRANSITION OF MAIN PROGRAMS TO Y2K); ADDED CALL TO "AEA"
-C>             WHICH CONVERTS EBCDIC CHARACTERS TO ASCII FOR INPUT
-C>             TRUE ON29/124 DATA SET PROCESSING OF SGI (WHICH DOES
-C>             NOT SUPPORT "-Cebcdic" IN ASSIGN STATEMENT)
-C> -1999-02-25  D. A. KEYSER -- ADDED ABILITY TO READ REPROCESSED SSM/I
-C>             BUFR DATA SET (SPSSMI); ADDED ABILITY TO READ MEAN
-C>             SEA-LEVEL PRESSURE BOGUS (PAOBS) DATA SET (SFCBOG)
-C> -1999-05-14  D. A. KEYSER -- MADE CHANGES NECESSARY TO PORT THIS
-C>             ROUTINE TO THE IBM SP
-C> -1999-06-18  D. A. KEYSER -- CAN NOW PROCESS WATER VAPOR SATWNDS
-C>             FROM FOREIGN PRODUCERS; STN. ID FOR FOREIGN SATWNDS
-C>             NOW REPROCESSED IN SAME WAY AS FOR NESDIS/GOES SATWNDS,
-C>             CHARACTER 1 OF STN. ID NOW DEFINES EVEN VS. ODD
-C>             SATELLITE WHILE CHARACTER 6 OF STN. ID NOW DEFINES
-C>             IR CLOUD-DRFT VS. VISIBLE CLOUD DRFT VS. WATER VAPOR
-C> -2002-03-05  D. A. KEYSER -- REMOVED ENTRY "E02O29", NOW PERFORMS
-C>             HEIGHT TO PRESS. CONVERSION DIRECTLY IN CODE FOR CAT. 7;
-C>             TEST FOR MISSING "RPID" CORRECTED FOR ADPUPA DATA (NOW
-C>             CHECKS UFBINT RETURN CODE RATHER THAN VALUE=BMISS);
-C>             ACCOUNTS FOR CHANGES IN INPUT ADPUPA, ADPSFC, AIRCFT
-C>             AND AIRCAR BUFR DUMP FILES AFTER 3/2002: CAT. 7 AND CAT.
-C>             51 USE MNEMONIC "HBLCS" TO GET HEIGHT OF CLOUD BASE IF
-C>             MNEMONIC "HOCB" NOT AVAILABLE (AND IT WILL NOT BE FOR ALL
-C>             CAT. 7 AND SOME CAT. 51 REPORTS); MNEMONIC "TIWM"
-C>             REPLACES "SUWS" IN HEADER FOR SURFACE DATA; MNEMONIC
-C>             "BORG" REPLACES "ICLI" IN CAT. 8 FOR AIRCRAFT DATA (WILL
-C>             STILL WORK PROPERLY FOR INPUT ADPUPA, ADPSFC, AIRCFT AND
-C>             AIRCAR DUMP FILES PRIOR TO 3/2002)
-C> -2013-03-20  D. A. KEYSER -- CHANGES TO RUN ON WCOSS:  OBTAIN VALUE OF
-C>             BMISS SET IN CALLING PROGRAM VIA CALL TO BUFRLIB ROUTINE
-C>             GETBMISS RATHER THAN HARDWIRING IT TO 10E08 (OR 10E10);
-C>             USE FORMATTED PRINT STATEMENTS WHERE PREVIOUSLY
-C>             UNFORMATTED PRINT WAS USED (WCOSS SPLITS UNFORMATTED
-C>             PRINT AT 80 CHARACTERS)
+C> Input files:
+C> -  unit aa sequential bufr or office note 29/124 data set ("aa"
+C> is unit number specified by input argument "nunit")
 C>
-C> USAGE:    II = IW3UNP29(NUNIT, OBS, IER)
-C>   INPUT ARGUMENT LIST:
-C>  @param[in] LUNIT    - FORTRAN UNIT NUMBER FOR SEQUENTIAL DATA SET CONTAINING
-C>              - PACKED BUFR REPORTS OR PACKED AND BLOCKED OFFICE NOTE
-C>              - 29/124 REPORTS
+C> Output files:
+C> -  unit 06 printout
 C>
-C>   OUTPUT ARGUMENT LIST:
-C> @param[out] OBS      - ARRAY CONTAINING ONE REPORT IN UNPACKED OFFICE NOTE
-C>              - 29/124 FORMAT.  FORMAT IS MIXED, USER MUST EQUIVALENCE
-C>              - INTEGER AND CHARACTER ARRAYS TO THIS ARRAY (SEE
-C>              - DOCBLOCK FOR W3FI64 IN /nwprod/lib/sorc/w3nco
-C>              - OR WRITEUPS ON W3FI64, ON29, ON124 FOR HELP)
-C>              - THE LENGTH OF THE ARRAY SHOULD BE AT LEAST 1608
-C> @param[out] IER      - RETURN FLAG (EQUAL TO FUNCTION VALUE) - SEE REMARKS
+C> @note
+C> - if input data set is on29/124, it should be assigned in this way:
+C>  - cray:
+C>   - assign -a adpupa -fcos -cebcdic fort.xx
+C>  - sgi:
+C>   - assign -a adpupa -fcos fort.xx
+C>   (note: -cebcdic is not possible on sgi, so call to w3nco
+C>   routine "aea" takes care of the conversion as each
+C>   on29 record is read in)
+C> - if input data set is bufr, it should be assigned in this way:
+C>  - cray:
+C>   - assign -a adpupa fort.xx
+C>  - sgi:
+C>   - assign -a adpupa -f cos fort.xx
 C>
-C>   INPUT FILES:
-C>   -  UNIT AA  - SEQUENTIAL BUFR OR OFFICE NOTE 29/124 DATA SET ("AA"
-C>              - IS UNIT NUMBER SPECIFIED BY INPUT ARGUMENT "NUNIT")
+C> @note for input on29/124 data sets, a contingency has been built
+C> into this subroutine to perform the conversion from ebcdic to
+C> ascii in the event the assign does not perform the conversion
+C> the return flags in ier (and function iw3unp29 itself) are:
+C> - 0 Observation read and unpacked into location 'obs'.
+C> see writeup of w3fi64 for contents. (all character
+C> words are left-justified.) Next call to iw3unp29
+C> will return next observation in data set.
+C> - 1 A 40 byte header in the format described here
+C> (y2k compliant pseudo-office note 85) is returned
+C> in the first 10 words of 'obs' on a 4-byte machine
+C> (ibm) and in the first 5 words of 'obs' on an
+C> 8-byte machine (cray).  next call to
+C> iw3unp29 will return first obs. in this data set.
+C> (note: if input data set is a true on29/124 file
+C> with the y2k compliant pseudo-on85 header record,
+C> then the pseudo-on85 header record is actually
+C> read in and returned; if input data set is a true
+C> on29/124 file with a non-y2k compliant on85 header
+C> record, then a y2k compliant pseudo-on85 header
+C> record is constructed from it using the "windowing"
+C> technique to obtain a 4-digit year from a 2-digit
+C> year.)
+C> format for y2k compliant pseudo-on85 header record
+C> returned (40 bytes in character):
+C>  - bytes 1- 8 -- data set name (as defined in on85 except up to
+C>    eight ascii char., left justified with blank fill)
+C>  - bytes 9-10 -- set type (as defined in on85)
+C>  - bytes 11-20 -- center (analysis) date for data
+C>    set (ten ascii characters in form "yyyymmddhh")
+C>  - bytes 21-24 -- set initialize (dump) time, as dedined in on85)
+C>  - bytes 25-34 -- always "washington" (as in on85)
+C>  - bytes 35-36 -- source machine (as defined in on85)
+C>  - bytes 37-40 -- blank fill characters
 C>
-C>   OUTPUT FILES:
-C>   -  UNIT 06  - PRINTOUT
+C> - 2 end-of-file (never an empty or null file):
+C>  - input on29/124 data set: the "endof file" record is
+C>  encountered - no useful information in 'obs' array.
+C>  next call to iw3unp29 will return physical end of
+C>  file for data set in 'nunit' (see ier=3 below).
+C>  - input bufr data set: the physical end of file is
+C>  encountered.
+C> -3 end-of-file:
+C> Physical end of file encountered on data set -
+C> this can only happen for an empty (null) data set
+C> or for a true on29/124 data set. There are no
+C> more reports (or never were any if null) associated
+C> with data set in this unit number - no useful
+C> information in 'obs' array. Either all done (if
+C> no more unit numbers are to be read in), or reset
+C> 'nunit' to point to a new data set (in which case
+C> next call to iw3unp29 should return with ier=1).
+C> - 4 only valid for input on29/124 data set - i/o error
+C> reading the next record of reports - no useful
+C> information in 'obs' array. Calling program can
+C> choose to stop or again call iw3unp29 which will
+C> attempt to unpack the first observation in the next
+C> record of reports.
+C> - 999  applies only to non-empty data sets:
+C>  - input on29/124 data set: first choice y2k compliant
+C>  pseudo-on85 file header label not encountered where
+C>  expected, and second choice non-y2k compliant on85
+C>  file header label also not encountered.
+C>  - input bufr data set:  either header label in
+C>  format of pseudo-on85 could not be returned, or an
+C>  abnormal error occurred in the attempt to decode an
+C>  observation.  for either input data set type, no
+C>  useful information in 'obs' array. Calling program
+C>  can choose to stop with non-zero condition code or
+C>  reset 'nunit' to point to a new data set (in which
+C>  case next call to iw3unp29 should return with
+C>  ier=1).
+C>  - input data set neither on29/124 nor bufr: speaks for
+C>  itself.
 C>
-C> REMARKS:
-C>     IF INPUT DATA SET IS ON29/124, IT SHOULD BE ASSIGNED IN THIS WAY:
-C>       Cray:
-C>        assign -a ADPUPA -Fcos -Cebcdic  fort.XX
-C>       SGI: 
-C>        assign -a ADPUPA -Fcos           fort.XX
-C>       (Note: -Cebcdic is not possible on SGI, so call to W3NCO
-C>              routine "AEA" takes care of the conversion as each
-C>              ON29 record is read in)
-C>     IF INPUT DATA SET IS BUFR, IT SHOULD BE ASSIGNED IN THIS WAY:
-C>       Cray:
-C>        assign -a ADPUPA                       fort.XX
-C>       SGI: 
-C>        assign -a ADPUPA        -F cos         fort.XX
-C>
-C>     NOTE: FOR INPUT ON29/124 DATA SETS, A CONTINGENCY HAS BEEN BUILT
-C>      INTO THIS SUBROUTINE TO PERFORM THE CONVERSION FROM EBCDIC TO
-C>      ASCII IN THE EVENT THE assign DOES NOT PERFORM THE CONVERSION
-C>
-C>     THE RETURN FLAGS IN IER (AND FUNCTION IW3UNP29 ITSELF) ARE:
-C>        -  0  OBSERVATION READ AND UNPACKED INTO LOCATION 'OBS'.
-C>                   SEE WRITEUP OF W3FI64 FOR CONTENTS. (ALL CHARACTER
-C>                   WORDS ARE LEFT-JUSTIFIED.)  NEXT CALL TO IW3UNP29
-C>                   WILL RETURN NEXT OBSERVATION IN DATA SET.
-C>        -  1  A 40 BYTE HEADER IN THE FORMAT DESCRIBED HERE
-C>                   (Y2K COMPLIANT PSEUDO-OFFICE NOTE 85) IS RETURNED
-C>                   IN THE FIRST 10 WORDS OF 'OBS' ON a 4-BYTE MACHINE
-C>                   (IBM) AND IN THE FIRST 5 WORDS OF 'OBS' ON AN
-C>                   8-BYTE MACHINE (CRAY).  NEXT CALL TO
-C>                   IW3UNP29 WILL RETURN FIRST OBS. IN THIS DATA SET.
-C>                   (NOTE: IF INPUT DATA SET IS A TRUE ON29/124 FILE
-C>                   WITH THE Y2K COMPLIANT PSEUDO-ON85 HEADER RECORD,
-C>                   THEN THE PSEUDO-ON85 HEADER RECORD IS ACTUALLY
-C>                   READ IN AND RETURNED; IF INPUT DATA SET IS A TRUE
-C>                   ON29/124 FILE WITH A NON-Y2K COMPLIANT ON85 HEADER
-C>                   RECORD, THEN A Y2K COMPLIANT PSEUDO-ON85 HEADER
-C>                   RECORD IS CONSTRUCTED FROM IT USING THE "WINDOWING" 
-C>                   TECHNIQUE TO OBTAIN A 4-DIGIT YEAR FROM A 2-DIGIT
-C>                   YEAR.)
-C>                 FORMAT FOR Y2K COMPLIANT PSEUDO-ON85 HEADER RECORD
-C>                  RETURNED (40 BYTES IN CHARACTER):
-C>                    BYTES  1- 8  -- DATA SET NAME (AS DEFINED IN ON85
-C>                                    EXCEPT UP TO EIGHT ASCII CHAR.,
-C>                                    LEFT JUSTIFIED WITH BLANK FILL)
-C>                    BYTES  9-10  -- SET TYPE (AS DEFINED IN ON85)
-C>                    BYTES 11-20  -- CENTER (ANALYSIS) DATE FOR DATA
-C>                                    SET (TEN ASCII CHARACTERS IN FORM
-C>                                    "YYYYMMDDHH")
-C>                    BYTES 21-24  -- SET INITIALIZE (DUMP) TIME, AS
-C>                                    DEDINED IN ON85)
-C>                    BYTES 25-34  -- ALWAYS "WASHINGTON" (AS IN ON85)
-C>                    BYTES 35-36  -- SOURCE MACHINE (AS DEFINED IN ON85)
-C>                    BYTES 37-40  -- BLANK FILL CHARACTERS
-C>                    
-C>        -  2  END-OF-FILE (NEVER AN EMPTY OR NULL FILE):
-C>                 INPUT ON29/124 DATA SET: THE "ENDOF FILE" RECORD IS
-C>                   ENCOUNTERED - NO USEFUL INFORMATION IN 'OBS' ARRAY.
-C>                   NEXT CALL TO IW3UNP29 WILL RETURN PHYSICAL END OF
-C>                   FILE FOR DATA SET IN 'NUNIT' (SEE IER=3 BELOW).
-C>                 INPUT BUFR DATA SET: THE PHYSICAL END OF FILE IS
-C>                   ENCOUNTERED.
-C>        -  3  END-OF-FILE:
-C>                   PHYSICAL END OF FILE ENCOUNTERED ON DATA SET -
-C>                   THIS CAN ONLY HAPPEN FOR AN EMPTY (NULL) DATA SET
-C>                   OR FOR A TRUE ON29/124 DATA SET.  THERE ARE NO
-C>                   MORE REPORTS (OR NEVER WERE ANY IF NULL) ASSOCIATED
-C>                   WITH DATA SET IN THIS UNIT NUMBER - NO USEFUL
-C>                   INFORMATION IN 'OBS' ARRAY.  EITHER ALL DONE (IF
-C>                   NO MORE UNIT NUMBERS ARE TO BE READ IN), OR RESET
-C>                   'NUNIT' TO POINT TO A NEW DATA SET (IN WHICH CASE
-C>                   NEXT CALL TO IW3UNP29 SHOULD RETURN WITH IER=1).
-C>        -  4  ONLY VALID FOR INPUT ON29/124 DATA SET - I/O ERROR
-C>                   READING THE NEXT RECORD OF REPORTS - NO USEFUL
-C>                   INFORMATION IN 'OBS' ARRAY.  CALLING PROGRAM CAN
-C>                   CHOOSE TO STOP OR AGAIN CALL IW3UNP29 WHICH WILL
-C>                   ATTEMPT TO UNPACK THE FIRST OBSERVATION IN THE NEXT
-C>                   RECORD OF REPORTS.
-C>        -999  APPLIES ONLY TO NON-EMPTY DATA SETS:
-C>                 INPUT ON29/124 DATA SET: FIRST CHOICE Y2K COMPLIANT
-C>                   PSEUDO-ON85 FILE HEADER LABEL NOT ENCOUNTERED WHERE
-C>                   EXPECTED, AND SECOND CHOICE NON-Y2K COMPLIANT ON85
-C>                   FILE HEADER LABEL ALSO NOT ENCOUNTERED.
-C>                 INPUT BUFR DATA SET:  EITHER HEADER LABEL IN
-C>                   FORMAT OF PSEUDO-ON85 COULD NOT BE RETURNED, OR AN
-C>                   ABNORMAL ERROR OCCURRED IN THE ATTEMPT TO DECODE AN
-C>                   OBSERVATION.  FOR EITHER INPUT DATA SET TYPE, NO
-C>                   USEFUL INFORMATION IN 'OBS' ARRAY.  CALLING PROGRAM
-C>                   CAN CHOOSE TO STOP WITH NON-ZERO CONDITION CODE OR
-C>                   RESET 'NUNIT' TO POINT TO A NEW DATA SET (IN WHICH
-C>                   CASE NEXT CALL TO IW3UNP29 SHOULD RETURN WITH
-C>                   IER=1).
-C>                 INPUT DATA SET NEITHER ON29/124 NOR BUFR: SPEAKS FOR
-C>                   ITSELF.
-C>
+C> @author D. A. Keyser @date 2013-03-20
       FUNCTION IW3UNP29(LUNIT,OBS,IER)
- 
+
       COMMON/IO29AA/JWFILE(100),LASTF
       COMMON/IO29BB/KNDX,KSKACF(8),KSKUPA,KSKSFC,KSKSAT,KSKSMI
       COMMON/IO29CC/SUBSET,IDAT10
@@ -291,7 +280,7 @@ C>
       COMMON/IO29JJ/ISET,MANLIN(1001)
       COMMON/IO29KK/KOUNT(499,18)
       COMMON/IO29LL/BMISS
- 
+
       DIMENSION    OBS(*)
       REAL(8)      BMISS,GETBMISS
 
@@ -356,10 +345,10 @@ C  --------------------------------------
          JWFILE(LASTF) = 0
       END IF
       LASTF = LUNIT
- 
+
 C  THE JWFILE INDICATOR: =0 IF UNOPENED; =1 IF ON29; =2 IF BUFR
 C  ------------------------------------------------------------
- 
+
       IF(JWFILE(LUNIT).EQ.0) THEN
          PRINT'(" ===> IW3UNP29 - WCOSS VERSION: 03-20-2013")'
 
@@ -383,7 +372,7 @@ C  ------------------------------------------------------------
             IW3UNP29 = 3
          ELSEIF(I02O29(LUNIT,OBS,IER).EQ.1) THEN
             PRINT'(" IW3UNP29 - OPENED A BUFR FILE IN UNIT ",I0)', LUNIT
- 
+
             JWFILE(LUNIT) = 2
             KNDX = 0
             KSKACF = 0
@@ -462,7 +451,7 @@ C  ------------------------------------------------------------
          END IF
          IW3UNP29 = IER
       END IF
- 
+
       RETURN
 
  9999 CONTINUE
@@ -479,11 +468,11 @@ C I01O29 RETURNS LOOK ALIKE Y2K COMPL. PSEUDO-ON85 HDR FROM A DATA FILE
 C-----------------------------------------------------------------------
       FUNCTION I01O29(LUNIT,HDR,IER)
 C     ---> formerly FUNCTION IW3HDR
- 
+
       COMMON/IO29AA/JWFILE(100),LASTF
- 
+
       DIMENSION HDR(*)
- 
+
       SAVE
 
 C  UNIT NUMBER OUT OF RANGE RETURNS A 999
@@ -494,10 +483,10 @@ C  --------------------------------------
      $    "-- IER = 999")', LUNIT
          GO TO 9999
       END IF
- 
+
 C  THE JWFILE INDICATOR: =0 IF UNOPENED; =1 IF ON29; =2 IF BUFR
 C  ------------------------------------------------------------
- 
+
       IF(JWFILE(LUNIT).EQ.0) THEN
          IF(I03O29(LUNIT,HDR,IER).EQ.1) THEN
             I01O29 = I03O29(0,HDR,IER)
@@ -524,7 +513,7 @@ C  -------------------------------
          PRINT'(" ##IW3UNP29/I01O29 - FILE ALREADY OPEN -- IER = 999")'
          GO TO 9999
       END IF
- 
+
       RETURN
 
  9999 CONTINUE
@@ -538,9 +527,9 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION I02O29(LUNIT,OBS,IER)
 C     ---> formerly FUNCTION JW3O29
- 
+
       COMMON/IO29CC/SUBSET,IDAT10
- 
+
       CHARACTER*40 ON85
       CHARACTER*10 CDATE
       CHARACTER*8  SUBSET,CBUFR
@@ -548,18 +537,18 @@ C     ---> formerly FUNCTION JW3O29
       CHARACTER*4  CDUMP
       DIMENSION    OBS(1608),RON85(16),JDATE(5),JDUMP(5)
       EQUIVALENCE  (RON85(1),ON85)
- 
+
       SAVE
 
       DATA ON85/'                                        '/
- 
+
       JDATE = -1
       JDUMP = -1
- 
+
 C  IF FILE IS CLOSED TRY TO OPEN IT AND RETURN A Y2K COMPLIANT
 C    PSEUDO-ON85 LABEL
 C  -----------------------------------------------------------
- 
+
       CALL STATUS(LUNIT,LUN,IL,IM)
 
       IF(IL.EQ.0) THEN
@@ -619,10 +608,10 @@ C  returned in DUMPBF ...
          IER = I02O29
          RETURN
       END IF
- 
+
 C  IF THE FILE IS ALREADY OPENED FOR INPUT TRY TO READ THE NEXT SUBSET
 C  -------------------------------------------------------------------
- 
+
       IF(IL.LT.0) THEN
  7822    CONTINUE
          CALL READNS(LUNIT,SUBSET,IDAT10,IRET)
@@ -632,16 +621,16 @@ C  -------------------------------------------------------------------
          IER = I02O29
          RETURN
       END IF
- 
+
 C  FILE MUST BE OPEN FOR INPUT!
 C  ----------------------------
- 
+
       PRINT'(" ##IW3UNP29/I02O29 - FILE ON UNIT ",I0," IS OPENED FOR ",
      $ "OUTPUT -- IER = 999")', LUNIT
       I02O29 = 999
       IER = 999
       RETURN
- 
+
       END
 C>
 C> ABSTRACT: READS A TRUE (SEE *) ON29/124 DATA SET AND UNPACKS ONE
@@ -723,7 +712,7 @@ C  ----------------------------------------------------------------
          ioldun = 0
          return
       end if
- 
+
       IF(NUNIT.NE.IOLDUN)  THEN
 
 C THIS IS A NEW UNIT NUMBER, SET 'NEXT' TO 0 AND REWIND THIS UNIT
@@ -738,11 +727,11 @@ CDAKCDAK PRINT 87, NUNIT    NOW REDUNDANT TO PRINT THIS
          REWIND NUNIT
          ISWT = 0
       END IF
- 
+
    10 CONTINUE
 
       IF(NEXT.NE.0)  GO TO 70
- 
+
 C COME HERE TO READ IN A NEW RECORD (EITHER REPORTS, Y2K COMPLIANT 40-
 C  BYTE PSEUDO-ON85 LBL, NON-Y2K 32-BYTE COMPLIANT ON85 LBL, OR E-O-F)
 C --------------------------------------------------------------------
@@ -769,7 +758,7 @@ C  -----------------------------------------------------------------
       IF(ISWT.EQ.1)  CALL AEA(CBUFF,CBUFF,6432)
 
       IF(NFILE.EQ.0)  THEN
- 
+
 C  TEST FOR EXPECTED HEADER LABEL
 C  ------------------------------
 
@@ -794,7 +783,7 @@ C ---------------------------------------------------------------------
          END IF
 
          IF(CBUFF(25)//CBUFF(26)//CBUFF(27)//CBUFF(28).EQ.'WASH')  THEN
- 
+
 C  THIS IS Y2K COMPLIANT 40-BYTE PSEUDO-ON85 LBL; RESET 'NEXT', SET
 C   'IER', FILL 'OBS(1)-(4)', AND QUIT
 C  ---------------------------------------------------------------
@@ -804,7 +793,7 @@ C  ---------------------------------------------------------------
             GO TO 90
          ELSE  IF(CBUFF(21)//CBUFF(22)//CBUFF(23)//CBUFF(24).EQ.'WASH')
      $    THEN
- 
+
 C  THIS IS NON-Y2K COMPLIANT 32-BYTE ON85 LBL; RESET 'NEXT', SET
 C   'IER', USE "WINDOWING" TECHNIQUE TO CONTRUCT 4-DIGIT YEAR,
 C   CONSTRUCT A 40-BYTE PSEUDO-ON85 LABE, FILL 'OBS(1)-(4)', AND QUIT
@@ -843,7 +832,7 @@ C  ------------------------------------------------------------------
             OBS(1:5) = IBUFF(1:5)
             GO TO 90
          ELSE
- 
+
 C  SOMETHING OTHER THAN EITHER Y2K COMPLIANT PSEUDO-ON85 LBL OR
 C  NON-Y2K COMPLIANT ON85 LBL FOUND; RESET 'NEXT', SET 'IER' AND QUIT
 C  ------------------------------------------------------------------
@@ -859,7 +848,7 @@ CDAK $ 'FIRST RECORD OF NEW LOGICAL FILE  -- IER = 999'/)
       END IF
 
       IF(CBUFF(1)//CBUFF(2)//CBUFF(3)//CBUFF(4).EQ.'ENDO')  THEN
- 
+
 C  LOGICAL "ENDOF FILE" READ; RESET NEXT, SET IER, AND QUIT
 C  --------------------------------------------------------
 
@@ -871,7 +860,7 @@ C  --------------------------------------------------------
       GO TO 70
 
  9997 CONTINUE
- 
+
 C  PHYSICAL END OF FILE; RESET 'NEXT', SET 'IER' AND QUIT
 C  ------------------------------------------------------
 
@@ -880,7 +869,7 @@ C  ------------------------------------------------------
       GO TO 90
 
  9998 CONTINUE
- 
+
 C  I/O ERROR; RESET 'NEXT', SET 'IER' AND QUIT
 C  -------------------------------------------
 
@@ -892,21 +881,21 @@ cppppp
       GO TO 90
 
    70 CONTINUE
- 
+
 C  WORKING WITHIN ACTUAL DATA REC. READ, CALL W3FI64 TO READ IN NEXT RPT
 C  ---------------------------------------------------------------------
 
       CALL W3FI64(CBUFF,OBS,NEXT)
 
       IF(NEXT.GE.0)  THEN
- 
+
 C  REPORT SUCCESSFULLY RETURNED IN ARRAY 'OBS'
 C  -------------------------------------------
 
          IER = 0
 
       ELSE
- 
+
 C HIT END-OF-RECORD, OR INTERNAL READ ERROR ENCOUNTERED & CAN'T RECOVER
 C  -- READ IN NEXT RECORD OF REPORTS
 C ---------------------------------------------------------------------
@@ -927,14 +916,14 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION C01O29(SUBSET)
 C     ---> formerly FUNCTION ADP
- 
+
       CHARACTER*(*) SUBSET
       CHARACTER*6   C01O29
- 
+
       SAVE
- 
+
       C01O29 = 'NONE'
- 
+
       IF(SUBSET(1:5).EQ.'NC000')  C01O29 = 'ADPSFC'
       IF(SUBSET(1:5).EQ.'NC001')  THEN
          IF(SUBSET(6:8).NE.'006')  THEN
@@ -947,11 +936,11 @@ C     ---> formerly FUNCTION ADP
       IF(SUBSET(1:5).EQ.'NC004')  C01O29 = 'AIRCFT'
       IF(SUBSET(1:5).EQ.'NC005')  C01O29 = 'SATWND'
       IF(SUBSET(1:5).EQ.'NC012')  C01O29 = 'SPSSMI'
- 
+
       IF(SUBSET .EQ. 'NC003101')  C01O29 = 'SATEMP'
       IF(SUBSET .EQ. 'NC004004')  C01O29 = 'AIRCAR'
       IF(SUBSET .EQ. 'NC004005')  C01O29 = 'ADPUPA'
- 
+
       IF(SUBSET .EQ. 'ADPSFC')  C01O29 = 'ADPSFC'
       IF(SUBSET .EQ. 'SFCSHP')  C01O29 = 'SFCSHP'
       IF(SUBSET .EQ. 'SFCBOG')  C01O29 = 'SFCBOG'
@@ -961,10 +950,10 @@ C     ---> formerly FUNCTION ADP
       IF(SUBSET .EQ. 'SATEMP')  C01O29 = 'SATEMP'
       IF(SUBSET .EQ. 'AIRCAR')  C01O29 = 'AIRCAR'
       IF(SUBSET .EQ. 'SPSSMI')  C01O29 = 'SPSSMI'
- 
+
       IF(C01O29.EQ.'NONE') PRINT'(" ##IW3UNP29/C01O29 - UNKNOWN SUBSET",
      $ " (=",A,") -- CONTINUE~~")', SUBSET
- 
+
       RETURN
       END
 C***********************************************************************
@@ -972,16 +961,16 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION R01O29(SUBSET,LUNIT,OBS)
 C     ---> formerly FUNCTION ADC
- 
+
       CHARACTER*(*) SUBSET
       CHARACTER*6   C01O29,ADPSUB
       DIMENSION     OBS(*)
 
       SAVE
- 
+
 C  FIND AN ON29/124 DATA TYPE AND CALL A TRANSLATOR
 C  ------------------------------------------------
- 
+
       R01O29 = 4
       ADPSUB = C01O29(SUBSET)
       IF(ADPSUB .EQ. 'ADPSFC')  R01O29 = R04O29(LUNIT,OBS)
@@ -999,10 +988,10 @@ C***********************************************************************
 C***********************************************************************
       SUBROUTINE S01O29(SID,XOB,YOB,RHR,RCH,RSV,RSV2,ELV,ITP,RTP)
 C     ---> Formerly SUBROUTINE O29HDR
- 
+
       COMMON/IO29DD/HDR(12),RCATS(50,150,11),IKAT(11),MCAT(11),NCAT(11)
       COMMON/IO29LL/BMISS
- 
+
       CHARACTER*(*) RSV,RSV2
       CHARACTER*8   COB,SID,RCT
       DIMENSION     IHDR(12),RHDR(12),ICATS(50,150,11)
@@ -1010,12 +999,12 @@ C     ---> Formerly SUBROUTINE O29HDR
       EQUIVALENCE   (IHDR(1),RHDR(1)),(COB,IOB),(ICATS,RCATS)
 
       SAVE
- 
+
       DATA OMISS/99999/
- 
+
 C  INITIALIZE THE UNPACK ARRAY TO MISSINGS
 C  ---------------------------------------
- 
+
       NCAT = 0
       RCATS = OMISS
       COB = '        '
@@ -1027,17 +1016,17 @@ C  ---------------------------------------
       ICATS(6,1:149,6) = IOB
       ICATS(3,1:149,7) = IOB
       ICATS(3,1:149,8) = IOB
- 
+
 C  WRITE THE RECEIPT TIME IN CHARACTERS
 C  ------------------------------------
- 
+
       RCT = '9999    '
       IF(RCH*100.LT.2401.AND.RCH*100.GT.-1)
      $ WRITE(RCT,'(I4.4)') NINT(RCH*100.)
- 
+
 C  STORE THE ON29 HEADER INFORMATION INTO UNP FORMAT
 C  -------------------------------------------------
- 
+
       RHDR( 1) = OMISS
       IF(YOB.LT.BMISS)  RHDR( 1) = NINT(100.*YOB)
 cppppp
@@ -1084,12 +1073,12 @@ cppppp
       COB = '        '
       COB(1:4) = SID(5:6)//'  '
       IHDR(12) = IOB
- 
+
 C  STORE THE HEADER INTO A HOLDING ARRAY
 C  -------------------------------------
- 
+
       HDR = RHDR
- 
+
       RETURN
       END
 C***********************************************************************
@@ -1097,7 +1086,7 @@ C***********************************************************************
 C***********************************************************************
       SUBROUTINE S02O29(ICAT,N,*)
 C     ---> Formerly SUBROUTINE O29CAT
- 
+
       COMMON/IO29DD/HDR(12),RCATS(50,150,11),IKAT(11),MCAT(11),NCAT(11)
       COMMON/IO29EE/POB(255),QOB(255),TOB(255),ZOB(255),DOB(255),
      $              SOB(255),VSG(255),CLP(255),CLA(255),OB8(255),
@@ -1141,10 +1130,10 @@ C  --------------------------------------------------------------
       ENTRY SE01O29(ICAT,N)
 C     ---> formerly ENTRY O29SFC
       SURF = .TRUE.
- 
+
 C  CHECK THE PARAMETERS COMING IN
 C  ------------------------------
- 
+
 1     KCAT = 0
       DO I = 1,11
          IF(ICAT.EQ.IKAT(I))  THEN
@@ -1172,10 +1161,10 @@ C  -----------------------------------------------------
      $    "-- IER = 999")', N
          RETURN 1
       END IF
- 
+
 C  MAKE A MISSING LEVEL AND RETURN WHEN N=0 (NOT ALLOWED FOR CAT 01)
 C  -----------------------------------------------------------------
- 
+
       IF(N.EQ.0) THEN
          IF(KCAT.EQ.1) RETURN
          NCAT(KCAT) = MIN(149,NCAT(KCAT)+1)
@@ -1186,10 +1175,10 @@ cppppp
 cppppp
          RETURN
       END IF
- 
+
 C  FIGURE OUT WHICH LEVEL TO UPDATE AND RESET THE LEVEL COUNTER
 C  ------------------------------------------------------------
- 
+
       IF(KCAT.EQ.1) THEN
          L = I04O29(POB(N)*.1)
          IF(L.EQ.999999)  GO TO 9999
@@ -1236,10 +1225,10 @@ cppppp
      $    kcat,L,kcat,ncat(kcat)
 cppppp
       END IF
- 
+
 C  EACH CATEGORY NEEDS A SPECIFIC DATA ARRANGEMENT
 C  -----------------------------------------------
- 
+
       COB = '        '
       IF(ICAT.EQ.1) THEN
          RCAT(1) = MIN(NINT(ZOB(N)),NINT(RCATS(1,L,KCAT)))
@@ -1356,14 +1345,14 @@ C  ----------------------------------
      $    "-- IER = 999")', ICAT
          RETURN 1
       END IF
- 
+
 C  TRANSFER THE LEVEL DATA INTO THE HOLDING ARRAY AND EXIT
 C  -------------------------------------------------------
- 
+
       DO I = 1,MCAT(KCAT)
          RCATS(I,L,KCAT) = RCAT(I)
       ENDDO
- 
+
       RETURN
  9999 CONTINUE
       RETURN 1
@@ -1373,28 +1362,28 @@ C***********************************************************************
 C***********************************************************************
       SUBROUTINE S03O29(UNP,SUBSET,*,*)
 C     ---> Formerly SUBROUTINE O29UNP
- 
+
       COMMON/IO29DD/HDR(12),RCATS(50,150,11),IKAT(11),MCAT(11),NCAT(11)
- 
+
       DIMENSION   RCAT(50),JCAT(50),UNP(*)
       CHARACTER*8  SUBSET
       EQUIVALENCE (RCAT(1),JCAT(1))
 
       SAVE
- 
+
 C  CALL TO SORT CATEGORIES 02, 03, 04, AND 08 LEVELS
 C  -------------------------------------------------
- 
+
       CALL S04O29
- 
+
 C  TRANSFER DATA FROM ALL CATEGORIES INTO UNP ARRAY & SET POINTERS
 C  ---------------------------------------------------------------
- 
+
       INDX = 43
       JCAT = 0
       NLEVTO = 0
       NLEVC8 = 0
- 
+
       DO K = 1,11
          JCAT(2*K+11) = NCAT(K)
          IF(K.NE.7.AND.K.NE.8.AND.K.NE.11)  THEN
@@ -1435,10 +1424,10 @@ C  --------------------------------------------------------------------
 
 C  TRANSFER THE HEADER AND POINTER ARRAYS INTO UNP
 C  -----------------------------------------------
- 
+
       UNP(1:12) =  HDR
       UNP(13:42) = RCAT(13:42)
- 
+
       RETURN
       END
 C***********************************************************************
@@ -1446,12 +1435,12 @@ C***********************************************************************
 C***********************************************************************
       SUBROUTINE S04O29
 C     ---> Formerly SUBROUTINE O29SRT
- 
+
       COMMON/IO29DD/HDR(12),RCATS(50,150,11),IKAT(11),MCAT(11),NCAT(11)
 cppppp
       character*8 c11,c12,sid
 cppppp
- 
+
       DIMENSION RCAT(50,150),IORD(150),IWORK(65536),SCAT(50,150),RCTL(3)
 cppppp
       EQUIVALENCE  (C11,HDR(11)),(C12,HDR(12))
@@ -1462,10 +1451,10 @@ cppppp
 cppppp
       sid = c11(1:4)//c12(1:4)
 cppppp
- 
+
 C  SORT CATEGORIES 2, 3, AND 4 - LEAVE THE FIRST LEVEL IN EACH INTACT
 C  ------------------------------------------------------------------
- 
+
       DO K=2,4
          IF(NCAT(K).GT.1) THEN
             DO J=1,NCAT(K)-1
@@ -1536,10 +1525,10 @@ cppppp
      $       NCAT(K) = 0
          END IF
       ENDDO
- 
+
 C  SORT CATEGORY 08 BY CODE FIGURE
 C  -------------------------------
- 
+
       DO K=8,8
       IF(NCAT(K).GT.1) THEN
          CALL ORDERS(2,IWORK,RCATS(2,1,K),IORD,NCAT(K),50,8,2)
@@ -1555,10 +1544,10 @@ C  -------------------------------
          ENDDO
       END IF
       ENDDO
- 
+
 C  NORMAL EXIT
 C  -----------
- 
+
       RETURN
       END
 C***********************************************************************
@@ -1566,27 +1555,27 @@ C***********************************************************************
 C***********************************************************************
       SUBROUTINE S05O29
 C     ---> Formerly SUBROUTINE O29INX
- 
+
       COMMON/IO29EE/OBS(255,11)
       COMMON/IO29FF/QMS(255,9)
       COMMON/IO29GG/SFO(34)
       COMMON/IO29HH/SFQ(5)
       COMMON/IO29LL/BMISS
- 
+
       CHARACTER*1 QMS,SFQ
 
       REAL(8)     BMISS
 
       SAVE
- 
+
 C  SET THE INPUT DATA ARRAYS TO MISSING OR BLANK
 C  ---------------------------------------------
- 
+
       OBS = BMISS
       QMS = ' '
       SFO = BMISS
       SFQ = ' '
- 
+
       RETURN
       END
 C***********************************************************************
@@ -1594,11 +1583,11 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION I04O29(P)
 C     ---> formerly FUNCTION MANO29
- 
+
       COMMON/IO29JJ/ISET,MANLIN(1001)
 
       SAVE
- 
+
       IF(ISET.EQ.0) THEN
          MANLIN = 0
 
@@ -1625,15 +1614,15 @@ C     ---> formerly FUNCTION MANO29
 
          ISET = 1
       END IF
- 
+
       IP = NINT(P*10.)
- 
+
       IF(IP.GT.10000 .OR. IP.LT.10 .OR. MOD(IP,10).NE.0) THEN
          I04O29 = 0
       ELSE
          I04O29 = MANLIN(IP/10)
       END IF
- 
+
       RETURN
 
       END
@@ -1642,7 +1631,7 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION R02O29()
 C     ---> formerly FUNCTION ONFUN
- 
+
       COMMON/IO29LL/BMISS
 
       CHARACTER*8 SUBSET,RPID
@@ -1651,11 +1640,11 @@ C     ---> formerly FUNCTION ONFUN
       REAL(8) BMISS
 
       SAVE
- 
+
       DATA GRAV/9.8/,CM2K/1.94/,TZRO/273.15/
       DATA KKK /5*90,16*91,30*92,49*93/
       DATA KKKK/94,2*95,6*96,10*97,30*98/
- 
+
       PRS1(Z) = 1013.25 * (((288.15 - (.0065 * Z))/288.15)**5.256)
       PRS2(Z) = 226.3 * EXP(1.576106E-4 * (11000. - Z))
       PRS3(PMND,TEMP,Z,ZMND)
@@ -1663,9 +1652,9 @@ C     ---> formerly FUNCTION ONFUN
       ES(T) = 6.1078 * EXP((17.269 * (T-273.16))/((T-273.16)+237.3))
       QFRMTP(T,PPPP) = (0.622 * ES(T))/(PPPP-(0.378 * ES(T)))
       HGTF(P) = (1.-(P/1013.25)**(1./5.256))*(288.15/.0065)
- 
+
       R02O29 = 0
- 
+
       RETURN
 
       ENTRY E01O29(PRS)
@@ -2083,7 +2072,7 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION R03O29(LUNIT,OBS)
 C     ---> formerly FUNCTION ADPUPA
- 
+
       COMMON/IO29DD/HDR(12),RCATS(50,150,11),IKAT(11),MCAT(11),NCAT(11)
       COMMON/IO29EE/POB(255),QOB(255),TOB(255),ZOB(255),DOB(255),
      $               SOB(255),VSG(255),CLP(255),CLA(255),OB8(255),
@@ -2094,7 +2083,7 @@ C     ---> formerly FUNCTION ADPUPA
       COMMON/IO29BB/KNDX,KSKACF(8),KSKUPA,KSKSFC,KSKSAT,KSKSMI
       COMMON/IO29II/PWMIN
       COMMON/IO29LL/BMISS
- 
+
       CHARACTER*80 HDSTR,LVSTR,QMSTR,RCSTR
       CHARACTER*8  SUBSET,SID,E35O29,E36O29,RSV,RSV2
       CHARACTER*1  PQM,QQM,TQM,ZQM,WQM,QCP,QCA,Q81,Q82,PQML
@@ -2111,35 +2100,35 @@ C     ---> formerly FUNCTION ADPUPA
       LOGICAL      L02O29
 
       SAVE
- 
+
       DATA HDSTR/'NULL CLON CLAT HOUR MINU SELV               '/
       DATA LVSTR/'PRLC TMDP TMDB GP07 GP10 WDIR WSPD          '/
       DATA QMSTR/'QMPR QMAT QMDD QMGP QMWN                    '/
       DATA RCSTR/'RCHR RCMI RCTS                              '/
- 
+
       DATA IHBLCS/25,75,150,250,450,800,1250,1750,2250,2500/
- 
+
       PRS1(Z) = 1013.25 * (((288.15 - (.0065 * Z))/288.15)**5.256)
       PRS2(Z) = 226.3 * EXP(1.576106E-4 * (11000. - Z))
 
 C  CHECK IF THIS IS A PREPBUFR FILE
 C  --------------------------------
- 
+
       R03O29 = 99
 c#V#V#dak - future
 cdak  IF(SUBSET.EQ.'ADPUPA') R03O29 = PRPUPA(LUNIT,OBS)
 caaaaadak - future
       IF(R03O29.NE.99) RETURN
       R03O29 = 0
- 
+
       CALL S05O29
- 
+
 C  VERTICAL SIGNIFICANCE DESCRIPTOR TO ASSIGN ON29 CATEGORY
 C  --------------------------------------------------------
 
 C NOTE: MNEMONIC "VSIG" 008001 IS DEFINED AS VERTICAL SOUNDING
 C       SIGNIFICANCE -- CODE TABLE FOLLOWS:
-C        64   Surface 
+C        64   Surface
 C              processed as ON29 category 2 and/or 3 and/or 4
 C        32   Standard (mandatory) level
 C              processed as ON29 category 1
@@ -2155,12 +2144,12 @@ C         1   ???????????????????????
 C              processed as ON29 category 6
 C
 C  anything else - the level is not processed
- 
+
       CALL UFBINT(LUNIT,VSG_8,1,255,NLEV,'VSIG');VSG=VSG_8
- 
+
 C  PUT THE HEADER INFORMATION INTO ON29 FORMAT
 C  -------------------------------------------
- 
+
       CALL UFBINT(LUNIT,HDR_8,12,  1,IRET,HDSTR);HDR(2:)=HDR_8(2:)
       IF(HDR(5).GE.BMISS) HDR(5) = 0
       CALL UFBINT(LUNIT,RID_8,1,1,IRET,'RPID')
@@ -2230,7 +2219,7 @@ cppppp
          RPSAL = RPSAL + SIGN(0.0000001,RPSAL)
          ELV = RPSAL
       END IF
-     
+
       CALL UFBINT(LUNIT,RAT_8, 1,255,NLEV,'RATP');RAT=RAT_8
       ITP = MIN(99,NINT(RAT(1)))
       RTP = E33O29(SUBSET,SID)
@@ -2245,10 +2234,10 @@ cdak  if(sid(5:5).eq.' ') print'(A)', sid
       IF(L02O29(SID).AND.SID(5:5).EQ.' ') SID = '0'//SID
       RSV2 = '        '
       CALL S01O29(SID,XOB,YOB,RHR,RCH,RSV,RSV2,ELV,ITP,RTP)
- 
+
 C  PUT THE LEVEL DATA INTO ON29 UNITS
 C  ----------------------------------
- 
+
       CALL UFBINT(LUNIT,ARR_8,10,255,NLEV,LVSTR);ARR=ARR_8
 
       PWMIN = 999999.
@@ -2321,7 +2310,7 @@ cppppp
  4523 CONTINUE
 
       MLEV = NLEV
- 
+
       CALL UFBINT(LUNIT,ARR_8,10,255,NLEV,QMSTR);ARR=ARR_8
 
       IF(IRECCO.GT.0.AND.MLEV.EQ.1)  THEN
@@ -2370,10 +2359,10 @@ cppppp
  4524 CONTINUE
 
       IF(IRECCO.GT.0.AND.NLEV.EQ.1)  NLEV = JLV + 1
- 
+
 C  SURFACE DATA MUST GO FIRST
 C  --------------------------
- 
+
       CALL S02O29(2,0,*9999)
       CALL S02O29(3,0,*9999)
       CALL S02O29(4,0,*9999)
@@ -2513,10 +2502,10 @@ cppppp
       END IF
  7732 CONTINUE
       ENDDO
- 
+
 C  TAKE CARE OF 925 MB NEXT
 C  ------------------------
- 
+
       DO L=1,NLEV
       IF(NINT(VSG(L)).EQ.32 .AND. NINT(POB(L)).EQ.9250) THEN
          CF8(L) = 925
@@ -2529,10 +2518,10 @@ C  ------------------------
          VSG(L) = 0
       END IF
       ENDDO
- 
+
 C  REST OF THE DATA
 C  ----------------
- 
+
       Z100 = 16000
       DO L=1,NLEV
       IF(NINT(VSG(L)).EQ.32) THEN
@@ -2754,10 +2743,10 @@ cppppp
          VSG(L) = 0
       END IF
       ENDDO
- 
+
 C  CHECK FOR LEVELS WHICH GOT LEFT OUT
 C  -----------------------------------
- 
+
       DO L=1,NLEV
       IF(NINT(VSG(L)).GT.0)  THEN
          PRINT 887, L,SID,NINT(VSG(L))
@@ -2769,10 +2758,10 @@ C  -----------------------------------
      $    G0)', pob(L),qob(L),tob(L),zob(L),dob(L),sob(L)
       END IF
       ENDDO
- 
+
 C  CLOUD DATA GOES INTO CATEGORY 07
 C  --------------------------------
- 
+
       CALL UFBINT(LUNIT,ARR_8,10,255,NLEV,'HOCB CLAM QMCA HBLCS')
       ARR=ARR_8
       DO L=1,NLEV
@@ -2806,7 +2795,7 @@ C  --------------------------------
          QCA(L) = E35O29(ARR(3,L))
          IF(CLP(L).LT.BMISS .OR. CLA(L).LT.BMISS) CALL S02O29(7,L,*9999)
       ENDDO
- 
+
 C  -----------------------------------------------------
 C  MISC DATA GOES INTO CATEGORY 08
 C  -----------------------------------------------------
@@ -2817,7 +2806,7 @@ C                    SOLAR/IR CORRECTION INDICATOR,
 C                    TRACKING TECH/STATUS OF SYSTEM USED
 C  CODE FIGURE 925 - HEIGHT OF 925 LEVEL
 C  -----------------------------------------------------
- 
+
       CALL UFBINT(LUNIT,RCT_8, 5,255,NRCT,RCSTR);RCT=RCT_8
 
 C NOTE: MNEMONIC "RCTS" 008202 IS A LOCAL DESCRIPTOR DEFINED AS
@@ -2866,12 +2855,12 @@ C        63   Missing
          Q82(1) = ' '
          CALL S02O29(8,1,*9999)
       END IF
- 
+
 C  PUT THE UNPACKED ON29 REPORT INTO OBS
 C  -------------------------------------
- 
+
       CALL S03O29(OBS,SUBSET,*9999,*9998)
- 
+
       RETURN
  9999 CONTINUE
       R03O29 = 999
@@ -2888,7 +2877,7 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION R04O29(LUNIT,OBS)
 C     ---> formerly FUNCTION SURFCE
- 
+
       COMMON/IO29EE/POB(255),QOB(255),TOB(255),ZOB(255),DOB(255),
      $              SOB(255),VSG(255),CLP(255),CLA(255),OB8(255),
      $              CF8(255)
@@ -2901,7 +2890,7 @@ C     ---> formerly FUNCTION SURFCE
       COMMON/IO29CC/SUBSET,IDAT10
       COMMON/IO29BB/KNDX,KSKACF(8),KSKUPA,KSKSFC,KSKSAT,KSKSMI
       COMMON/IO29LL/BMISS
- 
+
       CHARACTER*80 HDSTR,RCSTR
       CHARACTER*8  SUBSET,SID,E35O29,RSV,RSV2
       CHARACTER*1  PQM,QQM,TQM,ZQM,WQM,QCP,QCA,Q81,Q82,PSQ,SPQ,SWQ,STQ,
@@ -2915,10 +2904,10 @@ C     ---> formerly FUNCTION SURFCE
       EQUIVALENCE  (RID_8,SID)
 
       SAVE
- 
+
       DATA HDSTR/'RPID CLON CLAT HOUR MINU SELV AUTO          '/
       DATA RCSTR/'RCHR RCMI RCTS                              '/
- 
+
       DATA JTH/0,1,2,3,4,5,6,8,7,9/,JTL/0,1,5,8,7,2,3,4,6,9/
       DATA LTL/0,1,5,6,7,2,8,4,3,9/
       DATA ITIWM/0,3*7,3,3*7,1,3*7,4,3*7/
@@ -2926,7 +2915,7 @@ C     ---> formerly FUNCTION SURFCE
 
 C  CHECK IF THIS IS A PREPBUFR FILE
 C  --------------------------------
- 
+
       R04O29 = 99
 c#V#V#dak - future
 cdak  IF(SUBSET.EQ.'ADPSFC') R04O29 = PRPSFC(LUNIT,OBS)
@@ -2935,12 +2924,12 @@ cdak  IF(SUBSET.EQ.'SFCBOG') R04O29 = PRPSFC(LUNIT,OBS)
 caaaaadak - future
       IF(R04O29.NE.99) RETURN
       R04O29 = 0
- 
+
       CALL S05O29
- 
+
 C  PUT THE HEADER INFORMATION INTO ON29 FORMAT
 C  -------------------------------------------
- 
+
       CALL UFBINT(LUNIT,HDR_8,20,  1,IRET,HDSTR);HDR(2:)=HDR_8(2:)
       CALL UFBINT(LUNIT,RCT_8, 5,255,NRCT,RCSTR);RCT=RCT_8
       IF(HDR(5).GE.BMISS) HDR(5) = 0
@@ -3006,7 +2995,7 @@ C  THE 27'TH (RESERVE) CHARACTER IS INDICATOR FOR STN OPER./PAST WX DATA
 
 C  READ THE CATEGORY 51 SURFACE DATA FROM BUFR
 C  -------------------------------------------
- 
+
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'PMSL');PSL=UFBINT_8
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'PRES');STP=UFBINT_8
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'WDIR');SDR=UFBINT_8
@@ -3041,11 +3030,11 @@ C  -------------------------------------------
             CPT = BMISS
          END IF
       END IF
-      
- 
+
+
 C  READ THE CATEGORY 52 SURFACE DATA FROM BUFR
 C  -------------------------------------------
- 
+
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'TP06');PC6=UFBINT_8
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'TOSD');SND=UFBINT_8
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'TP24');P24=UFBINT_8
@@ -3081,7 +3070,7 @@ C  PAOBS always have a missing elev, but we know they are at sea level
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'POSW');SWP=UFBINT_8
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'HOSW');SWH=UFBINT_8
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'SST1');SST=UFBINT_8
-      IF(SST.GE.BMISS) THEN 
+      IF(SST.GE.BMISS) THEN
           CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'STMP');SST=UFBINT_8
       ENDIF
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'????');SPG=UFBINT_8
@@ -3092,10 +3081,10 @@ C  PAOBS always have a missing elev, but we know they are at sea level
       I52FLG = 0
       IF(MIN(SND,P24,POW,HOW,SWD,SWP,SWH,SST,SPG,SPD,SHC,SAS,WES)
      $ .GE.BMISS.AND.(PC6.EQ.0..OR.PC6.GE.BMISS))  I52FLG= 1
- 
+
 C  SOME CLOUD DATA IS NEEDED FOR LOW, MIDDLE, AND HIGH CLOUDS IN CAT. 51
 C  ---------------------------------------------------------------------
- 
+
       CALL UFBINT(LUNIT,CLDS_8,4,255,NCLD,'VSSO CLAM CLTP HOCB')
       CLDS=CLDS_8
       CTH = -9999.
@@ -3182,10 +3171,10 @@ C  ---------------------------------------------------------------------
          CTL = BMISS
          CCL = BMISS
       END IF
- 
+
 C  CALL FUNCTIONS TO TRANSFORM TO ON29/124 UNITS
 C  ---------------------------------------------
- 
+
       PSL = E01O29(PSL)
       STP = E01O29(STP)
       SDR = E04O29(SDR,SSP)
@@ -3232,7 +3221,7 @@ C  ADJUST QUIPS QUALITY MARKERS TO REFLECT UNPACKED ON29 CONVENTION
       HCB = E18O29(CHL,CHM,CHH,CTL,CTM,CTH)
       CPT = E19O29(CPT)
       APT = E01O29(APT)
- 
+
       PC6 = E20O29(PC6)
       SND = E21O29(SND)
       P24 = E20O29(P24)
@@ -3251,7 +3240,7 @@ C  ADJUST QUIPS QUALITY MARKERS TO REFLECT UNPACKED ON29 CONVENTION
 
 C  MAKE THE UNPACKED ON29/124 REPORT INTO OBS
 C  ------------------------------------------
- 
+
       RSV2 = '        '
       CALL S01O29(SID,XOB,YOB,RHR,RCH,RSV,RSV2,ELV,ITP,RTP)
       CALL S02O29(51,1,*9999)
@@ -3273,7 +3262,7 @@ C  ------------------------------------------------------------------
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'ALSE');ALS=UFBINT_8
       IF(ALS.LT.BMISS) THEN
          OB8(1) = E01O29(ALS)
-         CF8(1) = 20 
+         CF8(1) = 20
          Q81(1) = ' '
          Q82(1) = ' '
          CALL S02O29(8,1,*9999)
@@ -3289,7 +3278,7 @@ C  ------------------------------------------------------------------
                         TMX = E06O29(TMXMNM(J+1,I))
                         IF(TMX.LT.0)  THEN
                            OB8(1) = 1000 + ABS(NINT(TMX))
-                        ELSE 
+                        ELSE
                            OB8(1) = NINT(TMX)
                         END IF
                         CF8(1) = 81 + INT(J/2)
@@ -3302,7 +3291,7 @@ C  ------------------------------------------------------------------
                         TMX = E06O29(TMXMNM(J+1,I))
                         IF(TMX.LT.0)  THEN
                            OB8(1) = 1000 + ABS(NINT(TMX))
-                        ELSE 
+                        ELSE
                            OB8(1) = NINT(TMX)
                         END IF
                         CF8(1) = 83 + INT(J/2)
@@ -3326,7 +3315,7 @@ C  ------------------------------------------------------------------
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'TOSS');DUS=UFBINT_8
       IF(NINT(DUS).LT.1000) THEN
          OB8(1) = NINT(98000. + DUS)
-         CF8(1) = 98 
+         CF8(1) = 98
          Q81(1) = ' '
          Q82(1) = ' '
          CALL S02O29(8,1,*9999)
@@ -3338,9 +3327,9 @@ C  ------------------------------------------------------------------
          Q82(1) = ' '
          CALL S02O29(8,1,*9999)
       END IF
- 
+
       CALL S03O29(OBS,SUBSET,*9999,*9998)
- 
+
       RETURN
 
  9999 CONTINUE
@@ -3360,7 +3349,7 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION R05O29(LUNIT,OBS)
 C     ---> formerly FUNCTION AIRCFT
- 
+
       COMMON/IO29EE/POB(255),QOB(255),TOB(255),ZOB(255),DOB(255),
      $               SOB(255),VSG(255),CLP(255),CLA(255),OB8(255),
      $               CF8(255)
@@ -3369,7 +3358,7 @@ C     ---> formerly FUNCTION AIRCFT
       COMMON/IO29CC/SUBSET,IDAT10
       COMMON/IO29BB/KNDX,KSKACF(8),KSKUPA,KSKSFC,KSKSAT,KSKSMI
       COMMON/IO29LL/BMISS
- 
+
       CHARACTER*80 HDSTR,LVSTR,QMSTR,RCSTR,CRAWR
       CHARACTER*8 SUBSET,SID,SIDO,SIDMOD,E35O29,RSV,RSV2,CCL,CRAW(1,255)
       CHARACTER*1  PQM,QQM,TQM,ZQM,WQM,QCP,QCA,Q81,Q82,CTURB(0:14)
@@ -3379,17 +3368,17 @@ C     ---> formerly FUNCTION AIRCFT
       EQUIVALENCE  (RID_8,SID),(RCL_8,CCL),(RAW_8,CRAW)
 
       SAVE
- 
+
       DATA HDSTR/'RPID CLON CLAT HOUR MINU SECO               '/
       DATA LVSTR/'PRLC TMDP TMDB WDIR WSPD                    '/
       DATA QMSTR/'QMPR QMAT QMDD QMGP QMWN                    '/
       DATA RCSTR/'RCHR RCMI RCTS                              '/
- 
+
       DATA CTURB/'0','1','2','3','0','1','2','3','0','1','2',4*'3'/
- 
+
 C  CHECK IF THIS IS A PREPBUFR FILE
 C  --------------------------------
- 
+
       R05O29 = 99
 c#V#V#dak - future
 cdak  IF(SUBSET.EQ.'AIRCFT') R05O29 = PRPCFT(LUNIT,OBS)
@@ -3397,12 +3386,12 @@ cdak  IF(SUBSET.EQ.'AIRCAR') R05O29 = PRPCFT(LUNIT,OBS)
 caaaaadak - future
       IF(R05O29.NE.99) RETURN
       R05O29 = 0
- 
+
       CALL S05O29
- 
+
 C  PUT THE HEADER INFORMATION INTO ON29 FORMAT
 C  -------------------------------------------
- 
+
       CALL UFBINT(LUNIT,HDR_8,20,  1,IRET,HDSTR);HDR(2:)=HDR_8(2:)
       IF(IRET.EQ.0)  SID = '        '
       CALL UFBINT(LUNIT,RCT_8, 5,255,NRCT,RCSTR);RCT=RCT_8
@@ -3416,10 +3405,10 @@ C  -------------------------------------------
       IF(HDR(4).LT.BMISS) RHR = NINT(HDR(4)) + ((NINT(HDR(5)) * 60.) +
      $ NINT(HDR(6)))/3600.
       RCH = RCTIM
- 
+
 C  TRY TO FIND FIND THE FLIGHT LEVEL HEIGHT
 C  ----------------------------------------
- 
+
       CALL UFBINT(LUNIT,HDR_8,20,1,IRET,'PSAL FLVL IALT HMSL PRLC')
       HDR=HDR_8
       ELEV = BMISS
@@ -3462,9 +3451,9 @@ cvvvvv temporary?
 
 C This will toss all Carswell/Tinker Aircraft reports - until Jack
 C  fixes the dup-check to properly remove the duplicate Carswell
-C  reports, we are better off removing them all since they are 
+C  reports, we are better off removing them all since they are
 C  often of less quality than the non-Carswell AIREP reports
-C  RIGHT NOW WE ARE HAPPY WITH DUP-CHECKER'S HANDLING OF THESE, 
+C  RIGHT NOW WE ARE HAPPY WITH DUP-CHECKER'S HANDLING OF THESE,
 C   SO COMMENT THIS OUT
 
 cdak     R05O29 = -9999
@@ -3473,7 +3462,7 @@ cdak     RETURN
       END IF
 caaaaa temporary?
       IF(SUBSET.EQ.'NC004003')  THEN
- 
+
 C  ------------------------------------
 C  ASDAR/AMDAR AIRCRAFT TYPE COME HERE
 C  ------------------------------------
@@ -3500,7 +3489,7 @@ CDAKCDAK    kskacf(2) = kskacf(2) + 1
 CDAKCDAK    return
 CDAKCDAK end if
 caaaaa temporary?
- 
+
 C  MODIFY REPORT ID AS WAS DONE IN OLD ON29 AIRCRAFT PACKER
 C  --------------------------------------------------------
 
@@ -3522,18 +3511,18 @@ C          "PHWR" AND "EGWR" ARE ALSO APPARENTLY ALSO CARSWELL)
          IF(CCL(1:4).EQ.'KAWN')  RSV(3:3) = 'C'
 
       ELSE IF(SUBSET.EQ.'NC004004') THEN
- 
+
 C  ------------------------------
 C  ACARS AIRCRAFT TYPE COME HERE
 C  ------------------------------
- 
+
          CALL UFBINT(LUNIT,RID_8,1,1,IRET,'ACRN')
          IF(IRET.EQ.0)  SID = 'ACARS   '
          KNDX = KNDX + 1
          RSV = '999     '
 
       ELSE IF(SUBSET.EQ.'NC004001'.OR.SUBSET.EQ.'NC004002') THEN
- 
+
 C  -----------------------------------------
 C  AIREP AND PIREP AIRCRAFT TYPES COME HERE
 C  -----------------------------------------
@@ -3657,7 +3646,7 @@ C          "PHWR" AND "EGWR" ARE ALSO APPARENTLY ALSO CARSWELL)
          IF(CCL(1:4).EQ.'KAWN')  RSV(3:3) = 'C'
 
       END IF
- 
+
 C  -----------------------------
 C  ALL AIRCRAFT TYPES COME HERE
 C  -----------------------------
@@ -3666,7 +3655,7 @@ C  -----------------------------
 
 C  PUT THE LEVEL DATA INTO ON29 UNITS
 C  ----------------------------------
- 
+
       CALL UFBINT(LUNIT,ARR_8,10,255,NLEV,LVSTR);ARR=ARR_8
       DO L=1,NLEV
 
@@ -3709,11 +3698,11 @@ caaaaa temporary?
       CALL UFBINT(LUNIT,ARR_8,10,255,NLEV,QMSTR);ARR=ARR_8
 
       IF(SUBSET.EQ.'NC004004') THEN
- 
+
 C  ---------------------------------------------------------
 C  ACARS AIRCRAFT TYPE COME HERE FOR QUALITY MARK ASSIGNMENT
 C  ---------------------------------------------------------
- 
+
          DO L=1,NLEV
             PQM(L) = E35O29(ARR(1,L))
             TQM(L) = E35O29(ARR(2,L))
@@ -3732,7 +3721,7 @@ C  ----------------------------
 C  --------------------------------------------------------------
 C  ALL OTHER AIRCRAFT TYPES COME HERE FOR QUALITY MARK ASSIGNMENT
 C  --------------------------------------------------------------
- 
+
          DO L=1,NLEV
             ARR(4,L) =  2
 
@@ -3767,14 +3756,14 @@ C  ----------------------------
 
          WQM(1) = 'C'
       END IF
- 
+
 C  PUT THE UNPACKED ON29 REPORT INTO OBS
 C  -------------------------------------
- 
+
       RSV2 = '        '
       CALL S01O29(SID,XOB,YOB,RHR,RCH,RSV,RSV2,ELV,ITP,RTP)
       CALL S02O29(6,1,*9999)
- 
+
 C  ------------------------------------------------------------------
 C  MISC DATA GOES INTO CATEGORY 08
 C  ------------------------------------------------------------------
@@ -3842,7 +3831,7 @@ C  ------------------------------------------------------------------
       END IF
 
       CALL S03O29(OBS,SUBSET,*9999,*9998)
- 
+
       RETURN
 
  9999 CONTINUE
@@ -3862,7 +3851,7 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION R06O29(LUNIT,OBS)
 C     ---> formerly FUNCTION SATWND
- 
+
       COMMON/IO29EE/POB(255),QOB(255),TOB(255),ZOB(255),DOB(255),
      $               SOB(255),VSG(255),CLP(255),CLA(255),OB8(255),
      $               CF8(255)
@@ -3872,7 +3861,7 @@ C     ---> formerly FUNCTION SATWND
       COMMON/IO29BB/KNDX,KSKACF(8),KSKUPA,KSKSFC,KSKSAT,KSKSMI
       COMMON/IO29KK/KOUNT(499,18)
       COMMON/IO29LL/BMISS
- 
+
       CHARACTER*80 HDSTR,LVSTR,QMSTR,RCSTR
       CHARACTER*8  SUBSET,SID,E35O29,RSV,RSV2
       CHARACTER*3  CINDX3
@@ -3885,12 +3874,12 @@ C     ---> formerly FUNCTION SATWND
       EQUIVALENCE  (RID_8,SID)
 
       SAVE
- 
+
       DATA HDSTR/'RPID CLON CLAT HOUR MINU SAID               '/
       DATA LVSTR/'PRLC TMDP TMDB WDIR WSPD                    '/
       DATA QMSTR/'QMPR QMAT QMDD QMGP SWQM                    '/
       DATA RCSTR/'RCHR RCMI RCTS                              '/
- 
+
       DATA CSAT  /'A','B','C','D',45*'?','Z','W','X','Y','Z','W','X',
      $ 'Y','Z','W',90*'?','R','O','P','Q','R','O','P','Q','R','O',
      $ 339*'?','V'/
@@ -3900,30 +3889,30 @@ C     ---> formerly FUNCTION SATWND
       DATA CPRD  /'C','V','I','W','P','T','L','Z','G'/
       DATA C7    /'A','B','C','D','E','F','G','H','I','J','K','L','M',
      $            'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'/
- 
+
 C  CHECK IF THIS IS A PREPBUFR FILE
 C  --------------------------------
- 
+
       R06O29 = 99
 c#V#V#dak - future
 cdak  IF(SUBSET.EQ.'SATWND') R06O29 = PRPWND(LUNIT,OBS)
 caaaaadak - future
       IF(R06O29.NE.99) RETURN
       R06O29 = 0
- 
+
       CALL S05O29
- 
+
 C  TRY TO FIND FIND THE HEIGHT ASSIGNMENT
 C  --------------------------------------
- 
+
       CALL UFBINT(LUNIT,HDR_8,20,1,IRET,'HGHT PRLC');HDR=HDR_8
       ELEV = BMISS
       IF(HDR(2).LT.BMISS) ELEV = E03O29(HDR(2)*.01)
       IF(HDR(1).LT.BMISS) ELEV = HDR(1)
- 
+
 C  PUT THE HEADER INFORMATION INTO ON29 FORMAT
 C  -------------------------------------------
- 
+
       CALL UFBINT(LUNIT,HDR_8,20,  1,IRET,HDSTR);HDR(2:)=HDR_8(2:)
       CALL UFBINT(LUNIT,RCT_8, 5,255,NRCT,RCSTR);RCT=RCT_8
       IF(HDR(5).GE.BMISS) HDR(5) = 0
@@ -4018,10 +4007,10 @@ C    REPROCESSED CHAR 8 -----> ALWAYS BLANK (' ') FOR NOW
 
       ELV = ELEV
       RTP = E33O29(SUBSET,SID)
- 
+
 C  PUT THE LEVEL DATA INTO ON29 UNITS
 C  ----------------------------------
- 
+
       CALL UFBINT(LUNIT,ARR_8,10,255,NLEV,LVSTR);ARR=ARR_8
       DO L=1,NLEV
          POB(L) = E01O29(ARR(1,L))
@@ -4047,7 +4036,7 @@ C  -----------------------
 
 C  DETERMINE QUALITY MARKERS
 C  -------------------------
- 
+
       CALL UFBINT(LUNIT,ARR_8,10,255,NLEV,QMSTR);ARR=ARR_8
       CALL UFBINT(LUNIT,UFBINT_8,1,1,IRET,'RFFL');RFFL=UFBINT_8
       IF(RFFL.LT.BMISS.AND.(NINT(ARR(5,1)).EQ.2.OR.NINT(ARR(5,1)).GE.
@@ -4086,14 +4075,14 @@ C  ---------------------------------------------------------------------
          END IF
 
       ENDDO
- 
+
 C  PUT THE UNPACKED ON29 REPORT INTO OBS
 C  -------------------------------------
- 
+
       RSV2 = '        '
       CALL S01O29(SID,XOB,YOB,RHR,RCH,RSV,RSV2,ELV,ITP,RTP)
       CALL S02O29(6,1,*9999)
- 
+
 C  ---------------------------------------------------------------------
 C  MISC DATA GOES INTO CATEGORY 08
 C  ---------------------------------------------------------------------
@@ -4127,7 +4116,7 @@ C  ---------------------------------------------------------------------
       END IF
 
       CALL S03O29(OBS,SUBSET,*9999,*9998)
- 
+
       RETURN
 
  9999 CONTINUE
@@ -4147,7 +4136,7 @@ C***********************************************************************
 C***********************************************************************
       FUNCTION R07O29(LUNIT,OBS)
 C     ---> formerly FUNCTION SPSSMI
- 
+
       COMMON/IO29EE/POB(255),QOB(255),TOB(255),ZOB(255),DOB(255),
      $              SOB(255),VSG(255),CLP(255),CLA(255),OB8(255),
      $              CF8(255)
@@ -4156,7 +4145,7 @@ C     ---> formerly FUNCTION SPSSMI
       COMMON/IO29CC/SUBSET,IDAT10
       COMMON/IO29BB/KNDX,KSKACF(8),KSKUPA,KSKSFC,KSKSAT,KSKSMI
       COMMON/IO29LL/BMISS
- 
+
       CHARACTER*80 HDSTR
       CHARACTER*8  SUBSET,SID,RSV,RSV2
       CHARACTER*4  CSTDV
@@ -4168,24 +4157,24 @@ C     ---> formerly FUNCTION SPSSMI
       EQUIVALENCE  (RID_8,SID)
 
       SAVE
- 
+
       DATA HDSTR/'RPID CLON CLAT HOUR MINU SECO NMCT SAID     '/
- 
+
 C  CHECK IF THIS IS A PREPBUFR FILE
 C  --------------------------------
- 
+
       R07O29 = 99
 c#V#V#dak - future
 cdak  IF(SUBSET.EQ.'SPSSMI') R07O29 = PRPSMI(LUNIT,OBS)
 caaaaadak - future
       IF(R07O29.NE.99) RETURN
       R07O29 = 0
- 
+
       CALL S05O29
 
 C  PUT THE HEADER INFORMATION INTO ON29 FORMAT
 C  -------------------------------------------
- 
+
       CALL UFBINT(LUNIT,HDR_8,20,  1,IRET,HDSTR);HDR(2:)=HDR_8(2:)
       IF(HDR(5).GE.BMISS) HDR(5) = 0
       IF(HDR(6).GE.BMISS) HDR(6) = 0
@@ -4206,7 +4195,7 @@ C  -----------------------------------------------------------------
 
       ISUPOB = 1
       IF(HDR(8).LT.BMISS)  ISUPOB = 0
-      
+
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
       STDV = BMISS
@@ -4450,7 +4439,7 @@ C  PUT THE UNPACKED ON29 REPORT INTO OBS
 C  -------------------------------------
 
       CALL S03O29(OBS,SUBSET,*9999,*9998)
- 
+
       RETURN
  9999 CONTINUE
       R07O29 = 999
@@ -4462,18 +4451,14 @@ C  -------------------------------------
       KSKSMI = KSKSMI + 1
       RETURN
       END
-C>
-C> MODIFIES AMDAR REPORTS SO THAT LAST CHARACTER ENDS
-C> WITH 'Z'.
-C>
-C> PROGRAM HISTORY LOG:
-C> 1992-02-16  RAY CRAYTON
-C>
-C> @param[in] IDEN     - ACFT ID
-C>
-C> @param[out] ID       - MODIFIED AIRCRAFT ID.
-C>
+C> @brief Modifies amdar reports so that last character ends
+C> with 'Z'.
 C> @author RAY CRAYTON @date 1992-02-16
+
+C> Program history log:
+C> - Ray Crayton 1992-02-16
+C> @param[in] IDEN Acft id
+C> @param[out] ID Modified aircraft id.
 C>
       SUBROUTINE S06O29(IDEN,ID)
 C     ---> formerly SUBROUTINE IDP
@@ -4557,7 +4542,7 @@ C  ---------------------------------------------------
          IF(L.EQ.1)  THEN
             ID = ZEROES(1:5-N)//IDEN(1:N)//'Z'
          ELSE
-            IF(N.LT.L)  THEN 
+            IF(N.LT.L)  THEN
                IDEN(1:6) = 'AMDARZ'
             ELSE
                ID = IDEN(1:L-1)// ZEROES(1:5-N)//IDEN(L:N)//'Z'
@@ -4569,20 +4554,17 @@ C  ---------------------------------------------------
       RETURN
       END
 
+C> @brief Finds the location of the next numeric character
+C> in a string of characters.
+C> @author Ray Crayton @date 1989-07-07
+
+C> @param[in] STRING Character array.
+C> @param[in] NUM Number of characters to search in string.
+C> @param[out] CHAR Character found.
 C>
-C> FINDS LOCATION OF NEXT NUMERIC
-C> @author RAY CRAYTON @date 1989-07-07
-C>
-C> FINDS THE LOCATION OF THE NEXT NUMERIC CHARACTER
-C> IN A STRING OF CHARACTERS.
-C>
-C> @param[in] STRING   - CHARACTER ARRAY.
-C> @param[in] NUM      - NUMBER OF CHARACTERS TO SEARCH IN STRING.
-C> @param[out] CHAR     - CHARACTER FOUND.
-C>
-C> @return I05O29   - INTEGER*4 LOCATION OF ALPHANUMERIC CHARACTER.
-C>                = 0 IF NOT FOUND.
-C> REMARKS: NONE
+C> @return I05O29 Integer*4 location of alphanumeric character.
+c> - = 0 if not found.
+
 C>
       FUNCTION I05O29(STRING,NUM,CHAR)
 C     ---> formerly FUNCTION IFIG

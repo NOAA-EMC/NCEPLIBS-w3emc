@@ -1,73 +1,43 @@
 C> @file
-C
+C> @brief Test two pds (grib product definition section) to see
+C> if all equal; otherwise .false.
+C> @author Ralph Jones @date 1988-02-22
 C> FUNCTION: IW3PDS           TEST FOR MATCH OF TWO PDS
 C>   AUTHOR: JONES, R.E.      ORG: W342       DATE: 88-02-22
 C>
-C> ABSTACT: TEST TWO PDS (GRIB PRODUCT DEFINITION SECTION) TO SEE
-C>     IF ALL EQUAL; OTHERWISE .FALSE. IF KEY = 1, ALL 24 CHARACTERS
-C>     ARE TESTED, IF KEY = 0 , THE DATE (CHARACTERS 13-17) ARE NOT
-C>     TESTED. IF KEY = 2, 11 OF 1ST 12 BYTES ARE TESTED. BYTE 4 IS
-C>     IS NOT TESTED, SO TABLE VERSION NUMBER CAN CHANGE AND YOUR
-C>     PROGRAM WILL STILL WORK. IF KEY=3, TEST BYTES 1-3, 7-12.
+C> Test two pds (grib product definition section) to see
+C> if all equal; otherwise .false. if key = 1, all 24 characters
+C> are tested, if key = 0 , the date (characters 13-17) are not
+C> tested. If key = 2, 11 of 1st 12 bytes are tested. Byte 4 is
+C> is not tested, so table version number can change and your
+C> program will still work. If key=3, test bytes 1-3, 7-12.
 C>
-C> PROGRAM HISTORY LOG:
-C>   88-02-22  R.E.JONES
-C>   89-08-29  R.E.JONES  ADD ENTRY IW3PDS, AN ALIAS NAME.
-C>   89-08-29  R.E.JONES  CHANGE TO CRAY CFT77 FORTRAN, MAKE IW3PDS
-C>                        THE FUNCTION NAME, IW3PDB THE ALIAS.
-C>   94-02-10  R.E.JONES  ADD KEY=2, TEST ONLY 11 OF 1ST 12 BYTES.
-C>                        BYTE 4 (TABLE VERSION NO.) IS NOT TESTED
-C>   94-07-07  R.E.JONES  ADD KEY=3, TEST BYTES 1-3, 7-12.
+C> Program history log:
+C> - Ralph Jones 1988-02-22
+C> - Ralph Jones 1989-08-29 Add entry iw3pds, an alias name.
+C> - Ralph Jones 1989-08-29 Change to cray cft77 fortran, make iw3pds
+C> the function name, iw3pdb the alias.
+C> - Ralph Jones 1994-02-10 Add key=2, test only 11 of 1st 12 bytes.
+C> Byte 4 (table version no.) is not tested.
+C> - Ralph Jones 1994-07-07 Add key=3, test bytes 1-3, 7-12.
 C>
 C> USAGE:  II = IW3PDS(L1,L2,KEY)
 C>         II = IW3PDB(L1,L2,KEY)    ALIAS
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     L1     ARG LIST  CHARACTER ARRAY TO MATCH WITH L2,
-C>                      L1 CAN ALSO BE A 3 WORD INTEGER ARRAY
-C>     L2     ARG LIST  CHARACTER ARRAY TO MATCH WITH L1,
-C>                      L2 CAN ALSO BE A 3 WORD INTEGER ARRAY
-C>     KEY    ARG LIST  0, DO NOT INCLUDE THE DATE (BYTES 13-17) IN
-C>                         MATCH.
-C>                      1, MATCH 24 BYTES OF PDS
-C>                      2, MATCH BYTES 1-3, 5-12 OF PDS
-C>                      3, MATCH BYTES 1-3, 7-12 OF PDS
+C> @param[in] L1 character array to match with l2,
+C> l1 can also be a 3 word integer array.
+C> @param[in] L2 character array to match with l1,
+C> l2 can also be a 3 word integer array.
+C> @param[in] KEY 0, DO NOT INCLUDE THE DATE (BYTES 13-17) IN MATCH.
+C> - 1, match 24 bytes of pds
+C> - 2, match bytes 1-3, 5-12 of pds
+C> - 3, match bytes 1-3, 7-12 of pds
+C> @param[out] IW3PDB logical .true. if l1 and l2 match on all char.,
+C> logical .false. if not match on any char.
 C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     IW3PDB FUNCTION  LOGICAL .TRUE. IF L1 AND L2 MATCH ON ALL CHAR.,
-C>                      LOGICAL .FALSE. IF NOT MATCH ON ANY CHAR.
-C>
-C> EXAMPLE:  SEARCH IDTBL FOR MATCH WITH GIVEN (PDS), USE RBA IN 7TH
-C>           ID WORD TO READ RECORD BY RBA.
-C>
-C>           INTEGER   IDTBL(1794), IPDS(6), RBA
-C>           LOGICAL   IW3PDS
-C>
-C>           KEY = 0
-C>           DO 400 I = 9,1793,7
-C>             IF (IDTBL(I).EQ.0) GO TO 500
-C>               IF (IW3PDS(IPDS,IDTBL(I),KEY)) THEN
-C>                  RBA = IDTBL(I+6)
-C>                  GO TO 600
-C>               END IF
-C>   400     CONTINUE
-C>
-C>   500     CONTINUE
-C>           GO TO XXXX ... ERROR EXIT , CAN NOT FIND RECORD
-C>
-C>   600     ..  READ RECORD WITH RBA
-C>
-C> REMARK:  ALIAS ADDED BECAUSE OF NAME CHANGE IN GRIB WRITE UP.
-C>   NAME OF PDB (PRODUCT DEFINITION BLOCK) WAS CHANGD TO PDS
-C>   (PRODUCT DEFINITION SECTION).
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
+C> @note Alias added because of name change in grib write up.
+C> Name of pdb (product definition block) was changd to pds
+C> (product definition section).
 C>
       LOGICAL FUNCTION IW3PDS(L1, L2, KEY)
 C

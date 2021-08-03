@@ -1,56 +1,43 @@
 C> @file
-C
-C> SUBPROGRAM: IW3JDN         COMPUTE JULIAN DAY NUMBER
-C>   AUTHOR: JONES,R.E.       ORG: W342       DATE: 87-03-29
+C> @brief Computes julian day number from year (4 digits), month, and day.
+C> @author Ralph Jones @date 1987-03-29
+
+C> Computes julian day number from year (4 digits), month,
+C> and day. iw3jdn is valid for years 1583 a.d. to 3300 a.d.
+C> Julian day number can be used to compute day of week, day of
+C> year, record numbers in an archive, replace day of century,
+C> find the number of days between two dates.
 C>
-C> ABSTRACT: COMPUTES JULIAN DAY NUMBER FROM YEAR (4 DIGITS), MONTH,
-C>   AND DAY. IW3JDN IS VALID FOR YEARS 1583 A.D. TO 3300 A.D.
-C>   JULIAN DAY NUMBER CAN BE USED TO COMPUTE DAY OF WEEK, DAY OF
-C>   YEAR, RECORD NUMBERS IN AN ARCHIVE, REPLACE DAY OF CENTURY,
-C>   FIND THE NUMBER OF DAYS BETWEEN TWO DATES.
+C> Program history log:
+C> - Ralph Jones 1987-03-29
+C> - Ralph Jones 1989-10-25 Convert to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   87-03-29  R.E.JONES
-C>   89-10-25  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] IYEAR Integer year (4 Digits)
+C> @param[in] MONTH Integer month of year (1 - 12)
+C> @param[in] IDAY Integer day of month (1 - 31)
+C> @return IW3JDN Integer Julian day number
+C> - Jan 1, 1960 is Julian day number 2436935
+C> - Jan 1, 1987 is Julian day number 2446797
 C>
-C> USAGE:   II = IW3JDN(IYEAR,MONTH,IDAY)
+C> @note Julian period was devised by joseph scaliger in 1582.
+C> Julian day number #1 started on Jan. 1,4713 B.C. Three major
+C> chronological cycles begin on the same day. A 28-year solar
+C> cycle, a 19-year luner cycle, a 15-year indiction cycle, used
+C> in ancient rome to regulate taxes. It will take 7980 years
+C> to complete the period, the product of 28, 19, and 15.
+C> scaliger named the period, date, and number after his father
+C> Julius (not after the julian calendar). This seems to have
+C> caused a lot of confusion in text books. Scaliger name is
+C> spelled three different ways. Julian date and Julian day
+C> number are interchanged. A Julian date is used by astronomers
+C> to compute accurate time, it has a fraction. When truncated to
+C> an integer it is called an Julian day number. This function
+C> was in a letter to the editor of the communications of the acm
+C> volume 11 / number 10 / october 1968. The Julian day number
+C> can be converted to a year, month, day, day of week, day of
+C> year by calling subroutine w3fs26.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     IYEAR  ARG LIST  INTEGER   YEAR           ( 4 DIGITS)
-C>     MONTH  ARG LIST  INTEGER   MONTH OF YEAR   (1 - 12)
-C>     IDAY   ARG LIST  INTEGER   DAY OF MONTH    (1 - 31)
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     IW3JDN FUNTION   INTEGER   JULIAN DAY NUMBER
-C>                      JAN. 1,1960 IS JULIAN DAY NUMBER 2436935
-C>                      JAN. 1,1987 IS JULIAN DAY NUMBER 2446797
-C>
-C>   REMARKS: JULIAN PERIOD WAS DEVISED BY JOSEPH SCALIGER IN 1582.
-C>     JULIAN DAY NUMBER #1 STARTED ON JAN. 1,4713 B.C. THREE MAJOR
-C>     CHRONOLOGICAL CYCLES BEGIN ON THE SAME DAY. A 28-YEAR SOLAR
-C>     CYCLE, A 19-YEAR LUNER CYCLE, A 15-YEAR INDICTION CYCLE, USED
-C>     IN ANCIENT ROME TO REGULATE TAXES. IT WILL TAKE 7980 YEARS
-C>     TO COMPLETE THE PERIOD, THE PRODUCT OF 28, 19, AND 15.
-C>     SCALIGER NAMED THE PERIOD, DATE, AND NUMBER AFTER HIS FATHER
-C>     JULIUS (NOT AFTER THE JULIAN CALENDAR). THIS SEEMS TO HAVE
-C>     CAUSED A LOT OF CONFUSION IN TEXT BOOKS. SCALIGER NAME IS
-C>     SPELLED THREE DIFFERENT WAYS. JULIAN DATE AND JULIAN DAY
-C>     NUMBER ARE INTERCHANGED. A JULIAN DATE IS USED BY ASTRONOMERS
-C>     TO COMPUTE ACCURATE TIME, IT HAS A FRACTION. WHEN TRUNCATED TO
-C>     AN INTEGER IT IS CALLED AN JULIAN DAY NUMBER. THIS FUNCTION
-C>     WAS IN A LETTER TO THE EDITOR OF THE COMMUNICATIONS OF THE ACM
-C>     VOLUME 11 / NUMBER 10 / OCTOBER 1968. THE JULIAN DAY NUMBER
-C>     CAN BE CONVERTED TO A YEAR, MONTH, DAY, DAY OF WEEK, DAY OF
-C>     YEAR BY CALLING SUBROUTINE W3FS26.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author Ralph Jones @date 1987-03-29
       FUNCTION IW3JDN(IYEAR,MONTH,IDAY)
 C
        IW3JDN  =    IDAY - 32075
