@@ -1,55 +1,49 @@
 !> @file
-!                .      .    .                                       .
-!> MONITOR WALL-CLOCK TIMES, ETC.
-!! @author IREDELL @date 1998-07-16
-!!
-!! THIS SUBPROGRAM IS USEFUL IN INSTRUMENTING A CODE
-!! BY MONITORING THE NUMBER OF TIMES EACH GIVEN SECTION
-!! OF A PROGRAM IS INVOKED AS WELL AS THE MINIMUM, MAXIMUM
-!! AND TOTAL WALL-CLOCK TIME SPENT IN THE GIVEN SECTION.
-!!
-!! PROGRAM HISTORY LOG:
-!! -  1998-07-16  IREDELL
-!! -  2019-09-17  FRIMEL and KALINA
-!!               DECOMPOSE RETURN STATISTCS IF STATEMENT
-!! -  2020-04-02  BOI VUONG
-!!               CHECK FOR KA > 0 AND MODIFILED IFBLOCK STATEMENT
-!!               INTO TWO SEPARATE IFBLOCK STATEMENTS
-!!
-!! @param[in] K - INTEGER POSITIVE SECTION NUMBER
-!!                OR MAXIMUM SECTION NUMBER IN THE FIRST INVOCATION
-!!                OR ZERO TO RESET ALL WALL-CLOCK STATISTICS
-!!                OR NEGATIVE SECTION NUMBER TO SKIP MONITORING
-!!                AND JUST RETURN STATISTICS.
-!!
-!! @param[out] KALL     - INTEGER NUMBER OF TIMES SECTION IS CALLED
-!! @param[out] TTOT     - REAL TOTAL SECONDS SPENT IN SECTION
-!! @param[out] TMIN     - REAL MINIMUM SECONDS SPENT IN SECTION
-!! @param[out] TMAX     - REAL MAXIMUM SECONDS SPENT IN SECTION
-!!
-!! SUBPROGRAMS CALLED:
-!! -  W3UTCDAT     RETURN THE UTC DATE AND TIME
-!! -  W3DIFDAT     RETURN A TIME INTERVAL BETWEEN TWO DATES
-!!
-!! REMARKS:
-!!   THIS SUBPROGRAM SHOULD NOT BE INVOKED FROM A MULTITASKING REGION.
-!!   NORMALLY, TIME SPENT INSIDE THIS SUBPROGRAM IS NOT COUNTED.
-!!   WALL-CLOCK TIMES ARE KEPT TO THE NEAREST MILLISECOND.
-!!
-!!   EXAMPLE.
-!! <pre>      
-!!     CALL INSTRUMENT(2,KALL,TTOT,TMIN,TMAX)    ! KEEP STATS FOR 2 SUBS
-!!     DO K=1,N
-!!       CALL SUB1
-!!       CALL INSTRUMENT(1,KALL,TTOT,TMIN,TMAX)  ! ACCUM STATS FOR SUB1
-!!       CALL SUB2
-!!       CALL INSTRUMENT(2,KALL,TTOT,TMIN,TMAX)  ! ACCUM STATS FOR SUB2
-!!     ENDDO
-!!     PRINT *,'SUB2 STATS: ',KALL,TTOT,TMIN,TMAX
-!!     CALL INSTRUMENT(-1,KALL,TTOT,TMIN,TMAX)   ! RETURN STATS FOR SUB1
-!!     PRINT *,'SUB1 STATS: ',KALL,TTOT,TMIN,TMAX
-!! </pre>      
-!!
+!> @brief Monitor wall-clock times, etc.
+!> @author Mark Iredell @date 1998-07-16
+
+!>
+!> This subprogram is useful in instrumenting a code
+!> by monitoring the number of times each given section
+!> of a program is invoked as well as the minimum, maximum
+!> and total wall-clock time spent in the given section.
+!>
+!> Program history log:
+!> - Mark Iredell 1998-07-16
+!> - Frimel and Kalina 2019-09-17
+!> Decompose return statistcs if statement
+!> - Boi Vuong 2020-04-02 Check for ka > 0 and modifiled ifblock statement
+!> into two separate ifblock statements.
+!> @param[in] K Integer positive section number
+!> or maximum section number in the first invocation
+!> or zero to reset all wall-clock statistics
+!> or negative section number to skip monitoring
+!> and just return statistics.
+!>
+!> @param[out] KALL integer number of times section is called.
+!> @param[out] TTOT real total seconds spent in section.
+!> @param[out] TMIN real minimum seconds spent in section.
+!> @param[out] TMAX real maximum seconds spent in section.
+!>
+!> @note This subprogram should not be invoked from a multitasking region.
+!> Normally, time spent inside this subprogram is not counted.
+!> Wall-clock times are kept to the nearest millisecond.
+!>
+!> Example.
+!> <pre>
+!>     CALL INSTRUMENT(2,KALL,TTOT,TMIN,TMAX)    ! KEEP STATS FOR 2 SUBS
+!>     DO K=1,N
+!>       CALL SUB1
+!>       CALL INSTRUMENT(1,KALL,TTOT,TMIN,TMAX)  ! ACCUM STATS FOR SUB1
+!>       CALL SUB2
+!>       CALL INSTRUMENT(2,KALL,TTOT,TMIN,TMAX)  ! ACCUM STATS FOR SUB2
+!>     ENDDO
+!>     PRINT *,'SUB2 STATS: ',KALL,TTOT,TMIN,TMAX
+!>     CALL INSTRUMENT(-1,KALL,TTOT,TMIN,TMAX)   ! RETURN STATS FOR SUB1
+!>     PRINT *,'SUB1 STATS: ',KALL,TTOT,TMIN,TMAX
+!> </pre>
+!>
+!> @author Mark Iredell @date 1998-07-16
       SUBROUTINE INSTRUMENT(K,KALL,TTOT,TMIN,TMAX)
         IMPLICIT NONE
         INTEGER,INTENT(IN):: K
@@ -96,11 +90,11 @@
 
 !  FRIMEL and KALINA, DECOMPOSE THE IF STATEMENT, SAFER FOR SOME
 !  COMPILERS. Since No Guarantee on order of evaluation, and when
-!  evaluation will stop. 
+!  evaluation will stop.
 !  MAKE SURE KA.GE.1 BEFORE TESTING IF KALLS(KA).GT.0, ELSE
 !  MAY ENCOUNTER A RUNTIME SIGSEGV SEGEMENTATION FAULT.
-!  Since  Subscript #1 of the array KALLS can have value 0 which 
-!  is less than the lower bound of 1  
+!  Since  Subscript #1 of the array KALLS can have value 0 which
+!  is less than the lower bound of 1
 !        IF(KA.GE.1.AND.KA.LE.KMAX.AND.KALLS(KA).GT.0) THEN
 
         IF(KA.GE.1.AND.KA.LE.KMAX) THEN
