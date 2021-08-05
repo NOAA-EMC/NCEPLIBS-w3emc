@@ -1,271 +1,272 @@
-C> @file
-C> @brief Reads and unpacks one report into the unpacked office note
-C> 29/124 format
-C> @author D. A. Keyser @date 2013-03-20
+C>    @file
+C>    @brief Reads and unpacks one report into the unpacked office note
+C>    29/124 format
+C>    @author Dennis Keyser @date 2013-03-20
 
-C> This routine has not been tested reading input data from any dump
-C> type in ON29/124 format on WCOSS.  It likely will not work when
-C> attempting to read ON29/124 format dumps on WCOSS.  It has also
-C> not been tested reading any dump file other than ADPUPA (BUFR
-C> input only) on WCOSS. It does work reading BUFR ADPUPA dump files
-C> on WCOSS. It will hopefully working reading other BUFR (only)
-C> dump files on WCOSS. Also, this routine is only known to work correctly
-C> when compiled using 8 byte machine words (real and integer).
+C>    This routine has not been tested reading input data from any dump
+C>    type in ON29/124 format on WCOSS. It likely will not work when
+C>    attempting to read ON29/124 format dumps on WCOSS. It has also
+C>    not been tested reading any dump file other than ADPUPA (BUFR
+C>    input only) on WCOSS. It does work reading BUFR ADPUPA dump files
+C>    on WCOSS. It will hopefully working reading other BUFR (only)
+C>    dump files on WCOSS. Also, this routine is only known to work correctly
+C>    when compiled using 8 byte machine words (real and integer).
 C>
-C> Reads and unpacks one report into the unpacked office note
-C> 29/124 format.  The input data may be packed into either bufr or
-C> true on29/124 format with a y2k compliant pseudo-on85 header label.
-C> (Note: as a temporary measure, this code will still operate on a
-C> true on29/124 format file with a non-y2k compliant on85 header
-C> label.  The code will use the "windowing" technique to obtain a
-C> 4-digit year.) This routine will determine the format of the
-C> input data and take the appropriate action. It returns the
-C> unpacked report to the calling program in the array 'obs'.
-C> Various contingencies are covered by return value of the function
-C> and parameter 'ier' - function and ier have same value.  Repeated
-C> calls of function will return a sequence of unpacked on29/124
-C> reports.  The calling program may switch to a new 'nunit' at any
-C> time, that dataset will then be read in sequence. If user
-C> switches back to a previous 'nunit', that data set will be read
-C> from the beginning, not from where the user left off (this is a
-C> 'software tool', not an entire i/o system).
+C>    Reads and unpacks one report into the unpacked office note
+C>    29/124 format.  The input data may be packed into either bufr or
+C>    true on29/124 format with a y2k compliant pseudo-on85 header label.
+C>    (Note: as a temporary measure, this code will still operate on a
+C>    true on29/124 format file with a non-y2k compliant on85 header
+C>    label.  The code will use the "windowing" technique to obtain a
+C>    4-digit year.) This routine will determine the format of the
+C>    input data and take the appropriate action. It returns the
+C>    unpacked report to the calling program in the array 'obs'.
+C>    Various contingencies are covered by return value of the function
+C>    and parameter 'ier' - function and ier have same value. Repeated
+C>    calls of function will return a sequence of unpacked on29/124
+C>    reports.  The calling program may switch to a new 'nunit' at any
+C>    time, that dataset will then be read in sequence. If user
+C>    switches back to a previous 'nunit', that data set will be read
+C>    from the beginning, not from where the user left off (this is a
+C>    'software tool', not an entire i/o system).
 C>
-C> Program history log:
-C> - J. S. Woollen 1996-12-13 (gsc) Note this new
-C> version of iw3gad incorporates the earlier version which
-C> was written by j. stackpole and dealt only with true
-C> on29/124 data as input - this option is still available
-C> but is a small part of the new routine which was written
-C> from scratch to read in bufr data.
-C> - D. A. Keyser 1997-01-27 Changes to more closely duplicate format
-C> obtained when reading from true on29/124 data sets.
-C> - D. A. Keyser 1997-02-04 Drops with missing stnid get stnid set to
-C> "drp88a"; satwnds with zero pressure are tossed.
-C> - D. A. Keyser 1997-02-12 To get around the 3-bit limitation to
-C> the on29 pressure q.m. mnemonic "qmpr", an sdmedit/quips
-C> purge or reject flag on pressure is changed from 12 or 14
-C> to 6 in order to fit into 3-bits, see function e35o29;
-C> interprets sdmedit and quips purge/keep/change flags
-C> properly for all data types; can now process cat. 6 and
-C> cat. 2/3 type flight-level reccos (before skipped these);
-C> tests for missing lat, lon, obtime decoded from bufr and
-C> retains missing value on these in unpacked on29/124
-C> format (before no missing check, led to possible non-
-C> missing but incorrect values for these); the check for
-C> drops with missing stnid removed since decoder fixed for
-C> this.
-C> - D. A. Keyser 1997-05-01 Looks for duplicate levels when
-C> processing on29 cat. 2, 3, and 4 (in all data on level)
-C> and removes duplicate level; in processing on29 cat. 3
-C> levels, removes all levels where wind is missing; fixed
-C> bug in aircraft (airep/pirep/amdar) quality mark
-C> assignment (was not assigning keep flag to report if
-C> pressure had a keep q.m. but temperature q.m. was
-C> missing).
-C> - D. A. Keyser 1997-05-30 For aircft: (only acars right now) -
-C> seconds are decoded (if avail.) and used to obtain
-C> report time; only asdar/amdar - new cat. 8 code figs.
-C> o-put 917 (char. 1 & 2 of actual stnid), 918 (char. 3 &
-C> 4 of actual stnid), 919 (char. 5 & 6 of actual stnid);
-C> asdar/amdar and acars - new cat. 8 code fig. o-put 920
-C> (char. 7 & 8 of actual stnid); only acars - new cat. 8
-C> code fig. o-put 921 (report time to nearest 1000'th of
-C> an hour); only some acars - new mnemonic "ialt" now
-C> exists and can (if line not commented out) be used to
-C> obtain unpacked on29 cat. 6.
-C> - D. A. Keyser 1997-07-02 Removed filtering of aircraft data as
-C> follows: air france amdars no longer filtered, amdar/
-C> asdar below 7500 ft. no longer filtered, airep/pirep
-C> below 100 meters no longer filtered, all aircraft with
-C> missing wind but valid temperature are no longer
-C> filtered; reprocesses u.s. satwnd stn. ids to conform
-C> with previous on29 appearance except now 8-char (tag
-C> char. 1 & 6 not changed from bufr stn. id) - never any
-C> dupl. ids now for u.s. satwnds decoded from a single
-C> bufr file; streamlined/eliminated some do loops to
-C> speed up a bit.
-C> - D. A. Keyser 1997-09-18 Corrected errors in reformatting surface
-C> data into unpacked on124, specifically-header: inst. type
-C> (synoptic fmt flg, auto stn. type, converted hrly flg),
-C> indicators (precip., wind speed, wx/auto stn), cat51:
-C> p-tend, horiz. viz., present/past wx, cloud info, max/
-C> min temp, cat52: precip., snow dpth, wave info, ship
-C> course/speed, cat8: code figs. 81-85,98; corrected
-C> problem which coded upper-air mandatory level winds
-C> as cat. 3 instead of cat. 1 when mass data (only) was
-C> reported on same mandatory level in a separate reported
-C> level in the raw bulletin.
-C> - D. A. Keyser 1997-10-06 Updated logic to read and process nesdis
-C> hi-density satellite winds properly.
-C> - D. A. Keyser 1997-10-30 Added gross check on u-air pressure, all
-C> levels with reported pressure .le. zero now tossed; sfc
-C> cat. 52 sea-sfc temperature now read from hierarchy of
-C> sst in bufr {1st choice - hi-res sst ('sst2'), 2nd
-C> choice - lo-res sst ('sst1'), 3rd choice - sea temp
-C> ('stmp')}, before only read 'sst1'.
-C> - D. A. Keyser 1998-01-26 Changed pqm processing for adpupa types
-C> such that sdmedit flags are now honored (before, pqm
-C> was always hardwired to 2 for adpupa types); bumped
-C> limit for number of levels that can be processed from
-C> 100 to 150 and added diagnostic print when the limit
-C> is exceeded.
-C> - D. A. Keyser 1998-05-19 Y2k compliant version of iw3gad routine
-C> accomplished by redefining original 32-character on85
-C> header label to be a 40-character label that contains a
-C> full 4-digit year, can still read "true" on29/124 data
-C> sets provided their header label is in this modified
-C> form.
-C> - D. A. Keyser 1998-07-22 Minor modifications to account for
-C> corrections in y2k/f90 bufrlib (mainly related to
-C> bufrlib routine dumpbf).
-C> - D. A. Keyser 1998-08-04 Fixed a bug that resulted in code being
-C> clobbered in certain situations for recco reports; minor
-C> modifications to give same answers on cray as on sgi;
-C> allowed code to read true on29/124 files with non-y2k
-C> compliant on85 label (a temporary measure during
-C> transition of main programs to y2k); added call to "aea"
-C> which converts ebcdic characters to ascii for input
-C> true on29/124 data set processing of sgi (which does
-C> not support "-cebcdic" in assign statement).
-C> - D. A. Keyser 1999-02-25 Added ability to read reprocessed ssm/i
-C> bufr data set (spssmi); added ability to read mean
-C> sea-level pressure bogus (paobs) data set (sfcbog).
-C> - D. A. Keyser 1999-05-14 Made changes necessary to port this
-C> routine to the ibm sp.
-C> - D. A. Keyser 1999-06-18 Can now process water vapor satwnds
-C> from foreign producers; stn. id for foreign satwnds
-C> now reprocessed in same way as for nesdis/goes satwnds,
-C> character 1 of stn. id now defines even vs. odd
-C> satellite while character 6 of stn. id now defines
-C> ir cloud-drft vs. visible cloud drft vs. water vapor.
-C> - D. A. Keyser 2002-03-05 Removed entry "e02o29", now performs
-C> height to press. conversion directly in code for cat. 7;
-C> test for missing "rpid" corrected for adpupa data (now
-C> checks ufbint return code rather than value=bmiss);
-C> accounts for changes in input adpupa, adpsfc, aircft
-C> and aircar bufr dump files after 3/2002: cat. 7 and cat.
-C> 51 use mnemonic "hblcs" to get height of cloud base if
-C> mnemonic "hocb" not available (and it will not be for all
-C> cat. 7 and some cat. 51 reports); mnemonic "tiwm"
-C> replaces "suws" in header for surface data; mnemonic
-C> "borg" replaces "icli" in cat. 8 for aircraft data (will
-C> still work properly for input adpupa, adpsfc, aircft and
-C> aircar dump files prior to 3/2002).
-C> - D. A. Keyser 2013-03-20 Changes to run on wcoss:  obtain value of
-C> bmiss set in calling program via call to bufrlib routine
-C> getbmiss rather than hardwiring it to 10e08 (or 10e10);
-C> use formatted print statements where previously
-C> unformatted print was used (wcoss splits unformatted
-C> print at 80 characters).
+C>    Program history log:
+C>    - Jack Woollen 1996-12-13 (gsc) Note this new
+C>    version of iw3gad incorporates the earlier version which
+C>    was written by j. stackpole and dealt only with true
+C>    on29/124 data as input - this option is still available
+C>    but is a small part of the new routine which was written
+C>    from scratch to read in bufr data.
+C>    - Dennis Keyser 1997-01-27 Changes to more closely duplicate format
+C>    obtained when reading from true on29/124 data sets.
+C>    - Dennis Keyser 1997-02-04 Drops with missing stnid get stnid set to
+C>    "drp88a"; satwnds with zero pressure are tossed.
+C>    - Dennis Keyser 1997-02-12 To get around the 3-bit limitation to
+C>    the on29 pressure q.m. mnemonic "qmpr", an sdmedit/quips
+C>    purge or reject flag on pressure is changed from 12 or 14
+C>    to 6 in order to fit into 3-bits, see function e35o29;
+C>    interprets sdmedit and quips purge/keep/change flags
+C>    properly for all data types; can now process cat. 6 and
+C>    cat. 2/3 type flight-level reccos (before skipped these);
+C>    tests for missing lat, lon, obtime decoded from bufr and
+C>    retains missing value on these in unpacked on29/124
+C>    format (before no missing check, led to possible non-
+C>    missing but incorrect values for these); the check for
+C>    drops with missing stnid removed since decoder fixed for
+C>    this.
+C>    - Dennis Keyser 1997-05-01 Looks for duplicate levels when
+C>    processing on29 cat. 2, 3, and 4 (in all data on level)
+C>    and removes duplicate level; in processing on29 cat. 3
+C>    levels, removes all levels where wind is missing; fixed
+C>    bug in aircraft (airep/pirep/amdar) quality mark
+C>    assignment (was not assigning keep flag to report if
+C>    pressure had a keep q.m. but temperature q.m. was
+C>    missing).
+C>    - Dennis Keyser 1997-05-30 For aircft: (only acars right now) -
+C>    seconds are decoded (if avail.) and used to obtain
+C>    report time; only asdar/amdar - new cat. 8 code figs.
+C>    o-put 917 (char. 1 & 2 of actual stnid), 918 (char. 3 &
+C>    4 of actual stnid), 919 (char. 5 & 6 of actual stnid);
+C>    asdar/amdar and acars - new cat. 8 code fig. o-put 920
+C>    (char. 7 & 8 of actual stnid); only acars - new cat. 8
+C>    code fig. o-put 921 (report time to nearest 1000'th of
+C>    an hour); only some acars - new mnemonic "ialt" now
+C>    exists and can (if line not commented out) be used to
+C>    obtain unpacked on29 cat. 6.
+C>    - Dennis Keyser 1997-07-02 Removed filtering of aircraft data as
+C>    follows: air france amdars no longer filtered, amdar/
+C>    asdar below 7500 ft. no longer filtered, airep/pirep
+C>    below 100 meters no longer filtered, all aircraft with
+C>    missing wind but valid temperature are no longer
+C>    filtered; reprocesses u.s. satwnd stn. ids to conform
+C>    with previous on29 appearance except now 8-char (tag
+C>    char. 1 & 6 not changed from bufr stn. id) - never any
+C>    dupl. ids now for u.s. satwnds decoded from a single
+C>    bufr file; streamlined/eliminated some do loops to
+C>    speed up a bit.
+C>    - Dennis Keyser 1997-09-18 Corrected errors in reformatting surface
+C>    data into unpacked on124, specifically-header: inst. type
+C>    (synoptic fmt flg, auto stn. type, converted hrly flg),
+C>    indicators (precip., wind speed, wx/auto stn), cat51:
+C>    p-tend, horiz. viz., present/past wx, cloud info, max/
+C>    min temp, cat52: precip., snow dpth, wave info, ship
+C>    course/speed, cat8: code figs. 81-85,98; corrected
+C>    problem which coded upper-air mandatory level winds
+C>    as cat. 3 instead of cat. 1 when mass data (only) was
+C>    reported on same mandatory level in a separate reported
+C>    level in the raw bulletin.
+C>    - Dennis Keyser 1997-10-06 Updated logic to read and process nesdis
+C>    hi-density satellite winds properly.
+C>    - Dennis Keyser 1997-10-30 Added gross check on u-air pressure, all
+C>    levels with reported pressure .le. zero now tossed; sfc
+C>    cat. 52 sea-sfc temperature now read from hierarchy of
+C>    sst in bufr {1st choice - hi-res sst ('sst2'), 2nd
+C>    choice - lo-res sst ('sst1'), 3rd choice - sea temp
+C>    ('stmp')}, before only read 'sst1'.
+C>    - Dennis Keyser 1998-01-26 Changed pqm processing for adpupa types
+C>    such that sdmedit flags are now honored (before, pqm
+C>    was always hardwired to 2 for adpupa types); bumped
+C>    limit for number of levels that can be processed from
+C>    100 to 150 and added diagnostic print when the limit
+C>    is exceeded.
+C>    - Dennis Keyser 1998-05-19 Y2k compliant version of iw3gad routine
+C>    accomplished by redefining original 32-character on85
+C>    header label to be a 40-character label that contains a
+C>    full 4-digit year, can still read "true" on29/124 data
+C>    sets provided their header label is in this modified
+C>    form.
+C>    - Dennis Keyser 1998-07-22 Minor modifications to account for
+C>    corrections in y2k/f90 bufrlib (mainly related to
+C>    bufrlib routine dumpbf).
+C>    - Dennis Keyser 1998-08-04 Fixed a bug that resulted in code being
+C>    clobbered in certain situations for recco reports; minor
+C>    modifications to give same answers on cray as on sgi;
+C>    allowed code to read true on29/124 files with non-y2k
+C>    compliant on85 label (a temporary measure during
+C>    transition of main programs to y2k); added call to "aea"
+C>    which converts ebcdic characters to ascii for input
+C>    true on29/124 data set processing of sgi (which does
+C>    not support "-cebcdic" in assign statement).
+C>    - Dennis Keyser 1999-02-25 Added ability to read reprocessed ssm/i
+C>    bufr data set (spssmi); added ability to read mean
+C>    sea-level pressure bogus (paobs) data set (sfcbog).
+C>    - Dennis Keyser 1999-05-14 Made changes necessary to port this
+C>    routine to the ibm sp.
+C>    - Dennis Keyser 1999-06-18 Can now process water vapor satwnds
+C>    from foreign producers; stn. id for foreign satwnds
+C>    now reprocessed in same way as for nesdis/goes satwnds,
+C>    character 1 of stn. id now defines even vs. odd
+C>    satellite while character 6 of stn. id now defines
+C>    ir cloud-drft vs. visible cloud drft vs. water vapor.
+C>    - Dennis Keyser 2002-03-05 Removed entry "e02o29", now performs
+C>    height to press. conversion directly in code for cat. 7;
+C>    test for missing "rpid" corrected for adpupa data (now
+C>    checks ufbint return code rather than value=bmiss);
+C>    accounts for changes in input adpupa, adpsfc, aircft
+C>    and aircar bufr dump files after 3/2002: cat. 7 and cat.
+C>    51 use mnemonic "hblcs" to get height of cloud base if
+C>    mnemonic "hocb" not available (and it will not be for all
+C>    cat. 7 and some cat. 51 reports); mnemonic "tiwm"
+C>    replaces "suws" in header for surface data; mnemonic
+C>    "borg" replaces "icli" in cat. 8 for aircraft data (will
+C>    still work properly for input adpupa, adpsfc, aircft and
+C>    aircar dump files prior to 3/2002).
+C>    - Dennis Keyser 2013-03-20 Changes to run on wcoss, obtain value of
+C>    bmiss set in calling program via call to bufrlib routine
+C>    getbmiss rather than hardwiring it to 10e08 (or 10e10);
+C>    use formatted print statements where previously
+C>    unformatted print was used (wcoss splits unformatted
+C>    print at 80 characters).
 C>
-C> @param[in] lunit fortran unit number for sequential data set containing
-C> packed bufr reports or packed and blocked office note 29/124 reports
-C> @param[out] obs array containing one report in unpacked office note
-C> 29/124 format. Format is mixed, user must equivalence
-C> integer and character arrays to this array (see
-C> docblock for w3fi64 in /nwprod/lib/sorc/w3nco
-C> or writeups on w3fi64, on29, on124 for help)
-C> the length of the array should be at least 1608.
-C> @param[out] ier return flag (equal to function value) - see remarks
+C>    @param[in] lunit fortran unit number for sequential data set containing
+C>    packed bufr reports or packed and blocked office note 29/124 reports
+C>    @param[out] obs array containing one report in unpacked office note
+C>    29/124 format. Format is mixed, user must equivalence
+C>    integer and character arrays to this array (see
+C>    docblock for w3fi64 in /nwprod/lib/sorc/w3nco
+C>    or writeups on w3fi64, on29, on124 for help)
+C>    the length of the array should be at least 1608.
+C>    @param[out] ier return flag (equal to function value)
 C>
-C> Input files:
-C> -  unit aa sequential bufr or office note 29/124 data set ("aa"
-C> is unit number specified by input argument "nunit")
+C>    Input files:
+C>    - unit aa sequential bufr or office note 29/124 data set ("aa"
+C>    is unit number specified by input argument "nunit")
 C>
-C> Output files:
-C> -  unit 06 printout
+C>    Output files:
+C>    - unit 06 printout
 C>
-C> @note
-C> - if input data set is on29/124, it should be assigned in this way:
-C>  - cray:
-C>   - assign -a adpupa -fcos -cebcdic fort.xx
-C>  - sgi:
-C>   - assign -a adpupa -fcos fort.xx
-C>   (note: -cebcdic is not possible on sgi, so call to w3nco
-C>   routine "aea" takes care of the conversion as each
-C>   on29 record is read in)
-C> - if input data set is bufr, it should be assigned in this way:
-C>  - cray:
-C>   - assign -a adpupa fort.xx
-C>  - sgi:
-C>   - assign -a adpupa -f cos fort.xx
+C>    @note
+C>    - if input data set is on29/124, it should be assigned in this way:
+C>     - cray:
+C>      - assign -a adpupa -fcos -cebcdic fort.xx
+C>     - sgi:
+C>      - assign -a adpupa -fcos fort.xx
+C>      (note: -cebcdic is not possible on sgi, so call to w3nco
+C>      routine "aea" takes care of the conversion as each
+C>      on29 record is read in)
+C>    - if input data set is bufr, it should be assigned in this way:
+C>     - cray:
+C>      - assign -a adpupa fort.xx
+C>     - sgi:
+C>      - assign -a adpupa -f cos fort.xx
 C>
-C> @note for input on29/124 data sets, a contingency has been built
-C> into this subroutine to perform the conversion from ebcdic to
-C> ascii in the event the assign does not perform the conversion
-C> the return flags in ier (and function iw3unp29 itself) are:
-C> - 0 Observation read and unpacked into location 'obs'.
-C> see writeup of w3fi64 for contents. (all character
-C> words are left-justified.) Next call to iw3unp29
-C> will return next observation in data set.
-C> - 1 A 40 byte header in the format described here
-C> (y2k compliant pseudo-office note 85) is returned
-C> in the first 10 words of 'obs' on a 4-byte machine
-C> (ibm) and in the first 5 words of 'obs' on an
-C> 8-byte machine (cray).  next call to
-C> iw3unp29 will return first obs. in this data set.
-C> (note: if input data set is a true on29/124 file
-C> with the y2k compliant pseudo-on85 header record,
-C> then the pseudo-on85 header record is actually
-C> read in and returned; if input data set is a true
-C> on29/124 file with a non-y2k compliant on85 header
-C> record, then a y2k compliant pseudo-on85 header
-C> record is constructed from it using the "windowing"
-C> technique to obtain a 4-digit year from a 2-digit
-C> year.)
-C> format for y2k compliant pseudo-on85 header record
-C> returned (40 bytes in character):
-C>  - bytes 1- 8 -- data set name (as defined in on85 except up to
-C>    eight ascii char., left justified with blank fill)
-C>  - bytes 9-10 -- set type (as defined in on85)
-C>  - bytes 11-20 -- center (analysis) date for data
-C>    set (ten ascii characters in form "yyyymmddhh")
-C>  - bytes 21-24 -- set initialize (dump) time, as dedined in on85)
-C>  - bytes 25-34 -- always "washington" (as in on85)
-C>  - bytes 35-36 -- source machine (as defined in on85)
-C>  - bytes 37-40 -- blank fill characters
+C>    For input on29/124 data sets, a contingency has been built
+C>    into this subroutine to perform the conversion from ebcdic to
+C>    ascii in the event the assign does not perform the conversion
+C>    the return flags in ier (and function iw3unp29 itself) are:
+C>    - 0 Observation read and unpacked into location 'obs'.
+C>    see writeup of w3fi64 for contents. (all character
+C>    words are left-justified.) Next call to iw3unp29
+C>    will return next observation in data set.
+C>    - 1 A 40 byte header in the format described here
+C>    (y2k compliant pseudo-office note 85) is returned
+C>    in the first 10 words of 'obs' on a 4-byte machine
+C>    (ibm) and in the first 5 words of 'obs' on an
+C>    8-byte machine (cray). Next call to
+C>    iw3unp29 will return first obs. in this data set.
+C>    (note: if input data set is a true on29/124 file
+C>    with the y2k compliant pseudo-on85 header record,
+C>    then the pseudo-on85 header record is actually
+C>    read in and returned; if input data set is a true
+C>    on29/124 file with a non-y2k compliant on85 header
+C>    record, then a y2k compliant pseudo-on85 header
+C>    record is constructed from it using the "windowing"
+C>    technique to obtain a 4-digit year from a 2-digit
+C>    year.)
+C>    format for y2k compliant pseudo-on85 header record
+C>    returned (40 bytes in character):
+C>     - bytes 1- 8 -- data set name (as defined in on85 except up to
+C>       eight ascii char., left justified with blank fill)
+C>     - bytes 9-10 -- set type (as defined in on85)
+C>     - bytes 11-20 -- center (analysis) date for data
+C>       set (ten ascii characters in form "yyyymmddhh")
+C>     - bytes 21-24 -- set initialize (dump) time, as dedined in on85)
+C>     - bytes 25-34 -- always "washington" (as in on85)
+C>     - bytes 35-36 -- source machine (as defined in on85)
+C>     - bytes 37-40 -- blank fill characters
+C>    - 2 end-of-file (never an empty or null file):
+C>     - input on29/124 data set: the "endof file" record is
+C>     encountered - no useful information in 'obs' array.
+C>     next call to iw3unp29 will return physical end of
+C>     file for data set in 'nunit' (see ier=3 below).
+C>     - input bufr data set: the physical end of file is
+C>     encountered.
+C>    -3 end-of-file:
+C>    Physical end of file encountered on data set -
+C>    this can only happen for an empty (null) data set
+C>    or for a true on29/124 data set. There are no
+C>    more reports (or never were any if null) associated
+C>    with data set in this unit number - no useful
+C>    information in 'obs' array. Either all done (if
+C>    no more unit numbers are to be read in), or reset
+C>    'nunit' to point to a new data set (in which case
+C>    next call to iw3unp29 should return with ier=1).
+C>    - 4 only valid for input on29/124 data set - i/o error
+C>    reading the next record of reports - no useful
+C>    information in 'obs' array. Calling program can
+C>    choose to stop or again call iw3unp29 which will
+C>    attempt to unpack the first observation in the next
+C>    record of reports.
+C>    - 999 applies only to non-empty data sets:
+C>     - input on29/124 data set: first choice y2k compliant
+C>     pseudo-on85 file header label not encountered where
+C>     expected, and second choice non-y2k compliant on85
+C>     file header label also not encountered.
+C>     - input bufr data set either header label in
+C>     format of pseudo-on85 could not be returned, or an
+C>     abnormal error occurred in the attempt to decode an
+C>     observation. For either input data set type, no
+C>     useful information in 'obs' array. Calling program
+C>     can choose to stop with non-zero condition code or
+C>     reset 'nunit' to point to a new data set (in which
+C>     case next call to iw3unp29 should return with
+C>     ier=1).
+C>     - input data set neither on29/124 nor bufr speaks for
+C>     itself.
 C>
-C> - 2 end-of-file (never an empty or null file):
-C>  - input on29/124 data set: the "endof file" record is
-C>  encountered - no useful information in 'obs' array.
-C>  next call to iw3unp29 will return physical end of
-C>  file for data set in 'nunit' (see ier=3 below).
-C>  - input bufr data set: the physical end of file is
-C>  encountered.
-C> -3 end-of-file:
-C> Physical end of file encountered on data set -
-C> this can only happen for an empty (null) data set
-C> or for a true on29/124 data set. There are no
-C> more reports (or never were any if null) associated
-C> with data set in this unit number - no useful
-C> information in 'obs' array. Either all done (if
-C> no more unit numbers are to be read in), or reset
-C> 'nunit' to point to a new data set (in which case
-C> next call to iw3unp29 should return with ier=1).
-C> - 4 only valid for input on29/124 data set - i/o error
-C> reading the next record of reports - no useful
-C> information in 'obs' array. Calling program can
-C> choose to stop or again call iw3unp29 which will
-C> attempt to unpack the first observation in the next
-C> record of reports.
-C> - 999  applies only to non-empty data sets:
-C>  - input on29/124 data set: first choice y2k compliant
-C>  pseudo-on85 file header label not encountered where
-C>  expected, and second choice non-y2k compliant on85
-C>  file header label also not encountered.
-C>  - input bufr data set:  either header label in
-C>  format of pseudo-on85 could not be returned, or an
-C>  abnormal error occurred in the attempt to decode an
-C>  observation.  for either input data set type, no
-C>  useful information in 'obs' array. Calling program
-C>  can choose to stop with non-zero condition code or
-C>  reset 'nunit' to point to a new data set (in which
-C>  case next call to iw3unp29 should return with
-C>  ier=1).
-C>  - input data set neither on29/124 nor bufr: speaks for
-C>  itself.
+C>    @author Dennis Keyser @date 2013-03-20
 C>
-C> @author D. A. Keyser @date 2013-03-20
+
       FUNCTION IW3UNP29(LUNIT,OBS,IER)
 
       COMMON/IO29AA/JWFILE(100),LASTF
@@ -463,8 +464,14 @@ C  ------------------------------------------------------------
 C***********************************************************************
 C***********************************************************************
 C***********************************************************************
-C-----------------------------------------------------------------------
-C I01O29 RETURNS LOOK ALIKE Y2K COMPL. PSEUDO-ON85 HDR FROM A DATA FILE
+C>    This function read obs files and returns error message.
+C>    @param LUNIT full path of file
+C>    @param HDR header of file
+C>    @param IER  missing or invalid data indicator
+C>    @return Y2K COMPLIANT
+C>
+C>    @author Dennis Keyser @date 2013-03-20
+C>
 C-----------------------------------------------------------------------
       FUNCTION I01O29(LUNIT,HDR,IER)
 C     ---> formerly FUNCTION IW3HDR
@@ -525,6 +532,16 @@ C  -------------------------------
 C***********************************************************************
 C***********************************************************************
 C***********************************************************************
+
+C>    This function read obs files and returns error message.
+C>    @param LUNIT full path of file
+C>    @param OBS data output
+C>    @param IER  missing or invalid data indicator
+C>    @return Y2K COMPLIANT
+C>
+C>    @author Dennis Keyser @date 2013-03-20
+C>
+
       FUNCTION I02O29(LUNIT,OBS,IER)
 C     ---> formerly FUNCTION JW3O29
 
@@ -632,58 +649,48 @@ C  ----------------------------
       RETURN
 
       END
+
+C>    This function reads a true (see *) on29/124 data set and unpacks one
+C>    report into the unpacked office note 29/124 format. the input and
+C>    output arguments here have the same meaning as for iw3unp29.
+C>    repeated calls of function will return a sequence of unpacked
+C>    on29/124 reports. * - unlike original "true" on29/124 data sets,
+C>    the "expected" file header label is a y2k compliant 40-byte
+C>    pseudo-on85 version - if this is not encountered this code, as a
+C>    temporary measure during the y2k transition period, will look for
+C>    the original non-y2k compliant 32-byte on85 header label and use
+C>    the "windowing" technique to convert the 2-digit year to a 4-digit
+C>    year in preparation for returning a 40-byte pseudo-on85 label in
+C>    the first C call. (see iw3unp29 docblock for format of 40-byte
+C>    pseudo-on85 header label.)
 C>
-C> ABSTRACT: READS A TRUE (SEE *) ON29/124 DATA SET AND UNPACKS ONE
-C>  REPORT INTO THE UNPACKED OFFICE NOTE 29/124 FORMAT.  THE INPUT AND
-C>  OUTPUT ARGUMENTS HERE HAVE THE SAME MEANING AS FOR IW3UNP29.
-C>  REPEATED CALLS OF FUNCTION WILL RETURN A SEQUENCE OF UNPACKED
-C>  ON29/124 REPORTS. * - UNLIKE ORIGINAL "TRUE" ON29/124 DATA SETS,
-C>  THE "EXPECTED" FILE HEADER LABEL IS A Y2K COMPLIANT 40-BYTE
-C>  PSEUDO-ON85 VERSION - IF THIS IS NOT ENCOUNTERED THIS CODE, AS A
-C>  TEMPORARY MEASURE DURING THE Y2K TRANSITION PERIOD, WILL LOOK FOR
-C>  THE ORIGINAL NON-Y2K COMPLIANT 32-BYTE ON85 HEADER LABEL AND USE
-C>  THE "WINDOWING" TECHNIQUE TO CONVERT THE 2-DIGIT YEAR TO A 4-DIGIT
-C>  YEAR IN PREPARATION FOR RETURNING A 40-BYTE PSEUDO-ON85 LABEL IN
-C>  THE FIRST C  CALL.  (SEE IW3UNP29 DOCBLOCK FOR FORMAT OF 40-BYTE
-C>  PSEUDO-ON85 HEADER LABEL.)
+C>    Program History Log:
+C>    -1991-07-23 Dennis Keyser w3fi64 (f77) internal read error
+C>    no longer causes calling program to fail but will move
+C>    to next record if can't recover to next report
+C>    -1993-10-07 Dennis Keyser -- adapted for use on cray (added save
+C>    statement, removed ibm-specific code, etc.)
+C>    -1993-10-15 R. E. Jones added code so if file is ebcdic it converts
+C>    it to ascii
+C>    -1996-10-04 Jack Woollen changed name to i03gad and incorporated
+C>    into new w3lib routine iw3gad
+C>    -2013-03-20 Dennis Keyser changes to run on wcoss
 C>
-C> PROGRAM HISTORY LOG:
-C> -1980-12-01  J.STACKPOLE -- ORIGINAL W3LIB ROUTINE IW3GAD
-C> -1984-06-26  R.E.JONES   -- CONVERT TO VS FORTRAN
-C> -1991-07-23  D.A.KEYSER  -- NOW CALLS W3FI64 (F77); INTERNAL READ ERROR
-C>             NO LONGER CAUSES CALLING PROGRAM TO FAIL BUT WILL MOVE
-C>             TO NEXT RECORD IF CAN'T RECOVER TO NEXT REPORT
-C> -1993-10-07  D.A.KEYSER  -- ADAPTED FOR USE ON CRAY (ADDED SAVE
-C>             STATEMENT, REMOVED IBM-SPECIFIC CODE, ETC.)
-C> -1993-10-15  R.E.JONES   -- ADDED CODE SO IF FILE IS EBCDIC IT CONVERTS
-C>             IT TO ASCII
-C> -1996-10-04  J.S.WOOLLEN -- CHANGED NAME TO I03GAD AND INCORPORATED
-C>             INTO NEW W3LIB ROUTINE IW3GAD
-C> -2013-03-20  D. A. KEYSER -- CHANGES TO RUN ON WCOSS
+C>    @param[in] nunit fortran unit number for sequential data set containing
+C>    packed and blocked office note 29/124 reports
+C>    @param[out] obs array containing one report in unpacked office note
+C>    - 29/124 format is mixed, user must equivalence
+C>    - integer and character arrays to this array (see
+C>    - docblock for w3fi64 in /nwprod/lib/sorc/w3nco
+C>    - or writeups on w3fi64, on29, on124 for help)
+C>    - the length of the array should be at least 1608
+C>    @param[out] ier return flag (equal to function value) in iw3unp29 docblock
+C>    @return Y2K COMPLIANT
 C>
-C> USAGE:    II = I03O29(NUNIT, OBS, IER)
-C> @param[in] NUNIT    - FORTRAN UNIT NUMBER FOR SEQUENTIAL DATA SET CONTAINING
-C>              - PACKED AND BLOCKED OFFICE NOTE 29/124 REPORTS
+C>    @note aa unit number specified by input argument "nunit")
+C>    called by subprogram iw3unp29.
 C>
-C> @param[out] OBS      - ARRAY CONTAINING ONE REPORT IN UNPACKED OFFICE NOTE
-C>              - 29/124 FORMAT.  FORMAT IS MIXED, USER MUST EQUIVALENCE
-C>              - INTEGER AND CHARACTER ARRAYS TO THIS ARRAY (SEE
-C>              - DOCBLOCK FOR W3FI64 IN /nwprod/lib/sorc/w3nco
-C>              - OR WRITEUPS ON W3FI64, ON29, ON124 FOR HELP)
-C>              - THE LENGTH OF THE ARRAY SHOULD BE AT LEAST 1608
-C> @param[out] IER      - RETURN FLAG (EQUAL TO FUNCTION VALUE) - SEE REMARKS
-C>              - IN IW3UNP29 DOCBLOCK
-C>
-C>   INPUT FILES:
-C>    - UNIT AA  - SEQUENTIAL OFFICE NOTE 29/124 DATA SET ("AA" IS UNIT
-C>              - NUMBER SPECIFIED BY INPUT ARGUMENT "NUNIT")
-C>
-C>   OUTPUT FILES:
-C>    - UNIT 06  - PRINTOUT
-C>
-C> REMARKS:  CALLED BY SUBPROGRAM IW3UNP29.
-C> @author KEYSER @date 2013-03-20
-C>
+C>    @author keyser @date 2013-03-20
 C>
       FUNCTION I03O29(NUNIT, OBS, IER)
 C     ---> formerly FUNCTION KW3O29
@@ -912,7 +919,12 @@ C ---------------------------------------------------------------------
 
       END
 C***********************************************************************
-C***********************************************************************
+C>    This function read subset and returns group name.
+C>    @param SUBSET subset
+C>    @return group name
+C>
+C>    @author Dennis Keyser @date 2013-03-20
+C>
 C***********************************************************************
       FUNCTION C01O29(SUBSET)
 C     ---> formerly FUNCTION ADP
@@ -957,7 +969,12 @@ C     ---> formerly FUNCTION ADP
       RETURN
       END
 C***********************************************************************
-C***********************************************************************
+C>    This function read subset and returns corresponding file data.
+C>    @param SUBSET subset
+C>    @return file data
+C>
+C>    @author Dennis Keyser @date 2013-03-20
+C>
 C***********************************************************************
       FUNCTION R01O29(SUBSET,LUNIT,OBS)
 C     ---> formerly FUNCTION ADC
@@ -4451,15 +4468,14 @@ C  -------------------------------------
       KSKSMI = KSKSMI + 1
       RETURN
       END
-C> @brief Modifies amdar reports so that last character ends
-C> with 'Z'.
-C> @author RAY CRAYTON @date 1992-02-16
 
-C> Program history log:
-C> - Ray Crayton 1992-02-16
-C> @param[in] IDEN Acft id
-C> @param[out] ID Modified aircraft id.
+C>    This subrountine modifies amdar reports so that last character ends
+C>    with 'Z'.
+C>    @param[in] IDEN Acft id
+C>    @param[out] ID Modified aircraft id.
 C>
+C>    @author RAY CRAYTON @date 1992-02-16
+
       SUBROUTINE S06O29(IDEN,ID)
 C     ---> formerly SUBROUTINE IDP
 
@@ -4554,17 +4570,14 @@ C  ---------------------------------------------------
       RETURN
       END
 
-C> @brief Finds the location of the next numeric character
-C> in a string of characters.
-C> @author Ray Crayton @date 1989-07-07
-
-C> @param[in] STRING Character array.
-C> @param[in] NUM Number of characters to search in string.
-C> @param[out] CHAR Character found.
+C>    This function finds the location of the next numeric character
+C>    in a string of characters.
 C>
-C> @return I05O29 Integer*4 location of alphanumeric character.
-c> - = 0 if not found.
-
+C>    @param[in] STRING Character array.
+C>    @param[in] NUM Number of characters to search in string.
+C>    @param[out] CHAR Character found.
+C>    @return I05O29 Integer*4 location of alphanumeric character, = 0 if not found.
+C>    @author Ray Crayton @date 1989-07-07
 C>
       FUNCTION I05O29(STRING,NUM,CHAR)
 C     ---> formerly FUNCTION IFIG
