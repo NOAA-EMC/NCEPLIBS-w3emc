@@ -971,6 +971,8 @@ C     ---> formerly FUNCTION ADP
 C***********************************************************************
 C>    This function read subset and returns corresponding file data.
 C>    @param SUBSET subset
+C>    @param LUNIT full path of file
+C>    @param OBS data output
 C>    @return file data
 C>
 C>    @author Dennis Keyser @date 2013-03-20
