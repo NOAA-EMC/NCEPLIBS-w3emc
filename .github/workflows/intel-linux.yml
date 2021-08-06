@@ -40,11 +40,6 @@ jobs:
         mkdir build && cd build
         cmake .. -DOPENMP=ON
         make -j2
-    
-    - name: test
-      run: |
-        cd w3emc/build
-        ctest --output-on-failure
 
     - name: test-w3emc
       run: |
