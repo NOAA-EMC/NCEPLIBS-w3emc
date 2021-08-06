@@ -1,0 +1,32 @@
+name: GCC-9_debug_docs-test_Coverage
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    env:
+      FC: ${{ matrix.compiler }}
+    strategy:
+      matrix:
+        compiler: [gfortran-9, gfortran-10]
+
+    steps:
+    
+    - name: checkout-w3emc
+      uses: actions/checkout@v2
+      with: 
+        path: w3emc
+
+    - name: build-w3emc
+      run: |
+        cd w3emc
+        mkdir build 
+        cd build
+        cmake ..
+        make -j2
+
+    - name: test-w3emc
+      run: |
+        cd w3emc/build
+        ctest --output-on-failure
+
