@@ -1,39 +1,29 @@
 C> @file
-C
-C> SUBPROGRAM:    GTBITS      COMPUTE NUMBER OF BITS AND ROUND FIELD.
-C>   PRGMMR: IREDELL          ORG: W/NMC23    DATE: 92-10-31
+C> @brief The number of bits required to pack a given field.
+C> @author Mark Iredell @date 1992-10-31
+
+C> The number of bits required to pack a given field
+c> at a particular decimal scaling is computed using the field range.
+C> The field is rounded off to the decimal scaling for packing.
+C> The minimum and maximum rounded field values are also returned.
+C> Grib bitmap masking for valid data is optionally used.
 C>
-C> ABSTRACT: THE NUMBER OF BITS REQUIRED TO PACK A GIVEN FIELD
-C>   AT A PARTICULAR DECIMAL SCALING IS COMPUTED USING THE FIELD RANGE.
-C>   THE FIELD IS ROUNDED OFF TO THE DECIMAL SCALING FOR PACKING.
-C>   THE MINIMUM AND MAXIMUM ROUNDED FIELD VALUES ARE ALSO RETURNED.
-C>   GRIB BITMAP MASKING FOR VALID DATA IS OPTIONALLY USED.
+C> Program history log:
+C> - Mark Iredell 1992-10-31
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-10-31  IREDELL
+C> @param[in] ibm integer bitmap flag (=0 for no bitmap).
+c> @param[in] ids integer decimal scaling
+c> (e.g. ids=3 to round field to nearest milli-value).
+c> @param[in] len integer length of the field and bitmap.
+c> @param[in] mg integer (len) bitmap if ibm=1 (0 to skip, 1 to keep).
+c> @param[in] g real (len) field.
+c> @param[out] ground real (len) field rounded to decimal scaling
+c> (set to zero where bitmap is 0 if ibm=1).
+c> @param[out] gmin real minimum valid rounded field value.
+c> @param[out] gmax real maximum valid rounded field value.
+c> @param[out] nbit integer number of bits to pack.
 C>
-C> USAGE:    CALL GTBITS(IBM,IDS,LEN,MG,G,GMIN,GMAX,NBIT)
-C>   INPUT ARGUMENT LIST:
-C>     IBM      - INTEGER BITMAP FLAG (=0 FOR NO BITMAP)
-C>     IDS      - INTEGER DECIMAL SCALING
-C>                (E.G. IDS=3 TO ROUND FIELD TO NEAREST MILLI-VALUE)
-C>     LEN      - INTEGER LENGTH OF THE FIELD AND BITMAP
-C>     MG       - INTEGER (LEN) BITMAP IF IBM=1 (0 TO SKIP, 1 TO KEEP)
-C>     G        - REAL (LEN) FIELD
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     GROUND   - REAL (LEN) FIELD ROUNDED TO DECIMAL SCALING
-C>                (SET TO ZERO WHERE BITMAP IS 0 IF IBM=1)
-C>     GMIN     - REAL MINIMUM VALID ROUNDED FIELD VALUE
-C>     GMAX     - REAL MAXIMUM VALID ROUNDED FIELD VALUE
-C>     NBIT     - INTEGER NUMBER OF BITS TO PACK
-C>
-C> SUBPROGRAMS CALLED:
-C>   ISRCHNE  - FIND FIRST VALUE IN AN ARRAY NOT EQUAL TO TARGET VALUE
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY FORTRAN
-C>
+C> @author Mark Iredell @date 1992-10-31
       SUBROUTINE GTBITS(IBM,IDS,LEN,MG,G,GROUND,GMIN,GMAX,NBIT)
       DIMENSION MG(LEN),G(LEN),GROUND(LEN)
 C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

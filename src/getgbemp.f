@@ -1,205 +1,178 @@
 C> @file
-C
-C> SUBPROGRAM: GETGBEMP       FINDS A GRIB MESSAGE
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 94-04-01
+C> @brief Find a grib message.
+C> @author  Mark Iredell @date 1994-04-01
+
+C> Read a grib index file (or optionally the grib file itself)
+C> to get the index buffer (i.e. table of contents) for the grib file.
+C> Find in the index buffer a reference to the grib message requested.
+C> the grib message request specifies the number of messages to skip
+C> and the unpacked pds and gds parameters. (A requested parameter
+C> of -1 means to allow any value of this parameter to be found.)
+C> If the requested grib message is found, then it is read from the
+C> grib file. Its message number is returned along with the unpacked
+C> pds and gds parameters and the packed grib message. If the grib
+C> message is not found, then the return code will be nonzero.
 C>
-C> ABSTRACT: FIND A GRIB MESSAGE.
-C>   READ A GRIB INDEX FILE (OR OPTIONALLY THE GRIB FILE ITSELF)
-C>   TO GET THE INDEX BUFFER (I.E. TABLE OF CONTENTS) FOR THE GRIB FILE.
-C>   FIND IN THE INDEX BUFFER A REFERENCE TO THE GRIB MESSAGE REQUESTED.
-C>   THE GRIB MESSAGE REQUEST SPECIFIES THE NUMBER OF MESSAGES TO SKIP
-C>   AND THE UNPACKED PDS AND GDS PARAMETERS.  (A REQUESTED PARAMETER
-C>   OF -1 MEANS TO ALLOW ANY VALUE OF THIS PARAMETER TO BE FOUND.)
-C>   IF THE REQUESTED GRIB MESSAGE IS FOUND, THEN IT IS READ FROM THE
-C>   GRIB FILE.  ITS MESSAGE NUMBER IS RETURNED ALONG WITH THE UNPACKED
-C>   PDS AND GDS PARAMETERS AND THE PACKED GRIB MESSAGE.  IF THE GRIB
-C>   MESSAGE IS NOT FOUND, THEN THE RETURN CODE WILL BE NONZERO.
+C> Program history log:
+C>  - Mark Iredell 1994-04-01
+C>  - Mark Iredell 1995-10-31 Modularized portions of code into subprograms
+C>  and allowed for unspecified index file.
 C>
-C> PROGRAM HISTORY LOG:
-C>   94-04-01  IREDELL
-C>   95-10-31  IREDELL     MODULARIZED PORTIONS OF CODE INTO SUBPROGRAMS
-C>                         AND ALLOWED FOR UNSPECIFIED INDEX FILE
+C> @param[in] lugb integer unit of the unblocked grib data file.
+C> @param[in] lugi integer unit of the unblocked grib index file
+C> (=0 to get index buffer from the grib file).
+C> @param[in] jg integer maximum number of bytes in the grib message.
+C> @param[in] j integer number of messages to skip
+C> (=0 to search from beginning)
+C> (<0 to read index buffer and skip -1-j messages).
+C> @param[in] jpds integer (200) pds parameters for which to search
+C> (=-1 for wildcard).
+C> - 1: id of center.
+C> - 2: generating process id number.
+C> - 3: grid definition.
+C> - 4: gds/bms flag (right adj copy of octet 8).
+C> - 5: indicator of parameter.
+C> - 6: type of level.
+C> - 7: height/pressure , etc of level.
+C> - 8: year including (century-1).
+C> - 9: month of year.
+C> - 10: day of month.
+C> - 11: hour of day.
+C> - 12: minute of hour.
+C> - 13: indicator of forecast time unit.
+C> - 14: time range 1.
+C> - 15: time range 2.
+C> - 16: time range flag.
+C> - 17: number included in average.
+C> - 18: version nr of grib specification.
+C> - 19: version nr of parameter table.
+C> - 20: nr missing from average/accumulation.
+C> - 21: century of reference time of data.
+C> - 22: units decimal scale factor.
+C> - 23: subcenter number.
+C> - 24: pds byte 29, for nmc ensemble products.
+C>  - 128 if forecast field error.
+C>  - 64 if bias corrected fcst field.
+C>  - 32 if smoothed field.
+C>  - warning: can be combination of more than 1.
+C> - 25: pds byte 30, not used.
+C> @param[in] jgds         integer (200) gds parameters for which to search
+C> (only searched if jpds(3)=255)
+C> (=-1 for wildcard).
+C> - 1: data representation type.
+C> - 19: number of vertical coordinate parameters.
+C> - 20: octet number of the list of vertical coordinate parameters or
+C> octet number of the list of numbers of points in each row or
+C> 255 if neither are present.
+C> - 21: for grids with pl, number of points in grid.
+C> - 22: number of words in each row.
+C> - Latitude/longitude grids.
+C>  - 2: n(i) nr points on latitude circle.
+C>  - 3: n(j) nr points on longitude meridian.
+C>  - 4: la(1) latitude of origin.
+C>  - 5: lo(1) longitude of origin.
+C>  - 6: resolution flag (right adj copy of octet 17).
+C>  - 7: la(2) latitude of extreme point.
+C>  - 8: lo(2) longitude of extreme point.
+C>  - 9: di longitudinal direction of increment.
+C>  - 10: dj latitudinal direction increment.
+C>  - 11: scanning mode flag (right adj copy of octet 28).
+C> - Gaussian  grids.
+C>  - 2: n(i) nr points on latitude circle.
+C>  - 3: n(j) nr points on longitude meridian.
+C>  - 4: la(1) latitude of origin.
+C>  - 5: lo(1) longitude of origin.
+C>  - 6: resolution flag  (right adj copy of octet 17).
+C>  - 7: la(2) latitude of extreme point.
+C>  - 8: lo(2) longitude of extreme point.
+C>  - 9: di longitudinal direction of increment.
+C>  - 10: n - nr of circles pole to equator.
+C>  - 11: scanning mode flag (right adj copy of octet 28).
+C>  - 12: nv - nr of vert coord parameters.
+C>  - 13: pv - octet nr of list of vert coord parameters or.
+C>   - pl - location of the list of numbers of points in each row
+C>   (if no vert coord parameters are present) or
+C>   - 255 if neither are present.
+C> - Polar stereographic grids.
+C>  - 2: n(i) nr points along lat circle.
+C>  - 3: n(j) nr points along lon circle.
+C>  - 4: la(1) latitude of origin.
+C>  - 5: lo(1) longitude of origin.
+C>  - 6: resolution flag  (right adj copy of octet 17).
+C>  - 7: lov grid orientation.
+C>  - 8: dx - x direction increment.
+C>  - 9: dy - y direction increment.
+C>  - 10: projection center flag.
+C>  - 11: scanning mode (right adj copy of octet 28).
+C> - Spherical harmonic coefficients.
+C>  - 2: j pentagonal resolution parameter.
+C>  - 3: k pentagonal resolution parameter.
+C>  - 4: m pentagonal resolution parameter.
+C>  - 5: representation type.
+C>  - 6: coefficient storage mode.
+C> - Mercator grids.
+C>  - 2: n(i) nr points on latitude circle.
+C>  - 3: n(j) nr points on longitude meridian.
+C>  - 4: la(1) latitude of origin.
+C>  - 5: lo(1) longitude of origin.
+C>  - 6: resolution flag (right adj copy of octet 17).
+C>  - 7: la(2) latitude of last grid point.
+C>  - 8: lo(2) longitude of last grid point.
+C>  - 9: latit - latitude of projection intersection.
+C>  - 10: reserved.
+C>  - 11: scanning mode flag (right adj copy of octet 28).
+C>  - 12: longitudinal dir grid length.
+C>  - 13: latitudinal dir grid length.
+C> - Lambert conformal grids.
+C>  - 2: nx nr points along x-axis.
+C>  - 3: ny nr points along y-axis.
+C>  - 4: la1 lat of origin (lower left).
+C>  - 5: lo1 lon of origin (lower left).
+C>  - 6: resolution (right adj copy of octet 17).
+C>  - 7: lov - orientation of grid.
+C>  - 8: dx - x-dir increment.
+C>  - 9: dy - y-dir increment.
+C>  - 10: projection center flag.
+C>  - 11: scanning mode flag (right adj copy of octet 28).
+C>  - 12: latin 1 - first lat from pole of secant cone inter.
+C>  - 13: latin 2 - second lat from pole of secant cone inter.
+C> @param[in] jens integer (200) ensemble pds parms for which to search
+C> (only searched if jpds(23)=2)
+C> (=-1 for wildcard).
+C>  - 1: application identifier.
+C>  - 2: ensemble type.
+C>  - 3: ensemble identifier.
+C>  - 4: product identifier.
+C>  - 5: smoothing flag.
+C> @param[in] mbuf integer length of index buffer in bytes.
+C> @param[inout] cbuf character*1 (mbuf) index buffer
+C> (initialize by setting j=-1).
+C> @param[inout] nlen integer length of each index record in bytes
+C> (initialize by setting j=-1).
+C> @param[inout] nnum integer number of index records
+C> (initialize by setting j=-1).
+C> @param[inout] mnum integer number of index records skipped
+C> (initialize by setting j=-1).
+C> @param[out] kg integer number of bytes in the grib message.
+C> @param[out] k integer message number unpacked
+C> (can be same as j in calling program
+C> in order to facilitate multiple searches).
+C> @param[out] kpds integer (200) unpacked pds parameters.
+C> @param[out] kgds integer (200) unpacked gds parameters.
+C> @param[out] kens integer (200) unpacked ensemble pds parms.
+C> @param[out] g character*1 (kg) grib message.
+C> @param[out] iret integer return code.
+C> - 0: all ok.
+C> - 96: error reading index file.
+C> - 97: error reading grib file.
+C> - 98: number of bytes greater than jg.
+C> - 99: request not found.
 C>
-C> USAGE:    CALL GETGBEMP(LUGB,LUGI,JG,J,JPDS,JGDS,JENS,
-C>    &                    MBUF,CBUF,NLEN,NNUM,MNUM,
-C>    &                    KG,K,KPDS,KGDS,KENS,G,IRET)
-C>   INPUT ARGUMENTS:
-C>     LUGB         INTEGER UNIT OF THE UNBLOCKED GRIB DATA FILE
-C>     LUGI         INTEGER UNIT OF THE UNBLOCKED GRIB INDEX FILE
-C>                  (=0 TO GET INDEX BUFFER FROM THE GRIB FILE)
-C>     JG           INTEGER MAXIMUM NUMBER OF BYTES IN THE GRIB MESSAGE
-C>     J            INTEGER NUMBER OF MESSAGES TO SKIP
-C>                  (=0 TO SEARCH FROM BEGINNING)
-C>                  (<0 TO READ INDEX BUFFER AND SKIP -1-J MESSAGES)
-C>     JPDS         INTEGER (200) PDS PARAMETERS FOR WHICH TO SEARCH
-C>                  (=-1 FOR WILDCARD)
-C>          (1)   - ID OF CENTER
-C>          (2)   - GENERATING PROCESS ID NUMBER
-C>          (3)   - GRID DEFINITION
-C>          (4)   - GDS/BMS FLAG (RIGHT ADJ COPY OF OCTET 8)
-C>          (5)   - INDICATOR OF PARAMETER
-C>          (6)   - TYPE OF LEVEL
-C>          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C>          (8)   - YEAR INCLUDING (CENTURY-1)
-C>          (9)   - MONTH OF YEAR
-C>          (10)  - DAY OF MONTH
-C>          (11)  - HOUR OF DAY
-C>          (12)  - MINUTE OF HOUR
-C>          (13)  - INDICATOR OF FORECAST TIME UNIT
-C>          (14)  - TIME RANGE 1
-C>          (15)  - TIME RANGE 2
-C>          (16)  - TIME RANGE FLAG
-C>          (17)  - NUMBER INCLUDED IN AVERAGE
-C>          (18)  - VERSION NR OF GRIB SPECIFICATION
-C>          (19)  - VERSION NR OF PARAMETER TABLE
-C>          (20)  - NR MISSING FROM AVERAGE/ACCUMULATION
-C>          (21)  - CENTURY OF REFERENCE TIME OF DATA
-C>          (22)  - UNITS DECIMAL SCALE FACTOR
-C>          (23)  - SUBCENTER NUMBER
-C>          (24)  - PDS BYTE 29, FOR NMC ENSEMBLE PRODUCTS
-C>                  128 IF FORECAST FIELD ERROR
-C>                   64 IF BIAS CORRECTED FCST FIELD
-C>                   32 IF SMOOTHED FIELD
-C>                  WARNING: CAN BE COMBINATION OF MORE THAN 1
-C>          (25)  - PDS BYTE 30, NOT USED
-C>     JGDS         INTEGER (200) GDS PARAMETERS FOR WHICH TO SEARCH
-C>                  (ONLY SEARCHED IF JPDS(3)=255)
-C>                  (=-1 FOR WILDCARD)
-C>          (1)   - DATA REPRESENTATION TYPE
-C>          (19)  - NUMBER OF VERTICAL COORDINATE PARAMETERS
-C>          (20)  - OCTET NUMBER OF THE LIST OF VERTICAL COORDINATE
-C>                  PARAMETERS
-C>                  OR
-C>                  OCTET NUMBER OF THE LIST OF NUMBERS OF POINTS
-C>                  IN EACH ROW
-C>                  OR
-C>                  255 IF NEITHER ARE PRESENT
-C>          (21)  - FOR GRIDS WITH PL, NUMBER OF POINTS IN GRID
-C>          (22)  - NUMBER OF WORDS IN EACH ROW
-C>       LATITUDE/LONGITUDE GRIDS
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LA(2) LATITUDE OF EXTREME POINT
-C>          (8)   - LO(2) LONGITUDE OF EXTREME POINT
-C>          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C>          (10)  - DJ LATITUDINAL DIRECTION INCREMENT
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>       GAUSSIAN  GRIDS
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG  (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LA(2) LATITUDE OF EXTREME POINT
-C>          (8)   - LO(2) LONGITUDE OF EXTREME POINT
-C>          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C>          (10)  - N - NR OF CIRCLES POLE TO EQUATOR
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>          (12)  - NV - NR OF VERT COORD PARAMETERS
-C>          (13)  - PV - OCTET NR OF LIST OF VERT COORD PARAMETERS
-C>                             OR
-C>                  PL - LOCATION OF THE LIST OF NUMBERS OF POINTS IN
-C>                       EACH ROW (IF NO VERT COORD PARAMETERS
-C>                       ARE PRESENT
-C>                             OR
-C>                  255 IF NEITHER ARE PRESENT
-C>       POLAR STEREOGRAPHIC GRIDS
-C>          (2)   - N(I) NR POINTS ALONG LAT CIRCLE
-C>          (3)   - N(J) NR POINTS ALONG LON CIRCLE
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG  (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LOV GRID ORIENTATION
-C>          (8)   - DX - X DIRECTION INCREMENT
-C>          (9)   - DY - Y DIRECTION INCREMENT
-C>          (10)  - PROJECTION CENTER FLAG
-C>          (11)  - SCANNING MODE (RIGHT ADJ COPY OF OCTET 28)
-C>       SPHERICAL HARMONIC COEFFICIENTS
-C>          (2)   - J PENTAGONAL RESOLUTION PARAMETER
-C>          (3)   - K      "          "         "
-C>          (4)   - M      "          "         "
-C>          (5)   - REPRESENTATION TYPE
-C>          (6)   - COEFFICIENT STORAGE MODE
-C>       MERCATOR GRIDS
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LA(2) LATITUDE OF LAST GRID POINT
-C>          (8)   - LO(2) LONGITUDE OF LAST GRID POINT
-C>          (9)   - LATIT - LATITUDE OF PROJECTION INTERSECTION
-C>          (10)  - RESERVED
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>          (12)  - LONGITUDINAL DIR GRID LENGTH
-C>          (13)  - LATITUDINAL DIR GRID LENGTH
-C>       LAMBERT CONFORMAL GRIDS
-C>          (2)   - NX NR POINTS ALONG X-AXIS
-C>          (3)   - NY NR POINTS ALONG Y-AXIS
-C>          (4)   - LA1 LAT OF ORIGIN (LOWER LEFT)
-C>          (5)   - LO1 LON OF ORIGIN (LOWER LEFT)
-C>          (6)   - RESOLUTION (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LOV - ORIENTATION OF GRID
-C>          (8)   - DX - X-DIR INCREMENT
-C>          (9)   - DY - Y-DIR INCREMENT
-C>          (10)  - PROJECTION CENTER FLAG
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>          (12)  - LATIN 1 - FIRST LAT FROM POLE OF SECANT CONE INTER
-C>          (13)  - LATIN 2 - SECOND LAT FROM POLE OF SECANT CONE INTER
-C>     JENS         INTEGER (200) ENSEMBLE PDS PARMS FOR WHICH TO SEARCH
-C>                  (ONLY SEARCHED IF JPDS(23)=2)
-C>                  (=-1 FOR WILDCARD)
-C>          (1)   - APPLICATION IDENTIFIER
-C>          (2)   - ENSEMBLE TYPE
-C>          (3)   - ENSEMBLE IDENTIFIER
-C>          (4)   - PRODUCT IDENTIFIER
-C>          (5)   - SMOOTHING FLAG
-C>     MBUF         INTEGER LENGTH OF INDEX BUFFER IN BYTES
-C>     CBUF         CHARACTER*1 (MBUF) INDEX BUFFER
-C>                  (INITIALIZE BY SETTING J=-1)
-C>     NLEN         INTEGER LENGTH OF EACH INDEX RECORD IN BYTES
-C>                  (INITIALIZE BY SETTING J=-1)
-C>     NNUM         INTEGER NUMBER OF INDEX RECORDS
-C>                  (INITIALIZE BY SETTING J=-1)
-C>     MNUM         INTEGER NUMBER OF INDEX RECORDS SKIPPED
-C>                  (INITIALIZE BY SETTING J=-1)
-C>   OUTPUT ARGUMENTS:
-C>     CBUF         CHARACTER*1 (MBUF) INDEX BUFFER
-C>     NLEN         INTEGER LENGTH OF EACH INDEX RECORD IN BYTES
-C>     NNUM         INTEGER NUMBER OF INDEX RECORDS
-C>     MNUM         INTEGER NUMBER OF INDEX RECORDS SKIPPED
-C>     KG           INTEGER NUMBER OF BYTES IN THE GRIB MESSAGE
-C>     K            INTEGER MESSAGE NUMBER UNPACKED
-C>                  (CAN BE SAME AS J IN CALLING PROGRAM
-C>                  IN ORDER TO FACILITATE MULTIPLE SEARCHES)
-C>     KPDS         INTEGER (200) UNPACKED PDS PARAMETERS
-C>     KGDS         INTEGER (200) UNPACKED GDS PARAMETERS
-C>     KENS         INTEGER (200) UNPACKED ENSEMBLE PDS PARMS
-C>     G            CHARACTER*1 (KG) GRIB MESSAGE
-C>     IRET         INTEGER RETURN CODE
-C>                    0      ALL OK
-C>                    96     ERROR READING INDEX FILE
-C>                    97     ERROR READING GRIB FILE
-C>                    98     NUMBER OF BYTES GREATER THAN JG
-C>                    99     REQUEST NOT FOUND
+C> @note Specify an index file if feasible to increase speed.
+C> Subprogram can be called from a multiprocessing environment.
+C> Do not engage the same logical unit from more than one processor.
 C>
-C> SUBPROGRAMS CALLED:
-C>   GETGI          READ INDEX FILE
-C>   GETGIR         READ INDEX BUFFER FROM GRIB FILE
-C>   GETGB1S        SEARCH INDEX RECORDS
-C>   BAREAD         READ GRIB RECORD
-C>
-C> REMARKS: SPECIFY AN INDEX FILE IF FEASIBLE TO INCREASE SPEED.
-C>   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>   DO NOT ENGAGE THE SAME LOGICAL UNIT FROM MORE THAN ONE PROCESSOR.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 77
-C>   MACHINE:  CRAY, WORKSTATIONS
-C>
+C> @author Mark Iredell  @date 1994-04-01
 C-----------------------------------------------------------------------
       SUBROUTINE GETGBEMP(LUGB,LUGI,JG,J,JPDS,JGDS,JENS,
      &                    MBUF,CBUF,NLEN,NNUM,MNUM,

@@ -1,24 +1,18 @@
 C> @file
-C
-C> SUBPROGRAM: IDSDEF         SETS DEFAULT DECIMAL SCALINGS
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 92-10-31
+C> @brief Sets decimal scalings defaults for various parameters.
+C> @author Mark Iredell @date 1992-10-31
+
+C> Sets decimal scalings defaults for various parameters.
+C> A decimal scaling of -3 means data is packed in kilo-si units.
 C>
-C> ABSTRACT: SETS DECIMAL SCALINGS DEFAULTS FOR VARIOUS PARAMETERS.
-C>   A DECIMAL SCALING OF -3 MEANS DATA IS PACKED IN KILO-SI UNITS.
+C> Program history log:
+C> - Mark Iredell 1992-10-31
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-10-31  IREDELL
+C> @param[in] IPTV parameter table version (only 1 or 2 is recognized).
+C> @param[out] IDS integer (255) decimal scalings
+C> (unknown decimal scalings will not be set).
 C>
-C> USAGE:    CALL IDSDEF(IPTV,IDS)
-C>   INPUT ARGUMENTS:
-C>     IPTV         PARAMTER TABLE VERSION (ONLY 1 OR 2 IS RECOGNIZED)
-C>   OUTPUT ARGUMENTS:
-C>     IDS          INTEGER (255) DECIMAL SCALINGS
-C>                  (UNKNOWN DECIMAL SCALINGS WILL NOT BE SET)
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY FORTRAN
-C>
+C> @author Mark Iredell @date 1992-10-31
       SUBROUTINE IDSDEF(IPTV,IDS)
       DIMENSION IDS(255)
 C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

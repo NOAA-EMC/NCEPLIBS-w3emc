@@ -1,34 +1,19 @@
 C> @file
-C
-C> FUNCTION: IW3MAT           TEST FOR MATCH TWO INTEGER ARRAYS
-C>   AUTHOR: STACKPOLE. J.D.  ORG: W342       DATE: 86-01-13
+C> @brief Test n words starting at l1, l2 for equality, return .true.
+C> if all equal; otherwise .false.
+C> @author J.D. Stackpole @date 1986-01-13
+
+C> Program history log:
+C> - J.D. Stackpole 1986-01-13
+C> - Ralph Jones 1990-03-15 Convert to cray cft77 fortran.
 C>
-C> ABSTACT: TEST N WORDS STARTING AT L1, L2 FOR EQUALITY, RETURN .TRUE.
-C>     IF ALL EQUAL; OTHERWISE .FALSE.
+C> @param[in] L1 Integer array to match with l2.
+C> @param[in] L2 Integer array to match with l1.
+C> @param[in] N Number of integer words to test for match.
+C> @return IW3MAT Logical .true. if l1 and l2 match on all words,
+C> logical .false. if not match on any word.
 C>
-C> PROGRAM HISTORY LOG:
-C>   86-01-13  J.D.STACKPOLE
-C>   90-03-15  R.E.JONES       CONVERT TO CRAY CFT77 FORTRAN
-C>
-C> USAGE:  II = IW3MAT(L1,L2,N)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     L1     ARG LIST  INTEGER ARRAY TO MATCH WITH L2
-C>     L2     ARG LIST  INTEGER ARRAY TO MATCH WITH L1
-C>     N      ARG LIST  NUMBER OF INTEGER WORDS TO TEST FOR MATCH
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     IW3MAT FUNCTION  LOGICAL .TRUE. IF L1 AND L2 MATCH ON ALL WORDS,
-C>                      LOGICAL .FALSE. IF NOT MATCH ON ANY WORD
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864, CRAY Y-MP EL@/256
-C>
+C> @author J.D. Stackpole @date 1986-01-13
       LOGICAL FUNCTION IW3MAT(L1, L2, N)
 C
        INTEGER L1(*)

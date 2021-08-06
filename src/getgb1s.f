@@ -1,60 +1,43 @@
 C> @file
-C
-C> SUBPROGRAM: GETGB1S        FINDS A GRIB MESSAGE
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 95-10-31
+C> @brief Find a grib message.
+C> @author Mark Iredell @date 1995-10-31
+
+C> Find a grib message.
+C> Find in the index file a reference to the grib message requested.
+C> The grib message request specifies the number of messages to skip
+c> and the unpacked pds and gds parameters. (A requested parameter
+c> of -1 means to allow any value of this parameter to be found.)
 C>
-C> ABSTRACT: FIND A GRIB MESSAGE.
-C>   FIND IN THE INDEX FILE A REFERENCE TO THE GRIB MESSAGE REQUESTED.
-C>   THE GRIB MESSAGE REQUEST SPECIFIES THE NUMBER OF MESSAGES TO SKIP
-C>   AND THE UNPACKED PDS AND GDS PARAMETERS.  (A REQUESTED PARAMETER
-C>   OF -1 MEANS TO ALLOW ANY VALUE OF THIS PARAMETER TO BE FOUND.)
+C> Program history log:
+C> - Mark Iredell 1995-10-31
+C> - Mark Iredell 2001-06-05 Apply linux port by ebisuzaki.
 C>
-C> PROGRAM HISTORY LOG:
-C>   95-10-31  IREDELL
-C> 2001-06-05  IREDELL   APPLY LINUX PORT BY EBISUZAKI
+C> @param[in] CBUF Character*1 (nlen*nnum) buffer containing index data.
+C> @param[in] NLEN Integer length of each index record in bytes.
+C> @param[in] NNUM Integer number of index records.
+C> @param[in] J Integer number of messages to skip
+c> (=0 to search from beginning).
+C> @param[in] JPDS Integer (200) pds parameters for which to search
+c> (=-1 for wildcard).
+C> @param[in] JGDS Integer (200) gds parameters for which to search
+c> (only searched if jpds(3)=255) (=-1 for wildcard).
+C> @param[in] JENS Integer (200) ensemble pds parms for which to search
+c> (only searched if jpds(23)=2) (=-1 for wildcard).
+C> @param[out] K Integer message number found
+c> (can be same as j in calling program in order to facilitate multiple searches).
+C> @param[out] KPDS Integer (200) unpacked pds parameters.
+C> @param[out] KGDS Integer (200) unpacked gds parameters.
+C> @param[out] KENS Integer (200) unpacked ensemble pds parms.
+C> @param[out] LSKIP Integer number of bytes to skip.
+C> @param[out] LGRIB Integer number of bytes to read.
+C> @param[out] IRET Integer return code.
+C> - 0 All ok.
+C> - 1 Request not found.
 C>
-C> USAGE:    CALL GETGB1S(CBUF,NLEN,NNUM,J,JPDS,JGDS,JENS,
-C>    &                   K,KPDS,KGDS,KENS,LSKIP,LGRIB,IRET)
-C>   INPUT ARGUMENTS:
-C>     CBUF         CHARACTER*1 (NLEN*NNUM) BUFFER CONTAINING INDEX DATA
-C>     NLEN         INTEGER LENGTH OF EACH INDEX RECORD IN BYTES
-C>     NNUM         INTEGER NUMBER OF INDEX RECORDS
-C>     J            INTEGER NUMBER OF MESSAGES TO SKIP
-C>                  (=0 TO SEARCH FROM BEGINNING)
-C>     JPDS         INTEGER (200) PDS PARAMETERS FOR WHICH TO SEARCH
-C>                  (=-1 FOR WILDCARD)
-C>     JGDS         INTEGER (200) GDS PARAMETERS FOR WHICH TO SEARCH
-C>                  (ONLY SEARCHED IF JPDS(3)=255)
-C>                  (=-1 FOR WILDCARD)
-C>     JENS         INTEGER (200) ENSEMBLE PDS PARMS FOR WHICH TO SEARCH
-C>                  (ONLY SEARCHED IF JPDS(23)=2)
-C>                  (=-1 FOR WILDCARD)
-C>   OUTPUT ARGUMENTS:
-C>     K            INTEGER MESSAGE NUMBER FOUND
-C>                  (CAN BE SAME AS J IN CALLING PROGRAM
-C>                  IN ORDER TO FACILITATE MULTIPLE SEARCHES)
-C>     KPDS         INTEGER (200) UNPACKED PDS PARAMETERS
-C>     KGDS         INTEGER (200) UNPACKED GDS PARAMETERS
-C>     KENS         INTEGER (200) UNPACKED ENSEMBLE PDS PARMS
-C>     LSKIP        INTEGER NUMBER OF BYTES TO SKIP
-C>     LGRIB        INTEGER NUMBER OF BYTES TO READ
-C>     IRET         INTEGER RETURN CODE
-C>                    0      ALL OK
-C>                    1      REQUEST NOT FOUND
+C> @note Subprogram can be called from a multiprocessing environment.
+C> This subprogram is intended for private use by getgb routines only.
 C>
-C> REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>   THIS SUBPROGRAM IS INTENDED FOR PRIVATE USE BY GETGB ROUTINES ONLY.
-C>
-C> SUBPROGRAMS CALLED:
-C>   GBYTEC         UNPACK BYTES
-C>   FI632          UNPACK PDS
-C>   FI633          UNPACK GDS
-C>   PDSEUP         UNPACK PDS EXTENSION
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 77
-C>   MACHINE:  CRAY, WORKSTATIONS
-C>
+C> @author Mark Iredell @date 1995-10-31
 C-----------------------------------------------------------------------
       SUBROUTINE GETGB1S(CBUF,NLEN,NNUM,J,JPDS,JGDS,JENS,
      &                   K,KPDS,KGDS,KENS,LSKIP,LGRIB,IRET)

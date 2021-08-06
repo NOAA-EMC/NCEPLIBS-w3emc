@@ -44,7 +44,7 @@ C>
 C>   SUBPROGRAMS CALLED:
 C>     NAMES                                                   LIBRARY
 C>     ------------------------------------------------------- --------
-C>     ABS IABS MIN0 MOD                                       SYSTEM
+C>     ABS IABS MIN MOD                                       SYSTEM
 C>
 C>   REMARKS: NORMAL SUBROUTINE RETURN, UNLESS NUMBER OF ROWS
 C>            IS GREATER THAN 200, PRINTS ERROR MESSAGE AND EXITS.
@@ -518,9 +518,9 @@ C
              PCFST = KRFST-PAGNL+1
              IF (PCFST.GE.PAGN3) GO TO 6700
                PGFSTA = PCFST-1
-               PCCNT = MIN0(PAGNR-KRFST+2,KRCNT)
+               PCCNT = MIN(PAGNR-KRFST+2,KRCNT)
                IF (PGFSTA.EQ.0) GO TO 6600
-               PGCNTA = MIN0(PAGNR-KRFST,KRCNT)
+               PGCNTA = MIN(PAGNR-KRFST,KRCNT)
                IF (PGCNTA.GT.0) GO TO 6000
                  PGCNTA = 0
                  GO TO 6100
@@ -561,7 +561,7 @@ C
            GO TO 6100
 C
  6600    CONTINUE
-         PGCNTA = MIN0(PGMAX,KRCNT+KRFST-PAGNL)
+         PGCNTA = MIN(PGMAX,KRCNT+KRFST-PAGNL)
          GO TO 6100
 C
  6700        CONTINUE
@@ -580,7 +580,7 @@ C
 C
          KK = 1
          KA = IMIN
-         LBL = MIN0(IMAX,PGMAX)
+         LBL = MIN(IMAX,PGMAX)
 C
          DO 7300 JJ = 1,LBL
            KLINE(KK) = KHPLUS
