@@ -14,9 +14,6 @@ jobs:
       CC: icc
       FC: ifort
       CXX: icpc
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
 
     steps:
 
