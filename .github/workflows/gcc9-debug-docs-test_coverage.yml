@@ -2,7 +2,7 @@ name: gcc-9_debug_docs-test_coverage
 on: [push, pull_request]
 
 jobs:
-  gcc9-build-and-test:
+  build-and-test:
     runs-on: ubuntu-latest
     env:
       FC: gfortran-9
