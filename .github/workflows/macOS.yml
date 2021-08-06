@@ -1,4 +1,4 @@
-name: GCC-9_debug_docs-test_Coverage
+name: macOS-gcc
 on: [push, pull_request]
 
 jobs:
