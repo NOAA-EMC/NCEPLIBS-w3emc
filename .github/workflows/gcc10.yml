@@ -1,0 +1,29 @@
+name: GCC-10_build_and_test
+on: [push, pull_request]
+
+jobs:
+  gcc10-build:
+    runs-on: ubuntu-latest
+    env:
+      FC: gfortran-10
+      CC: gcc-10
+
+    steps:
+    
+    - name: checkout-w3emc
+      uses: actions/checkout@v2
+      with: 
+        path: w3emc
+
+    - name: build-w3emc
+      run: |
+        cd w3emc
+        mkdir build 
+        cd build
+        cmake .. 
+        make -j2
+
+    - name: test-w3emc
+      run: |
+        cd w3emc/build
+        ctest --output-on-failure
