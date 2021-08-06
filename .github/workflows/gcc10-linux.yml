@@ -2,7 +2,7 @@ name: GCC-10_build_and_test
 on: [push, pull_request]
 
 jobs:
-  gcc10-build:
+  gcc10-build-and-test:
     runs-on: ubuntu-latest
     env:
       FC: gfortran-10
