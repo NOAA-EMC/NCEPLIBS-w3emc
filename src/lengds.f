@@ -1,23 +1,15 @@
 C> @file
-C
-C> SUBPROGRAM:    LENGDS      RETURN THE LENGTH OF A GRID
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 96-07-19
+C> @brief GIven a grid description section (in w3fi63 format),
+C> return its size in terms of number of data points.
+C> @author Mark Iredell @date 1996-07-19
+
+C> Program history log:
+C> - Mark Iredell 1996-07-19
 C>
-C> ABSTRACT: GIVEN A GRID DESCRIPTION SECTION (IN W3FI63 FORMAT),
-C>   RETURN ITS SIZE IN TERMS OF NUMBER OF DATA POINTS.
+C> @param[in] KGDS Integer (200) gds parameters in w3fi63 format.
+C> @return LENGDS Integer size of grid.
 C>
-C> PROGRAM HISTORY LOG:
-C>   96-07-19  IREDELL
-C>
-C> USAGE:    CALL LENGDS(KGDS)
-C>   INPUT ARGUMENTS:
-C>     KGDS         INTEGER (200) GDS PARAMETERS IN W3FI63 FORMAT
-C>   OUTPUT ARGUMENTS:
-C>     LENGDS       INTEGER SIZE OF GRID
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN
-C>
+C> @author Mark Iredell @date 1996-07-19
 C-----------------------------------------------------------------------
       FUNCTION LENGDS(KGDS)
       INTEGER KGDS(200)
