@@ -5,7 +5,7 @@ C> @author Stephen Gilbert @date 2002-09-16
 C> Generates a TOC Flag Field Separator Block used to separate
 C> WMO Bulletins within a transmission file to be ingested in TOC's
 C> FTP Input Service, which can be used to disseminate WMO buletins.
-C> ( see http://weather.gov/tg/ftpingest.html )
+C> (see http://weather.gov/tg/ftpingest.html)
 C>
 C> This routine can generate different flag field separator blocks
 C> depending on the value of variable iopt.
