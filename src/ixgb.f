@@ -1,48 +1,36 @@
 C> @file
-C
-C> SUBPROGRAM: IXGB           MAKE INDEX RECORD
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 95-10-31
+C> @brief This subprogram makes one index record.
+C> @author Mark iredell @date 1995-10-31
+
+C> Byte 001-004: Bytes to skip in data file before grib message.
+C> Byte 005-008: Bytes to skip in message before pds.
+C> Byte 009-012: Bytes to skip in message before gds (0 if no gds).
+C> Byte 013-016: Bytes to skip in message before bms (0 if no bms).
+C> Byte 017-020: Bytes to skip in message before bds.
+C> Byte 021-024: Bytes total in the message.
+C> Byte 025-025: Grib version number.
+C> Byte 026-053: Product definition section (pds).
+C> Byte 054-095: Grid definition section (gds) (or nulls).
+C> Byte 096-101: First part of the bit map section (bms) (or nulls).
+C> Byte 102-112: First part of the binary data section (bds).
+C> Byte 113-172: (optional) bytes 41-100 of the pds.
+C> Byte 173-184: (optional) bytes 29-40 of the pds.
+C> Byte 185-320: (optional) bytes 43-178 of the gds.
 C>
-C> ABSTRACT: THIS SUBPROGRAM MAKES ONE INDEX RECORD.
-C>       BYTE 001-004: BYTES TO SKIP IN DATA FILE BEFORE GRIB MESSAGE
-C>       BYTE 005-008: BYTES TO SKIP IN MESSAGE BEFORE PDS
-C>       BYTE 009-012: BYTES TO SKIP IN MESSAGE BEFORE GDS (0 IF NO GDS)
-C>       BYTE 013-016: BYTES TO SKIP IN MESSAGE BEFORE BMS (0 IF NO BMS)
-C>       BYTE 017-020: BYTES TO SKIP IN MESSAGE BEFORE BDS
-C>       BYTE 021-024: BYTES TOTAL IN THE MESSAGE
-C>       BYTE 025-025: GRIB VERSION NUMBER
-C>       BYTE 026-053: PRODUCT DEFINITION SECTION (PDS)
-C>       BYTE 054-095: GRID DEFINITION SECTION (GDS) (OR NULLS)
-C>       BYTE 096-101: FIRST PART OF THE BIT MAP SECTION (BMS) (OR NULLS)
-C>       BYTE 102-112: FIRST PART OF THE BINARY DATA SECTION (BDS)
-C>       BYTE 113-172: (OPTIONAL) BYTES 41-100 OF THE PDS
-C>       BYTE 173-184: (OPTIONAL) BYTES 29-40 OF THE PDS
-C>       BYTE 185-320: (OPTIONAL) BYTES 43-178 OF THE GDS
+C> Program history log:
+C> - Mark iredell 1995-10-31
+C> - Mark iredell 1996-10-31 Augmented optional definitions to byte 320.
+C> - Mark iredell 2001-06-05 Apply linux port by ebisuzaki.
 C>
-C> PROGRAM HISTORY LOG:
-C>   95-10-31  IREDELL
-C>   96-10-31  IREDELL   AUGMENTED OPTIONAL DEFINITIONS TO BYTE 320
-C> 2001-06-05  IREDELL   APPLY LINUX PORT BY EBISUZAKI
+C> @param[in] LUGB Integer logical unit of input grib file.
+C> @param[in] LSKIP Integer number of bytes to skip before grib message.
+C> @param[in] LGRIB Integer number of bytes in grib message.
+C> @param[in] NLEN Integer length of each index record in bytes.
+C> @param[in] NNUM Integer index record number to make.
+C> @param[out] MLEN Integer actual valid length of index record.
+C> @param[out] CBUF Character*1 (mbuf) buffer to receive index data.
 C>
-C> USAGE:    CALL WRGI1R(LUGB,LSKIP,LGRIB,LUGI)
-C>   INPUT ARGUMENTS:
-C>     LUGB         INTEGER LOGICAL UNIT OF INPUT GRIB FILE
-C>     LSKIP        INTEGER NUMBER OF BYTES TO SKIP BEFORE GRIB MESSAGE
-C>     LGRIB        INTEGER NUMBER OF BYTES IN GRIB MESSAGE
-C>     NLEN         INTEGER LENGTH OF EACH INDEX RECORD IN BYTES
-C>     NNUM         INTEGER INDEX RECORD NUMBER TO MAKE
-C>   OUTPUT ARGUMENTS:
-C>     MLEN         INTEGER ACTUAL VALID LENGTH OF INDEX RECORD
-C>     CBUF         CHARACTER*1 (MBUF) BUFFER TO RECEIVE INDEX DATA
-C>
-C> SUBPROGRAMS CALLED:
-C>   GBYTEC       GET INTEGER DATA FROM BYTES
-C>   SBYTEC       STORE INTEGER DATA IN BYTES
-C>   BAREAD       BYTE-ADDRESSABLE READ
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY FORTRAN
-C>
+C> @author Mark iredell @date 1995-10-31
 C-----------------------------------------------------------------------
       SUBROUTINE IXGB(LUGB,LSKIP,LGRIB,NLEN,NNUM,MLEN,CBUF)
       CHARACTER CBUF(*)
