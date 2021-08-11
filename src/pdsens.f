@@ -1,6 +1,6 @@
 C> @file
 C> @brief Packs grib pds extension 41- for ensemble.
-C> @author Zoltan Toth & Mark Iredell @date 1998-03-14
+C> @author Zoltan Toth & Mark Iredell @date 1995-03-14
 
 C> Packs brib pds extension starting on byte 41 for ensemble
 c> forecast products. For format of pds extension, see nmc office note 38.
@@ -23,6 +23,7 @@ C>
 C> @note Use pdseup() for unpacking pds ensemble extension.
 c> subprogram can be called from a multiprocessing environment.
 C>
+C> @author Zoltan Toth & Mark Iredell @date 1995-03-14
       SUBROUTINE PDSENS(KENS,KPROB,XPROB,KCLUST,KMEMBR,ILAST,MSGA)
       INTEGER KENS(5),KPROB(2),KCLUST(16),KMEMBR(80)
       DIMENSION XPROB(2)
