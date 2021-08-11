@@ -23,6 +23,7 @@ C>
 C> @note Use pdsens() for packing pds ensemble extension.
 C> Subprogram can be called from a multiprocessing environment.
 C>
+C> @author Zoltan Toth and Mark Iredell @date DATE: 1995-03-14
       SUBROUTINE PDSEUP(KENS,KPROB,XPROB,KCLUST,KMEMBR,ILAST,MSGA)
       INTEGER KENS(5),KPROB(2),KCLUST(16),KMEMBR(80)
       DIMENSION XPROB(2)
