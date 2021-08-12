@@ -1,30 +1,29 @@
 C> @file
-C> @brief PACKS GRIB PDS EXTENSION 41- FOR ENSEMBLE      
-C
-C> PACKS GRIB PDS EXTENSION 41- FOR ENSEMBLE
-C> @author RICHARD WOBUS @date 98-09-28
+C> @brief Packs grib pds extension 41- for ensemble.
+C> @author Zoltan Toth & Mark Iredell @date 1995-03-14
+
+C> Packs brib pds extension starting on byte 41 for ensemble
+c> forecast products. For format of pds extension, see nmc office note 38.
 C>
-C> PACKS BRIB PDS EXTENSION STARTING ON BYTE 41 FOR ENSEMBLE
-C> FORECAST PRODUCTS. FOR FORMAT OF PDS EXTENSION, SEE NMC OFFICE NOTE 38
+C> Program history log:
+C> - Zoltan Toth and Mark Iredell 1995-03-14
+C> - Mark Iredell 1995-10-31 Removed saves and prints.
+C> - Richard Wobus 1998-09-28 Corrected member entry, blank all unused fields.
+C> - Mark Iredell 2001-06-05 Apply linux port by Ebisuzaki.
 C>
-C> PROGRAM HISTORY LOG:
-C> -  95-03-14  ZOLTAN TOTH AND MARK IREDELL
-C> -  95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C> -  98-09-28  WOBUS       CORRECTED MEMBER ENTRY, BLANK ALL UNUSED FIELDS
-C> -  2001-06-05  IREDELL   APPLY LINUX PORT BY EBISUZAKI
+C> @param[in] KENS (5) Bytes 41-45 (general section, always present.)
+C> @param[in] KPROB (2) Bytes 46-47 (probability section, present only if needed).
+C> @param[in] XPROB (2) Bytes 48-51&52-55 (probability section, if needed.).
+C> @param[in] KCLUST (16) Bytes 61-76 (clustering section, if needed.).
+C> @param[in] KMEMBR (80) Bytes 77-86 (cluster membership section, if needed.).
+C> @param[in] ILAST Last byte to be packed (if greater or equal to first byte
+C> in any of four sections above, whole section is packed).
+C> @param[out] MSGA - Full pds section, including new ensemble extension.
 C>
-C> @param[in] KENS (5)   BYTES 41-45 (GENERAL SECTION, ALWAYS PRESENT.)
-C> @param[in] KPROB (2)  BYTES 46-47 (PROBABILITY SECTION, PRESENT ONLY IF NEEDE
-C> @param[in] XPROB (2)  BYTES 48-51&52-55 (PROBABILITY SECTION, IF NEEDED.)
-C> @param[in] KCLUST (16) BYTES 61-76 (CLUSTERING SECTION, IF NEEDED.)
-C> @param[in] KMEMBR (80) BYTES 77-86 (CLUSTER MEMBERSHIP SECTION, IF NEEDED.)
-C> @param[in] ILAST LAST BYTE TO BE PACKED (IF GREATER OR EQUAL TO FIRST BY
-C>                IN ANY OF FOUR SECTIONS ABOVE, WHOLE SECTION IS PACKED.
-C> @param[out] MSGA - FULL PDS SECTION, INCLUDING NEW ENSEMBLE EXTENSION
+C> @note Use pdseup() for unpacking pds ensemble extension.
+c> subprogram can be called from a multiprocessing environment.
 C>
-C> USE PDSEUP.F FOR UNPACKING PDS ENSEMBLE EXTENSION.
-C> SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
+C> @author Zoltan Toth & Mark Iredell @date 1995-03-14
       SUBROUTINE PDSENS(KENS,KPROB,XPROB,KCLUST,KMEMBR,ILAST,MSGA)
       INTEGER KENS(5),KPROB(2),KCLUST(16),KMEMBR(80)
       DIMENSION XPROB(2)
