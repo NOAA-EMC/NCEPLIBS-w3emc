@@ -1,37 +1,29 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    Q9IE32      CONVERT IBM370 F.P. TO IEEE F.P.
-C>   PRGMMR: R.E.JONES        ORG: W/NMC42    DATE: 90-06-04
+C> @brief Convert IBM370 F.P. to IEEE F.P.
+C> @author Ralph Jones @date 1990-06-04
+
+C> Convert ibm370 32 bit floating point numbers to ieee
+C> 32 bit task 754 floating point numbers.
 C>
-C> ABSTRACT: CONVERT IBM370 32 BIT FLOATING POINT NUMBERS TO IEEE
-C>   32 BIT TASK 754 FLOATING POINT NUMBERS.
+C> Program history log:
+C> - Ralph Jones 1990-06-04 Change to sun fortran 1.3
+C> - Ralph Jones 1990-07-14 Change ishft to lshift or lrshft
+C> - Ralph Jones 1991-03-09 Change to silicongraphics fortran
+C> - Ralph Jones 1992-07-20 Change to ibm aix xl fortran
+C> - Ralph Jones 1995-11-15 Add save statement
+C> - Stephen Gilbert 1998-11-15 Specified 4-byte integers for IBM SP
 C>
-C> PROGRAM HISTORY LOG:
-C>   90-06-04  R.E.JONES   CHANGE TO SUN FORTRAN 1.3
-C>   90-07-14  R.E.JONES   CHANGE ISHFT TO LSHIFT OR LRSHFT
-C>   91-03-09  R.E.JONES   CHANGE TO SiliconGraphics FORTRAN
-C>   92-07-20  R.E.JONES   CHANGE TO IBM AIX XL FORTRAN
-C>   95-11-15  R.E.JONES   ADD SAVE STATEMENT
-C>   98-11-15  gilbert     Specified 4-byte integers for IBM SP
+C> @param[in] A REAL*4 Array of ibm370 32 bit floating point numbers.
+C> @param[out] N Number of points to convert.
+C> @param[out] B REAL*4 Array of ieee 32 bit floating point numbers.
+C> @param[out]ISTAT Number of point greater than 10e+38, numbers are set to
+c> ieee infinity, one is added to istat. Numbers less than
+c> e-38 are set to zero, one is  not added to istat.
 C>
-C> USAGE:    CALL Q9IE32(A, B, N, ISTAT)
-C>   INPUT ARGUMENT LIST:
-C>     A        - REAL*4 ARRAY OF IBM370 32 BIT FLOATING POINT NUMBERS
-C>     N        - NUMBER OF POINTS TO CONVERT
+C> @note See ieee task 754 standard floating point arithmetic
+C> for more information about IEEE F.P.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     B        - REAL*4 ARRAY OF IEEE 32 BIT FLOATING POINT NUMBERS
-C>     ISTAT    - NUMBER OF POINT GREATER THAN 10E+38, NUMBERS ARE SET TO
-C>                IEEE INFINITY, ONE IS ADDED TO ISTAT. NUMBERS LESS THAN
-C>                E-38 ARE SET TO ZERO , ONE IS  NOT ADDED TO ISTAT.
-C>
-C> REMARKS: SEE IEEE TASK 754 STANDARD FLOATING POINT ARITHMETIC
-C>   FOR MORE INFORMATION ABOUT IEEE F.P.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM AIX XL FORTRAN Compiler/6000
-C>   MACHINE:  IBM RS6000 model 530
-C>
+C> @author Ralph Jones @date 1990-06-04
       SUBROUTINE Q9IE32(A,B,N,ISTAT)
 C
        INTEGER(4)      A(*)
@@ -78,7 +70,7 @@ C
 C
 C          CONVERT IBM EXPONENT TO IEEE EXPONENT
 C
-           IEEEXP = (ISHFT(ITEMP,-24_4) - 64_4) * 4 + 126 
+           IEEEXP = (ISHFT(ITEMP,-24_4) - 64_4) * 4 + 126
 C
            K = 0
 C
