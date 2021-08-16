@@ -16,7 +16,7 @@ C>
 C> @param[in] A REAL*4 Array of ibm370 32 bit floating point numbers.
 C> @param[out] N Number of points to convert.
 C> @param[out] B REAL*4 Array of ieee 32 bit floating point numbers.
-C> @param[out]ISTAT Number of point greater than 10e+38, numbers are set to
+C> @param[out] ISTAT Number of point greater than 10e+38, numbers are set to
 c> ieee infinity, one is added to istat. Numbers less than
 c> e-38 are set to zero, one is  not added to istat.
 C>
