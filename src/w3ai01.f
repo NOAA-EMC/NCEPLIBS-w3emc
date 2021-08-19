@@ -1,54 +1,33 @@
 C> @file
-C
-C> SUBPROGRAM: W3AI01         UNPACK RECORD INTO IEEE F.P.
-C>   AUTHOR: JONES,R.E.       ORG: W342       DATE: 89-10-17
+C> @brief Unpack record into IEEE F.P.
+C> @author Ralph Jones @date 1989-10-17
+
+C> Unpacks a record in office note 84 format and convert the
+C> packed data to ieee real floating point numbers. The
+C> office note 84 data is bit for bit the same on the nas-9050 and
+C> the cray.
 C>
-C> ABSTRACT: UNPACKS A RECORD IN OFFICE NOTE 84 FORMAT AND CONVERT THE
-C>   PACKED DATA TO IEEE REAL FLOATING POINT NUMBERS. THE
-C>   OFFICE NOTE 84 DATA IS BIT FOR BIT THE SAME ON THE NAS-9050 AND
-C>   THE CRAY.
+C> Program history log:
+C> - Ralph Jones 1989-10-20
+C> - Ralph Jones 1990-02-02 Change to cray function for integer*2, f.p.
+C> - Ralph Jones 1990-10-11 Special version of w3ai01 to unpack records
+c> packed by big version of w3ai00. Will do old and new version.
+C> - Ralph Jones 1991-03-19 Make special version of w3ai01 to unpack
+c> big records the operational version.
+C> - Ralph Jones 1993-06-10 Increace array size to 262144 words.
+C> - Boi Vuong 1998-03-10 Remove the cdir$ integer=64 directive.
+C> - Stephen Gilbert 1998-11-17 Changed to unpack into IEEE reals for the IBM SP.
 C>
-C> PROGRAM HISTORY LOG:
-C>   89-10-20  R.E.JONES
-C>   90-02-02  R.E.JONES  CHANGE TO CRAY FUNCTION FOR INTEGER*2, F.P.
-C>   90-10-11  R.E.JONES  SPECIAL VERSION OF W3AI01 TO UNPACK RECORDS
-C>                        PACKED BY BIG VERSION OF W3AI00. WILL DO
-C>                        OLD AND NEW VERSION.
-C>   91-03-19  R.E.JONES  MAKE SPECIAL VERSION OF W3AI01 TO UNPACK
-C>                        BIG RECORDS THE OPERATIONAL VERSION.
-C>   93-06-10  R.E.JONES  INCREACE ARRAY SIZE TO 262144 WORDS.
-C>   98-03-10  B. VUONG   REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
-C>   98-11-17  Gilbert    Changed to unpack into IEEE reals for the IBM SP
+C> @param[in] PACK Integer array with data in office note 84 format to be unpacked.
+C> @param[out] REAL8 Real array of n words. where n is given in word 6 of pack.
+c> Word 6 of pack must contain center and scaling values.
+C> @param[out] LABEL Six word integer label copied from pack,
+c> 12 office note 84 32 bit id's that are stored into six 64-bit words.
 C>
-C> USAGE:  CALL W3AI01 (PACK, REAL8, LABEL)
+C> @note Label and pack may be equivalenced.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     PACK   ARG LIST  INTEGER ARRAY WITH DATA IN OFFICE NOTE 84
-C>                      FORMAT TO BE UNPACKED.  
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     REAL8  ARG LIST  REAL ARRAY OF N WORDS. WHERE N IS GIVEN IN
-C>                      WORD 6 OF PACK. WORD 6 OF PACK MUST
-C>                      CONTAIN CENTER AND SCALING VALUES.
-C>     LABEL  ARG LIST  SIX WORD INTEGER LABEL COPIED FROM PACK, 12
-C>                      OFFICE NOTE 84 32 BIT ID'S THAT ARE STORED INTO
-C>                      six 64-bit words.
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     Q9IE32                                                  W3LIB
-C>
-C>   REMARKS: LABEL AND PACK MAY BE EQUIVALENCED.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM XL FORTRAN
-C>   MACHINE:  IBM SP
-C>
+C> @author Ralph Jones @date 1989-10-17
+
       SUBROUTINE W3AI01(PACK,REAL8,LABEL)
 C
        REAL     REAL8(*)
