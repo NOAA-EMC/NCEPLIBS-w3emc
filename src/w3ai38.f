@@ -1,47 +1,38 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3AI38      EBCDIC TO ASCII
-C>   PRGMMR: DESMARAIS        ORG: W342       DATE: 82-11-29
+C> @brief EBCDIC to ASCII
+C> @author Armand Desmarais @date 1982-11-29
+
+C> Convert EBCDIC to ASCII by character.
+C> This subroutine can be replaced by cray utility subroutine
+C> uscctc. See manual sr-2079 page 3-15. cray utility tr
+C> can also be used for ASCII, EBCDIC conversion. See manual sr-2079
+C> page 9-35.
 C>
-C> ABSTRACT: CONVERT EBCDIC TO ASCII BY CHARACTER.
-C>   THIS SUBROUTINE CAN BE REPLACED BY CRAY UTILITY SUBROUTINE
-C>   USCCTC . SEE MANUAL SR-2079 PAGE 3-15. CRAY UTILITY TR
-C>   CAN ALSO BE USED FOR ASCII, EBCDIC CONVERSION. SEE MANUAL SR-2079
-C>   PAGE 9-35.
+C> Program history log:
+C> - Armand Desmarais 1982-11-29
+C> - Ralph Jones 1988-03-31 Change logic so it works like a
+C> ibm370 translate instruction.
+C> - Ralph Jones 1988-08-22 Changes for microsoft fortran 4.10.
+C> - Ralph Jones 1988-09-04 Change tables to 128 character set.
+C> - Ralph Jones 1990-01-31 Convert to cray cft77 fortran
+C> cray does not allow char*1 to be set to hex.
+C> - Stephen Gilbert 98-12-21 Replaced Function ICHAR with mova2i.
 C>
-C> PROGRAM HISTORY LOG:
-C>   82-11-29  DESMARAIS
-C>   88-03-31  R.E.JONES  CHANGE LOGIC SO IT WORKS LIKE A
-C>                        IBM370 TRANSLATE INSTRUCTION.
-C>   88-08-22  R.E.JONES  CHANGES FOR MICROSOFT FORTRAN 4.10
-C>   88-09-04  R.E.JONES  CHANGE TABLES TO 128 CHARACTER SET
-C>   90-01-31  R.E.JONES  CONVERT TO CRAY CFT77 FORTRAN
-C>                        CRAY DOES NOT ALLOW CHAR*1 TO BE SET TO HEX
-C>   98-12-21  Gilbert    Replaced Function ICHAR with mova2i.
+C> @param[inout] IE (in) Character*1 array of EBCDIC data (out) ASCII data
+C> @param[in] NC Integer, contains character count to convert.
 C>
-C> USAGE:    CALL W3AI38 (IE, NC)
-C>   INPUT ARGUMENT LIST:
-C>     IE       - CHARACTER*1 ARRAY OF EBCDIC DATA 
-C>     NC       - INTEGER,  CONTAINS CHARACTER COUNT TO CONVERT....
+C> @note Software version of ibm370 translate instruction, by
+C> changing the two tables we could do a 64, 96, 128 ASCII
+C> character set, change lower case to upper, etc.
+C> aea converts data at a rate of 1.5 million characters per sec.
+C> cray utility usccti convert ASCII to IBM EBCDIC
+C> cray utility uscctc convert IBM EBCDIC to ASCII
+C> they convert data at a rate of 2.1 million characters per sec.
+C> cray utility tr will also do a ASCII, EBCDIC conversion.
+C> tr convert data at a rate of 5.4 million characters per sec.
+C> tr is in library /usr/lib/libcos.a add to segldr card.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     IE       - CHARACTER*1 ARRAY OF ASCII DATA  
-C>
-C> REMARKS: SOFTWARE VERSION OF IBM370 TRANSLATE INSTRUCTION, BY
-C>   CHANGING THE TWO TABLES WE COULD DO A  64, 96, 128  ASCII
-C>   CHARACTER SET, CHANGE LOWER CASE TO UPPER, ETC.
-C>   AEA CONVERTS DATA AT A RATE OF 1.5 MILLION CHARACTERS PER SEC.
-C>   CRAY UTILITY USCCTI CONVERT ASCII TO IBM EBCDIC
-C>   CRAY UTILITY USCCTC CONVERT IBM EBCDIC TO ASCII
-C>   THEY CONVERT DATA AT A RATE OF 2.1 MILLION CHARACTERS PER SEC.
-C>   CRAY UTILITY TR WILL ALSO DO A ASCII, EBCDIC CONVERSION.
-C>   TR CONVERT DATA AT A RATE OF 5.4 MILLION CHARACTERS PER SEC.
-C>   TR IS IN LIBRARY  /USR/LIB/LIBCOS.A   ADD TO SEGLDR CARD.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author Armand Desmarais @date 1982-11-29
       SUBROUTINE W3AI38 (IE, NC )
 C
       INTEGER(8)      IASCII(32)

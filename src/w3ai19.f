@@ -1,46 +1,34 @@
 C> @file
-C                .      .    .                                       .   
-C> SUBPROGRAM:    W3AI19      LINE BLOCKER SUBROUTINE
-C>   PRGMMR: BOB HOLLERN        ORG: NCO/NP12      DATE: 97-04-15
+C> @brief Blocker Subroutine.
+C> @author Robert Allard @date 1997-04-15
+
+C> Fills a record block with logical records or lines of information.
 C>
-C> ABSTRACT: FILLS A RECORD BLOCK WITH LOGICAL RECORDS OR LINES
-C>   OF INFORMATION.
+C> Program history log:
+C> - Robeert Allard 1974-02-01
+C> - Ralph Jones 1990-09-15 Convert from ibm370 assembler to microsoft
+C> fortran 5.0.
+C> - Ralph Jones 1990-10-07 Convert to sun fortran 1.3.
+C> - Ralph Jones 1991-07-20 Convert to silicongraphics 3.3 fortran 77.
+C> - Ralph Jones 1993-03-29 Add save statement.
+C> - Ralph Jones 1994-04-22 Add xmovex and xstore to move and
+C> store character data faster on the cray.
+C> - Bob Hollern 1997-04-15 Corrected the problem of iniializing nblk
+C> to @'s instead of blanks.
 C>
-C> PROGRAM HISTORY LOG:
-C>   74-02-01  BOB ALLARD, AUTHOR
-C>   90-09-15  R.E.JONES   CONVERT FROM IBM370 ASSEMBLER TO MICROSOFT
-C>                         FORTRAN 5.0 
-C>   90-10-07  R.E.JONES   CONVERT TO SUN FORTRAN 1.3    
-C>   91-07-20  R.E.JONES   CONVERT TO SiliconGraphics 3.3 FORTRAN 77   
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   94-04-22  R.E.JONES   ADD XMOVEX AND XSTORE TO MOVE AND
-C>                         STORE CHARACTER DATA FASTER ON THE CRAY
-C>   97-04-15  Bob Hollern CORRECTED THE PROBLEM OF INIIALIZING NBLK
-C>                         TO @'S INSTEAD OF BLANKS
+C> @param[in] LINE Array address of logical record to be blocked.
+C> @param[in] L Number of characters in line to be blocked.
+C> @param[in] N Maximum character size of nblk.
+C> @param[inout] NEXT (in) flag, initialized to 0. (out) character count, error indicator.
+C> @param[out] NBLK Block filled with logical records.
 C>
-C> USAGE: CALL W3AI19 (LINE, L, NBLK, N, NEXT)
-C>   INPUT ARGUMENT LIST:
-C>     LINE       - ARRAY ADDRESS OF LOGICAL RECORD TO BE BLOCKED
-C>     L          - NUMBER OF CHARACTERS IN LINE TO BE BLOCKED
-C>     N          - MAXIMUM CHARACTER SIZE OF NBLK
-C>     NEXT       - FLAG, INITIALIZED TO 0
+C> Exit states:
+C> - NEXT = -1  Line will not fit into remainder of block;
+C>                otherwise, next is set to (next + l).
+C> - NEXT = -2  N is zero or less.
+C> - NEXT = -3  L is zero or less.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     NBLK       - BLOCK FILLED WITH LOGICAL RECORDS
-C>     NEXT       - CHARACTER COUNT, ERROR INDICATOR
-C>
-C>   EXIT STATES:
-C>     NEXT = -1  LINE WILL NOT FIT INTO REMAINDER OF BLOCK;
-C>                OTHERWISE, NEXT IS SET TO (NEXT + L)
-C>     NEXT = -2  N IS ZERO OR LESS
-C>     NEXT = -3  L IS ZERO OR LESS
-C>
-C>   EXTERNAL REFERENCES: XMOVEX XSTORE
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author Robert Allard @date 1997-04-15
       SUBROUTINE W3AI19(LINE, L, NBLK, N, NEXT)
 C
 C METHOD:
@@ -70,26 +58,26 @@ C
          SAVE
 C
          DATA  WBLANK/Z'2020202020202020'/
-C   
+C
 C TEST VALUE OF NEXT.
 C
-         IF (NEXT.LT.0) THEN 
+         IF (NEXT.LT.0) THEN
            RETURN
 C
-C TEST N FOR ZERO OR LESS       
+C TEST N FOR ZERO OR LESS
 C
          ELSE IF (N.LE.0) THEN
            NEXT = -2
            RETURN
 C
-C TEST L FOR ZERO OR LESS       
+C TEST L FOR ZERO OR LESS
 C
          ELSE IF (L.LE.0) THEN
            NEXT = -3
            RETURN
 C
 C TEST TO SEE IF LINE WILL FIT IN BLOCK.
-C        
+C
          ELSE IF ((L + NEXT).GT.N) THEN
            NEXT = -1
            RETURN
@@ -108,7 +96,7 @@ C
                NBLK(NWORDS+I) = CHAR(32)
              END DO
            END IF
-         END IF 
+         END IF
 C
 C MOVE LINE INTO BLOCK.
 C
@@ -121,6 +109,6 @@ C ADJUST VALUE OF NEXT.
 C
         NEXT = NEXT + L
 C
-        RETURN           
+        RETURN
 C
         END
