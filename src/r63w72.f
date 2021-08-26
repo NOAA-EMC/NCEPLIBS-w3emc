@@ -1,36 +1,30 @@
 C> @file
-C
-C> SUBPROGRAM:    R63W72      CONVERT W3FI63 PARMS TO W3FI72 PARMS
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 92-10-31
+C> @brief Convert w3fi63 parms to w3fi72 parms.
+C> @author Mark Iredell @date 1992-10-31
+
+C> determines the integer pds and gds parameters
+C> for the grib1 packing routine w3fi72 given the parameters
+C> returned from the grib1 unpacking routine w3fi63.
 C>
-C> ABSTRACT: DETERMINES THE INTEGER PDS AND GDS PARAMETERS
-C>           FOR THE GRIB1 PACKING ROUTINE W3FI72 GIVEN THE PARAMETERS
-C>           RETURNED FROM THE GRIB1 UNPACKING ROUTINE W3FI63.
+C> Program history log:
+C> - Mark Iredell 1991-10-31
+C> - Mark Iredell 1996-05-03 Corrected some level types and
+C> some data representation types
+C> - Mark Iredell 1997-02-14 Only altered ipds(26:27) for extended pds
+C> - Chris Caruso 1998-06-01 Y2K fix for year of century
+C> - Diane Stoken 2005-05-06 Recognize level 236
 C>
-C> PROGRAM HISTORY LOG:
-C>   91-10-31  MARK IREDELL
-C>   96-05-03  MARK IREDELL  CORRECTED SOME LEVEL TYPES AND
-C>                           SOME DATA REPRESENTATION TYPES
-C>   97-02-14  MARK IREDELL  ONLY ALTERED IPDS(26:27) FOR EXTENDED PDS
-C>   98-06-01  CHRIS CARUSO  Y2K FIX FOR YEAR OF CENTURY
-C> 2005-05-06  DIANE STOKES  RECOGNIZE LEVEL 236
+C> Usage:    call r63w72(kpds,kgds,ipds,igds)
 C>
-C> USAGE:    CALL R63W72(KPDS,KGDS,IPDS,IGDS)
+C> @param[in] kpds integer (200) pds parameters from w3fi63
+C> @param[in] kgds integer (200) gds parameters from w3fi63
+C> @param[out] ipds integer (200) pds parameters for w3fi72
+C> @param[out] igds integer (200) gds parameters for w3fi72
 C>
-C>   INPUT ARGUMENT LIST:
-C>     KPDS     - INTEGER (200) PDS PARAMETERS FROM W3FI63
-C>     KGDS     - INTEGER (200) GDS PARAMETERS FROM W3FI63
+C> @note kgds and igds extend beyond their dimensions here
+C> if pl parameters are present.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     IPDS     - INTEGER (200) PDS PARAMETERS FOR W3FI72
-C>     IGDS     - INTEGER (200) GDS PARAMETERS FOR W3FI72
-C>
-C> REMARKS: KGDS AND IGDS EXTEND BEYOND THEIR DIMENSIONS HERE
-C>          IF PL PARAMETERS ARE PRESENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY FORTRAN
-C>
+C> @author Mark Iredell @date 1992-10-31
       SUBROUTINE R63W72(KPDS,KGDS,IPDS,IGDS)
       DIMENSION KPDS(200),KGDS(200),IPDS(200),IGDS(200)
 C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

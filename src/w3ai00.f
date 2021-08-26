@@ -1,76 +1,41 @@
 C> @file
-C
-C> SUBPROGRAM: W3AI00         REAL ARRAY TO 16 BIT PACKED FORMAT
-C>   AUTHOR: JONES,R.E.       ORG: W342       DATE: 85-07-31
+C> @brief Real array to 16 bit packed format.
+C> @author Ralph Jones @date 1985-07-31
+
+C> Converts IEEE floating point numbers to 16 bit
+C> packed office note 84 format. The floating point number are
+C> converted to 16 bit signed scaled integers.
 C>
-C> ABSTRACT: CONVERTS IEEE FLOATING POINT NUMBERS TO 16 BIT
-C>   PACKED OFFICE NOTE 84 FORMAT. THE FLOATING POINT NUMBER ARE
-C>   CONVERTED TO 16 BIT SIGNED SCALED INTEGERS.
+C> Program history log:
+C> - Ralph Jones 1989-10-20 Convert cyber 205 version of w3ai00 to cray.
+C> - Ralph Jones 1990-03-18 Change to use cray integer*2 packer.
+C> - Ralph Jones 1990-10-11 Special version to pack grids larger than
+C> 32743 words. Will do old and new version.
+C> - Ralph Jones 1991-02-16 Changes so equivalence of pack and real8
+C> arrays will work.
+C> - Ralph Jones 1993-06-10 Changes for array size (512,512) 262144 words.
+C> - Boi Vuong 1998-03-10 Remove the cdir$ integer=64 directive.
+C> - Stephen Gilbert 1998-11-18 Changed to pack IEEE values for the IBM SP
 C>
-C> PROGRAM HISTORY LOG:
-C>   89-10-20  R.E.JONES  CONVERT CYBER 205 VERSION OF W3AI00 TO CRAY
-C>   90-03-18  R.E.JONES  CHANGE TO USE CRAY INTEGER*2 PACKER
-C>   90-10-11  R.E.JONES  SPECIAL VERSION TO PACK GRIDS LARGER THAN
-C>                        32743 WORDS. WILL DO OLD AND NEW VERSION.
-C>   91-02-16  R.E.JONES  CHANGES SO EQUIVALENCE OF PACK AND REAL8
-C>                        ARRAYS WILL WORK.
-C>   93-06-10  R.E.JONES  CHANGES FOR ARRAY SIZE (512,512) 262144 WORDS.
-C>   98-03-10  B. VUONG   REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
-C>   98-11-18  Gilbert    Changed to pack IEEE values for the IBM SP
+C> @param[in] REAL8 Array of cray floating point numbers.
+C> @param[in] LABEL Six 8-byte integer words. Must have first 8 of 12 32 bit
+C> word office note 84 label. word 6 must have in bits 31-00 the number of
+C> real words in array real8 if j is greater than 32743.
+C> j in bits 15-0 of the 4th id word is set zero.
+C> @param[out] PACK Packed output array of integer words of size 6 + (j+3)/4 ,
+C> j = no. points in label (from word 4 bits 15-00). Label will be copied to pack words 1-4.
+C> - Pack will contain the following in words 5-6:
+C>  - word 5 bits 63-48 Number of bytes in whole record. will not be correct if j > 32743.
+C>  - word 5 bits 47-32 Exclusive-or checksum by 16 bit words of whole array pack excluding checksum itself.
+C>  - word 5 bits 31-00 Center value a = mean of max and min values. converted to ibm 32 floating point number.
+C>  - word 6 bits 63-48 Zero.
+C>  - word 6 bits 47-32 16 bit shift value n. the least integer such that abs(x-a)/2**n lt 1 for all x in real8. limited to +-127.
+C>  - word 6 bits 31-00 Number of words in real8 if > 32743, right adjusted if <= 32743 set zero.
 C>
-C> USAGE:  CALL W3AI00 (REAL8, PACK, LABEL)
+C> @note Pack and label may be equivalenced.  n, the number of points
+C> in a grid is now in 32 bit id word 12.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     REAL8  ARG LIST  ARRAY OF CRAY FLOATING POINT NUMBERS
-C>     LABEL  ARG LIST  SIX 8-BYTE INTEGER WORDS.
-C>                      MUST HAVE FIRST 8 OF 12 32 BIT
-C>                      WORD OFFICE NOTE 84 LABEL. WORD 6 MUST HAVE
-C>                      IN BITS 31-00 THE NUMBER OF REAL WORDS IN ARRAY
-C>                      REAL8 IF J IS GREATER THAN 32743. J IN BITS
-C>                      15-0 OF THE 4TH ID WORD IS SET ZERO.
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     PACK   ARG LIST  PACKED OUTPUT ARRAY OF INTEGER WORDS OF
-C>                      SIZE 6 + (J+3)/4 , J = NO. POINTS IN LABEL
-C>                      (FROM WORD 4 BITS 15-00).
-C>                      LABEL WILL BE COPIED TO PACK WORDS 1-4. PACK
-C>                      WILL CONTAIN THE FOLLOWING IN WORDS 5-6
-C>                      WORD 5  BITS 63-48  NUMBER OF BYTES IN WHOLE
-C>                                          RECORD. WILL NOT BE
-C>                                          CORRECT IF J > 32743.
-C>                      WORD 5  BITS 47-32  EXCLUSIVE-OR CHECKSUM BY 16
-C>                                          BIT WORDS OF WHOLE ARRAY PACK
-C>                                          EXCLUDING CHECKSUM ITSELF.
-C>                      WORD 5  BITS 31-00  CENTER VALUE A = MEAN OF
-C>                                          MAX AND MIN VALUES.
-C>                                          CONVERTED TO IBM 32
-C>                                          FLOATING POINT NUMBER.
-C>                      WORD  6 BITS 63-48  ZERO.
-C>                      WORD  6 BITS 47-32  16 BIT SHIFT VALUE N. THE
-C>                                          LEAST INTEGER SUCH THAT
-C>                                          ABS(X-A)/2**N LT 1 FOR
-C>                                          ALL X IN REAL8. LIMITED
-C>                                          TO +-127.
-C>                      WORD  6 BITS 31-00  NUMBER OF WORDS IN REAL8
-C>                                          IF > 32743, RIGHT ADJUSTED
-C>                                          IF <= 32743 SET ZERO.
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     IAND    IOR    BTEST                                    SYSTEM
-C>
-C>   REMARKS: PACK AND LABEL MAY BE EQUIVALENCED.  N, THE NUMBER OF
-C>     POINTS IN A GRID IS NOW IN 32 BIT ID WORD 12.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM XL FORTRAN.
-C>   MACHINE:  IBM SP
-C>
+C> @author Ralph Jones @date 1985-07-31
       SUBROUTINE W3AI00(REAL8,PACK,LABEL)
 C
        REAL           REAL8(*)
@@ -278,42 +243,31 @@ C
        RETURN
        END
 
+
+C> Convert IEEE 32 bit task 754 floating point numbers
+C> to IBM370 32 bit floating point numbers.
+C>
+C> Program history log:
+C> - Ralph Jones 1990-06-04 Convert to sun fortran 1.3.
+C> - Ralph Jones 1990-07-14 Change ishft to lshift or lrshft.
+C> - Ralph Jones 1991-03-28 Change to silicongraphics 3.3 fortran 77.
+C> - Ralph Jones 1992-07-20 Change to ibm aix xl fortran.
+C> - Ralph Jones 1995-11-15 Add save statement.
+C> - Stepen Gilbert 1998-11-18 Specified 4-byte Integer values.
+C>
+C> @param[in] A - Real*4 array of IEEE 32 bit floating point numbers.
+C> @param[in] N - Number of words to convert to IBM370 32 bit F.P.
+C> @param[out] B - Real*4 array of IBM370 32 bit floating point numbers.
+C> @param[out] ISTAT:
+C> - 0: All numbers converted.
+C> - -1: N is less than one.
+C> - +K: K infinity or nan numbers were found.
+C>
+C> @note See IEEE task 754 standard floating point arithmetic for
+C> more information about IEEE F.P.
+C>
+C> @author Ralph Jones @date 1990-06-04
       SUBROUTINE Q9EI32(A,B,N,ISTAT)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    Q9EI32      IEEE 32 BIT F.P. TO IBM370 F.P.
-C   PRGMMR: R.E.JONES        ORG: W/NMC42    DATE: 90-06-04
-C
-C ABSTRACT: CONVERT IEEE 32 BIT TASK 754 FLOATING POINT NUMBERS
-C   TO IBM370 32 BIT FLOATING POINT NUMBERS.
-C
-C PROGRAM HISTORY LOG:
-C   90-06-04  R.E.JONES   CONVERT TO SUN FORTRAN 1.3
-C   90-07-14  R.E.JONES   CHANGE ISHFT TO LSHIFT OR LRSHFT
-C   91-03-28  R.E.JONES   CHANGE TO SiliconGraphics 3.3 FORTRAN 77
-C   92-07-20  R.E.JONES   CHANGE TO IBM AIX XL FORTRAN
-C   95-11-15  R.E.JONES   ADD SAVE STATEMENT
-C   98-11-18  Gilbert     Specified 4-byte Integer values
-C
-C USAGE:    CALL Q9EI32(A, B, N, ISTAT)
-C   INPUT ARGUMENT LIST:
-C      A       - REAL*4 ARRAY OF IEEE 32 BIT FLOATING POINT NUMBERS
-C      N       - NUMBER OF WORDS TO CONVERT TO IBM370 32 BIT F.P.
-C
-C   OUTPUT ARGUMENT LIST:  
-C      B       - REAL*4 ARRAY OF IBM370 32 BIT FLOATING POINT NUMBERS
-C      ISTAT   -  0  , ALL NUMBERS CONVERTED
-C                -1  , N IS LESS THAN ONE
-C                +K  , K INFINITY OR NAN NUMBERS WERE FOUND
-C
-C REMARKS: SEE IEEE TASK 754 STANDARD FLOATING POINT ARITHMETIC FOR
-C   MORE INFORMATION ABOUT IEEE F.P.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM AIX XL FORTRAN Compiler/6000
-C   MACHINE:  IBM RS6000 model 530
-C
-C$$$
 C
        INTEGER(4)      A(*)
        INTEGER(4)      B(*)
@@ -390,38 +344,27 @@ C
          RETURN
        END
 
+C> Convert ieee 32 bit task 754 floating point numbers
+C> to ibm370 64 bit floating point numbers.
+C>
+C> Program history log:
+C> - Ralph Jones 1992-08-02
+C> - Ralph Jones 1995-11-15 Add save statement.
+C>
+C> @param[in] A Real*4 array of IEEE 32 bit floating point numbers.
+C> @param[in] N Number of words to convert to IBM370 64 bit F.P.
+C> @param[out] B Real*8 array of IBM370 64 bit floating point numbers.
+C> @param[out] ISTAT
+C> - 0 All numbers converted.
+C> - -1 N is less than one.
+C> - +K K infinity or nan numbers were found.
+C>
+C> @note See IEEE task 754 standard floating point arithmetic for
+C> more information about IEEE F.P.
+C>
+C> @author Ralph Jones @date 1992-08-02
       SUBROUTINE Q9E3I6(A,B,N,ISTAT)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    Q9E3I6      IEEE 32 BIT F.P. TO IBM370 64 BIT F.P.
-C   PRGMMR: R.E.JONES        ORG: W/NMC42    DATE: 92-08-02
-C
-C ABSTRACT: CONVERT IEEE 32 BIT TASK 754 FLOATING POINT NUMBERS
-C   TO IBM370 64 BIT FLOATING POINT NUMBERS.
-C
-C PROGRAM HISTORY LOG:
-C   92-08-02  R.E.JONES
-C   95-11-15  R.E.JONES   ADD SAVE STATEMENT
-C
-C USAGE:    CALL Q9E3I6(A, B, N, ISTAT)
-C   INPUT ARGUMENT LIST:
-C      A       - REAL*4 ARRAY OF IEEE 32 BIT FLOATING POINT NUMBERS
-C      N       - NUMBER OF WORDS TO CONVERT TO IBM370 64 BIT F.P.
-C
-C   OUTPUT ARGUMENT LIST:  
-C      B       - REAL*8 ARRAY OF IBM370 64 BIT FLOATING POINT NUMBERS
-C      ISTAT   -  0  , ALL NUMBERS CONVERTED
-C                -1  , N IS LESS THAN ONE
-C                +K  , K INFINITY OR NAN NUMBERS WERE FOUND
-C
-C REMARKS: SEE IEEE TASK 754 STANDARD FLOATING POINT ARITHMETIC FOR
-C   MORE INFORMATION ABOUT IEEE F.P.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM AIX XL FORTRAN
-C   MACHINE:  IBM RS/6000 model 530
-C
-C$$$
+
 C
        INTEGER(4)      A(N)
        INTEGER(4)      B(2,N)
@@ -486,7 +429,7 @@ C
      &     -IBX7))
            B(1,I) = IOR(JTEMP,ISIGN)
            B(2,I) = 0
-           IF (IBX7.GT.0) B(2,I) = ISHFT(ITEMP,32_4-IBX7)           
+           IF (IBX7.GT.0) B(2,I) = ISHFT(ITEMP,32_4-IBX7)
            GO TO  30
 C
  10      CONTINUE

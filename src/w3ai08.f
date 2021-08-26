@@ -1,158 +1,149 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3AI08        UNPK GRIB FIELD TO GRIB GRID
-C>   PRGMMR: BOSTELMAN        ORG: NMC421      DATE:90-07-31
+C> @brief Unpack grib field to grib grid.
+C> @author Bill Cavanaugh @date 1988-01-20
+
+C> Unpack a grib field to the exact grid specified in the
+C> message, isolate the bit map and make the values of the product
+C> description sec (pds) and the grid description sec (gds)
+C> available in return arrays.
 C>
-C> ABSTRACT: UNPACK A GRIB FIELD TO THE EXACT GRID SPECIFIED IN THE
-C>   MESSAGE, ISOLATE THE BIT MAP AND MAKE THE VALUES OF THE PRODUCT
-C>   DESCRIPTION SEC   (PDS) AND THE GRID DESCRIPTION SEC   (GDS)
-C>   AVAILABLE IN RETURN ARRAYS.
+C> Program history log:
+C> - Bill Cavanaugh 1988-01-20
+C> - Bill Cavanaugh 1990-05-11  To assure that all u.s. grids in the grib decoder
+C> comply with size changes in the december 1989 revisions.
+C> - Bill Cavanaugh 1990-05-24 Corrects searching an improper location for grib
+c> version number in grib messages.
+C> - William Bostelman 1990-07-15 Modiifed sub. ai084 so that it will test
+C> the grib bds byte size to determine what ecmwf grid array size is
+C> to be specified.
+C> - Ralph Jones 1990-09-14 Change's for ansi fortran, and pds version 1.
+C> - Ralph Jones 1990-09-23 Change's for cray cft77 fortran.
+C> - Ralph Jones 1990-12-05 Change's for grib nov. 21,1990.
+C> - Boi Vuong 2002-10-15 Replaced function ichar with mova2i.
 C>
-C> PROGRAM HISTORY LOG:
-C>   88-01-20  CAVANAUGH
-C>   90-05-11  CAVANAUGH   TO ASSURE THAT ALL U.S. GRIDS IN THE
-C>                         GRIB DECODER COMPLY WITH SIZE CHANGES
-C>                         IN THE DECEMBER 1989 REVISIONS.
-C>   90-05-24  CAVANAUGH   CORRECTS SEARCHING AN IMPROPER LOCATION
-C>                         FOR GRIB VERSION NUMBER IN GRIB MESSAGES.
-C>   90-07-15  BOSTELMAN   MODIIFED SUB. AI084 SO THAT IT WILL TEST
-C>                         THE GRIB BDS BYTE SIZE TO DETERMINE WHAT
-C>                         ECMWF GRID ARRAY SIZE IS TO BE SPECIFIED.
-C>   90-09-14  R.E.JONES   CHANGE'S FOR ANSI FORTRAN, AND PDS VERSION 1
-C>   90-09-23  R.E.JONES   CHANGE'S FOR CRAY CFT77 FORTRAN
-C>   90-12-05  R.E.JONES   CHANGE'S FOR GRIB NOV. 21,1990
-C>   02-10-15  VUONG       REPLACED FUNCTION ICHAR WITH MOVA2I
+C> @param[in] msga grib field - "grib" thru "7777"   char*1
+C> @param[out] data array containing data elements
+C> @note (version 0):
+C> - 1: id of center
+C> - 2: model identification
+C> - 3: grid identification
+C> - 4: gds/bms flag
+C> - 5: indicator of parameter
+C> - 6: type of level
+C> - 7: height/pressure , etc of level
+C> - 8: year including century
+C> - 9: month of year
+C> - 10: day of month
+C> - 11: hour of day
+C> - 12: minute of hour
+C> - 13: indicator of forecast time unit
+C> - 14: time range 1
+C> - 15: time range 2
+C> - 16: time range flag
+C> - 17: number included in average
+C> - 18: grib specification edition number
+C> @param[out] kpds array containing pds elements.  (version 1)
+C> - 1: id of center
+C> - 2: model identification
+C> - 3: grid identification
+C> - 4: gds/bms flag
+C> - 5: indicator of parameter
+C> - 6: type of level
+C> - 7: height/pressure , etc of level
+C> - 8: year including century
+C> - 9: month of year
+C> - 10: day of month
+C> - 11: hour of day
+C> - 12: minute of hour
+C> - 13: indicator of forecast time unit
+C> - 14: time range 1
+C> - 15: time range 2
+C> - 16: time range flag
+C> - 17: number included in average
+C> - 18: version nr of grib specification
+C> - 19: version nr of parameter table
+C> - 20: total length of grib message (including section 0)
+C> @param[out] kgds array containing gds elements.
+C> - 1: data representation type
+C> - Latitude/longitude grids
+C>  - 2: n(i) nr points on latitude circle
+C>  - 3: n(j) nr points on longitude meridian
+C>  - 4: la(1) latitude of origin
+C>  - 5: lo(1) longitude of origin
+C>  - 6: resolution flag
+C>  - 7: la(2) latitude of extreme point
+C>  - 8: lo(2) longitude of extreme point
+C>  - 9: di longitudinal direction of increment
+C>  - 10: dj latitundinal direction of increment
+C>  - 11: scanning mode flag
+C> - Polar stereographic grids
+C>  - 2: n(i) nr points along lat circle
+C>  - 3: n(j) nr points along lon circle
+C>  - 4: la(1) latitude of origin
+C>  - 5: lo(1) longitude of origin
+C>  - 6: reserved
+C>  - 7: lov grid orientation
+C>  - 8: dx - x direction increment
+C>  - 9: dy - y direction increment
+C>  - 10: projection center flag
+C>  - 11: scanning mode
+C> - Spherical harmonic coefficients
+C>  - 2: j pentagonal resolution parameter
+C>  - 3: k pentagonal resolution parameter
+C>  - 4: m pentagonal resolution parameter
+C>  - 5: representation type
+C>  - 6: coefficient storage mode
+C> - Mercator grids
+C>  - 2: n(i) nr points on latitude circle
+C>  - 3: n(j) nr points on longitude meridian
+C>  - 4: la(1) latitude of origin
+C>  - 5: lo(1) longitude of origin
+C>  - 6: resolution flag
+C>  - 7: la(2) latitude of last grid point
+C>  - 8: lo(2) longitude of last grid point
+C>  - 9: longit dir increment
+C>  - 10: latit dir increment
+C>  - 11: scanning mode flag
+C>  - 12: latitude intersection
+C> - Lambert conformal grids
+C>  - 2: nx nr points along x-axis
+C>  - 3: ny nr points along y-axis
+C>  - 4: la1 lat of origin (lower left)
+C>  - 5: lo1 lon of origin (lower left)
+C>  - 6: reserved
+C>  - 7: lov - orientation of grid
+C>  - 8: dx - x-dir increment
+C>  - 9: dy - y-dir increment
+C>  - 10: projection center flag
+C>  - 11: scanning mode flag
+C>  - 12: latin 1 - first lat from pole of secant cone inter
+C>  - 13: latin 2 - second lat from pole of secant cone inter
+C> @param[out] kbms       - bitmap describing location of output elements.
+C> @param[out] kptr       - array containing storage for following parameters
+C> - 1: unused
+C> - 2: unused
+C> - 3: length of pds
+C> - 4: length of gds
+C> - 5: length of bms
+C> - 6: length of bds
+C> - 7: value of current byte
+C> - 8: unused
+C> - 9: grib start byte nr
+C> - 10: grib/grid element count
+C> @param[out] kret flag indicating quality of completion
 C>
-C> USAGE:    CALL W3AI08(MSGA,KPDS,KGDS,KBMS,DATA,KPTR,KRET)
-C>   INPUT ARGUMENT LIST:
-C>     MSGA     - GRIB FIELD - "GRIB" THRU "7777"   CHAR*1
+C> @note values for return flag (kret)
+C> - kret = 0 - normal return, no errors
+C>  - = 1 - 'grib' not found in first 100 chars
+C>  - = 2 - '7777' not in correct location
+C>  - = 3 - unpacked field is larger than 32768
+C>  - = 4 - gds/ grid not one of currently accepted values
+C>  - = 5 - grid not currently avail for center indicated
+C>  - = 8 - temp gds indicated, but gds flag is off
+C>  - = 9 - gds indicates size mismatch with std grid
+C>  - = 10 - incorrect center indicator
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     DATA     - ARRAY CONTAINING DATA ELEMENTS
-C>     KPDS     - ARRAY CONTAINING PDS ELEMENTS. (VERSION 0)
-C>          (1)   - ID OF CENTER
-C>          (2)   - MODEL IDENTIFICATION
-C>          (3)   - GRID IDENTIFICATION
-C>          (4)   - GDS/BMS FLAG
-C>          (5)   - INDICATOR OF PARAMETER
-C>          (6)   - TYPE OF LEVEL
-C>          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C>          (8)   - YEAR INCLUDING CENTURY
-C>          (9)   - MONTH OF YEAR
-C>          (10)  - DAY OF MONTH
-C>          (11)  - HOUR OF DAY
-C>          (12)  - MINUTE OF HOUR
-C>          (13)  - INDICATOR OF FORECAST TIME UNIT
-C>          (14)  - TIME RANGE 1
-C>          (15)  - TIME RANGE 2
-C>          (16)  - TIME RANGE FLAG
-C>          (17)  - NUMBER INCLUDED IN AVERAGE
-C>          (18)  - GRIB SPECIFICATION EDITION NUMBER
-C>     KPDS     - ARRAY CONTAINING PDS ELEMENTS.  (VERSION 1)
-C>          (1)   - ID OF CENTER
-C>          (2)   - MODEL IDENTIFICATION
-C>          (3)   - GRID IDENTIFICATION
-C>          (4)   - GDS/BMS FLAG
-C>          (5)   - INDICATOR OF PARAMETER
-C>          (6)   - TYPE OF LEVEL
-C>          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C>          (8)   - YEAR INCLUDING CENTURY
-C>          (9)   - MONTH OF YEAR
-C>          (10)  - DAY OF MONTH
-C>          (11)  - HOUR OF DAY
-C>          (12)  - MINUTE OF HOUR
-C>          (13)  - INDICATOR OF FORECAST TIME UNIT
-C>          (14)  - TIME RANGE 1
-C>          (15)  - TIME RANGE 2
-C>          (16)  - TIME RANGE FLAG
-C>          (17)  - NUMBER INCLUDED IN AVERAGE
-C>          (18)  - VERSION NR OF GRIB SPECIFICATION
-C>          (19)  - VERSION NR OF PARAMETER TABLE
-C>          (20)  - TOTAL LENGTH OF GRIB MESSAGE (INCLUDING SECTION 0)
-C>     KGDS     - ARRAY CONTAINING GDS ELEMENTS.
-C>          (1)   - DATA REPRESENTATION TYPE
-C>       LATITUDE/LONGITUDE GRIDS
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG
-C>          (7)   - LA(2) LATITUDE OF EXTREME POINT
-C>          (8)   - LO(2) LONGITUDE OF EXTREME POINT
-C>          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C>          (10)  - DJ LATITUNDINAL DIRECTION OF INCREMENT
-C>          (11)  - SCANNING MODE FLAG
-C>       POLAR STEREOGRAPHIC GRIDS
-C>          (2)   - N(I) NR POINTS ALONG LAT CIRCLE
-C>          (3)   - N(J) NR POINTS ALONG LON CIRCLE
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESERVED
-C>          (7)   - LOV GRID ORIENTATION
-C>          (8)   - DX - X DIRECTION INCREMENT
-C>          (9)   - DY - Y DIRECTION INCREMENT
-C>          (10)  - PROJECTION CENTER FLAG
-C>          (11)  - SCANNING MODE
-C>       SPHERICAL HARMONIC COEFFICIENTS
-C>          (2)   - J PENTAGONAL RESOLUTION PARAMETER
-C>          (3)   - K      "          "         "
-C>          (4)   - M      "          "         "
-C>          (5)   - REPRESENTATION TYPE
-C>          (6)   - COEFFICIENT STORAGE MODE
-C>       MERCATOR GRIDS
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG
-C>          (7)   - LA(2) LATITUDE OF LAST GRID POINT
-C>          (8)   - LO(2) LONGITUDE OF LAST GRID POINT
-C>          (9)   - LONGIT DIR INCREMENT
-C>          (10)  - LATIT DIR INCREMENT
-C>          (11)  - SCANNING MODE FLAG
-C>          (12)  - LATITUDE INTERSECTION
-C>       LAMBERT CONFORMAL GRIDS
-C>          (2)   - NX NR POINTS ALONG X-AXIS
-C>          (3)   - NY NR POINTS ALONG Y-AXIS
-C>          (4)   - LA1 LAT OF ORIGIN (LOWER LEFT)
-C>          (5)   - LO1 LON OF ORIGIN (LOWER LEFT)
-C>          (6)   - RESERVED
-C>          (7)   - LOV - ORIENTATION OF GRID
-C>          (8)   - DX - X-DIR INCREMENT
-C>          (9)   - DY - Y-DIR INCREMENT
-C>          (10)  - PROJECTION CENTER FLAG
-C>          (11)  - SCANNING MODE FLAG
-C>          (12)  - LATIN 1 - FIRST LAT FROM POLE OF SECANT CONE INTER
-C>          (13)  - LATIN 2 - SECOND LAT FROM POLE OF SECANT CONE INTER
-C>     KBMS       - BITMAP DESCRIBING LOCATION OF OUTPUT ELEMENTS.
-C>     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C>          (1)   - UNUSED
-C>          (2)   - UNUSED
-C>          (3)   - LENGTH OF PDS
-C>          (4)   - LENGTH OF GDS
-C>          (5)   - LENGTH OF BMS
-C>          (6)   - LENGTH OF BDS
-C>          (7)   - VALUE OF CURRENT BYTE
-C>          (8)   - UNUSED
-C>          (9)   - GRIB START BYTE NR
-C>         (10)   - GRIB/GRID ELEMENT COUNT
-C>     KRET       - FLAG INDICATING QUALITY OF COMPLETION
-C>
-C> REMARKS: VALUES FOR RETURN FLAG (KRET)
-C>     KRET = 0 - NORMAL RETURN, NO ERRORS
-C>          = 1 - 'GRIB' NOT FOUND IN FIRST 100 CHARS
-C>          = 2 - '7777' NOT IN CORRECT LOCATION
-C>          = 3 - UNPACKED FIELD IS LARGER THAN 32768
-C>          = 4 - GDS/ GRID NOT ONE OF CURRENTLY ACCEPTED VALUES
-C>          = 5 - GRID NOT CURRENTLY AVAIL FOR CENTER INDICATED
-C>          = 8 - TEMP GDS INDICATED, BUT GDS FLAG IS OFF
-C>          = 9 - GDS INDICATES SIZE MISMATCH WITH STD GRID
-C>          =10 - INCORRECT CENTER INDICATOR
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Bill Cavanaugh @date 1988-01-20
       SUBROUTINE W3AI08(MSGA,KPDS,KGDS,KBMS,DATA,KPTR,KRET)
 C                                                         4 AUG 1988
 C                               W3AI08
@@ -525,70 +516,57 @@ C
 C
   900 RETURN
       END
+
+C>Find 'grib; characters and set pointers to the next
+C>byte following 'grib'. If they exist extract counts from gds and
+C>bms. Extract count from bds. determine if sum of counts actually
+C>places terminator '7777' at the correct location.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-01-20
+C> - Ralph Jones 1990-09-01 Change's for ansi fortran.
+C> - Ralph Jones 1990-09-23 Change's for cray cft77 fortran.
+C>
+C> @param[in] msga grib field - "grib" thru "7777".``
+C> @param[inout] kptr array containing storage for following parameters.
+C> - 1: Unused.
+C> - 2: Unused.
+C> - 3: Length of pds.
+C> - 4: Length of gds.
+C> - 5: Length of bms.
+C> - 6: Length of bds.
+C> - 7: Value of current byte.
+C> - 8: Unused.
+C> - 9: Grib start byte.
+C> - 10: Grib/grid element count.
+C> @param[out] kpds     - array containing pds elements..
+C> - 1: Id of center.
+C> - 2: Model identification.
+C> - 3: Grid identification.
+C> - 4: Gds/bms flag.
+C> - 5: Indicator of parameter.
+C> - 6: Type of level.
+C> - 7: Height/pressure , etc of level.
+C> - 8: Year of century.
+C> - 9: Month of year.
+C> - 10: Day of month.
+C> - 11: Hour of day.
+C> - 12: Minute of hour.
+C> - 13: Indicator of forecast time unit.
+C> - 14: Time range 1.
+C> - 15: Time range 2.
+C> - 16: Time range flag.
+C> - 17: Number included in average.
+C> - 18: Version nr of grib specification.
+C> @param[out] kret Error return.
+C>
+C> @note Error returns.
+C> - kret = 1: No 'grib'.
+C> - kret = 2: No '7777' or mislocated (by counts).
+C>
+C> @author Bill Cavanaugh @date 1988-01-20
       SUBROUTINE AI081(MSGA,KPTR,KPDS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    AI081       FIND 'GRIB' CHARS & RESET POINTERS
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 88-01-20
-C
-C ABSTRACT: FIND 'GRIB; CHARACTERS AND SET POINTERS TO THE NEXT
-C   BYTE FOLLOWING 'GRIB'. IF THEY EXIST EXTRACT COUNTS FROM GDS AND
-C   BMS. EXTRACT COUNT FROM BDS. DETERMINE IF SUM OF COUNTS ACTUALLY
-C   PLACES TERMINATOR '7777' AT THE CORRECT LOCATION.
-C
-C PROGRAM HISTORY LOG:
-C   88-01-20  CAVANAUGH
-C   90-09-01  R.E.JONES   CHANGE'S FOR ANSI FORTRAN
-C   90-09-23  R.E.JONES   CHANGE'S FOR CRAY CFT77 FORTRAN
-C
-C USAGE:    CALL AI081(MSGA,KPTR,KPDS,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA       - GRIB FIELD - "GRIB" THRU "7777"
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - UNUSED
-C          (2)   - UNUSED
-C          (3)   - LENGTH OF PDS
-C          (4)   - LENGTH OF GDS
-C          (5)   - LENGTH OF BMS
-C          (6)   - LENGTH OF BDS
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - UNUSED
-C          (9)   - GRIB START BYTE
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR OF CENTURY
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C          (18)  - VERSION NR OF GRIB SPECIFICATION
-C     KPTR       - SEE INPUT LIST
-C     KRET       - ERROR RETURN
-C
-C REMARKS:
-C     ERROR RETURNS
-C     KRET  = 1  -  NO 'GRIB'
-C             2  -  NO '7777' OR MISLOCATED (BY COUNTS)
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
+
 C
 C                       INCOMING MESSAGE HOLDER
       CHARACTER*1   MSGA(*)
@@ -716,72 +694,58 @@ C
  1000 CONTINUE
       RETURN
       END
+
+C> Extract information from the product description
+C> sec, and generate label information to permit storage
+C> in office note 84 format.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-01-20
+C> - Ralph Jones 1990-09-01 Change's for ansi fortran.
+C> - Ralph Jones 1990-09-23 Change's for cray cft77 fortran.
+C> - Ralph Jones 1990-12-05 Change's for grib nov. 21,1990.
+C>
+C> @param[in] msga Array containing grib message.
+C> @param[inout] kptr Array containing storage for following parameters.
+C> - 1: Unused.
+C> - 2: Unused.
+C> - 3: Length of pds.
+C> - 4: Length of gds.
+C> - 5: Length of bms.
+C> - 6: Length of pds.
+C> - 7: Value of current byte.
+C> - 8: Unused.
+C> - 9: Grib start byte nr.
+C> - 10: Grib/grid element count.
+C> @param[out] kpds Array containing pds elements.
+C> - 1: Id of center.
+C> - 2: Model identification.
+C> - 3: Grid identification.
+C> - 4: Gds/bms flag.
+C> - 5: Indicator of parameter.
+C> - 6: Type of level.
+C> - 7: Height/pressure, etc of level.
+C> - 8: Year of century.
+C> - 9: Month of year.
+C> - 10: Day of month.
+C> - 11: Hour of day.
+C> - 12: Minute of hour.
+C> - 13: Indicator of forecast time unit.
+C> - 14: Time range 1.
+C> - 15: Time range 2.
+C> - 16: Time range flag.
+C> - 17: Number included in average.
+C> - 18: Version number of grib spefication.
+C> - 19: Version nr of parameter table.
+C> - 20: Total length of grib message (including section 0).
+C> @param[out] kret error return.
+C>
+C> @note error return:
+C> - = 0 - no errors
+C> - = 8 - temp gds indicated, but no gds
+C>
+C> @author Bill Cavanaugh @date 1988-01-20
       SUBROUTINE AI082(MSGA,KPTR,KPDS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    AI082       GATHER INFO FROM PGM DESC SECTION
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 88-01-20
-C
-C ABSTRACT: EXTRACT INFORMATION FROM THE PRODUCT DESCRIPTION
-C   SEC  , AND GENERATE LABEL INFORMATION TO PERMIT STORAGE
-C   IN OFFICE NOTE 84 FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C   88-01-20  CAVANAUGH
-C   90-09-01  R.E.JONES   CHANGE'S FOR ANSI FORTRAN
-C   90-09-23  R.E.JONES   CHANGE'S FOR CRAY CFT77 FORTRAN
-C   90-12-05  R.E.JONES   CHANGE'S FOR GRIB NOV. 21,1990
-C
-C USAGE:    CALL AI082(MSGA,KPTR,KPDS,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA      - ARRAY CONTAINING GRIB MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - UNUSED
-C          (2)   - UNUSED
-C          (3)   - LENGTH OF PDS
-C          (4)   - LENGTH OF GDS
-C          (5)   - LENGTH OF BMS
-C          (6)   - LENGTH OF PDS
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - UNUSED
-C          (9)   - GRIB START BYTE NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR OF CENTURY
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C          (18)  - VERSION NUMBER OF GRIB SPEFICATION
-C          (19)  - VERSION NR OF PARAMETER TABLE
-C          (20)  - TOTAL LENGTH OF GRIB MESSAGE (INCLUDING SECTION 0)
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET   - ERROR RETURN
-C
-C REMARKS:
-C        ERROR RETURN = 0 - NO ERRORS
-C                     = 8 - TEMP GDS INDICATED, BUT NO GDS
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
 C
 C                       INCOMING MESSAGE HOLDER
       CHARACTER*1   MSGA(*)
@@ -891,102 +855,83 @@ C  ----------- TEST FOR NEW GRID
       END IF
       RETURN
       END
+
+C> Extract information from the product description section (version 1).
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1989-11-20
+C> - Ralph Jones 1990-09-01 Change's for ansi fortran.
+C> - Ralph Jones 1990-09-23 Change's for cray cft77 fortran.
+C> - Ralph Jones 1990-12-05 Change's for grib nov. 21,1990.
+C>
+C> @param[in] MSGA Array containing grib message.
+C> @param[inout] KPTR Array containing storage for following parameters.
+C> - 1: Unused.
+C> - 2: Unused.
+C> - 3: Length of pds.
+C> - 4: Length of gds.
+C> - 5: Length of bms.
+C> - 6: Length of pds.
+C> - 7: Value of current byte.
+C> - 8: Unused.
+C> - 9: Grib start byte nr.
+C> - 10: Grib/grid element count.
+C>
+C> @param[out] KPDS Array containing pds elements.
+C> - 1: Id of center
+C> - 2: Model identi.fication
+C> - 3: Grid identification.
+C> - 4: Gds/bms flag.
+C> - 5: Indicator of. parameter
+C> - 6: Type of level.
+C> - 7: Height/pressu.re , etc of level
+C> - 8: Year (including century).
+C> - 9: Month of year.
+C> - 10: Day of month..
+C> - 11: Hour of day.
+C> - 12: Minute of hour.
+C> - 13: Indicator of forecast time unit.
+C> - 14: Time range 1.
+C> - 15: Time range 2.
+C> - 16: Time range flag.
+C> - 17: Number included in average.
+C> - 18: Version nr of grib specification.
+C> - 19: Version nr of parameter table.
+C> - 20: Total byte count for source message.
+C> @param[out] KRET Error return.
+C>
+C> @note Source pds structure (version 1).
+C> - 1-3: Length of pds section in bytes.
+C> - 4: Parameter table version no. for international exchange (crrently no. 1).
+C> - 5: Center id.
+C> - 6: Model id.
+C> - 7: Grid id.
+C> - 8: Flag for gds/bms.
+C> - 9: Indicator for parameter.
+C> - 10: Indicator for type of level.
+C> - 11-12: Height, pressure of level.
+C> - 13: Year of century.
+C> - 14: Month.
+C> - 15: Day.
+C> - 16: Hour.
+C> - 17: Minute.
+C> - 18: Forecast time unit.
+C> - 19: P1 - pd of time.
+C> - 20: P2 - pd of time.
+C> - 21: Time range indicator.
+C> - 22-23: Number in average.
+C> - 24: Number misg from averages.
+C> - 25: Century.
+C> - 26: Indicator of parameter in locally re-defined parameter table..
+C> - 27-28: Units decimal scale factor (d).
+C> - 29-40: Reserved: need not be present.
+C> - 41-NN: National use.
+C> - Error return:
+C>  - = 0 - No errors.
+C>  - = 8 - Temp gds indicated, but no gds.
+C>
+C> @author Bill Cavanaugh @date 1988-01-20
       SUBROUTINE AI082A(MSGA,KPTR,KPDS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    AI082A      GATHER INFO FROM PGM DESC SECTION
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 88-01-20
-C
-C ABSTRACT: EXTRACT INFORMATION FROM THE PRODUCT DESCRIPTION SECTION
-C   (VERSION 1)
-C
-C PROGRAM HISTORY LOG:
-C   89-11-20  CAVANAUGH
-C   90-09-01  R.E.JONES   CHANGE'S FOR ANSI FORTRAN
-C   90-09-23  R.E.JONES   CHANGE'S FOR CRAY CFT77 FORTRAN
-C   90-12-05  R.E.JONES   CHANGE'S FOR GRIB NOV. 21,1990
-C
-C USAGE:    CALL AI082A(MSGA,KPTR,KPDS,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA      - ARRAY CONTAINING GRIB MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - UNUSED
-C          (2)   - UNUSED
-C          (3)   - LENGTH OF PDS
-C          (4)   - LENGTH OF GDS
-C          (5)   - LENGTH OF BMS
-C          (6)   - LENGTH OF PDS
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - UNUSED
-C          (9)   - GRIB START BYTE NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C
-C   OUTPUT ARGUMENT LIST:
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR (INCLUDING CENTURY)
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C          (18)  - VERSION NR OF GRIB SPECIFICATION
-C          (19)  - VERSION NR OF PARAMETER TABLE
-C          (20)  - TOTAL BYTE COUNT FOR SOURCE MESSAGE
-C
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET   - ERROR RETURN
-C
-C REMARKS:
-C     SOURCE PDS STRUCTURE (VERSION 1)
-C        1-3     - LENGTH OF PDS SECTION IN BYTES
-C         4      - PARAMETER TABLE VERSION NO. FOR INTERNATIONAL
-C                  EXCHANGE (CRRENTLY NO. 1)
-C         5      - CENTER ID
-C         6      - MODEL ID
-C         7      - GRID ID
-C         8      - FLAG FOR GDS/BMS
-C         9      - INDICATOR FOR PARAMETER
-C        10      - INDICATOR FOR TYPE OF LEVEL
-C       11-12    - HEIGHT, PRESSURE OF LEVEL
-C        13      - YEAR OF CENTURY
-C        14      - MONTH
-C        15      - DAY
-C        16      - HOUR
-C        17      - MINUTE
-C        18      - FORECAST TIME UNIT
-C        19      - P1 - PD OF TIME
-C        20      - P2 - PD OF TIME
-C        21      - TIME RANGE INDICATOR
-C       22-23    - NUMBER IN AVERAGE
-C        24      - NUMBER MISG FROM AVERAGES
-C        25      - CENTURY
-C        26      - INDICATOR OF PARAMETER IN LOCALLY RE-DEFINED
-C                  PARAMETER TABLE.
-C       27-28    - UNITS DECIMAL SCALE FACTOR (D)
-C       29-40    - RESERVED: NEED NOT BE PRESENT
-C       41-NN    - NATIONAL USE
-C         .
-C
-C        ERROR RETURN = 0 - NO ERRORS
-C                     = 8 - TEMP GDS INDICATED, BUT NO GDS
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
 C
 C                       INCOMING MESSAGE HOLDER
       CHARACTER*1   MSGA(*)
@@ -1105,126 +1050,111 @@ C  ----------- TEST FOR NEW GRID
       END IF
       RETURN
       END
+
+C> Extract information on unlisted grid to allow conversion to office note 84 format.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-01-20
+C> - Bill Cavanaugh 1989-03-16 Added mercator & lambert conformal processing.
+C> - Bill Cavanaugh 1989-07-12 Corrected change entered 89-03-16 reordering
+C> processing for lambert conformal and mercator grids.
+C> - Ralph Jones 1990-09-23 Change's for cray cft77 fortran.
+C>
+C> @param[in] MSGA Array containing grib message.
+C> @param[inout] KPTR Array containing storage for following parameters.
+C> - 1): Unused.
+C> - 2): Unused.
+C> - 3): Length of pds.
+C> - 4): Length of gds.
+C> - 5): Length of bms.
+C> - 6): Length of bds.
+C> - 7): Value of current byte.
+C> - 8): Unused.
+C> - 9): Grib start byte nr.
+C> - 0): Grib/grid element count.
+C> @param[in] KPDS Array containing pds elements.
+C> - 1): Id of center.
+C> - 2): Model identification.
+C> - 3): Grid identification.
+C> - 4): Gds/bms flag.
+C> - 5): Indicator of parameter.
+C> - 6): Type of level.
+C> - 7): Height/pressure , etc of level.
+C> - 8): Year of century.
+C> - 9): Month of year.
+C> - 10: Day of month.
+C> - 11: Hour of day.
+C> - 12: Minute of hour.
+C> - 13: Indicator of forecast time unit.
+C> - 14: Time range 1.
+C> - 15: Time range 2.
+C> - 16: Time range flag.
+C> - 17: Number included in average.
+C> - 18: Version nr of grib specification.
+C> @param[out] KGDS Array containing gds elements..
+C> - 1): Data representation type.
+C> - Latitude/Longitude grids
+C>  - 2): N(i) nr points on latitude circle.
+C>  - 3): N(j) nr points on longitude meridian.
+C>  - 4): La(1) latitude of origin.
+C>  - 5): Lo(1) longitude of origin.
+C>  - 6): Resolution flag.
+C>  - 7): La(2) latitude of extreme point.
+C>  - 8): Lo(2) longitude of extreme point.
+C>  - 9): Di longitudinal direction of increment.
+C>  - 10: Dj latitudinal direction of increment.
+C>  - 11: Scanning mode flag.
+C> - Polar stereographic grids.
+C>  - 2): N(i) nr points along lat circle.
+C>  - 3): N(j) nr points along lon circle.
+C>  - 4): La(1) latitude of origin.
+C>  - 5): Lo(1) longitude of origin.
+C>  - 6): Reserved.
+C>  - 7): Lov grid orientation.
+C>  - 8): Dx - x direction increment.
+C>  - 9): Dy - y direction increment.
+C>  - 10: Projection center flag.
+C>  - 11: Scanning mode.
+C> - Spherical harmonic coefficients.
+C>  - 2): J pentagonal resolution parameter.
+C>  - 3): K pentagonal resolution parameter.
+C>  - 4): M pentagonal resolution parameter.
+C>  - 5): Representation type.
+C>  - 6): Coefficient storage mode.
+C> - Mercator grids.
+C>  - 2): N(i) nr points on latitude circle.
+C>  - 3): N(j) nr points on longitude meridian.
+C>  - 4): La(1) latitude of origin.
+C>  - 5): Lo(1) longitude of origin.
+C>  - 6): Resolution flag.
+C>  - 7): La(2) latitude of last grid point.
+C>  - 8): Lo(2) longitude of last grid point.
+C>  - 9): Longit dir increment.
+C>  - 10: Latit dir increment.
+C>  - 11: Scanning mode flag.
+C>  - 12: Latitude intersection.
+C> - Lambert conformal grids.
+C>  - 2): Nx nr points along x-axis.
+C>  - 3): Ny nr points along y-axis.
+C>  - 4): La1 lat of origin (lower left).
+C>  - 5): Lo1 lon of origin (lower left).
+C>  - 6): Reserved.
+C>  - 7): Lov - orientation of grid.
+C>  - 8): Dx - x-dir increment.
+C>  - 9): Dy - y-dir increment.
+C>  - 10: Projection center flag.
+C>  - 11: Scanning mode flag.
+C>  - 12: Latin 1 - first lat from pole of secant cone inter.
+C>  - 13: Latin 2 - second lat from pole of secant cone inter.
+C> @param[out] KRET Error return.
+C>
+C> @note KRET
+C> - = 0
+C> - = 4   - DATA REPRESENTATION TYPE NOT CURRENTLY ACCEPTABLE
+C>
+C> @author Bill Cavanaugh @date 1988-01-20
+
       SUBROUTINE AI083(MSGA,KPTR,KPDS,KGDS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    AI083       EXTRACT INFO FROM GRIB-GDS
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 88-01-20
-C
-C ABSTRACT: EXTRACT INFORMATION ON UNLISTED GRID TO ALLOW
-C   CONVERSION TO OFFICE NOTE 84 FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C   88-01-20  CAVANAUGH
-C   89-03-16  CAVANAUGH   ADDED MERCATOR & LAMBERT CONFORMAL PROCESSING
-C   89-07-12  CAVANAUGH   CORRECTED CHANGE ENTERED 89-03-16 REORDERING
-C                         PROCESSING FOR LAMBERT CONFORMAL AND MERCATOR
-C                         GRIDS.
-C   90-09-23  R.E.JONES   CHANGE'S FOR CRAY CFT77 FORTRAN
-C
-C USAGE:    CALL AI083(MSGA,KPTR,KPDS,KGDS,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA      - ARRAY CONTAINING GRIB MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - UNUSED
-C          (2)   - UNUSED
-C          (3)   - LENGTH OF PDS
-C          (4)   - LENGTH OF GDS
-C          (5)   - LENGTH OF BMS
-C          (6)   - LENGTH OF BDS
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - UNUSED
-C          (9)   - GRIB START BYTE NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR OF CENTURY
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C          (18)  - VERSION NR OF GRIB SPECIFICATION
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KGDS     - ARRAY CONTAINING GDS ELEMENTS.
-C          (1)   - DATA REPRESENTATION TYPE
-C       LATITUDE/LONGITUDE GRIDS
-C          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C          (4)   - LA(1) LATITUDE OF ORIGIN
-C          (5)   - LO(1) LONGITUDE OF ORIGIN
-C          (6)   - RESOLUTION FLAG
-C          (7)   - LA(2) LATITUDE OF EXTREME POINT
-C          (8)   - LO(2) LONGITUDE OF EXTREME POINT
-C          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C          (10)  - DJ LATITUDINAL DIRECTION OF INCREMENT
-C          (11)  - SCANNING MODE FLAG
-C       POLAR STEREOGRAPHIC GRIDS
-C          (2)   - N(I) NR POINTS ALONG LAT CIRCLE
-C          (3)   - N(J) NR POINTS ALONG LON CIRCLE
-C          (4)   - LA(1) LATITUDE OF ORIGIN
-C          (5)   - LO(1) LONGITUDE OF ORIGIN
-C          (6)   - RESERVED
-C          (7)   - LOV GRID ORIENTATION
-C          (8)   - DX - X DIRECTION INCREMENT
-C          (9)   - DY - Y DIRECTION INCREMENT
-C          (10)  - PROJECTION CENTER FLAG
-C          (11)  - SCANNING MODE
-C       SPHERICAL HARMONIC COEFFICIENTS
-C          (2)   - J PENTAGONAL RESOLUTION PARAMETER
-C          (3)   - K      "          "         "
-C          (4)   - M      "          "         "
-C          (5)   - REPRESENTATION TYPE
-C          (6)   - COEFFICIENT STORAGE MODE
-C       MERCATOR GRIDS
-C          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C          (4)   - LA(1) LATITUDE OF ORIGIN
-C          (5)   - LO(1) LONGITUDE OF ORIGIN
-C          (6)   - RESOLUTION FLAG
-C          (7)   - LA(2) LATITUDE OF LAST GRID POINT
-C          (8)   - LO(2) LONGITUDE OF LAST GRID POINT
-C          (9)   - LONGIT DIR INCREMENT
-C          (10)  - LATIT DIR INCREMENT
-C          (11)  - SCANNING MODE FLAG
-C          (12)  - LATITUDE INTERSECTION
-C       LAMBERT CONFORMAL GRIDS
-C          (2)   - NX NR POINTS ALONG X-AXIS
-C          (3)   - NY NR POINTS ALONG Y-AXIS
-C          (4)   - LA1 LAT OF ORIGIN (LOWER LEFT)
-C          (5)   - LO1 LON OF ORIGIN (LOWER LEFT)
-C          (6)   - RESERVED
-C          (7)   - LOV - ORIENTATION OF GRID
-C          (8)   - DX - X-DIR INCREMENT
-C          (9)   - DY - Y-DIR INCREMENT
-C          (10)  - PROJECTION CENTER FLAG
-C          (11)  - SCANNING MODE FLAG
-C          (12)  - LATIN 1 - FIRST LAT FROM POLE OF SECANT CONE INTER
-C          (13)  - LATIN 2 - SECOND LAT FROM POLE OF SECANT CONE INTER
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET       - ERROR RETURN
-C
-C REMARKS:
-C     KRET = 0
-C          = 4   - DATA REPRESENTATION TYPE NOT CURRENTLY ACCEPTABLE
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
 C  ************************************************************
 C                       INCOMING MESSAGE HOLDER
       CHARACTER*1   MSGA(*)
@@ -1573,80 +1503,115 @@ C  -------------------
   900 CONTINUE
       RETURN
       END
+
+C> If bit map sec is available in grib message,extract
+C> for program use, otherwise generate an appropriate bit map.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-01-20
+C> - Bill Cavanaugh 1989-02-24 Increment of position in bit map when bit map was included was handled improperly. corrected this data.
+C> - Bill Cavanaugh 1989-07-12 Altered method of calculating nr of bits in a bit map contained in grib message.
+C> - Bill Cavanaugh 1990-05-07 Brings all u.s. grids to revised values as of dec 89.
+C> - William Bostelman 1990-07-15 Modiifed to test the grib bds byte size to determine what ecmwf grid array size is to be specified.
+C> - Ralph Jones 1990-09-23 Change's for cray cft77 fortran.
+C> - Ralph Jones 1990-12-05 Change's for grib nov. 21,1990.
+C>
+C> @param[in] MSGA BUFR message.
+C> @param[inout] KPTR Array containing storage for following parameters.
+C> - 1: Unused.
+C> - 2: Unused.
+C> - 3: Length of pds.
+C> - 4: Length of gds.
+C> - 5: Length of bms.
+C> - 6: Length of bds.
+C> - 7: Value of current byte.
+C> - 8: Unused.
+C> - 9: Grib start byte nr.
+C> - 10: Grib/grid element count.
+C> @param[in] KPDS ARRAY CONTAINING PDS ELEMENTS.
+C> - 1: Id of center.
+C> - 2: Model identification.
+C> - 3: Grid identification.
+C> - 4: Gds/bms flag.
+C> - 5: Indicator of parameter.
+C> - 6: Type of level.
+C> - 7: Height/pressure , etc of level.
+C> - 8: Year of century.
+C> - 9: Month of year.
+C> - 10: Day of month.
+C> - 11: Hour of day.
+C> - 12: Minute of hour.
+C> - 13: Indicator of forecast time unit.
+C> - 14: Time range 1.
+C> - 15: Time range 2.
+C> - 16: Time range flag.
+C> - 17: Number included in average.
+C> - 18: Version nr of grib specification.
+C> @param[out] kgds array containing gds elements.
+C> - 1: data representation type
+C> - Latitude/longitude grids
+C>  - 2: n(i) nr points on latitude circle
+C>  - 3: n(j) nr points on longitude meridian
+C>  - 4: la(1) latitude of origin
+C>  - 5: lo(1) longitude of origin
+C>  - 6: resolution flag
+C>  - 7: la(2) latitude of extreme point
+C>  - 8: lo(2) longitude of extreme point
+C>  - 9: di longitudinal direction of increment
+C>  - 10: dj latitundinal direction of increment
+C>  - 11: scanning mode flag
+C> - Polar stereographic grids
+C>  - 2: n(i) nr points along lat circle
+C>  - 3: n(j) nr points along lon circle
+C>  - 4: la(1) latitude of origin
+C>  - 5: lo(1) longitude of origin
+C>  - 6: reserved
+C>  - 7: lov grid orientation
+C>  - 8: dx - x direction increment
+C>  - 9: dy - y direction increment
+C>  - 10: projection center flag
+C>  - 11: scanning mode
+C> - Spherical harmonic coefficients
+C>  - 2: j pentagonal resolution parameter
+C>  - 3: k pentagonal resolution parameter
+C>  - 4: m pentagonal resolution parameter
+C>  - 5: representation type
+C>  - 6: coefficient storage mode
+C> - Mercator grids
+C>  - 2: n(i) nr points on latitude circle
+C>  - 3: n(j) nr points on longitude meridian
+C>  - 4: la(1) latitude of origin
+C>  - 5: lo(1) longitude of origin
+C>  - 6: resolution flag
+C>  - 7: la(2) latitude of last grid point
+C>  - 8: lo(2) longitude of last grid point
+C>  - 9: longit dir increment
+C>  - 10: latit dir increment
+C>  - 11: scanning mode flag
+C>  - 12: latitude intersection
+C> - Lambert conformal grids
+C>  - 2: nx nr points along x-axis
+C>  - 3: ny nr points along y-axis
+C>  - 4: la1 lat of origin (lower left)
+C>  - 5: lo1 lon of origin (lower left)
+C>  - 6: reserved
+C>  - 7: lov - orientation of grid
+C>  - 8: dx - x-dir increment
+C>  - 9: dy - y-dir increment
+C>  - 10: projection center flag
+C>  - 11: scanning mode flag
+C>  - 12: latin 1 - first lat from pole of secant cone inter
+C>  - 13: latin 2 - second lat from pole of secant cone inter
+C> @param[out] KBMS Bitmap describing location of output elements..
+C> @param[out] KRET Error return.
+C>
+C> @note KRET
+C> - = 0 - No error.
+C> - = 5 - Grid not avail for center indicated.
+C> - = 10 - Incorrect center indicator.
+C>
+C> @author Bill Cavanaugh @date 1988-01-20
       SUBROUTINE AI084(MSGA,KPTR,KPDS,KGDS,KBMS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    AI084       EXTRACT OR GENERATE BIT MAP FOR OUTPUT
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 88-01-20
-C
-C ABSTRACT: IF BIT MAP SEC   IS AVAILABLE IN GRIB MESSAGE, EXTRACT
-C   FOR PROGRAM USE, OTHERWISE GENERATE AN APPROPRIATE BIT MAP.
-C
-C PROGRAM HISTORY LOG:
-C   88-01-20  CAVANAUGH
-C   89-02-24  CAVANAUGH   INCREMENT OF POSITION IN BIT MAP WHEN BIT MAP
-C                         WAS INCLUDED WAS HANDLED IMPROPERLY.
-C                         CORRECTED THIS DATA.
-C   89-07-12  CAVANAUGH   ALTERED METHOD OF CALCULATING NR OF BITS
-C                         IN A BIT MAP CONTAINED IN GRIB MESSAGE.
-C   90-05-07  CAVANAUGH   BRINGS ALL U.S. GRIDS TO
-C                         REVISED VALUES AS OF DEC 89.
-C   90-07-15  BOSTELMAN   MODIIFED TO TEST
-C                         THE GRIB BDS BYTE SIZE TO DETERMINE WHAT
-C                         ECMWF GRID ARRAY SIZE IS TO BE SPECIFIED.
-C   90-09-23  R.E.JONES   CHANGE'S FOR CRAY CFT77 FORTRAN
-C   90-12-05  R.E.JONES   CHANGE'S FOR GRIB NOV. 21,1990
-C
-C USAGE:    CALL AI084(MSGA,KPTR,KPDS,KGDS,KBMS,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA       - BUFR MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - UNUSED
-C          (2)   - UNUSED
-C          (3)   - LENGTH OF PDS
-C          (4)   - LENGTH OF GDS
-C          (5)   - LENGTH OF BMS
-C          (6)   - LENGTH OF BDS
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - UNUSED
-C          (9)   - GRIB START BYTE NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR OF CENTURY
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C          (18)  - VERSION NR OF GRIB SPECIFICATION
-C
-C   OUTPUT ARGUMENT LIST:
-C     KBMS       - BITMAP DESCRIBING LOCATION OF OUTPUT ELEMENTS.
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET       - ERROR RETURN
-C
-C REMARKS:
-C     KRET   = 0 - NO ERROR
-C            = 5 - GRID NOT AVAIL FOR CENTER INDICATED
-C            =10 - INCORRECT CENTER INDICATOR
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
 C
 C                       INCOMING MESSAGE HOLDER
       CHARACTER*1   MSGA(*)
@@ -2048,73 +2013,57 @@ C                   ----- U.S. GRID 103 - MAP SIZE 3640  (65 X 56)
   900 CONTINUE
       RETURN
       END
+
+C> Extract grib data and place into output arry in proper position.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-01-20
+C> - Ralph Jones 1990-09-01 Change's for ansi fortran.
+C> - Ralph Jones 1990-09-23 Change's for cray cft77 fortran.
+C> - Ralph Jones 1990-12-05 Change's for grib nov. 21,1990.
+C>
+C> @param[in] MSGA Array containing grib message.
+C> @param[inout] KPTR Array containing storage for following parameters.
+C> - 1: Unused.
+C> - 2: Unused.
+C> - 3: Length of pds.
+C> - 4: Length of gds.
+C> - 5: Length of bms.
+C> - 6: Length of bds.
+C> - 7: Value of current byte.
+C> - 8: Unused.
+C> - 9: Grib start byte nr.
+C> - 10: Grib/grid element count.
+C> @param[in] KPDS Array containing pds elements.
+C> - 1: Id of center.
+C> - 2: Model identification.
+C> - 3: Grid identification.
+C> - 4: Gds/bms flag.
+C> - 5: Indicator of parameter.
+C> - 6: Type of level.
+C> - 7: Height/pressure , etc of level.
+C> - 8: Year of century.
+C> - 9: Month of year.
+C> - 10: Day of month.
+C> - 11: Hour of day.
+C> - 12: Minute of hour.
+C> - 13: Indicator of forecast time unit.
+C> - 14: Time range 1.
+C> - 15: Time range 2.
+C> - 16: Time range flag.
+C> - 17: Number included in average.
+C> - 18: Version nr of grib specification.
+C> @param[in] KBMS Bitmap describing location of output elements.
+C> @param[out] DATA Real array of gridded elements in grib message.
+C> @param[out] KRET Error return.
+C>
+C> @note Error return.
+C> - 3 = Unpacked field is larger than 32768.
+C> - 6 = Does not match nr of entries for this grib/grid.
+C> - 7 = Number of bits in fill too large.
+C>
+C> @author Bill Cavanaugh @date 1988-01-20
       SUBROUTINE AI085(MSGA,KPTR,KPDS,KBMS,DATA,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    AI085         EXTRACT GRIB DATA ELEMENTS
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 88-01-20
-C
-C ABSTRACT: EXTRACT GRIB DATA AND PLACE INTO OUTPUT ARRY IN
-C   PROPER POSITION.
-C
-C PROGRAM HISTORY LOG:
-C   88-01-20  CAVANAUGH
-C   90-09-01  R.E.JONES   CHANGE'S FOR ANSI FORTRAN
-C   90-09-23  R.E.JONES   CHANGE'S FOR CRAY CFT77 FORTRAN
-C   90-12-05  R.E.JONES   CHANGE'S FOR GRIB NOV. 21,1990
-C
-C USAGE:    CALL AI085(MSGA,KPTR,KPDS,KBMS,DATA,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA       - ARRAY CONTAINING GRIB MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - UNUSED
-C          (2)   - UNUSED
-C          (3)   - LENGTH OF PDS
-C          (4)   - LENGTH OF GDS
-C          (5)   - LENGTH OF BMS
-C          (6)   - LENGTH OF BDS
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - UNUSED
-C          (9)   - GRIB START BYTE NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR OF CENTURY
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C          (18)  - VERSION NR OF GRIB SPECIFICATION
-C     KBMS       - BITMAP DESCRIBING LOCATION OF OUTPUT ELEMENTS.
-C
-C   OUTPUT ARGUMENT LIST:
-C     DATA       - REAL   ARRAY OF GRIDDED ELEMENTS IN GRIB MESSAGE.
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET       - ERROR RETURN
-C
-C REMARKS:
-C     ERROR RETURN
-C              3 = UNPACKED FIELD IS LARGER THAN 32768
-C              6 = DOES NOT MATCH NR OF ENTRIES FOR THIS GRIB/GRID
-C              7 = NUMBER OF BITS IN FILL TOO LARGE
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
 C  *************************************************************
       CHARACTER*1   MSGA(*)
       CHARACTER*1   KREF(8)
@@ -2348,82 +2297,68 @@ C  --------------
   900 CONTINUE
       RETURN
       END
+
+
+C> Extract grib data (version 1) and place into proper position in output array.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1989-11-20
+C> - Ralph Jones 1990-09-01 Change's for ansi fortran.
+C> - Ralph Jones 1990-09-23 Change's for cray cft77 fortran.
+C> - Ralph Jones 1990-12-05 Change's for grib nov. 21,1990.
+C>
+C> @param[in] MSGA Array containing grib message.
+C> @param[inout] KPTR Array containing storage for following parameters.
+C> - 1:Unused.
+C> - 2:Unused.
+C> - 3:Length of pds.
+C> - 4:Length of gds.
+C> - 5:Length of bms.
+C> - 6:Length of bds.
+C> - 7:Value of current byte.
+C> - 8:Unused.
+C> - 9:Grib start byte nr.
+C> - 10:Grib/grid element count.
+C> @param[in] KPDS Array containing pds elements.  (version 1)
+C> - 1: Id of center.
+C> - 2: Model identification.
+C> - 3: Grid identification.
+C> - 4: Gds/bms flag.
+C> - 5: Indicator of parameter.
+C> - 6: Type of level.
+C> - 7: Height/pressure , etc of level.
+C> - 8: Year including century.
+C> - 9: Month of year.
+C> - 10: Day of month.
+C> - 11: Hour of day.
+C> - 12: Minute of hour.
+C> - 13: Indicator of forecast time unit.
+C> - 14: Time range 1.
+C> - 15: Time range 2.
+C> - 16: Time range flag.
+C> - 17: Number included in average.
+C> - 18: Version nr of grib specification.
+C> - 19: Version nr of parameter table.
+C> - 20: Total length of grib message (including section 0).
+C> @param[in] KBMS Bitmap describing location of output elements.
+C> @param[out] DATA Real array of gridded elements in grib message.
+C> @param[out] KRET Error return.
+C>
+C> @note Structure of binary data section (version 1)
+C> - 1-3: LENGTH OF SECTION
+C> - 4: PACKING FLAGS
+C> - 5-6: SCALE FACTOR
+C> - 7-10: REFERENCE VALUE
+C> - 11: NUMBER OF BIT FOR EACH VALUE
+C> - 12s-N: DATA
+C>
+C> @note Error return:
+C> - 3 = Unpacked field is larger than 32768.
+C> - 6 = Does not match nr of entries for this grib/grid.
+C> - 7 = Number of bits in fill too large.
+C>
+C> @author Bill Cavanaugh @date 1989-11-20
       SUBROUTINE AI085A(MSGA,KPTR,KPDS,KBMS,DATA,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    AI085A        EXTRACT GRIB DATA (VER 1) ELEMENTS
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 89-11-20
-C
-C ABSTRACT: EXTRACT GRIB DATA (VERSION 1) AND PLACE INTO PROPER
-C   POSITION IN OUTPUT ARRAY.
-C
-C PROGRAM HISTORY LOG:
-C   89-11-20  CAVANAUGH
-C   90-09-01  R.E.JONES   CHANGE'S FOR ANSI FORTRAN
-C   90-09-23  R.E.JONES   CHANGE'S FOR CRAY CFT77 FORTRAN
-C   90-12-05  R.E.JONES   CHANGE'S FOR GRIB NOV. 21,1990
-C
-C USAGE:    CALL AI085A (MSGA,KPTR,KPDS,KBMS,DATA,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA       - ARRAY CONTAINING GRIB MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - UNUSED
-C          (2)   - UNUSED
-C          (3)   - LENGTH OF PDS
-C          (4)   - LENGTH OF GDS
-C          (5)   - LENGTH OF BMS
-C          (6)   - LENGTH OF BDS
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - UNUSED
-C          (9)   - GRIB START BYTE NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.  (VERSION 1)
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR INCLUDING CENTURY
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C          (18)  - VERSION NR OF GRIB SPECIFICATION
-C          (19)  - VERSION NR OF PARAMETER TABLE
-C          (20)  - TOTAL LENGTH OF GRIB MESSAGE (INCLUDING SECTION 0)
-C     KBMS       - BITMAP DESCRIBING LOCATION OF OUTPUT ELEMENTS.
-C
-C   OUTPUT ARGUMENT LIST:
-C     DATA       - REAL   ARRAY OF GRIDDED ELEMENTS IN GRIB MESSAGE.
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET       - ERROR RETURN
-C
-C REMARKS:
-C   STRUCTURE OF BINARY DATA SECTION (VERSION 1)
-C       1-3      - LENGTH OF SECTION
-C        4       - PACKING FLAGS
-C       5-6      - SCALE FACTOR
-C       7-10     - REFERENCE VALUE
-C       11       - NUMBER OF BIT FOR EACH VALUE
-C      12-N      - DATA
-C   ERROR RETURN
-C              3 = UNPACKED FIELD IS LARGER THAN 32768
-C              6 = DOES NOT MATCH NR OF ENTRIES FOR THIS GRIB/GRID
-C              7 = NUMBER OF BITS IN FILL TOO LARGE
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
 C  *************************************************************
       CHARACTER*1   MSGA(*)
       CHARACTER*1   KREF(8)
@@ -2673,38 +2608,25 @@ C
   900 CONTINUE
       RETURN
       END
-      SUBROUTINE AI087(*,J,KPDS,KGDS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    AI087       GRIB GRID/SIZE TEST
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 88-02-08
-C
-C ABSTRACT: TO TEST WHEN GDS IS AVAILABLE TO SEE IF SIZE MISMATCH
-C   ON EXISTING GRIDS (BY CENTER) IS INDICATED
-C
-C PROGRAM HISTORY LOG:
-C   88-02-08  CAVANAUGH
-C   90-09-23  R.E.JONES   CHANGE'S FOR CRAY CFT77 FORTRAN
-C   90-12-05  R.E.JONES   CHANGE'S FOR GRIB NOV. 21,1990
-C
-C USAGE:    CALL AI087(*,J,KPDS,KGDS,KRET)
-C   INPUT ARGUMENT LIST:
-C     J        - SIZE FOR INDICATED GRID
-C     KPDS     -
-C     KGDS     -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KRET     - ERROR RETURN
-C
-C REMARKS:
-C     KRET     -
-C          = 9 - GDS INDICATES SIZE MISMATCH WITH STD GRID
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
+
+C> To test when gds is available to see if size mismatch
+C> on existing grids (by center) is indicated.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-02-08
+C> - Ralph Jones 1990-09-23 Change's for cray cft77 fortran.
+C> - Ralph Jones 1990-12-05 Change's for grib nov. 21,1990.
+C>
+C> @param[in] J Size for indicated grid.
+C> @param[in] KPDS
+C> @param[in] KGDS
+C> @param[out] KRET Error return.
+C>
+C> @note KRET = 9 - GDS indicates size mismatch with std grid.
+C>
+C> @author Bill Cavanaugh @date 1988-02-08
 C$$$
+      SUBROUTINE AI087(*,J,KPDS,KGDS,KRET)
       INTEGER       KPDS(20)
       INTEGER       KGDS(13)
       INTEGER       J

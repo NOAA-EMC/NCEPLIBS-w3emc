@@ -1,63 +1,51 @@
 C> @file
-C
-C> SUBR: W3AI15   - CONVERT INTEGERS TO ACSII (ALTERNATE TO ENCODE)
-C>   AUTHOR: ALLARD, R.         ORG: W342          DATE: JANUARY, 1974
+C> @brief Converts a set of binary numbers to an equivalent set
+C> of ascii number fields in core.
+C> @author R. Allard @date 1974-01
+
+C> Converts a set of binary numbers to an equivalent set
+C> of ascii number fields in core. This is an alternate procedure
+C> to the use of the 360/195 version of encode.
 C>
-C> ABSTRACT: CONVERTS A SET OF BINARY NUMBERS TO AN EQUIVALENT SET
-C>   OF ASCII NUMBER FIELDS IN CORE.  THIS IS AN ALTERNATE PROCEDURE
-C>   TO THE USE OF THE 360/195 VERSION OF ENCODE.
+C> Program history log:
+C> - R. Allard 1974-01-15
+C> - Ralph Jones 1989-02-06 Change from assembler to fortran
+C> this subroutine should be rewritten in intel 8088 assembly language.
+C> - Ralph Jones 1990-08-13 Change to cray cft77 fortran.
+C> - Boi Vuong 2012-11-05 Change variable zero fill for little-endian.
 C>
-C> PROGRAM HISTORY LOG:
-C>   74-01-15  R.ALLARD
-C>   89-02-06  R.E.JONES   CHANGE FROM ASSEMBLER TO FORTRAN
-C>                         THIS SUBROUTINE SHOULD BE REWRITTEN IM
-C>                         INTEL 8088 ASSEMBLY LANGUAGE
-C>   90-08-13  R.E.JONES   CHANGE TO CRAY CFT77 FORTRAN
-C>   12-11-05  B. VUONG    CHANGE VARIABLE ZERO FILL FOR LITTLE-ENDIAN
+C> @param[in] NBUFA Input array (integer*4).
+C> @param[in] N1 Number of integers in nbufa to be converted.
+C> @param[in] N2 Desired character width of ascii number field.
+C> @param[in] MINUS Character to be inserted in the high order position
+C> of a negative number field.
+C> @param[out] NBUFB Output array (integer*4).
 C>
-C> USAGE: CALL W3AI15 (NBUFA,NBUFB,N1,N2,MINUS)
+C> @note If n2 is greater than 4, allow two words (eight characters)
+C> in the nbufb array for each ascii number field. A number field
+C> is left adjusted with blank fill to the right if needed.
+C> Likewise, if n2 is less than 4, the result is left adjusted
+C> with blank fill to the right.
 C>
-C>   INPUT:
-C>     'NBUFA' - INPUT ARRAY (INTEGER*4)
-C>     '   N1' - NUMBER OF INTEGERS IN NBUFA TO BE CONVERTED
-C>     '   N2' - DESIRED CHARACTER WIDTH OF ASCII NUMBER FIELD
-C>     'MINUS' - CHARACTER TO BE INSERTED IN THE HIGH ORDER POSITION
-C>               OF A NEGATIVE NUMBER FIELD
-C>   OUTPUT:
-C>     'NBUFB' - OUTPUT ARRAY (INTEGER*4)
+C> @note N2 can be specified in the range 1-8. An eight digit positive
+C> integer can be converted or a seven digit negative integer
+C> and a sign. Zero fill is used for high order positions in a
+C> number field. The user should be aware that w3ai15 does not
+C> verify that the value of n2 is in the correct range.
 C>
-C>   EXIT STATES: NONE
+C> @note The minus sign can be inserted as a literal in the call
+C> sequence or defined in a data statement. 1h- and 1h+ are the
+C> two most likely negative signs. Unfortunately the ascii plus
+C> character is the negative sign required in most transmissions.
+C> The minus sign will always be in the high order position of a
+C> negative number field.
 C>
-C>   EXTERNAL REFERENCES: NONE
+C> @note If a number contains more digits than the n2 specification
+C> allows, the excess high order digits are lost.
 C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author R. Allard @date 1974-01
       SUBROUTINE  W3AI15 (NBUFA,NBUFB,N1,N2,MINUS)
-C
-C NOTE 1. - IF N2 IS GREATER THAN 4, ALLOW TWO WORDS (EIGHT CHARACTERS)
-C     IN THE NBUFB ARRAY FOR EACH ASCII NUMBER FIELD.  A NUMBER FIELD
-C     IS LEFT ADJUSTED WITH BLANK FILL TO THE RIGHT IF NEEDED.
-C     LIKEWISE, IF N2 IS LESS THAN 4, THE RESULT IS LEFT ADJUSTED
-C     WITH BLANK FILL TO THE RIGHT.
-C
-C NOTE 2. - N2 CAN BE SPECIFIED IN THE RANGE 1-8.  AN EIGHT DIGIT POSI-
-C     TIVE INTEGER CAN BE CONVERTED OR A SEVEN DIGIT NEGATIVE INTEGER
-C     AND A SIGN.  ZERO FILL IS USED FOR HIGH ORDER POSITIONS IN A
-C     NUMBER FIELD.  THE USER SHOULD BE AWARE THAT W3AI15 DOES NOT
-C     VERIFY THAT THE VALUE OF N2 IS IN THE CORRECT RANGE.
-C
-C NOTE 3. - THE MINUS SIGN CAN BE INSERTED AS A LITERAL IN THE CALL
-C     SEQUENCE OR DEFINED IN A DATA STATEMENT.  1H- AND 1H+ ARE THE
-C     TWO MOST LIKELY NEGATIVE SIGNS.  UNFORTUNATELY THE ASCII PLUS
-C     CHARACTER IS THE NEGATIVE SIGN REQUIRED IN MOST TRANSMISSIONS.
-C     THE MINUS SIGN WILL ALWAYS BE IN THE HIGH ORDER POSITION OF A
-C     NEGATIVE NUMBER FIELD.
-C
-C NOTE 4. - IF A NUMBER CONTAINS MORE DIGITS THAN THE N2 SPECIFICATION
-C     ALLOWS, THE EXCESS HIGH ORDER DIGITS ARE LOST.
-C
+
       INTEGER     ATEMP
       INTEGER     BTEMP
       INTEGER     IDIV(8)
@@ -128,4 +116,3 @@ C
   100 CONTINUE
         RETURN
         END
-

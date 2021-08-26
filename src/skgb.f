@@ -1,37 +1,27 @@
 C> @file
-C
-C> SUBPROGRAM: SKGB           SEARCH FOR NEXT GRIB MESSAGE
-C>   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 93-11-22
+C> @brief Search for next grib message.
+C> @author Mark Iredell @date 1993-11-22
+
+C> This subprogram searches a file for the next grib 1 message.
+C> A grib 1 message is identified by its indicator section, i.e.
+C> an 8-byte sequence with 'grib' in bytes 1-4 and 1 in byte 8.
+C> If found, the length of the message is decoded from bytes 5-7.
+C> The search is done over a given section of the file.
+C> The search is terminated if an eof or i/o error is encountered.
 C>
-C> ABSTRACT: THIS SUBPROGRAM SEARCHES A FILE FOR THE NEXT GRIB 1 MESSAGE.
-C>   A GRIB 1 MESSAGE IS IDENTIFIED BY ITS INDICATOR SECTION, I.E.
-C>   AN 8-BYTE SEQUENCE WITH 'GRIB' IN BYTES 1-4 AND 1 IN BYTE 8.
-C>   IF FOUND, THE LENGTH OF THE MESSAGE IS DECODED FROM BYTES 5-7.
-C>   THE SEARCH IS DONE OVER A GIVEN SECTION OF THE FILE.
-C>   THE SEARCH IS TERMINATED IF AN EOF OR I/O ERROR IS ENCOUNTERED.
+C> Program history log:
+C> - Mark Iredell 1993-11-22
+C> - Mark Iredell 1995-10-31 Add call to baread.
+C> - Mark Iredell 1997-03-14 Check for '7777'.
+C> - Stephen Gilbert 2001-12-05 Modified to also look for grib2 messages.
 C>
-C> PROGRAM HISTORY LOG:
-C>   93-11-22  IREDELL
-C>   95-10-31  IREDELL   ADD CALL TO BAREAD 
-C>   97-03-14  IREDELL   CHECK FOR '7777'
-C> 2001-12-05  GILBERT   MODIFIED TO ALSO LOOK FOR GRIB2 MESSAGES
+C> @param[in] LUGB Integer logical unit of input grib file.
+C> @param[in] ISEEK Integer number of bytes to skip before search.
+C> @param[in] MSEEK Integer maximum number of bytes to search.
+C> @param[out] LSKIP Integer number of bytes to skip before message.
+C> @param[out] LGRIB Integer number of bytes in message (0 if not found).
 C>
-C> USAGE:    CALL SKGB(LUGB,ISEEK,MSEEK,LSKIP,LGRIB)
-C>   INPUT ARGUMENTS:
-C>     LUGB         INTEGER LOGICAL UNIT OF INPUT GRIB FILE
-C>     ISEEK        INTEGER NUMBER OF BYTES TO SKIP BEFORE SEARCH
-C>     MSEEK        INTEGER MAXIMUM NUMBER OF BYTES TO SEARCH
-C>   OUTPUT ARGUMENTS:
-C>     LSKIP        INTEGER NUMBER OF BYTES TO SKIP BEFORE MESSAGE
-C>     LGRIB        INTEGER NUMBER OF BYTES IN MESSAGE (0 IF NOT FOUND)
-C>
-C> SUBPROGRAMS CALLED:
-C>   BAREAD       BYTE-ADDRESSABLE READ
-C>   GBYTEC         GET INTEGER DATA FROM BYTES
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN
-C>
+C> @author Mark Iredell @date 1993-11-22
 C-----------------------------------------------------------------------
       SUBROUTINE SKGB(LUGB,ISEEK,MSEEK,LSKIP,LGRIB)
       PARAMETER(LSEEK=128)
