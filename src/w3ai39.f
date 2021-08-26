@@ -1,36 +1,27 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3AI39      TRANSLATE 'ASCII' FIELD TO 'EBCDIC'
-C>   PRGMMR: DESMARAIS        ORG: W342       DATE: 93-10-06
+C> @brief Translate 'ASCII' field to 'EBCDIC'.
+C> @author Armand Desmarais @date 1993-10-06
+
+C> translate an 'ASCII' field to 'EBCDIC', all alphanumerics,
+C> special charcaters, fill scatter, brocken< clear, overcast, bell,
+C> ht and vt (for AFOS). space, '6D' to '5E' conversion (hdrology),
+C> changers were made to W3AI38 to give reverse table translation
 C>
-C> ABSTRACT: TRANSLATE AN 'ASCII' FIELD TO 'EBCDIC', ALL ALPHANUMERICS,
-C>   SPECIAL CHARCATERS, FILL SCATTER, BROCKEN< CLEAR, OVERCAST, BELL,
-C>   HT AND VT (FOR AFOS). SPACE, '6D' TO '5E' CONVERSION (HDROLOGY),
-C>   CHANGERS WERE MADE TO W3AI38 TO GIVE REVERSE TABLE TRANSLATION
+C> Program history log:
+C> - Ralph Jones 1993-10-06 Convert ibm370 assebler version to fortran.
+C> - Ralph Jones 1994-04-28 Changes for cray.
+C> - Stephen Gilbert 1998-12-21 Replaced Function ICHAR with mova2i.
 C>
-C> PROGRAM HISTORY LOG:
-C>   93-10-06  R.E.JONES   CONVERT IBM370 ASSEBLER VERSION TO FORTRAN
-C>   94-04-28  R.E.JONES   CHANGES FOR CRAY
-C>   98-12-21  Gilbert    Replaced Function ICHAR with mova2i.
+C> @param[inout] NFLD Character*1 array of (in) ASCII data (out) EBCDIC data.
+C> @param[in] N Integer, contains character count to convert.
 C>
-C> USAGE:    CALL W3AI39 (NFLD,N)
-C>   INPUT ARGUMENT LIST:
-C>     NFLD    - CHARACTER*1 ARRAY OF ASCII DATA
-C>     N       - INTEGER,  CONTAINS CHARACTER COUNT TO CONVERT....
+C> @note Software version of IBM370 translate instruction, by
+C> changing the table we could do a 64, 96, ASCII
+C> character set, change lower case to upper, etc.
+C> tr convert data at a rate of 5.4 million characters per sec.
+C> tr is in library /usr/lib/libcos.a add to segldr card.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     NFLD     - CHARACTER*1 ARRAY OF EBCDIC DATA
-C>
-C> REMARKS: SOFTWARE VERSION OF IBM370 TRANSLATE INSTRUCTION, BY
-C>   CHANGING THE TABLE WE COULD DO A  64, 96,  ASCII
-C>   CHARACTER SET, CHANGE LOWER CASE TO UPPER, ETC.
-C>   TR CONVERT DATA AT A RATE OF 5.4 MILLION CHARACTERS PER SEC.
-C>   TR IS IN LIBRARY  /USR/LIB/LIBCOS.A   ADD TO SEGLDR CARD.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author Armand Desmarais @date 1993-10-06
       SUBROUTINE W3AI39 (NFLD, N)
 C
       INTEGER(8)      IEBCDC(32)

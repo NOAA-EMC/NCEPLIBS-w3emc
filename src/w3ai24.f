@@ -1,32 +1,19 @@
 C> @file
-C
-C> FUNCT  W3AI24              TEST FOR MATCH OF TWO STRINGS
-C>   PRGMMR: LUKELIN          ORG: NMC421      DATE:94-08-31
+C> @brief Test for match of two strings.
+C> @author Luke Lin @date 1994-08-31
+
+C> Test two strings. If all equal; Otherwise .false.
 C>
-C> ABSTACT: TEST TWO STRINGS.
-C>     IF ALL EQUAL; OTHERWISE .FALSE.
+C> Program history log:
+C> - Luke Lin 1994-08-31
 C>
-C> PROGRAM HISTORY LOG:
-C>   94-08-31  LUKE LIN
+C> @param[in] STRING1 Character array to match with string2
+C> @param[in] STRING2 Character array to match with string1
+C> @param[in] LENGTH Integer length of string1 and string2
+C> @return W3AI24 Logical .true. if s1 and s2 match on all char.,
+C> logical .false. if not match on any char.
 C>
-C> USAGE:  II = W3AI24(STRING1,STRING2,LENGTH)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     STRING1 ARG LIST  CHARACTER ARRAY TO MATCH WITH STRING2
-C>     STRING2 ARG LIST  CHARACTER ARRAY TO MATCH WITH STRING1
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     W3AI24 FUNCTION  LOGICAL .TRUE. IF S1 AND S2 MATCH ON ALL CHAR.,
-C>                      LOGICAL .FALSE. IF NOT MATCH ON ANY CHAR.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM VS FORTRAN
-C>   MACHINE:  NAS
-C>
+C> @author Luke Lin @date 1994-08-31
       LOGICAL FUNCTION W3AI24(STRING1, STRING2,LENGTH)
 C
        CHARACTER*1 STRING1(*)

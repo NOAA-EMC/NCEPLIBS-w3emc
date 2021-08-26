@@ -1,66 +1,57 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3AI18      LINE BUILDER SUBROUTINE
-C>   PRGMMR: ALLARD, R.       ORG: W/NMC42    DATE: 74-02-01
+C> @brief Line builder subroutine.
+C> @author Robert Allard @date 1974-02-01
+
+C> Build a line of information composed of user specified
+C> character strings.
 C>
-C> ABSTRACT: BUILD A LINE OF INFORMATION COMPOSED OF USER SPECIFIED
-C>   CHARACTER STRINGS.
+C> Program history log:
+C> - Robert Allard 1974-02-02
+C> - Ralph Jones 1984-07-05 Recompile
+C> - Ralph Jones 1996-08-06 Convert from ibm370 assembler to fortran
+C> for the cray, workstations, and pc's.
 C>
-C> PROGRAM HISTORY LOG:
-C>   74-02-02  ROBERT ALLARD
-C>   84-07-05  R.E.JONES     RECOMPILE
-C>   96-08-06  R.E.JONES     CONVERT FROM IBM370 ASSEMBLER TO FORTRAN
-C>                           FOR THE CRAY, WORKSTATIONS, AND PC'S.
+C> @param[in] ITEM Character string to be added to line array.
+C> @param[in] I1 Number of character strings to be added to line array.
+C> @param[in] I2 Number of characters per string to add to line.
+C> @param[in] L Character length of line to be built (2.le.l.le.256).
+C> @param[in] K Number of blkank characters to precede a character
+C> string (0.le.k.le.256).
+C> @param[inout] N (in) Pointer set equal to 0 when beginning a line.
+C> (out) Character count, error indicator.
+C> @param[out] LINE Array in which character string are placed while
+C> building aline; must be of type integer.
 C>
-C> USAGE:    CALL W3AI18(ITEM, I1, I2, LINE, L, K, N)
-C>   INPUT ARGUMENT LIST:
-C>     ITEM   - CHARACTER STRING TO BE ADDED TO LINE ARRAY
-C>     I1     - NUMBER OF CHARACTER STRINGS TO BE ADDED TO LINE ARRAY
-C>     I2     - NUMBER OF CHARACTERS PER STRING TO ADD TO LINE
-C>     L      - CHARACTER LENGTH OF LINE TO BE BUILT (2.LE.L.LE.256)
-C>     K      - NUMBER OF BLKANK CHARACTERS TO PRECEDE A CHARACTER
-C>              STRING (0.LE.K.LE.256)
-C>     N      - POINTER SET EQUAL TO 0 WHEN BEGINNING A LINE
+C> Exit states:
+C> - N = -1 Character string will not fit in the line array;
+C> otherwise, each time a chacter string is added
+C> to the line, n is incremented by (i2 + k).
 C>
-C>   OUTPUT ARGUMENT LIST:     
-C>     LINE   - ARRAY IN WHICH CHARACTER STRING ARE PLACED WHILE
-C>              BUILDING ALINE; MUST BE OF TYPE INTEGER
-C>     N      - CHARACTER COUNT, ERROR INDICATOR
+C> @note Each character string included in the item array must
+C> start on a full word boundary and be equal in length.
+C> Each successive string must start on the nest fullword
+C> boundary following the end of the previous string.
+C> On a cray this is 8.
 C>
+C> @note The dimensions of the item array should be at least the
+C> value of (i1*(i2+j))/4, where the integer j is in the
+C> range 0.le.j.le.3 and the sum (i2+j) is 4 or a multiple
+C> of 4. On a cray this is 8 or a multiple of 8. On a cray
+C> (i1*(i2+j))/8, range is 0.le.j.le.7
 C>
-C>   EXIT STATES:
-C>     N = -1    CHARACTER STRING WILL NOT FIT IN THE LINE ARRAY;
-C>               OTHERWISE, EACH TIME A CHACTER STRING IS ADDED
-C>               TO THE LINE, N IS INCREMENTED BY (I2 + K)
+C> @note The maximum dimension of line is 64 word or 256 bytes.
+C> On a cray it is 32 words or 256 bytes.
 C>
-C> NOTE 1. - EACH CHARACTER STRING INCLUDED IN THE ITEM ARRAY MUST 
-C>           START ON A FULL WORD BOUNDARY AND BE EQUAL IN LENGTH. 
-C>           EACH SUCCESSIVE STRING MUST START ON THE NEST FULLWORD
-C>           BOUNDARY FOLLOWING THE END OF THE PREVIOUS STRING.
-C>           ON A CRAY THIS 8.
+C> @note The user should set n = 0 each time a line is stated to
+C> tell w3ai18 to fill the line array with blank characters.
+C> Each time a character string is added to the line, the
+C> variable (n) is incremented by (i2 + k). If a character
+C> string will not fit in the line array, w3ai18 sets n = -1
+C> and returns to the user. The user will not be able to
+C> program a recovery procedure for the line being full if
+C> more than one character string is in the item array.
 C>
-C> NOTE 2. - THE DIMENSIONS OF THE ITEM ARRAY SHOULD BE AT LEAST THE
-C>           VALUE OF (I1*(I2+J))/4, WHERE THE INTEGER J IS IN THE
-C>           RANGE 0.LE.J.LE.3 AND THE SUM (I2+J) IS 4 OR A MULTIPLE
-C>           OF 4. ON A CRAY THIS IS 8 OR A MULTIPLE OF 8. ON A CRAY
-C>           (I1*(I2+J))/8, RANGE IS 0.LE.J.LE.7
-C>
-C> NOTE 3. - THE MAXIMUM DIMENSION OF LINE IS 64 WORD OR 256 BYTES.
-C>           ON A CRAY IT IS 32 WORDS OR 256 BYTES.
-C>
-C> NOTE 4. - THE USER SHOULD SET N = 0 EACH TIME A LINE IS STATED TO
-C>           TELL W3AI18 TO FILL THE LINE ARRAY WITH BLANK CHARACTERS.
-C>           EACH TIME A CHARACTER STRING IS ADDED TO THE LINE, THE 
-C>           VARIABLE (N) IS INCREMENTED BY (I2 + K). IF A CHARACTER
-C>           STRING WILL NOT FIT IN THE LINE ARRAY, W3AI18 SETS N = -1
-C>           AND RETURNS TO THE USER. THE USER WILL NOT BE ABLE TO 
-C>           PROGRAM A RECOVERY PROCEDURE FOR THE LINE BEING FULL IF
-C>           MORE THAN ONE CHARACTER STRING IS IN THE ITEM ARRAY.
-C>           
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048.
-C>
+C> @author Robert Allard @date 1974-02-01
       SUBROUTINE W3AI18(ITEM,I1,I2,LINE,L,K,N)
 C
       CHARACTER * (*) LINE
@@ -68,12 +59,12 @@ C
 C
       SAVE
 C
-C     TEST WORD LENGTH, LW WILL BE 4 OR 8 BYTES 
+C     TEST WORD LENGTH, LW WILL BE 4 OR 8 BYTES
 C
       CALL W3FI01(LW)
 C
 C     BAIL OUT IF NEGATIVE
-C 
+C
       IF (N.LT.0) RETURN
 C
 C     FILL LINE WITH BLANK CHAACTERS
@@ -83,17 +74,17 @@ C
           LINE(I:I) = ' '
         END DO
       END IF
-      IF (I1.EQ.1) THEN 
+      IF (I1.EQ.1) THEN
         J = 0
         IF ((I2+K+N).GT.L) GO TO 200
           LINE(K+N+1:K+N+I2) = ITEM(1:I2)
-          N = I2+K+N        
+          N = I2+K+N
           RETURN
       ELSE
         JJ = MOD(I2, LW)
         IF (JJ.EQ.0) THEN
           J = 0
-        ELSE       
+        ELSE
           J = LW - JJ
         END IF
         IF ((I2+K+N).GT.L) GO TO 200
@@ -103,10 +94,10 @@ C
             IF ((I2+K+N).GT.L) GO TO 200
             LINE(K+N+1:K+N+I2) = ITEM((I2+J)*I+1:(I2+J)*I+I2)
             N = I2+K+N
-          END DO              
-          RETURN    
+          END DO
+          RETURN
       END IF
  200  CONTINUE
         N = -1
-        RETURN         
+        RETURN
       END
