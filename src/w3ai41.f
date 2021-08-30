@@ -1,56 +1,45 @@
 C> @file
-C                .      .    .                                        .
-C> SUBPROGRAM:    W3AI41      CONSTANT SIZE BINARY STRING UNPACKER
-C>   PRGMMR: ALLARD, R.       ORG: W342            DATE: 80-04-01
+C> @brief Constant size binary string unpacker.
+C> @author Robert Allard @date 1980-04-01
+
+C> Unpack consecutive binary strings of the same size from
+C> one user supplied array and store them in the same order right
+C> aligned in another array. W3AI41() is the reverse of W3AI40().
 C>
-C> ABSTRACT: UNPACK CONSECUTIVE BINARY STRINGS OF THE SAME SIZE FROM
-C>   ONE USER SUPPLIED ARRAY AND STORE THEM IN THE SAME ORDER RIGHT
-C>   ALIGNED IN ANOTHER ARRAY. W3AI41 IS THE REVERSE OF W3AI40. (SEE
+C> Program history log:
+C> - Robert Allard 1980-04-01  R.ALLARD (ORIGINAL AUTHOR)  ASMEMBLER LANGUAGE VERSION.
+C> - Ralph Jones 1984-07-05 Recompiled for NAS-9050
+C> - Ralph Jones 1988-07-05 Wrote fortran version of w3ai41 to unpack
+C> variable size binary strings, added code to reverse orfer of bytes.
+C> - Ralph Jones 1989-11-04 Convert to craf CFT77 FORTRAN
+C> - Boi Vuong 1998-03-10 Remove the cdir$ integer=64 directive.
 C>
-C> PROGRAM HISTORY LOG:
-C>   80-04-01  R.ALLARD (ORIGINAL AUTHOR)  ASMEMBLER LANGUAGE VERSION.
-C>   84-07-05  R.E.JONES  RECOMPILED FOR NAS-9050
-C>   88-07-05  R.E.JONES  WROTE FORTRAN VERSION OF W3AI41 TO UNPACK
-C>                        VARIABLE SIZE BINARY STRINGS, ADDED CODE TO
-C>                        REVERSE ORFER OF BYTES.
-C>   89-11-04  R.E.JONES  CONVERT TO CRAF CFT77 FORTRAN
-C>   98-03-10  B. VUONG   REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
+C> @param[in] KFLD Integer array contining binary string(s).
+C> @param[in] KLEN Integer number of bits per string (0 < klen < 65).
+C> @param[in] KNUM Integer number of strings to unpack. this value must
+C> not exceed the dimension of 'kout'.
+C> @param[in] KOFF Integer number specifying the bit offset of the
+C> first string 'kfld'. the offset value is reset to
+C> include the low order bit of the last string unpacked
+C> ('koff' > 0 ).
+C> @param[out] KOUT Integer*4 array holding unpacked string(s).
 C>
-C> USAGE:    CALL W3AI41 (KFLD, KOUT, KLEN, KNUM, KOFF)
+C> Exit states:
+C> error - 'koff' < 0 if 'klen' has an illegal value or 'knum' < 1
+C> then 'kout' has no strings stored.
 C>
-C>   INPUT:
-C>     KFLD   - INTEGER ARRAY CONTINING BINARY STRING(S)
-C>     KLEN   - INTEGER NUMBER OF BITS PER STRING (0 < KLEN < 65)
-C>     KNUM   - INTEGER NUMBER OF STRINGS TO UNPACK. THIS VALUE MUST
-*              NOT EXCEED THE DIMENSION OF 'KOUT'.
-C>     KOFF   - INTEGER NUMBER SPECIFYING THE BIT OFFSET OF THE
-C>              FIRST STRING 'KFLD'. THE OFFSET VALUE IS RESET TO
-C>              INCLUDE THE LOW ORDER BIT OF THE LAST STRING UNPACKED
-C>              ('KOFF' > 0 )
-C>   OUTPUT:
-C>     KOUT   - INTEGER*4 ARRAY HOLDING UNPACKED STRING(S)
+C> @note This subroutine should be written in assembler language.
+C> The fortran version runs two or three times slower than the asembler
+C> version. The fortran version can be converted to run on other
+C> computers with a few changes. The bit manipulation functions are the
+C> same in IBM370 vs fortran 4.1, microsoft fortran 4.10, vax fortran.
+C> Most modern fortran compiler have and, or, shift functions. If you
+C> are running on a pc, vax and your input was made on a IBM370, apollo
+C> sun, h.p.. etc. you may have to add more code to reverse the order o
+C> bytes in an integer word. NCAR gbytes() can be used instead of this
+C> subroutine.
 C>
-C>   EXIT STATES:
-C>     ERROR - 'KOFF' < 0 IF 'KLEN' HAS AN ILLEGAL VALUE OR 'KNUM' < 1
-C>             THEN 'KOUT' HAS NO STRINGS STORED.
-C>
-C>   EXTERNAL REFERENCES: NONE
-C>
-C> REMARKS:  THIS SUBROUTINE SHOULD BE WRITTEN IN ASSEMBLER LANGUAGE.
-C>   THE FORTRAN VERSION RUNS TWO OR THREE TIMES SLOWER THAN THE ASEMBLER
-C>   VERSION. THE FORTRAN VERSION CAN BE CONVERTED TO RUN ON OTHER
-C>   COMPUTERS WITH A FEW CHANGES. THE BIT MANIPULATION FUNCTIONS ARE THE
-C>   SAME IN IBM370 VS FORTRAN 4.1, MICROSOFT FORTRAN 4.10, VAX FORTRAN.
-C>   MOST MODERN FORTRAN COMPILER HAVE AND, OR, SHIFT FUNCTIONS. IF YOU
-C>   ARE RUNNING ON A PC, VAX AND YOUR INPUT WAS MADE ON A IBM370, APOLLO
-C>   SUN, H.P.. ETC. YOU MAY HAVE TO ADD MORE CODE TO REVERSE THE ORDER O
-C>   BYTES IN AN INTEGER WORD. NCAR GBYTES CAN BE USED INSTEAD OF THIS
-C>   SUBROUTINE.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Robert Allard @date 1980-04-01
       SUBROUTINE W3AI41(KFLD,KOUT,KLEN,KNUM,KOFF)
 C
       INTEGER  KFLD(*)

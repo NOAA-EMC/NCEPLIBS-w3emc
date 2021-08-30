@@ -1,47 +1,29 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3AQ15      GMT TIME PACKER
-C>   PRGMMR: R.E.JONES        ORG: W/NMC421    DATE: 95-10-10
+C> @brief GMT time packer.
+C> @author B. Struble @date 1983-12-12
+
 C>
-C> ABSTRACT: CONVERT 32 OR 64 BIT BINARY TIME (GMT) INTO A 16 BIT 
-C>   STRING AND STORE THESE 4 PACKED DECIMAL NUMBERS INTO BYTES
-C>   39 AND 40 OF THE OUTPUT ARRAY.
+C> @note Convert 32 or 64 bit binary time (GMT) into a 16 bit
+C> string and store these 4 packed decimal numbers into bytes
+C> 39 and 40 of the output array.
 C>
-C> PROGRAM HISTORY LOG:
-C>   83-12-12  B. STRUBLE (ORIGINAL AUTHOR)
-C>   84-07-06  R.E.JONES  CHANGE TO IBM ASSEMBLER V 02
-C>   95-10-16  R.E.JONES  CHANGE TO FORTRAN FOR CRAY AND 32 BIT
-C>                        WORKSTATIONS
+C> Program history log:
+C> - B. Struble 1983-12-12
+C> - Ralph Jones 1984-07-06 Change to ibm assembler v 02.
+C> - Ralph Jones 1995-10-16 Change to fortran for cray and 32 bit workstations.
 C>
-C> USAGE:    CALL W3AQ15(ITIME, QDESCR)
-C>   INPUT ARGUMENT LIST:
-C>     ITIME    - INTEGER WORD CONTAINING TIME IN BINARY
-C>
-C>   OUTPUT ARGUMENT LIST:   
-C>     QDESCR   - ARRAY CONTAINING TRANSMISSION QUEUE DESCRIPTOR
-C>                NOTE- TIME WILL BE PLACED IN 39 AND 40TH 
-C>                BYTE OF THIS ARRAY AS 4 (4 BIT) BCD.
-C>     
-C>
-C> REMARKS: THE USER CAN OBTAIN THE CURRENT TIME IN GMT BY INVOCKING
-C>   THE W3 LIBRARY ROUTINE W3FQ02 WHICH FILLS AN EIGHT WORD ARRAY
-C>   WITH THE CURRENT DATE AND TIME. THE 5TH WORD FROM THIS ARRAY
-C>   CONTAINS THE TIME WHICH CAN BE PASSED TO W3AQ15 AS THE 
-C>   INPUT PARAMETER-ITIME.
+C> @param[in] ITIME Integer word containing time in binary.
+C> @param[out] QDESCR Array containing transmission queue descriptor
+C> Time will be placed in 39 and 40th byte of this array as 4 (4 bit) BCD.
 C>
 C>
-C> EXAMPLE:
-C>   
-C>         INTEGER        NTIME(8)
-C>         CHARACTER * 80 QUEUE
+C> @note The user can obtain the current time in GMT by invocking
+C> the W3 library routine w3fq02 which fills an eight word array
+C> with the current date and time. The 5th word from this array
+C> contains the time which can be passed to w3aq15 as the
+C> input parameter-itime.
 C>
-C>         CALL W3FQ02(NTIME,0)
-C>         CALL W3AQ15(NTIME(5),QUEUE)
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048.
-C>
+C> @author B. Struble @date 1983-12-12
       SUBROUTINE W3AQ15(ITIME, QDESCR)
       INTEGER        ITIME
 C
