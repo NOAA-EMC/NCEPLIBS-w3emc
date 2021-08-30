@@ -1,30 +1,22 @@
 !> @file
-!> @brief CONVERTS AN NCEP ABSOLUTE DATE AND TIME TO ANOTHER TIME ZONE.      
-!
-!> CHANGE THE TIME ZONE OF A DATE AND TIME
-!! @author MARK IREDELL @date 98-01-05
-!!
-!! THIS SUBPROGRAM CONVERTS AN NCEP ABSOLUTE DATE AND TIME
-!! TO ANOTHER TIME ZONE.
-!!
-!! PROGRAM HISTORY LOG:
-!! - 98-01-05  MARK IREDELL
-!!
-!! @param[in] NTZ INTEGER NEW TIME ZONE DIFFERENTIAL FROM UTC
-!!                IN SIGNED HH OR HHMM FORMAT
-!!                (IF NTZ IS INVALID, NO CHANGE IS MADE.)
-!! @param[in] IDAT INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!!                (YEAR, MONTH, DAY, TIME ZONE,
-!!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!! @param[out] JDAT INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!!                (YEAR, MONTH, DAY, TIME ZONE,
-!!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!!
-!! SUBPROGRAMS CALLED:
-!! - iw3jdn() COMPUTE JULIAN DAY NUMBER     
-!! - w3fs26() YEAR, MONTH, DAY FROM JULIAN DAY NUMBER
-!! - w3reddat() REDUCE A TIME INTERVAL TO A CANONICAL FORM
-!!
+!> @brief Converts an ncep absolute date and time to another time zone.
+!> @author Mark Iredell @date 1998-01-05
+
+!> THis subprogram converts an ncep absolute date and time
+!> to another time zone.
+!>
+!> Program history log:
+!> - Mark Iredell 1998-01-05
+!>
+!> @param[in] NTZ Integer new time zone differential from utc in signed hh
+!> or hhmm format (if ntz is invalid, no change is made.)
+!> @param[in] IDAT Integer (8) ncep absolute date and time
+!> (year, month, day, time zone, hour, minute, second, millisecond)
+!> @param[out] JDAT Integer (8) ncep absolute date and time
+!> (year, month, day, time zone, hour, minute, second, millisecond)
+!>
+!> @author Mark Iredell @date 1998-01-05
+
       subroutine w3ctzdat(ntz,idat,jdat)
       integer idat(8),jdat(8)
       real rinc1(5),rinc2(5)

@@ -1,56 +1,45 @@
 C> @file
-C                .      .    .                                        .
-C> SUBPROGRAM:    W3AI41      CONSTANT SIZE BINARY STRING PACKER
-C>   PRGMMR: ALLARD, R.       ORG: W342            DATE: 80-04-01
+C> @brief Constant size binary string packer.
+C> @author Robert Allard @date 1980-04-01
+
+C> Packs constant size binary strings into an array. This
+C> packing replaces bits in the part of the output array indicated
+C> by the offset value. W3AI40 is the reverse of W3AI41. (see W3AI32
+C> to pack variable size binary strings.)
 C>
+C> Program history log:
+C> - Robert Allard 1980-04-01 Asmembler language version.
+C> - Ralph Jones 1984-07-05 Recompiled for nas-9050.
+C> - Ralph Jones 1989-11-04 Wrote fortran version of w3ai40 to pack
+C> constant size binary strings.
+C> - Ralph Jones 1989-11-05 Convert to cray cft77 fortran.
+C> - Boi Vuong 1998-03-10 Remove the cdir$ integer=64 directive.
 C>
-C> ABSTRACT: PACKS CONSTANT SIZE BINARY STRINGS INTO AN ARRAY. THIS
-C>   PACKING REPLACES BITS IN THE PART OF THE OUTPUT ARRAY INDICATED
-C>   BY THE OFFSET VALUE. W3AI40 IS THE REVERSE OF W3AI41. (SEE W3AI32
-C>   TO PACK VARIABLE SIZE BINARY STRINGS.)
+C> @param[in] KFLD Integer input array of right adjusted strings.
+C> @param[in] KLEN Integer number of bits per string (0 < klen < 33).
+C> @param[in] KNUM Integer number of strings in 'kfld' to pack.
+C> @param[in] KOFF Integer number specifying the bit offset of the
+C> first output string. the offset value is reset to
+C> include the low order bit of the last packed string.
+C> @param[out] KOUT Integer output array to hold packed string(s).
 C>
-C> PROGRAM HISTORY LOG:
-C>   80-04-01  R.ALLARD (ORIGINAL AUTHOR)  ASMEMBLER LANGUAGE VERSION.
-C>   84-07-05  R.E.JONES  RECOMPILED FOR NAS-9050
-C>   89-11-04  R.E.JONES  WROTE FORTRAN VERSION OF W3AI40 TO PACK
-C>                        CONSTANT SIZE BINARY STRINGS
-C>   89-11-05  R.E.JONES  CONVERT TO CRAY CFT77 FORTRAN
-C>   98-03-10  B. VUONG   REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
+C> exit states:
+C> error  - koff < 0 if klen has an illegal value or knum < 1
+C> then kout has no strings stored.
 C>
-C> USAGE: CALL W3AI40 (KFLD,KOUT,KLEN,KNUM,KOFF)
+C> @note This subroutine should be written in assembler language.
+C> The fortran version runs two or three times slower than the asembler
+C> version. The fortran version can be converted to run on other
+C> computers with a few changes. The bit manipulation functions are the
+C> same in IBM370 vs fortran 4.1, microsoft fortran 4.10, vax fortran.
+C> Most modern fortran compiler have and, or, shift functions. If you
+C> are running on a pc, vax and your input was made on a IBM370, apollo
+C> sun, h.p.. etc. you may have to add more code to reverse the order of
+C> bytes in an integer word. NCAR sbytes() can be used instead of this
+C> subroutine. Please use NCAR sbytes() subroutine instead of this
+C> subroutine.
 C>
-C>   INPUT:
-C>     KFLD   - INTEGER INPUT ARRAY OF RIGHT ADJUSTED STRINGS
-C>     KLEN   - INTEGER NUMBER OF BITS PER STRING (0 < KLEN < 33)
-C>     KNUM   - INTEGER NUMBER OF STRINGS IN 'KFLD' TO PACK
-C>     KOFF   - INTEGER NUMBER SPECIFYING THE BIT OFFSET OF THE
-C>              FIRST OUTPUT STRING. THE OFFSET VALUE IS RESET TO
-C>              INCLUDE THE LOW ORDER BIT OF THE LAST PACKED STRING
-C>   OUTPUT:
-C>     KOUT   - INTEGER OUTPUT ARRAY TO HOLD PACKED STRING(S)
-C>
-C>   EXIT STATES:
-C>     ERROR  - KOFF < 0 IF KLEN HAS AN ILLEGAL VALUE OR KNUM < 1
-C>              THEN KOUT HAS NO STRINGS STORED.
-C>
-C>   EXTERNAL REFERENCES: NONE
-C>
-C> REMARKS:  THIS SUBROUTINE SHOULD BE WRITTEN IN ASSEMBLER LANGUAGE.
-C>   THE FORTRAN VERSION RUNS TWO OR THREE TIMES SLOWER THAN THE ASEMBLER
-C>   VERSION. THE FORTRAN VERSION CAN BE CONVERTED TO RUN ON OTHER
-C>   COMPUTERS WITH A FEW CHANGES. THE BIT MANIPULATION FUNCTIONS ARE THE
-C>   SAME IN IBM370 VS FORTRAN 4.1, MICROSOFT FORTRAN 4.10, VAX FORTRAN.
-C>   MOST MODERN FORTRAN COMPILER HAVE AND, OR, SHIFT FUNCTIONS. IF YOU
-C>   ARE RUNNING ON A PC, VAX AND YOUR INPUT WAS MADE ON A IBM370, APOLLO
-C>   SUN, H.P.. ETC. YOU MAY HAVE TO ADD MORE CODE TO REVERSE THE ORDER O
-C>   BYTES IN AN INTEGER WORD. NCAR SBYTES CAN BE USED INSTEAD OF THIS
-C>   SUBROUTINE. PLEASE USE NCAR SBYTES SUBROUTINE INSTEAD OF THIS
-C>   SUBROUTINE.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Robert Allard @date 1980-04-01
       SUBROUTINE W3AI40(KFLD,KOUT,KLEN,KNUM,KOFF)
 C
       INTEGER  KFLD(*)
