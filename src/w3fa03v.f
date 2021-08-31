@@ -3,7 +3,7 @@ C> @brief Compute standard height, temp, and pot temp.
 C> @author James McDonell @date 1974-06-01
 C>
 C> Computes the standard height, temperature, and potential
-C> temperature given the pressure in millibars ( > 8.68 mb ). For
+C> temperature given the pressure in millibars (>8.68 mb). For
 C> height and temperature the results duplicate the values in the
 C> U.S. standard atmosphere (l962), which is the icao standard
 C> atmosphere to 54.7487 mb (20 km) and the proposed extension to
