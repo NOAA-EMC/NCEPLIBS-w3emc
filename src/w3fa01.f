@@ -1,46 +1,28 @@
 C> @file
-C
-C> SUBPROGRAM: W3FA01         COMPUTE LIFTING CONDENDSATION LEVEL
-C>   AUTHOR: HOWCROFT,J.      ORG: W/NMC342   DATE: 79-07-01
+C> @brief Compute lifting condendsation level.
+C> @author James Howcroft @date 1979-07-01
+
+C> Given the pressure, temperature and relative humidity of
+C> an air parcel at some point in the atmosphere, calculate the
+C> dewpoint temperature and the pressure and temperature of the
+C> lifting condensation level.
 C>
-C> ABSTRACT: GIVEN THE PRESSURE, TEMPERATURE AND RELATIVE HUMIDITY OF
-C>   AN AIR PARCEL AT SOME POINT IN THE ATMOSPHERE, CALCULATE THE
-C>   DEWPOINT TEMPERATURE AND THE PRESSURE AND TEMPERATURE OF THE
-C>   LIFTING CONDENSATION LEVEL.
+C> Program history log:
+C> - James Howcroft 1979-07-01
+C> - Ralph Jones 1989-01-24 Change to microsoft fortran 4.10.
+C> - Ralph Jones 1990-06-11 Change to sun fortran 1.3.
+C> - Ralph Jones 1991-03-29 Convert to silicongraphics fortran.
+C> - Ralph Jones 1993-03-29 Add save statement.
+C> - Ralph Jones 1995-09-25 Put in cray w3 library.
 C>
-C> PROGRAM HISTORY LOG:
-C>   79-07-01  J.HOWCROFT
-C>   89-01-24  R.E.JONES   CHANGE TO MICROSOFT FORTRAN 4.10
-C>   90-06-11  R.E.JONES   CHANGE TO SUN FORTRAN 1.3
-C>   91-03-29  R.E.JONES   CONVERT TO SiliconGraphics FORTRAN
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   95-09-25  R.E.JONES   PUT IN CRAY W3 LIBRARY
+C> @param[in] P Parcel pressure in millibars.
+C> @param[in] T Parcel temperature in degrees celsius.
+C> @param[in] RH Parcel relative humidity in percent.
+C> @param[out] TD Dewpoint temperature in degrees celsius.
+C> @param[out] PLCL Pressure of LCL in millibars.
+C> @param[out] TLCL Temperature at LCL in degrees celsius.
 C>
-C> USAGE: CALL W3FA01(P,T,RH,TD,PLCL,TLCL)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     P      ARG LIST  PARCEL PRESSURE IN MILLIBARS
-C>     T      ARG LIST  PARCEL TEMPERATURE IN DEGREES CELSIUS
-C>     RH     ARG LIST  PARCEL RELATIVE HUMIDITY IN PERCENT
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     TD     ARG LIST  DEWPOINT TEMPERATURE IN DEGREES CELSIUS
-C>     PLCL   ARG LIST  PRESSURE OF LCL IN MILLIBARS
-C>     TLCL   ARG LIST  TEMPERATURE AT LCL IN DEGREES CELSIUS
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     ABS    ALOG   ALOG10 EXP                                SYSLIB
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048
-C>
+C> @author James Howcroft @date 1979-07-01
       SUBROUTINE W3FA01(P,T,RH,TD,PLCL,TLCL)
 C
       SAVE

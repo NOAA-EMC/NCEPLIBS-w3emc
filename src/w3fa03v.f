@@ -1,47 +1,34 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FA03V     COMPUTE STANDARD HEIGHT, TEMP, AND POT TEMP
-C>   PRGMMR: KEYSER           ORG: W/NMC22    DATE: 92-06-29
+C> @brief Compute standard height, temp, and pot temp.
+C> @author James McDonell @date 1974-06-01
 C>
-C> ABSTRACT: COMPUTES THE STANDARD HEIGHT, TEMPERATURE, AND POTENTIAL
-C>   TEMPERATURE GIVEN THE PRESSURE IN MILLIBARS ( > 8.68 MB ).  FOR
-C>   HEIGHT AND TEMPERATURE THE RESULTS DUPLICATE THE VALUES IN THE
-C>   U.S. STANDARD ATMOSPHERE (L962), WHICH IS THE ICAO STANDARD
-C>   ATMOSPHERE TO 54.7487 MB (20 KM) AND THE PROPOSED EXTENSION TO
-C>   8.68 MB (32 KM).  FOR POTENTIAL TEMPERATURE A VALUE OF  2/7  IS
-C>   USED FOR  RD/CP.
+C> Computes the standard height, temperature, and potential
+C> temperature given the pressure in millibars (>8.68 mb). For
+C> height and temperature the results duplicate the values in the
+C> U.S. standard atmosphere (l962), which is the icao standard
+C> atmosphere to 54.7487 mb (20 km) and the proposed extension to
+C> 8.68 mb (32 km). For potential temperature a value of 2/7 is
+C> used for rd/cp.
 C>
-C> PROGRAM HISTORY LOG:
-C>   74-06-01  J. MCDONELL W345     -- ORIGINAL AUTHOR
-C>   84-06-01  R.E.JONES W342       -- CHANGE TO IBM VS FORTRAN
-C>   92-06-29  D. A. KEYSER W/NMC22 -- CONVERT TO CRAY CFT77 FORTRAN
-C>   94-09-13  R.E.JONES            -- VECTORIZED VERSION TO DO ARRAY  
-C>                                     INSTEAD OF ONE WORD
+C> Program history log:
+C> - James McDonell 1974-06-01
+C> - Ralph Jones 1984-06-01 Change to ibm vs fortran.
+C> - Dennis Keyser 1992-06-29 Convert to cray cft77 fortran.
+C> - Ralph Jones 1994-09-13 Vectorized version to do array instead of one word.
 C>
-C> USAGE:    CALL W3FA03V(PRESS,HEIGHT,TEMP,THETA,N)
-C>   INPUT ARGUMENT LIST:
-C>     PRESS    - PRESSURE ARRAY IN MILLIBARS
+C> @param[in] PRESS Pressure array in millibars.
+C> @param[out] HEIGHT Height array in meters.
+C> @param[out] TEMP Temperature array in degrees kelvin.
+C> @param[out] THETA Potential temperature array in degrees kelvin.
+C> @param[out] N Number of points in array press.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     HEIGHT   - HEIGHT ARRAY IN METERS
-C>     TEMP     - TEMPERATURE ARRAY IN DEGREES KELVIN
-C>     THETA    - POTENTIAL TEMPERATURE ARRAY IN DEGREES KELVIN
-C>     N        - NUMBER OF POINTS IN ARRAY PRESS
+C> @note Not valid for pressures less than 8.68 millibars, declare
+C> all parameters as type real.
 C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       CRAY     - ALOG
+C> @note Height, temp, theta are now all arrays, you must
+C> have arrays of size n or you will wipe out memory.
 C>
-C> REMARKS: NOT VALID FOR PRESSURES LESS THAN 8.68 MILLIBARS, DECLARE
-C>   ALL PARAMETERS AS TYPE REAL.
-C>
-C> WARNING: HEIGHT, TEMP, THETA ARE NOW ALL ARRAYS, YOU MUST
-C>          HAVE ARRAYS OF SIZE N OR YOU WILL WIPE OUT MEMORY.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/128, Y-MP8/864, Y-MP EL92/256
-C>
+C> @author James McDonell @date 1974-06-01
       SUBROUTINE W3FA03V(PRESS,HEIGHT,TEMP,THETA,N)
 C
       REAL  M0

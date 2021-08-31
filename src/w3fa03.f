@@ -1,42 +1,29 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FA03      COMPUTE STANDARD HEIGHT, TEMP, AND POT TEMP
-C>   PRGMMR: KEYSER           ORG: W/NMC22    DATE: 92-06-29
+C> @brief Compute standard height, temp, and pot temp.
+C> @author James McDonell @date 1974-06-01
+
+C> Computes the standard height, temperature, and potential
+C> temperature given the pressure in millibars ( > 8.68 mb ). For
+C> height and temperature the results duplicate the values in the
+C> U.S. standard atmosphere (l962), which is the icao standard
+C> atmosphere to 54.7487 mb (20 km) and the proposed extension to
+C> 8.68 mb (32 km). For potential temperature a value of 2/7 is
+C> used for rd/cp.
 C>
-C> ABSTRACT: COMPUTES THE STANDARD HEIGHT, TEMPERATURE, AND POTENTIAL
-C>   TEMPERATURE GIVEN THE PRESSURE IN MILLIBARS ( > 8.68 MB ).  FOR
-C>   HEIGHT AND TEMPERATURE THE RESULTS DUPLICATE THE VALUES IN THE
-C>   U.S. STANDARD ATMOSPHERE (L962), WHICH IS THE ICAO STANDARD
-C>   ATMOSPHERE TO 54.7487 MB (20 KM) AND THE PROPOSED EXTENSION TO
-C>   8.68 MB (32 KM).  FOR POTENTIAL TEMPERATURE A VALUE OF  2/7  IS
-C>   USED FOR  RD/CP.
+C> Program history log:
+C> - James McDonell 1974-06-01
+C> - Ralph Jones 1984-06-01 Change to ibm vs fortran.
+C> - Dennis Keyser 1992-06-29 Convert to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   74-06-01  J. MCDONELL W345     -- ORIGINAL AUTHOR
-C>   84-06-01  R.E.JONES W342       -- CHANGE TO IBM VS FORTRAN
-C>   92-06-29  D. A. KEYSER W/NMC22 -- CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] PRESS Pressure in millibars.
+C> @param[out] HEIGHT Height in meters.
+C> @param[out] TEMP Temperature in degrees kelvin.
+C> @param[out] THETA Potential temperature in degrees kelvin.
 C>
-C> USAGE:    CALL W3FA03(PRESS,HEIGHT,TEMP,THETA)
-C>   INPUT ARGUMENT LIST:
-C>     PRESS    - PRESSURE IN MILLIBARS
+C> @note Not valid for pressures less than 8.68 millibars, declare
+C> all parameters as type real.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     HEIGHT   - HEIGHT IN METERS
-C>     TEMP     - TEMPERATURE IN DEGREES KELVIN
-C>     THETA    - POTENTIAL TEMPERATURE IN DEGREES KELVIN
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       CRAY     - ALOG
-C>
-C>
-C> REMARKS: NOT VALID FOR PRESSURES LESS THAN 8.68 MILLIBARS, DECLARE
-C>   ALL PARAMETERS AS TYPE REAL.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author James McDonell @date 1974-06-01
       SUBROUTINE W3FA03(PRESS,HEIGHT,TEMP,THETA)
 C
       REAL  M0

@@ -1,27 +1,18 @@
 !> @file
-!! @brief RETURNS THE INTEGER DAY OF WEEK, THE DAY
-!!   OF YEAR, AND JULIAN DAY GIVEN AN NCEP ABSOLUTE DATE AND TIME.
-      
-!> RETURN WEEK DAY, YEAR DAY, AND JULIAN DAY
-!! @author MARK IREDELL @date 98-01-05
-!!
-!! THIS SUBPROGRAM RETURNS THE INTEGER DAY OF WEEK, THE DAY
-!! OF YEAR, AND JULIAN DAY GIVEN AN NCEP ABSOLUTE DATE AND TIME.
-!!
-!! PROGRAM HISTORY LOG:
-!! -  98-01-05  MARK IREDELL
-!!
-!! @param[in] IDAT INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!!                (YEAR, MONTH, DAY, TIME ZONE,
-!!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!! @param[out] JDOW INTEGER DAY OF WEEK (1-7, WHERE 1 IS SUNDAY)
-!! @param[out] JDOY INTEGER DAY OF YEAR (1-366, WHERE 1 IS JANUARY 1)
-!! @param[out] JDAY INTEGER JULIAN DAY (DAY NUMBER FROM JAN. 1,4713 B.C.)
-!!
-!! SUBPROGRAMS CALLED:
-!! - iw3jdn() COMPUTE JULIAN DAY NUMBER     
-!! - w3fs26() YEAR, MONTH, DAY FROM JULIAN DAY NUMBER
-!!
+!> @brief Returns the integer day of week, the day
+!> of year, and julian day given an NCEP absolute date and time.
+!> @author Mark Iredell @date 1998-01-05
+
+!> Program history log:
+!> - Mark Iredell 1998-01-05
+!>
+!> @param[in] IDAT Integer (8) NCEP absolute date and time
+!> (year, month, day, time zone, hour, minute, second, millisecond)
+!> @param[out] JDOW Integer day of week (1-7, where 1 is sunday)
+!> @param[out] JDOY Integer day of year (1-366, where 1 is january 1)
+!> @param[out] JDAY Integer julian day (day number from jan. 1,4713 b.c.)
+!>
+!> @author Mark Iredell @date 1998-01-05
       subroutine w3doxdat(idat,jdow,jdoy,jday)
       integer idat(8)
 !  get julian day and then get day of week and day of year
