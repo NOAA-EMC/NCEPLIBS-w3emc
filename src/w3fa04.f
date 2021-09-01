@@ -1,50 +1,30 @@
 C> @file
-C
-C> SUBPROGRAM: W3FA04         COMPUTE STADARD PRESSURE, TEMP, POT TEMP
-C>   AUTHOR: MCDONELL, J.     ORG: W345       DATE: JUL 74
+C> @brief Compute standard pressure, temp, pot temp.
+C> @author James McDonell @date 1974-06-01
+
+C> Computes the standard pressure, temperature, and poten-
+C> tial temperature given the height in meters (<32 km). For
+C> the pressure and temperature the results duplicate the values in
+C> the U.S. standard atmosphere (1962), which is the icao standard
+C> atmosphere to 54.7487 mb (20 km) and the proposed extension to
+C> 8.68 mb (32 km). For potential temperature a value of 2/7 is
+C> used for rd/cp.
 C>
-C> ABSTRACT: COMPUTES THE STANDARD PRESSURE, TEMPERATURE, AND POTEN-
-C>   TIAL TEMPERATURE GIVEN THE HEIGHT IN METERS ( < 32 KM ).    FOR
-C>   THE PRESSURE AND TEMPERATURE THE RESULTS DUPLICATE THE VALUES IN
-C>   THE U.S. STANDARD ATMOSPHERE (1962), WHICH IS THE ICAO STANDARD
-C>   ATMOSPHERE TO 54.7487 MB (20 KM) AND THE PROPOSED EXTENSION TO
-C>   8.68 MB (32 KM).  FOR POTENTIAL TEMPERATURE A VALUE OF  2/7  IS
-C>   USED FOR  RD/CP.
+C> Program history log:
+C> - James McDonell 1974-06-01
+C> - Ralph Jones 1984-07-05 Change to ibm vs fortran.
+C> - Ralph Jones 1990-04-27 Change to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   74-06-01  J.MCDONELL
-C>   84-07-05  R.E.JONES   CHANGE TO IBM VS FORTRAN
-C>   90-04-27  R.E.JONES   CHANGE TO CRAY CFT77 FORTRAN
+C> @param[in] HEIGHT Height in meters.
+C> @param[out] PRESS Standard pressure in millibars.
+C> @param[out] TEMP Temperature in degrees kelvin.
+C> @param[out] THETA Potential temperature in degrees kelvin.
 C>
-C> USAGE:  CALL W3FA04 (HEIGHT, PRESS, TEMP, THETA)
+C> @note Not valid for heights greater than 32 km. declare all parameters
+C> as type real*4.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     HEIGHT ARG LIST  HEIGHT IN METERS
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     PRESS  ARG LIST  STANDARD PRESSURE IN MILLIBARS
-C>     TEMP   ARG LIST  TEMPERATURE IN DEGREES KELVIN
-C>     THETA  ARG LIST  POTENTIAL TEMPERATURE IN DEGREES KELVIN
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     EXP                                                     SYSTEM
-C>
-C>   REMARKS: NOT VALID FOR HEIGHTS GREATER THAN 32 KM.
-C>     DECLARE ALL PARAMETERS AS TYPE REAL*4
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: INCLUDE VENDOR EXTENSIONS USED.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP/832
-C>
+C> @author James McDonell @date 1974-06-01
+
       SUBROUTINE W3FA04(HEIGHT,PRESS,TEMP,THETA)
 C
       REAL  M0

@@ -1,51 +1,31 @@
 C> @file
-C
-C> SUBPROGRAM: W3FA06         CALCULATION OF THE LIFTED INDEX
-C>   AUTHOR: HOWCROFT,J.      ORG: W/NMC342   DATE: 78-07-01
+C> @brief Calculation of the lifted index.
+C> @author James Howcroft @date 1978-07-01
+
+C> Given the pressure,temperature and relative humidity of
+C> an air parcel at some point in the atmosphere, calculate the
+C> lifted index of the parcel. Lifted index is defined as the
+C> temperature difference between the observed 500mb temperature and
+C> the supposed temperature that the parcel would obtain if it were
+C> lifted dry-adiabatically to saturation and then moved moist
+C> adiabatically to the 500mb level.
 C>
-C> ABSTRACT: GIVEN THE PRESSURE,TEMPERATURE AND RELATIVE HUMIDITY OF
-C>   AN AIR PARCEL AT SOME POINT IN THE ATMOSPHERE, CALCULATE THE
-C>   LIFTED INDEX OF THE PARCEL. LIFTED INDEX IS DEFINED AS THE
-C>   TEMPERATURE DIFFERENCE BETWEEN THE OBSERVED 500MB TEMPERATURE AND
-C>   THE SUPPOSED TEMPERATURE THAT THE PARCEL WOULD OBTAIN IF IT WERE
-C>   LIFTED DRY-ADIABATICALLY TO SATURATION AND THEN MOVED MOIST
-C>   ADIABATICALLY TO THE 500MB LEVEL.
+C> Program history log:
+C> - James Howcroft 1978-07-01
+C> - Ralph Jones 1989-01-24 Change to microsoft fortran 4.10.
+C> - Ralph Jones 1990-06-08 Change to sun fortran 1.3.
+C> - Ralph Jones 1991-03-29 Convert to silicongraphics fortran.
+C> - Ralph Jones 1993-03-29 Add save statement.
+C> - Ralph Jones 1995-09-25 Put in w3 library on cray.
 C>
-C> PROGRAM HISTORY LOG:
-C>   78-07-01  J.HOWCROFT
-C>   89-01-24  R.E.JONES   CHANGE TO MICROSOFT FORTRAN 4.10
-C>   90-06-08  R.E.JONES   CHANGE TO SUN FORTRAN 1.3
-C>   91-03-29  R.E.JONES   CONVERT TO SiliconGraphics FORTRAN
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   95-09-25  R.E.JONES   PUT IN W3 LIBRARY ON CRAY
+C> @param[in] P Parcel pressure in millibars.
+C> @param[in] T Parcel temperataure in degrees celsius.
+C> @param[in] RH Parcel relative humidity in percent.
+C> @param[in] T5 Temperature at the 500mb level in deg. celsius.
+C> @param[out] TLI Lifted index in degrees celsius
+C> tli = 9.9999  iteration diverges; return to user program.
 C>
-C> USAGE: CALL W3FA06(P,T,RH,T5,TLI)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     P      ARG LIST   PARCEL PRESSURE IN MILLIBARS
-C>     T      ARG LIST   PARCEL TEMPERATAURE IN DEGREES CELSIUS
-C>     RH     ARG LIST   PARCEL RELATIVE HUMIDITY IN PERCENT
-C>     T5     ARG LIST   TEMPERATURE AT THE 500MB LEVEL IN DEG. CELSIUS
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     TLI    ARG LIST  LIFTED INDEX IN DEGREES CELSIUS
-C>                      TLI = 9.9999  ITERATION DIVERGES;
-C>                      RETURN TO USER PROGRAM
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     EXP    ABS    SIGN                                      SYSLIB
-C>     W3FA01                                                  W3LIB
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048
-C>
+C> @author James Howcroft @date 1978-07-01
       SUBROUTINE W3FA06 (P,T,RH,T5,TLI)
 C
        SAVE

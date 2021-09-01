@@ -1,27 +1,22 @@
 C> @file
-C> @brief COMPUTES LEGENDRE POLYNOMIALS AT A GIVEN LATITUDE.
-      
-C> COMPUTES LEGENDRE POLYNOMIALS
-C> @author SELA,JOE @date 80-10-28
+C> @brief Computes legendre polynomials at a given latitude.
+C> @author Joe Sela @date 1980-10-28
 C>
-C> SUBROUTINE COMPUTES LEGENDRE POLYNOMIALS AT A
-C> GIVEN LATITUDE.
+C> Subroutine computes legendre polynomials at a given latitude.
 C>
-C> PROGRAM HISTORY LOG:
-C> -  80-10-20  JOE SELA
-C> -  84-06-01  R.E.JONES   CHANGE TO IBM VS FORTRAN
-C> -  93-04-12  R.E.JONES   CHANGES FOR CRAY, DOUBLE PRECISION TO REAL
+C> Program history log:
+C> - Joe Sela 1980-10-20
+C> - Ralph Jones 1984-06-01 Change to ibm vs fortran.
+C> - Ralph Jones 1993-04-12 Changes for cray, double precision to real.
 C>
-C> @param[out] PLN REAL LOCATIONS CONTAIN LEGENDRE
-C> POLNOMIALS , SIZE IS (JCAP+2)*(JCAP+1)
-C> @param[in] COLRAD COLATITUDE IN RADIANS OF DESIRED POINT.
-C> @param[in] JCAP FOR RHOMBOIADAL TRUNCATION OF ZONAL WAVE
-C> @param[in] EPS COEFF. USED IN RECURSION EQUATION.
-C> DIMENSION OF EPS IS (JCAP+2)*(JCAP+1)
+C> @param[out] PLN Real locations contain legendre
+C> polynomials, size is (jcap+2)*(jcap+1)
+C> @param[in] COLRAD Colatitude in radians of desired point.
+C> @param[in] JCAP For rhomboiadal truncation of zonal wave
+C> @param[in] EPS Coeff. used in recursion equation.
+C> Dimension of eps is (jcap+2)*(jcap+1)
 C>
-C>   SUBPROGRAMS CALLED:
-C>     cos()   sin()   sngl()                                        
-C>
+C> @author Joe Sela @date 1980-10-28
        SUBROUTINE W3FA12(PLN,COLRAD,JCAP,EPS)
        REAL A
        REAL B
