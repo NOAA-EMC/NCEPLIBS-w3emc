@@ -1,26 +1,22 @@
 C> @file
-C> @brief COMPUTES COEFFICIENTS FOR USE IN W3FA12
-C
-C> COMPUTES COEFFICIENTS FOR USE IN W3FA12
-C> @author SELA,JOE @date 80-10-28
+C> @brief Computes coefficients for use in w3fa12.
+C> @author Joe Sela @date 1980-10-28
+
+C> Subroutine computes double precision  coefficients
+C> used in generating  legendre polynomials in subr. w3fa12.
+C> on a cray double precision is changed to real, dsqrt to sqrt.
 C>
-C> SUBROUTINE COMPUTES DOUBLE PRECISION  COEFFICIENTS
-C> USED IN GENERATING  LEGENDRE POLYNOMIALS IN SUBR. W3FA12.
-C> ON A CRAY DOUBLE PRECISION IS CHANGED TO REAL, DSQRT TO SQRT.
+C> Program history log:
+C> - Joe Sela 1980-10-28
+C> - Ralph Jones 1984-06-01 0change to ibm vs fortran.
+C> - Ralph Jones 1993-04-12 0changes for cray, double precision to real.
 C>
-C> PROGRAM HISTORY LOG:
-C> -  80-10-28  JOE SELA
-C> -  84-06-01  R.E.JONES   CHANGE TO IBM VS FORTRAN
-C> -  93-04-12  R.E.JONES   CHANGES FOR CRAY, DOUBLE PRECISION TO REAL
+C> @param[out] EPS Real coefficients used in computing legendre polynomials.
+C> dimension of eps is (jcap+2)*(jcap+1)
+C> @param[in] JCAP Zonal wave number thirty, etc.
 C>
-C> @param[out] EPS REAL COEFFICIENTS USED IN
-C>                      COMPUTING LEGENDRE POLYNOMIALS.
-C>                      DIMENSION OF EPS IS (JCAP+2)*(JCAP+1)
-C> @param[in] JCAP ZONAL WAVE NUMBER THIRTY, ETC.
-C>
-C> SUBPROGRAMS CALLED:
-C>     sqrt()
-C>
+C> @author Joe Sela @date 1980-10-28
+
        SUBROUTINE W3FA11 (EPS,JCAP)
 C
        REAL  EPS(*)

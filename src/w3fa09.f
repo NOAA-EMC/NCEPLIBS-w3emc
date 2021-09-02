@@ -1,43 +1,28 @@
 C> @file
-C
-C> SUBR: W3FA09   - TEMPERATURE TO SATURATION VAPOR PRESSURE
-C>   AUTHOR: CHASE, P.          ORG: W345          DATE:    OCT 78
-C>   UPDATE: JONES, R.E.        ORG: W342          DATE: 26 JUN 84
+C> @brief Temperature to saturation vapor pressure.
+C> @author P. Chase @date 1978-10-01
+
+C> Computes saturation vapor pressure in kilopascals given temperataure in kelvins.
 C>
-C> ABSTRACT: COMPUTES SATURATION VAPOR PRESSURE IN KILOPASCALS GIVEN
-C>   TEMPERATAURE IN KELVINS.
+C> Program history log:
+C> - P. Chase 1978-10-01  P.CHASE
+C> - Ralph Jones 1984-06-26 Change to ibm vs fortran.
+C> - Ralph Jones 1984-06-26 Change to microsoft fortran 4.10.
+C> - Ralph Jones 1990-06-08 Change to sun fortran 1.3.
+C> - Ralph Jones 1991-03-29 Convert to silicongraphic fortran.
+C> - Ralph Jones 1993-03-29 Add save statement.
+C> - Ralph Jones 1995-09-25 Change tk to cray 64 bit real, change double.
+C> precision to cray 64 bit real.
 C>
-C> PROGRAM HISTORY LOG:
-C>   78-10-01  P.CHASE
-C>   84-06-26  R.E.JONES  CHANGE TO IBM VS FORTRAN
-C>   84-06-26  R.E.JONES  CHANGE TO MICROSOFT FORTRAN 4.10
-C>   90-06-08  R.E.JONES  CHANGE TO SUN FORTRAN 1.3
-C>   91-03-29  R.E.JONES  CONVERT TO SiliconGraphic FORTRAN
-C>   93-03-29  R.E.JONES  ADD SAVE STATEMENT
-C>   95-09-25  R.E.JONES  CHANGE TK TO CRAY 64 BIT REAL, CHANGE DOUBLE
-C>                        PRECISION TO CRAY 64 BIT REAL.
+C> @param[in] TK REAL*8 Temperature in kelvins. if tk < 223.16, the value
+C> 223.16 will be used.  if tk > 323.16, the value 323.16
+C> will be used as the argument. 'tk' itself is unchanged.
+C> @return VP Saturation vapor pressure in kilopascals 0.0063558 < VP < 12.3395.
 C>
-C> USAGE:  VP = W3FA09 (TK)
+C> @note W3FA09 may be declared real*8 so that a real*8 value is
+C> returned, but no increase in accuracy is implied.
 C>
-C>   INPUT:
-C>     'TK' - REAL*8 TEMPERATURE IN KELVINS. IF TK < 223.16, THE VALUE
-C>            223.16 WILL BE USED.  IF TK > 323.16, THE VALUE 323.16
-C>            WILL BE USED AS THE ARGUMENT. 'TK' ITSELF IS UNCHANGED.
-C>   OUTPUT:
-C>     'VP' - SATURATION VAPOR PRESSURE IN KILOPASCALS.
-C>            0.0063558 < VP < 12.3395
-C>
-C>   NOTES: W3FA09 MAY BE DECLARED REAL*8 SO THAT A REAL*8 VALUE IS
-C>     RETURNED, BUT NO INCREASE IN ACCURACY IS IMPLIED.
-C>
-C>   EXIT STATES: NONE
-C>
-C>   EXTERNAL REFERENCES: NONE
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048
-C>
+C> @author P. Chase @date 1978-10-01
       REAL FUNCTION W3FA09 (TK)
 C
 C THE CHEBYSHEV COEFFICIENTS ARE IN ARRAY C, LOW-ORDER TERM FIRST.
