@@ -1,50 +1,32 @@
 C> @file
-C
-C> SUBPROGRAM: W3FB01         I,J TO LATITUDE, LONGITUDE
-C>   AUTHOR: HEERMANN,A.      ORG: W345       DATE: 69-08-01
-C>
-C> ABSTRACT: CONVERTS THE COORDINATES OF A LOCATION FROM THE GRID(I,J)
-C>   COORDINATE SYSTEM OVERLAID ON THE POLAR STEREOGRAPHIC MAP PRO-
-C>   JECTION TRUE AT 60 N TO THE NATURAL COORDINATE SYSTEM OF LATITUDE
-C>   /LONGITUDE ON THE EARTH. A PREFERABLE MORE FLEXIBLE SUBROUTINE TO
-C>   USE IS W3FB05. W3FB01 IS THE REVERSE OF W3FB00.
+C> @brief I,J TO LATITUDE, LONGITUDE
+C> @author A. Heermann @date 1969-08-01
+
+C> Converts the coordinates of a location from the grid(i,j)
+C> coordinate system overlaid on the polar stereographic map pro-
+C> jection true at 60 n to the natural coordinate system of latitude
+C> /longitude on the Earth. A preferable more flexible subroutine to
+C> use is w3fb05(). w3fb01() is the reverse of w3fb00().
 C>
 C> PROGRAM HISTORY LOG:
-C>   69-08-01  A. HEERMANN
-C>   90-08-31  R.E.JONES     CHANGE TO CRAY CFT77 FORTRAN
+C> - A. Heermann 1969-08-01  A. HEERMANN
+C> - Ralph Jones 1990-08-31 Change to cray cft77 fortran.
 C>
-C> USAGE:  CALL W3FB01 (XI, XJ, XMESHL, ALAT, ALONG)
+C> @param[in] XI I of the point relative to north pole.
+C> @param[in] XJ J of the point relative to north pole.
+C> @param[in] XMESHL Mesh length of grid in kilometers at 60n.
+C> @param[out] ALAT Latitude in deg. (-20.0(s. hemis) < alat < 90.0).
+C> @param[out] ALONG West longitude in degrees.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     XI     ARG LIST  I OF THE POINT RELATIVE TO NORTH POLE
-C>     XJ     ARG LIST  J OF THE POINT RELATIVE TO NORTH POLE
-C>     XMESHL ARG LIST  MESH LENGTH OF GRID IN KILOMETERS AT 60N
+C> @note The grid used in this subroutine has its origin (i=0,j=0)
+C> at the north pole, so if the user's grid has its origin at a
+C> point other than the north pole, a translation is required to
+C> get i and j for input into w3fb01(). The subroutine grid is
+C> oriented so that longitude 80w is parallel to gridlines of
+C> i=constant. The Earth's radius is taken to be 6371.2 km.
+C> All parameters in the call statement must be real.
 C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     ALAT   ARG LIST  LATITUDE IN DEG. (-20.0(S. HEMIS) < ALAT < 90.0)
-C>     ALONG  ARG LIST  WEST LONGITUDE IN DEGREES
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     ASIN ATAN2                                              SYSLIB
-C>
-C>   REMARKS: THE GRID USED IN THIS SUBROUTINE HAS ITS ORIGIN (I=0,J=0)
-C>     AT THE NORTH POLE, SO IF THE USER'S GRID HAS ITS ORIGIN AT A
-C>     POINT OTHER THAN THE NORTH POLE, A TRANSLATION IS REQUIRED TO
-C>     GET I AND J FOR INPUT INTO W3FB01. THE SUBROUTINE GRID IS
-C>     ORIENTED SO THAT LONGITUDE 80W IS PARALLEL TO GRIDLINES OF
-C>     I=CONSTANT. THE EARTH'S RADIUS IS TAKEN TO BE 6371.2 KM.
-C>     ALL PARAMETERS IN THE CALL STATEMENT MUST BE REAL
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author A. Heermann @date 1969-08-01
       SUBROUTINE W3FB01(XI,XJ,XMESHL,ALAT,ALONG)
 C
       DATA  DEGPRD/57.2957795/
