@@ -1,45 +1,22 @@
 C> @file
-C
-C> SUBPROGRAM: W3FB02         CONVERT S. HEMISPHERE LAT/LON TO I AND J
-C>   AUTHOR: JONES,R.E.       ORG: W342       DATE: 85-09-13
+C> @brief COnvert s. hemisphere lat/lon to i and j.
+C> @author Ralph Jones @date 1985-09-13
+
+C> Computes i and j coordinates for a latitude/longitude
+C> point on the southern hemisphere polar stereographic map
+C> projection.
 C>
-C> ABSTRACT: COMPUTES I AND J COORDINATES FOR A LATITUDE/LONGITUDE
-C>   POINT ON THE SOUTHERN HEMISPHERE POLAR STEREOGRAPHIC MAP
-C>   PROJECTION.
+C> Program history log:
+C> - Ralph Jones 1985-09-13 Convert to fortran 77.
+C> - Ralph Jones 1990-08-31 Convert to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   85-09-13  R.E.JONES   CONVERT TO FORTRAN 77
-C>   90-08-31  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] ALAT Real*4 latitude (s.h. latitudes are negative)
+C> @param[in] ALONG Real*4 west longitude.
+C> @param[in] XMESHL Real*4 grid interval in km.
+C> @param[out] XI Real*4 i coordinate.
+C> @param[out] XJ Real*4 j coordinate.
 C>
-C> USAGE:  CALL W3FB02 (ALAT, ALONG, XMESHL, XI, XJ)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     ALAT   ARG LIST  REAL*4 LATITUDE (S.H. LATITUDES ARE NEGATIVE)
-C>     ALONG  ARG LIST  REAL*4 WEST LONGITUDE
-C>     XMESHL ARG LIST  REAL*4 GRID INTERVAL IN KM.
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     XI     ARG LIST  REAL*4 I COORDINATE
-C>     XJ     ARG LIST  REAL*4 J COORDINATE
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     COS  SIN                                                SYSLIB
-C>
-C>
-C>   EXIT STATES: *
-C>
-C>   EXTERNAL REFERENCES: NONE
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Ralph Jones @date 1985-09-13
       SUBROUTINE W3FB02(ALAT, ALONG, XMESHL, XI, XJ)
 C
 C     ...GIVEN ... ALAT   SRN HEMI LATS ARE NEGATIVE VALUED

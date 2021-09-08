@@ -1,40 +1,22 @@
 C> @file
-C
-C> SUBPROGRAM: W3FB03         CONVERT I,J GRID COORDINATES TO LAT/LON
-C>   AUTHOR: JONES,R.E.       ORG: W342       DATE: 86-07-17
+C> @brief Convert i,j grid coordinates to lat/lon.
+C> @author Ralph Jones @date 1986-07-17
+
+C> Converts i,j grid coordinates to the corresponding
+C> latitude/longitude on a southern hemisphere polar stereographic
+C> map projection.
 C>
-C> ABSTRACT: CONVERTS I,J GRID COORDINATES TO THE CORRESPONDING
-C>   LATITUDE/LONGITUDE ON A SOUTHERN HEMISPHERE POLAR STEREOGRAPHIC
-C>   MAP PROJECTION.
+C> Program history log.
+C> - Ralph Jones 1986-07-17 Convert to fortran 77.
+C> - Ralph Jones 1990-08-31 Convert to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG.
-C>   86-07-17  R.E.JONES   CONVERT TO FORTRAN 77
-C>   90-08-31  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] XI Real i coordinate.
+C> @param[in] XJ Real j coordinate.
+C> @param[in] XMESHL Real grid interval in km.
+C> @param[out] TLAT Real s.h. latitude.
+C> @param[out] TLONG Real longitude.
 C>
-C> USAGE:  CALL W3FBO3 (XI, XJ, XMESHL, TLAT, TLONG)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     XI     ARG LIST  REAL I COORDINATE
-C>     XJ     ARG LIST  REAL J COORDINATE
-C>     XMESHL ARG LIST  REAL GRID INTERVAL IN KM.
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     TLAT   ARG LIST  REAL  S.H. LATITUDE
-C>     TLONG  ARG LIST  REAL  LONGITUDE
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     ASIN  ATAN2                                             SYSLIB
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Ralph Jones @date 1986-07-17
       SUBROUTINE W3FB03(XI, XJ, XMESHL, TLAT, TLONG)
 C
 C     ...GIVEN ... XI/XJ GRID COORDINATES OF A POINT RELATIVE

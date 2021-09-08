@@ -1,38 +1,19 @@
 C> @file
-C
-C> SUBPROGRAM: W3FA13         COMPUTES TRIG FUNCTIONS
-C>   AUTHOR: SELA, JOE        ORG: W323       DATE: 80-11-21
+C> @brief Computes Trig Functions
+C> @author Joe Sela @date 1980-11-21
+
+C> Computes trig functions used in 2.5 by 2.5 lat,lon
+C> mapping routines. w3fa13() must be called at least once before
+C> calls to w3ft08(), w3ft09(), w3ft10(), w3ft11().
 C>
-C> ABSTRACT:  COMPUTES TRIG FUNCTIONS USED IN 2.5 BY 2.5 LAT,LON
-C>   MAPPING ROUTINES. W3FA13 MUST BE CALLED AT LEAST ONCE BEFORE
-C>   CALLS TO W3FT08,W3FT09,W3FT10,W3FT11.
+C> Program history log:
+C> - Joe Sela 1980-11-21
+C> - Ralph Jones 1984-06-01 Change to vs fortran
 C>
-C> PROGRAM HISTORY LOG:
-C>   80-11-21  JOE SELA
-C>   84-06-01  R.E.JONES   CHANGE TO VS FORTRAN
+C> @param[out] TRIGS 216 trig values, used by subroutine w3fa12().
+C> @param[out] RCOS 37 colatitudes used by subroutines w3ft09() ,w3ft11()
 C>
-C> USAGE:  CALL W3FA13(TRIGS,RCOS)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     N/A
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     TRIGS  ARG LIST  216 TRIG VALUES, USED BY SUBROUTINE W3FA12.
-C>     RCOS   ARG LIST  37 COLATITUDES USED BY SUBROUTINES W3FT09,W3FT11
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     IABS  SIN COS                                           SYSTEM
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN 77
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author Joe Sela @date 1980-11-21
       SUBROUTINE W3FA13(TRIGS,RCOS)
 C
        REAL            RCOS(*)

@@ -1,52 +1,33 @@
 C> @file
-C
-C> SUBPROGRAM: W3FB00         LATITUDE, LONGITUDE TO I,J
-C>   AUTHOR: HEERMANN,A.      ORG: W345       DATE: 69-08-01
+C> @brief Convert latitude, longitude to i,j
+C> @author A. Heermann @date 1969-08-01
+
+C> Converts the coordinates of a location on earth from the
+C> natural coordinate system of latitude/longitude to the grid (i,j)
+C> coordinate system overlaid on the polar stereographic map pro-
+C> jection true at 60 n. a preferable, more flexible subroutine to
+C> use is w3fb04(). w3fb00() is the reverse of w3fb01().
 C>
-C> ABSTRACT: CONVERTS THE COORDINATES OF A LOCATION ON EARTH FROM THE
-C>   NATURAL COORDINATE SYSTEM OF LATITUDE/LONGITUDE TO THE GRID (I,J)
-C>   COORDINATE SYSTEM OVERLAID ON THE POLAR STEREOGRAPHIC MAP PRO-
-C>   JECTION TRUE AT 60 N. A PREFERABLE, MORE FLEXIBLE SUBROUTINE TO
-C>   USE IS W3FB04. W3FB00 IS THE REVERSE OF W3FB01.
+C> Program history log:
+C> - A. Heermann 1969-08-01
+C> - Ralph Jones 1990-08-31 Convert to cray cft77 fortran
 C>
-C> PROGRAM HISTORY LOG:
-C>   69-08-01  A. HEERMANN
-C>   90-08-31  R.E.JONES     CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] ALAT Latitude in deg. (-20.0 (s. hemis)) alat) 90.0).
+C> @param[in] ALONG West longitude in degrees.
+C> @param[in] XMESHL Mesh length of grid in kilometers at 60n.
+C> @param[out] XI I of the point relative to north pole.
+C> @param[out] XJ J of the point relative to north pole.
 C>
-C> USAGE:  CALL W3FB00 (ALAT, ALONG, XMESHL, XI, XJ)
+C> @note The grid used in this subroutine has its origin (i=0,j=0)
+C> at the north pole, so if the user's grid has its origin at a
+C> point other than the north pole, a translation is required to
+C> get i and j. The subroutine grid is oriented so that longitude
+C> 80w is parallel to the gridlines of i=constant. The radius of
+C> the earth is taken to be 6371.2 km. All parameters in the call statement
+C> must be real this code will not vectorize on a cray. You will have put
+C> it line to vectorize it.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     ALAT   ARG LIST  LATITUDE IN DEG.  (-20.0(S. HEMIS) ) ALAT ) 90.0)
-C>     ALONG            WEST LONGITUDE IN DEGREES
-C>     XMESHL ARG LIST  MESH LENGTH OF GRID IN KILOMETERS AT 60N
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     XI     ARG LIST  I OF THE POINT RELATIVE TO NORTH POLE
-C>     XJ     ARG LIST  J OF THE POINT RELATIVE TO NORTH POLE
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     COS SIN                                                 SYSLIB
-C>
-C>   REMARKS: THE GRID USED IN THIS SUBROUTINE HAS ITS ORIGIN (I=0,J=0)
-C>     AT THE NORTH POLE, SO IF THE USER'S GRID HAS ITS ORIGIN AT A
-C>     POINT OTHER THAN THE NORTH POLE, A TRANSLATION IS REQUIRED TO
-C>     GET I AND J. THE SUBROUTINE GRID IS ORIENTED SO THAT LONGITUDE
-C>     80W IS PARALLEL TO THE GRIDLINES OF I=CONSTANT. THE RADIUS OF
-C>     THE EARTH IS TAKEN TO BE 6371.2 KM.
-C>     ALL PARAMETERS IN THE CALL STATEMENT MUST BE REAL
-C>     THIS CODE WILL NOT VECTORIZE ON A CRAY. YOU WILL HAVE PUT
-C>     IT LINE TO VECTORIZE IT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM370 VS FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author A. Heermann @date 1969-08-01
       SUBROUTINE W3FB00(ALAT,ALONG,XMESHL,XI,XJ)
 C
       DATA  RADPD /.01745329/
