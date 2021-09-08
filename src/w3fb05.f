@@ -1,58 +1,41 @@
 C> @file
-C
-C> SUBPROGRAM: W3FB05         GRID COORDINATES TO LATITUDE, LONGITUDE
-C>   AUTHOR: JONES,R.E.       ORG: W345       DATE: 86-07-17
+C> @brief Grid coordinates to latitude, longitude.
+C> @author Ralph Jones @date 1986-07-17
 C>
-C> ABSTRACT: CONVERTS THE COORDINATES OF A LOCATION FROM THE GRID(I,J)
-C>   COORDINATE SYSTEM OVERLAID ON THE POLAR STEREOGRAPHIC MAP PROJEC-
-C>   TION TRUE AT 60 DEGREES N OR S LATITUDE TO THE NATURAL COORDINATE
-C>   SYSTEM OF LATITUDE/LONGITUDE ON THE EARTH. W3FB05 IS THE REVERSE
-C>   OF W3FB04.
+C> Converts the coordinates of a location from the grid(i,j)
+C> coordinate system overlaid on the polar stereographic map projec-
+C> tion true at 60 degrees n or s latitude to the natural coordinate
+C> system of latitude/longitude on the earth. w3fb05() is the reverse
+C> of w3fb04().
 C>
-C> PROGRAM HISTORY LOG:
-C>   86-07-17  R.E.JONES
-C>   89-11-01  R.E.JONES   CHANGE TO CRAY CFT77 FORTRAN
+C> Program history log:
+C> - Ralph Jones 1986-07-17
+C> - Ralph Jones 1989-11-01 Change to cray cft77 fortran.
 C>
-C> USAGE:  CALL W3FB05 (XI, XJ, XMESHL, ORIENT, ALAT, ALONG)
+C> @param[in] XI I of the point relative to the north or s. pole
+C> @param[in] XJ J of the point relative to the north or s. pole
+C> @param[in] XMESHL Mesh length of grid in km at 60 degrees(<0 if sh)
+C> (190.5 lfm grid, 381.0 nh pe grid,-381.0 sh pe grid)
+C> @param[in] ORIENT Orientation west longitude of the grid
+C> (105.0 lfm grid, 80.0 nh pe grid, 260.0 sh pe grid)
+C> @param[out] ALAT Latitude in degrees  (<0 if sh)
+C> @param[out] ALONG West longitude in degrees
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     XI     ARG LIST  I OF THE POINT RELATIVE TO THE NORTH OR S. POLE
-C>     XJ     ARG LIST  J OF THE POINT RELATIVE TO THE NORTH OR S. POLE
-C>     XMESHL ARG LIST  MESH LENGTH OF GRID IN KM AT 60 DEGREES(<0 IF SH)
-C>                   (190.5 LFM GRID, 381.0 NH PE GRID,-381.0 SH PE GRID)
-C>     ORIENT ARG LIST  ORIENTATION WEST LONGITUDE OF THE GRID
-C>                    (105.0 LFM GRID, 80.0 NH PE GRID, 260.0 SH PE GRID)
+C> @note All parameters in the calling statement must be
+C> real. the range of allowable latitudes is from a pole to
+C> 30 degrees into the opposite hemisphere.
+C> the grid used in this subroutine has its origin (i=0,j=0)
+C> at the pole, so if the user's grid has its origin at a point
+C> other than a pole, a translation is required to get i and j for
+C> input into w3fb05(). the subroutine grid is oriented so that
+C> gridlines of i=constant are parallel to a west longitude sup-
+C> plied by the user. the earth's radius is taken to be 6371.2 km.
 C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     ALAT   ARG LIST  LATITUDE IN DEGREES  (<0 IF SH)
-C>     ALONG  ARG LIST  WEST LONGITUDE IN DEGREES
+C> @note This code will not vectorize, it is normaly used in a
+C> double do loop with w3ft01(), w3ft00(), etc. to vectorize it,
+C> put it in line, put w3ft01(), w3ft00(), etc. in line.
 C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     ASIN   ATAN2                                            SYSLIB
-C>
-C>   REMARKS: ALL PARAMETERS IN THE CALLING STATEMENT MUST BE
-C>     REAL. THE RANGE OF ALLOWABLE LATITUDES IS FROM A POLE TO
-C>     30 DEGREES INTO THE OPPOSITE HEMISPHERE.
-C>     THE GRID USED IN THIS SUBROUTINE HAS ITS ORIGIN (I=0,J=0)
-C>     AT THE POLE, SO IF THE USER'S GRID HAS ITS ORIGIN AT A POINT
-C>     OTHER THAN A POLE, A TRANSLATION IS REQUIRED TO GET I AND J FOR
-C>     INPUT INTO W3FB05. THE SUBROUTINE GRID IS ORIENTED SO THAT
-C>     GRIDLINES OF I=CONSTANT ARE PARALLEL TO A WEST LONGITUDE SUP-
-C>     PLIED BY THE USER. THE EARTH'S RADIUS IS TAKEN TO BE 6371.2 KM.
-C>
-C>   WARNING: THIS CODE WILL NOT VECTORIZE, IT IS NORMALY USED IN A
-C>            DOUBLE DO LOOP WITH W3FT01, W3FT00, ETC. TO VECTORIZE IT,
-C>            PUT IT IN LINE, PUT W3FT01, W3FT00, ETC. IN LINE.
-C>
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Ralph Jones @date 1986-07-17
       SUBROUTINE W3FB05(XI,XJ,XMESHL,ORIENT,ALAT,ALONG)
 C
       DATA  DEGPRD/57.2957795/
