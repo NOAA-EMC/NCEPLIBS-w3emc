@@ -1,80 +1,72 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FB10        LAT/LONG PAIR TO COMPASS BEARING, GCD
-C>   PRGMMR: CHASE            ORG: NMC421      DATE:88-10-26
+C> @brief Lat/long pair to compass bearing, gcd.
+C> @author Peter Chase @date 1988-08-29
+
+C> Given a pair of points (1) and (2) given by latitude and
+C> longitude, w3fb10() computes the bearing and great circle distance
+C> from point (1) to point (2) assuming a spherical Earth. The
+C> north and south poles are special cases. If latitude of point
+C> (1) is within 1e-10 degrees of the north pole, bearing is the
+C> negative longitude of point (2) by convention. If latitude of
+C> point (1) is within 1e-10 degrees of the south pole, bearing is
+C> the longitude of point (2) by convention. If point (2) is within
+C> 1e-6 radians of the antipode of point (1), the bearing will be
+C> set to zero. If point (1) and point (2) are within 1e-10 radians
+C> of each other, both bearing and distance will be set to zero.
 C>
-C> ABSTRACT: GIVEN A PAIR OF POINTS (1) AND (2) GIVEN BY LATITUDE AND
-C>   LONGITUDE, W3FB10 COMPUTES THE BEARING AND GREAT CIRCLE DISTANCE
-C>   FROM POINT (1) TO POINT (2) ASSUMING A SPHERICAL EARTH.  THE
-C>   NORTH AND SOUTH POLES ARE SPECIAL CASES.  IF LATITUDE OF POINT
-C>   (1) IS WITHIN 1E-10 DEGREES OF THE NORTH POLE, BEARING IS THE
-C>   NEGATIVE LONGITUDE OF POINT (2) BY CONVENTION.  IF LATITUDE OF
-C>   POINT (1) IS WITHIN 1E-10 DEGREES OF THE SOUTH POLE, BEARING IS
-C>   THE LONGITUDE OF POINT (2) BY CONVENTION.  IF POINT (2) IS WITHIN
-C>   1E-6 RADIANS OF THE ANTIPODE OF POINT (1), THE BEARING WILL BE
-C>   SET TO ZERO.  IF POINT (1) AND POINT (2) ARE WITHIN 1E-10 RADIANS
-C>   OF EACH OTHER, BOTH BEARING AND DISTANCE WILL BE SET TO ZERO.
+C> Program history log:
+C> - Peter Chase 1988-08-29
+C> - Peter Chase 1988-09-23 Fix dumb south pole error.
+C> - Peter Chase 1988-10-05 Fix bearing ambiguity.
+C> - Ralph Jones 1990-04-12 Convert to cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   88-08-29  CHASE, P.
-C>   88-09-23  CHASE, P.   FIX DUMB SOUTH POLE ERROR
-C>   88-10-05  CHASE, P.   FIX BEARING AMBIGUITY
-C>   90-04-12  R.E.JONES   CONVERT TO CFT77 FORTRAN
+C> @param[in] DLAT1 REAL Latitude of point (1) in degrees north.
+C> @param[in] DLON1 REAL Longitude of point (1) in degrees east.
+C> @param[in] DLAT2 REAL Latitude of point (2) in degrees north.
+C> @param[in] DLON2 REAL Longitude of point (2) in degrees east.
+C> @param[out] BEARD REAL Bearing of point (2) from point (1) in
+C> compass degrees with north = 0.0, values from
+C> -180.0 to +180.0 degrees.
+C> @param[out] GCDKM REAL Great circle distance from point (1) to
+C> point (2) in kilometers.
 C>
-C> USAGE:    CALL W3FB10(DLAT1, DLON1, DLAT2, DLON2, BEARD, GCDKM)
+C> @note According to the nmc handbook, the Earth's radius is
+C> 6371.2 kilometers. This is what we use, even though the value
+C> recommended by the smithsonian meteorological handbook is
+C> 6371.221 km. (I wouldn't want you to think that I didn't know
+C> what the correct value was.)
 C>
-C>   INPUT ARGUMENT LIST:
-C>     DLAT1    - REAL  LATITUDE OF POINT (1) IN DEGREES NORTH.
-C>     DLON1    - REAL  LONGITUDE OF POINT (1) IN DEGREES EAST.
-C>     DLAT2    - REAL  LATITUDE OF POINT (2) IN DEGREES NORTH.
-C>     DLON2    - REAL  LONGITUDE OF POINT (2) IN DEGREES EAST.
+C> @note Method: The poles are special cases, and handled separately.
+C> otherwise, from spherical trigonometry, the law of cosines is used
+C> to calculate the third side of the spherical triangle having
+C> sides from the pole to points (1) and (2) (the colatitudes).
+C> then the law of sines is used to calculate the angle at point
+C> (1). A test is applied to see whether the arcsine result may be
+C> be used as such, giving an acute angle as the bearing, or whether
+C> the arcsine result should be subtracted from pi, giving an obtuse
+C> angle as the bearing. This test is derived by constructing a
+C> right spherical triangle using the pole, point (2), and the
+C> meridian through point(1). The latitude of the right-angled
+C> vertex then provides a test--if latitude (1) is greater than this
+C> latitude, the bearing angle must be obtuse, otherwise acute.
+C> If the two points are within 1e-6 radians of each other
+C> a flat Earth is assumed, and the four-quadrant arctangent
+C> function is used to find the bearing. The y-displacement is
+C> the difference in latitude and the x-displacement is the
+C> difference in longitude times cosine latitude, both in radians.
+C> distance is then the diagonal.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     BEARD    - REAL  BEARING OF POINT (2) FROM POINT (1) IN
-C>                COMPASS DEGREES WITH NORTH = 0.0, VALUES FROM
-C>                -180.0 TO +180.0 DEGREES.
-C>     GCDKM    - REAL  GREAT CIRCLE DISTANCE FROM POINT (1) TO
-C>                POINT (2) IN KILOMETERS.
+C> @note Fundamental trigonometric identities are used freely, such
+C> as that cos(x) = sin(pi/2 - x), etc.  See almost any mathematical
+C> handbook, such as the c.r.c. standard math tables under 'relations
+C> in any spherical triangle', or the national bureau of standards
+C> 'handbook of mathematical functions' under section 4.3.149,
+C> formulas for solution of spherical triangles.
 C>
-C>   SUBPROGRAMS CALLED: NONE
+C> @note Double precision is used internally because of the wide
+C> range of geographic values that may be used.
 C>
-C> REMARKS:  ACCORDING TO THE NMC HANDBOOK, THE EARTH'S RADIUS IS
-C>   6371.2 KILOMETERS.  THIS IS WHAT WE USE, EVEN THOUGH THE VALUE
-C>   RECOMMENDED BY THE SMITHSONIAN METEOROLOGICAL HANDBOOK IS
-C>   6371.221 KM.  (I WOULDN'T WANT YOU TO THINK THAT I DIDN'T KNOW
-C>   WHAT THE CORRECT VALUE WAS.)
-C>   METHOD:  THE POLES ARE SPECIAL CASES, AND HANDLED SEPARATELY.
-C>   OTHERWISE, FROM SPHERICAL TRIGONOMETRY, THE LAW OF COSINES IS USED
-C>   TO CALCULATE THE THIRD SIDE OF THE SPHERICAL TRIANGLE HAVING
-C>   SIDES FROM THE POLE TO POINTS (1) AND (2) (THE COLATITUDES).
-C>   THEN THE LAW OF SINES IS USED TO CALCULATE THE ANGLE AT POINT
-C>   (1).  A TEST IS APPLIED TO SEE WHETHER THE ARCSINE RESULT MAY BE
-C>   BE USED AS SUCH, GIVING AN ACUTE ANGLE AS THE BEARING, OR WHETHER
-C>   THE ARCSINE RESULT SHOULD BE SUBTRACTED FROM PI, GIVING AN OBTUSE
-C>   ANGLE AS THE BEARING.  THIS TEST IS DERIVED BY CONSTRUCTING A
-C>   RIGHT SPHERICAL TRIANGLE USING THE POLE, POINT (2), AND THE
-C>   MERIDIAN THROUGH POINT(1).  THE LATITUDE OF THE RIGHT-ANGLED
-C>   VERTEX THEN PROVIDES A TEST--IF LATITUDE (1) IS GREATER THAN THIS
-C>   LATITUDE, THE BEARING ANGLE MUST BE OBTUSE, OTHERWISE ACUTE.
-C>         IF THE TWO POINTS ARE WITHIN 1E-6 RADIANS OF EACH OTHER
-C>   A FLAT EARTH IS ASSUMED, AND THE FOUR-QUADRANT ARCTANGENT
-C>   FUNCTION IS USED TO FIND THE BEARING.  THE Y-DISPLACEMENT IS
-C>   THE DIFFERENCE IN LATITUDE AND THE X-DISPLACEMENT IS THE
-C>   DIFFERENCE IN LONGITUDE TIMES COSINE LATITUDE, BOTH IN RADIANS.
-C>   DISTANCE IS THEN THE DIAGONAL.
-C>         FUNDAMENTAL TRIGONOMETRIC IDENTITIES ARE USED FREELY, SUCH
-C>   AS THAT COS(X) = SIN(PI/2 - X), ETC.  SEE ALMOST ANY MATHEMATICAL
-C>   HANDBOOK, SUCH AS THE C.R.C. STANDARD MATH TABLES UNDER 'RELATIONS
-C>   IN ANY SPHERICAL TRIANGLE', OR THE NATIONAL BUREAU OF STANDARDS
-C>   'HANDBOOK OF MATHEMATICAL FUNCTIONS' UNDER SECTION 4.3.149,
-C>   FORMULAS FOR SOLUTION OF SPHERICAL TRIANGLES.
-C>         DOUBLE PRECISION IS USED INTERNALLY BECAUSE OF THE WIDE
-C>   RANGE OF GEOGRAPHIC VALUES THAT MAY BE USED.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Peter Chase @date 1988-08-29
       SUBROUTINE W3FB10(DLAT1, DLON1, DLAT2, DLON2, BEARD, GCDKM)
 C
 C *** IMPLICIT TYPE DEFAULTS.....

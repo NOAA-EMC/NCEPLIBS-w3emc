@@ -1,51 +1,34 @@
 C> @file
-C
-C> SUBPROGRAM: W3FC02         GRID U,V WIND COMPS. TO DIR. AND SPEED
-C>   AUTHOR: STACKPOLE, J.    ORG: W324       DATE: 81-12-30
+C> @brief Grid U,V wind comps. to dir. and speed.
+C> @author John Stackpole @date 1981-12-30
+
+C> Given the grid-oriented wind components on a northern
+C> hemisphere polar stereographic grid point, compute the direction
+C> and speed of the wind at that point. Input winds at the north
+C> pole point are assumed to have their components follow the wmo
+C> standards for reporting winds at the north pole.
+C> (see office note 241 for wmo definition). Output direction
+C> will follow wmo convention.
 C>
-C> ABSTRACT: GIVEN THE GRID-ORIENTED WIND COMPONENTS ON A NORTHERN
-C>   HEMISPHERE POLAR STEREOGRAPHIC GRID POINT, COMPUTE THE DIRECTION
-C>   AND SPEED OF THE WIND AT THAT POINT.  INPUT WINDS AT THE NORTH
-C>   POLE POINT ARE ASSUMED TO HAVE THEIR COMPONENTS FOLLOW THE WMO
-C>   STANDARDS FOR REPORTING WINDS AT THE NORTH POLE.
-C>   (SEE OFFICE NOTE 241 FOR WMO DEFINITION). OUTPUT DIRECTION
-C>   WILL FOLLOW WMO CONVENTION.
+C> Program history log:
+C> - John Stackpole 1981-12-30
+C> - Ralph Jones 1989-01-20 Convert to microsoft fortran 4.10.
+C> - Ralph Jones 1990-06-11 Convert to sun fortran 1.3.
+C> - Ralph Jones 1991-03-30 Convert to silicongraphics fortran.
+C> - Ralph Jones 1993-03-29 Add save statement.
+C> - Ralph Jones 1995-08-09 Compile on cray.
 C>
-C> PROGRAM HISTORY LOG:
-C>   81-12-30  J.STACKPOLE
-C>   89-01-20  R.E.JONES  CONVERT TO MICROSOFT FORTRAN 4.10
-C>   90-06-11  R.E.JONES  CONVERT TO SUN FORTRAN 1.3
-C>   91-03-30  R.E.JONES  CONVERT TO SiliconGRaphics FORTRAN
-C>   93-03-29  R.E.JONES  ADD SAVE STATEMENT
-C>   95-08-09  R.E.JONES  COMPILE ON CRAY
+C> @param[in] FFID REAL*4 I(north pole) - i(point).
+C> @param[in] FFJD REAL*4 J(north pole) - j(point).
+C> @param[in] FGU REAL*4 Grid-oriented u-component.
+C> @param[in] FGV REAL*4 Grid-oriented v-component.
 C>
-C> USAGE:  CALL W3FC02 (FFID, FFJD, FGU, FGV, DIR, SPD)
+C> @param[out] DIR REAL*4 Wind direction, degrees.
+C> @param[out] SPD REAL*4 Wind speed.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     FFID   ARG LIST  REAL*4    I(NORTH POLE) - I(POINT)
-C>     FFJD   ARG LIST  REAL*4    J(NORTH POLE) - J(POINT)
-C>     FGU    ARG LIST  REAL*4    GRID-ORIENTED U-COMPONENT
-C>     FGV    ARG LIST  REAL*4    GRID-ORIENTED V-COMPONENT
+C> @note This job will not vectorize on a cray.
 C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     DIR    ARG LIST  REAL*4     WIND DIRECTION, DEGREES
-C>     SPD    ARG LIST  REAL*4     WIND SPEED
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     ABS  ACOS   ATAN2   SQRT                                SYSTEM
-C>
-C> WARNING: THIS JOB WILL NOT VECTORIZE ON A CRAY
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/16256, J916/162048
-C>
+C> @author John Stackpole @date 1981-12-30
       SUBROUTINE W3FC02(FFID,FFJD,FGU,FGV,DIR,SPD)
 C
       SAVE
