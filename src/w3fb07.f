@@ -1,53 +1,45 @@
 C> @file
-C
-C> SUBPROGRAM:  W3FB07        GRID COORDS TO LAT/LON FOR GRIB
-C>   PRGMMR: STACKPOLE        ORG: NMC42       DATE:88-04-05
+C> @brief Grid coords to lat/lon for grib.
+C> @author John Stackpole @date 1988-01-01
+
+C> Converts the coordinates of a location on earth given in a
+C> grid coordinate system overlaid on a polar stereographic map pro-
+C> jection true at 60 degrees n or s latitude to the
+C> natural coordinate system of latitude/longitude
+C> w3fb07() is the reverse of w3fb06().
+C> uses grib specification of the location of the grid
 C>
-C> ABSTRACT: CONVERTS THE COORDINATES OF A LOCATION ON EARTH GIVEN IN A
-C>   GRID COORDINATE SYSTEM OVERLAID ON A POLAR STEREOGRAPHIC MAP PRO-
-C>   JECTION TRUE AT 60 DEGREES N OR S LATITUDE TO THE
-C>   NATURAL COORDINATE SYSTEM OF LATITUDE/LONGITUDE
-C>   W3FB07 IS THE REVERSE OF W3FB06.
-C>   USES GRIB SPECIFICATION OF THE LOCATION OF THE GRID
+C> Program history log:
+C> - John Stackpole 1988-01-01
+C> - Ralph Jones 1990-04-12 Convert to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   88-01-01  ORIGINAL AUTHOR:  STACKPOLE, W/NMC42
-C>   90-04-12  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] XI I coordinate of the point  real*4.
+C> @param[in] XJ J coordinate of the point  real*4.
+C> @param[in] ALAT1 Latitude of lower left point of grid (point 1,1)
+C> latitude <0 for southern hemisphere; real*4.
+C> @param[in] ALON1 Longitude of lower left point of grid (point 1,1)
+C> east longitude used throughout; real*4.
+C> @param[in] DX Mesh length of grid in meters at 60 deg lat
+C> must be set negative if using
+C> southern hemisphere projection; real*4
+C> 190500.0 lfm grid,
+C> 381000.0 nh pe grid, -381000.0 sh pe grid, etc.
+C> @param[in] ALONV The orientation of the grid.  i.e.,
+C> the east longitude value of the vertical meridian
+C> which is parallel to the y-axis (or columns of
+C> the grid) along which latitude increases as
+C> the y-coordinate increases.  real*4
+C> for example:
+C> 255.0 for lfm grid,
+C> 280.0 nh pe grid, 100.0 sh pe grid, etc.
+C> @param[out] ALAT Latitude in degrees (negative in southern hemi.).
+C> @param[out] ALON East longitude in degrees, real*4.
 C>
-C> USAGE:  CALL W3FB07(XI,XJ,ALAT1,ALON1,DX,ALONV,ALAT,ALON)
-C>   INPUT ARGUMENT LIST:
-C>     XI       - I COORDINATE OF THE POINT  REAL*4
-C>     XJ       - J COORDINATE OF THE POINT  REAL*4
-C>     ALAT1    - LATITUDE  OF LOWER LEFT POINT OF GRID (POINT 1,1)
-C>                LATITUDE <0 FOR SOUTHERN HEMISPHERE; REAL*4
-C>     ALON1    - LONGITUDE OF LOWER LEFT POINT OF GRID (POINT 1,1)
-C>                  EAST LONGITUDE USED THROUGHOUT; REAL*4
-C>     DX       - MESH LENGTH OF GRID IN METERS AT 60 DEG LAT
-C>                 MUST BE SET NEGATIVE IF USING
-C>                 SOUTHERN HEMISPHERE PROJECTION; REAL*4
-C>                   190500.0 LFM GRID,
-C>                   381000.0 NH PE GRID, -381000.0 SH PE GRID, ETC.
-C>     ALONV    - THE ORIENTATION OF THE GRID.  I.E.,
-C>                THE EAST LONGITUDE VALUE OF THE VERTICAL MERIDIAN
-C>                WHICH IS PARALLEL TO THE Y-AXIS (OR COLUMNS OF
-C>                THE GRID) ALONG WHICH LATITUDE INCREASES AS
-C>                THE Y-COORDINATE INCREASES.  REAL*4
-C>                   FOR EXAMPLE:
-C>                   255.0 FOR LFM GRID,
-C>                   280.0 NH PE GRID, 100.0 SH PE GRID, ETC.
+C> @note Formulae and notation loosely based on hoke, hayes,
+C> and renninger's "map projections and grid systems...", march 1981
+C> afgwc/tn-79/003
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     ALAT     - LATITUDE IN DEGREES (NEGATIVE IN SOUTHERN HEMI.)
-C>     ALON     - EAST LONGITUDE IN DEGREES, REAL*4
-C>
-C>   REMARKS: FORMULAE AND NOTATION LOOSELY BASED ON HOKE, HAYES,
-C>     AND RENNINGER'S "MAP PROJECTIONS AND GRID SYSTEMS...", MARCH 1981
-C>     AFGWC/TN-79/003
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author John Stackpole @date 1988-01-01
       SUBROUTINE W3FB07(XI,XJ,ALAT1,ALON1,DX,ALONV,ALAT,ALON)
 C
          DATA  RERTH /6.3712E+6/,PI/3.1416/

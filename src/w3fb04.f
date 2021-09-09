@@ -1,59 +1,41 @@
 C> @file
-C
-C> SUBPROGRAM: W3FB04         LATITUDE, LONGITUDE TO GRID COORDINATES
-C>   AUTHOR: MCDONELL,J.      ORG: W345       DATE: 86-07-17
+C> @brief Latitude, longitude to grid coordinates.
+C> @author James McDonell @date 1986-07-17
+
+C> Converts the coordinates of a location on earth from the
+C> natural coordinate system of latitude/longitude to the grid (i,j)
+C> coordinate system overlaid on a polar stereographic map pro-
+C> jection true at 60 degrees n or s latitude. w3fb04() is the reverse
+C> of w3fb05().
 C>
-C> ABSTRACT: CONVERTS THE COORDINATES OF A LOCATION ON EARTH FROM THE
-C>   NATURAL COORDINATE SYSTEM OF LATITUDE/LONGITUDE TO THE GRID (I,J)
-C>   COORDINATE SYSTEM OVERLAID ON A POLAR STEREOGRAPHIC MAP PRO-
-C>   JECTION TRUE AT 60 DEGREES N OR S LATITUDE. W3FB04 IS THE REVERSE
-C>   OF W3FB05.
+C> Program history log:
+C> - James McDonell 1986-07-17
+C> - Ralph Jones 1988-06-07 Clean up code, take out goto, use then, else.
+C> - Ralph Jones 1989-11-02 Change to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   86-07-17  MCDONELL,J.
-C>   88-06-07  R.E.JONES   CLEAN UP CODE, TAKE OUT GOTO, USE THEN, ELSE
-C>   89-11-02  R.E.JONES   CHANGE TO CRAY CFT77 FORTRAN
+C> @param[in] ALAT Latitude in degrees (<0 if sh).
+C> @param[in] ALONG West longitude in degrees.
+C> @param[in] XMESHL Mesh length of grid in km at 60 deg lat(<0 if sh)
+C> (190.5 lfm grid, 381.0 nh pe grid,-381.0 sh pe grid).
+C> @param[in] ORIENT Orientation west longitude of the grid
+C> (105.0 lfm grid, 80.0 nh pe grid, 260.0 sh pe grid).
+C> @param[out] XI I of the point relative to north or south pole.
+C> @param[out] XJ J of the point relative to north or south pole.
 C>
-C> USAGE:  CALL W3FB04 (ALAT, ALONG, XMESHL, ORIENT, XI, XJ)
+C> @note All parameters in the calling statement must be
+c> real. the range of allowable latitudes is from a pole to
+c> 30 degrees into the opposite hemisphere.
+c> The grid used in this subroutine has its origin (i=0,j=0)
+c> at the pole in either hemisphere, so if the user's grid has its
+c> origin at a point other than the pole, a translation is needed
+c> to get i and j. The gridlines of i=constant are parallel to a
+c> longitude designated by the user. the earth's radius is taken
+c> to be 6371.2 km.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     ALAT   ARG LIST  LATITUDE IN DEGREES (<0 IF SH)
-C>     ALONG  ARG LIST  WEST LONGITUDE IN DEGREES
-C>     XMESHL ARG LIST  MESH LENGTH OF GRID IN KM AT 60 DEG LAT(<0 IF SH)
-C>                   (190.5 LFM GRID, 381.0 NH PE GRID,-381.0 SH PE GRID)
-C>     ORIENT ARG LIST  ORIENTATION WEST LONGITUDE OF THE GRID
-C>                   (105.0 LFM GRID, 80.0 NH PE GRID, 260.0 SH PE GRID)
+C> @note This code is not vectorized. To vectorize take it and the
+C> subroutine it calls and put them in line.
 C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     XI     ARG LIST  I OF THE POINT RELATIVE TO NORTH OR SOUTH POLE
-C>     XJ     ARG LIST  J OF THE POINT RELATIVE TO NORTH OR SOUTH POLE
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     COS SIN                                                 SYSLIB
-C>
-C>   REMARKS: ALL PARAMETERS IN THE CALLING STATEMENT MUST BE
-C>     REAL. THE RANGE OF ALLOWABLE LATITUDES IS FROM A POLE TO
-C>     30 DEGREES INTO THE OPPOSITE HEMISPHERE.
-C>     THE GRID USED IN THIS SUBROUTINE HAS ITS ORIGIN (I=0,J=0)
-C>     AT THE POLE IN EITHER HEMISPHERE, SO IF THE USER'S GRID HAS ITS
-C>     ORIGIN AT A POINT OTHER THAN THE POLE, A TRANSLATION IS NEEDED
-C>     TO GET I AND J. THE GRIDLINES OF I=CONSTANT ARE PARALLEL TO A
-C>     LONGITUDE DESIGNATED BY THE USER. THE EARTH'S RADIUS IS TAKEN
-C>     TO BE 6371.2 KM.
-C>
-C> WARNING:  THIS CODE IS NOT VECTORIZED. TO VECTORIZE TAKE IT AND
-C>           SUBROUTINE IT CALLS AND PU THEM IN LINE.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author James McDonell @date 1986-07-17
       SUBROUTINE W3FB04(ALAT,ALONG,XMESHL,ORIENT,XI,XJ)
 C
       DATA  RADPD /.01745329/

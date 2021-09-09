@@ -1,41 +1,33 @@
 C> @file
-C
-C> SUBPROGRAM:  W3FB08        LAT/LON TO MERC (I,J) FOR GRIB
-C>   PRGMMR: STACKPOLE        ORG: NMC42       DATE:88-04-05
+C> @brief Lat/lon to merc (i,j) for grib.
+C> @author John Stackpole @date 1988-03-01
+
+C> Converts a location on earth given in
+C> the coordinate system of latitude/longitude to an (i,j)
+C> coordinate system overlaid on a mercator map projection
+C> w3fb08() is the reverse of w3fb09()
+C> uses grib specification of the location of the grid.
 C>
-C> ABSTRACT: CONVERTS A LOCATION ON EARTH GIVEN IN
-C>   THE COORDINATE SYSTEM OF LATITUDE/LONGITUDE TO AN (I,J)
-C>   COORDINATE SYSTEM OVERLAID ON A MERCATOR MAP PROJECTION
-C>   W3FB08 IS THE REVERSE OF W3FB09
-C>   USES GRIB SPECIFICATION OF THE LOCATION OF THE GRID
+C> Program history log:
+C> - John Stackpole 1988-03-01
+C> - Ralph Jones 1990-04-12 Convert to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   88-03-01  ORIGINAL AUTHOR:  STACKPOLE, W/NMC42
-C>   90-04-12  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] ALAT Latitude in degrees (negative in southern hemis).
+C> @param[in] ALON East longitude in degrees, real*4.
+C> @param[in] ALAT1 Latitude of lower left corner of grid (point (1,1)).
+C> @param[in] ALON1 Longitude of lower left corner of grid (point (1,1))
+C> all real*4.
+C> @param[in] ALATIN The latitude at which the mercator cylinder
+C> intersects the earth.
+C> @param[in] DX Mesh length of grid in meters at alatin.
+C> @param[out] XI I coordinate of the point specified by alat, alon.
+C> @param[out] XJ J coordinate of the point; both real*4.
 C>
-C> USAGE:  CALL W3FB08 (ALAT,ALON,ALAT1,ALON1,ALATIN,DX,XI,XJ)
-C>   INPUT ARGUMENT LIST:
-C>     ALAT     - LATITUDE IN DEGREES (NEGATIVE IN SOUTHERN HEMIS)
-C>     ALON     - EAST LONGITUDE IN DEGREES, REAL*4
-C>     ALAT1    - LATITUDE  OF LOWER LEFT CORNER OF GRID (POINT (1,1))
-C>     ALON1    - LONGITUDE OF LOWER LEFT CORNER OF GRID (POINT (1,1))
-C>                ALL REAL*4
-C>     ALATIN   - THE LATITUDE AT WHICH THE MERCATOR CYLINDER
-C>                INTERSECTS THE EARTH
-C>     DX       - MESH LENGTH OF GRID IN METERS AT ALATIN
+C> @note Formulae and notation loosely based on hoke, hayes,
+C> and renninger's "map projections and grid systems...", march 1981
+C> afgwc/tn-79/003
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     XI       - I COORDINATE OF THE POINT SPECIFIED BY ALAT, ALON
-C>     XJ       - J COORDINATE OF THE POINT; BOTH REAL*4
-C>
-C>   REMARKS: FORMULAE AND NOTATION LOOSELY BASED ON HOKE, HAYES,
-C>     AND RENNINGER'S "MAP PROJECTIONS AND GRID SYSTEMS...", MARCH 1981
-C>     AFGWC/TN-79/003
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author John Stackpole @date 1988-03-01
       SUBROUTINE W3FB08(ALAT,ALON,ALAT1,ALON1,ALATIN,DX,XI,XJ)
 C
          DATA  RERTH /6.3712E+6/, PI/3.1416/

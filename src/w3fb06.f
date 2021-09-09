@@ -1,51 +1,43 @@
 C> @file
-C
-C> SUBPROGRAM:  W3FB06        LAT/LON TO POLA (I,J) FOR GRIB
-C>   PRGMMR: STACKPOLE        ORG: NMC42       DATE:88-04-05
+C> @brief Lat/lon to pola (i,j) for grib.
+C> @author John Stackpole @date 1988-01-01
+
+C> Converts the coordinates of a location on earth given in
+C> the natural coordinate system of latitude/longitude to a grid
+C> coordinate system overlaid on a polar stereographic map pro-
+C> jection true at 60 degrees n or s latitude. w3fb06() is the reverse
+C> of w3fb07(). uses grib specification of the location of the grid
 C>
-C> ABSTRACT: CONVERTS THE COORDINATES OF A LOCATION ON EARTH GIVEN IN
-C>   THE NATURAL COORDINATE SYSTEM OF LATITUDE/LONGITUDE TO A GRID
-C>   COORDINATE SYSTEM OVERLAID ON A POLAR STEREOGRAPHIC MAP PRO-
-C>   JECTION TRUE AT 60 DEGREES N OR S LATITUDE. W3FB06 IS THE REVERSE
-C>   OF W3FB07. USES GRIB SPECIFICATION OF THE LOCATION OF THE GRID
+C> Program history log:
+C> - John Stackpole 1988-01-01
+C> - Ralph Jones 1990-04-12 Convert to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   88-01-01  ORIGINAL AUTHOR:  STACKPOLE, W/NMC42
-C>   90-04-12  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] ALAT Latitude in degrees (negative in southern hemis)
+C> @param[in] ALON East longitude in degrees, real*4
+C> @param[in] ALAT1 Latitude of lower left point of grid (point (1,1))
+C> @param[in] ALON1 Longitude of lower left point of grid (point (1,1))
+C> all real*4
+C> @param[in] DX Mesh length of grid in meters at 60 deg lat
+C> must be set negative if using
+C> southern hemisphere projection.
+C> 190500.0 lfm grid,
+C> 381000.0 nh pe grid, -381000.0 sh pe grid, etc.
+C> @param[in] ALONV The orientation of the grid.  i.e.,
+C> the east longitude value of the vertical meridian
+C> which is parallel to the y-axis (or columns of
+C> of the grid)along which latitude increases as
+C> the y-coordinate increases.  real*4
+C> for example:
+C> 255.0 for lfm grid,
+C> 280.0 nh pe grid, 100.0 sh pe grid, etc.
+C> @param[out] XI I Coordinate of the point specified by alat, alon.
+C> @param[out] XJ J Coordinate of the point; both real*4.
 C>
-C> USAGE:  CALL W3FB06 (ALAT,ALON,ALAT1,ALON1,DX,ALONV,XI,XJ)
-C>   INPUT ARGUMENT LIST:
-C>     ALAT     - LATITUDE IN DEGREES (NEGATIVE IN SOUTHERN HEMIS)
-C>     ALON     - EAST LONGITUDE IN DEGREES, REAL*4
-C>     ALAT1    - LATITUDE  OF LOWER LEFT POINT OF GRID (POINT (1,1))
-C>     ALON1    - LONGITUDE OF LOWER LEFT POINT OF GRID (POINT (1,1))
-C>                ALL REAL*4
-C>     DX       - MESH LENGTH OF GRID IN METERS AT 60 DEG LAT
-C>                 MUST BE SET NEGATIVE IF USING
-C>                 SOUTHERN HEMISPHERE PROJECTION.
-C>                   190500.0 LFM GRID,
-C>                   381000.0 NH PE GRID, -381000.0 SH PE GRID, ETC.
-C>     ALONV    - THE ORIENTATION OF THE GRID.  I.E.,
-C>                THE EAST LONGITUDE VALUE OF THE VERTICAL MERIDIAN
-C>                WHICH IS PARALLEL TO THE Y-AXIS (OR COLUMNS OF
-C>                OF THE GRID)ALONG WHICH LATITUDE INCREASES AS
-C>                THE Y-COORDINATE INCREASES.  REAL*4
-C>                   FOR EXAMPLE:
-C>                   255.0 FOR LFM GRID,
-C>                   280.0 NH PE GRID, 100.0 SH PE GRID, ETC.
+C> @note Formulae and notation loosely based on hoke, hayes,
+C> and renninger's "map projections and grid systems...", march 1981
+C> afgwc/tn-79/003
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     XI       - I COORDINATE OF THE POINT SPECIFIED BY ALAT, ALON
-C>     XJ       - J COORDINATE OF THE POINT; BOTH REAL*4
-C>
-C>   REMARKS: FORMULAE AND NOTATION LOOSELY BASED ON HOKE, HAYES,
-C>     AND RENNINGER'S "MAP PROJECTIONS AND GRID SYSTEMS...", MARCH 1981
-C>     AFGWC/TN-79/003
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author John Stackpole @date 1988-01-01
       SUBROUTINE W3FB06(ALAT,ALON,ALAT1,ALON1,DX,ALONV,XI,XJ)
 C
          DATA  RERTH /6.3712E+6/, PI/3.1416/
