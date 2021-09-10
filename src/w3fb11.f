@@ -5,8 +5,8 @@ C> @author John Stackpole @date 1988-11-25
 C> Converts the coordinates of a location on Earth given in
 C> the natural coordinate system of latitude/longitude to a grid
 C> coordinate system overlaid on a lambert conformal tangent cone
-C> projection true at a given n or s latitude. w3fb11 is the reverse
-C> of w3fb12. uses grib specification of the location of the grid
+C> projection true at a given n or s latitude. w3fb11() is the reverse
+C> of w3fb12(). uses grib specification of the location of the grid
 C>
 C> Program history log:
 C> - John Stackpole 1988-11-25
@@ -15,15 +15,15 @@ C> - Ralph Jones 1994-04-28 Add save statement.
 C>
 C> @param[in] ALAT Latitude in degrees (negative in southern hemis).
 C> @param[in] ELON East longitude in degrees, real*4.
-C> @param[in] ALAT1 Latitude  of lower left point of grid (point (1,1)).
+C> @param[in] ALAT1 Latitude of lower left point of grid (point (1,1)).
 C> @param[in] ELON1 Longitude of lower left point of grid (point (1,1))
 C> all real*4.
 C> @param[in] DX Mesh length of grid in meters at tangent latitude.
-C> @param[in] ELONV The orientation of the grid.  i.e.,
+C> @param[in] ELONV The orientation of the grid. i.e.,
 C> the east longitude value of the vertical meridian
 C> which is parallel to the y-axis (or columns of
 C> of the grid) along which latitude increases as
-C> the y-coordinate increases.  real*4
+C> the y-coordinate increases. real*4
 C> this is also the meridian (on the back side of the
 C> tangent cone) along which the cut is made to lay
 C> the cone flat.

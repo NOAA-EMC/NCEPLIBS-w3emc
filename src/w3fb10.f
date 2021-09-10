@@ -57,7 +57,7 @@ C> difference in longitude times cosine latitude, both in radians.
 C> distance is then the diagonal.
 C>
 C> @note Fundamental trigonometric identities are used freely, such
-C> as that cos(x) = sin(pi/2 - x), etc.  See almost any mathematical
+C> as that cos(x) = sin(pi/2 - x), etc. See almost any mathematical
 C> handbook, such as the c.r.c. standard math tables under 'relations
 C> in any spherical triangle', or the national bureau of standards
 C> 'handbook of mathematical functions' under section 4.3.149,

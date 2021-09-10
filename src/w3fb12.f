@@ -14,31 +14,31 @@ C> - John Stackpole 1988-11-25
 C> - Ralph Jones 1990-04-12 Convert to cft77 fortran.
 C> - Ralph Jones 1994-04-28 Add save statement.
 C>
-C> @param[in] XI I coordinate of the point  real*4
-C> @param[in] XJ J coordinate of the point  real*4
+C> @param[in] XI I coordinate of the point real*4
+C> @param[in] XJ J coordinate of the point real*4
 C> @param[in] ALAT1 Latitude of lower left point of grid (point 1,1)
 C> latitude <0 for southern hemisphere; real*4
 C> @param[in] ELON1 Longitude of lower left point of grid (point 1,1)
 C> east longitude used throughout; real*4
 C> @param[in] DX Mesh length of grid in meters at tangent latitude
-C> @param[in] ELONV The orientation of the grid.  i.e.,
+C> @param[in] ELONV The orientation of the grid. i.e.,
 C> the east longitude value of the vertical meridian
 C> which is parallel to the y-axis (or columns of
 C> the grid) along which latitude increases as
-C> the y-coordinate increases.  real*4
+C> the y-coordinate increases. real*4
 C> this is also the meridian (on the other side of the
 C> tangent cone) along which the cut is made to lay
 C> the cone flat.
 C> @param[in] ALATAN The latitude at which the lambert cone is tangent to
-C> (touches or osculates) the spherical earth.
+C> (touches or osculates) the spherical Earth.
 C> set negative to indicate a
 C> southern hemisphere projection; real*4
 C>
 C> @param[out] ALAT Latitude in degrees (negative in southern hemi.)
 C> @param[out] ELON East longitude in degrees, real*4
 C> @param[out] IERR
-C> - .eq. 0   if no problem
-C> - .ge. 1   if the requested xi,xj point is in the
+C> - .eq. 0 if no problem
+C> - .ge. 1 if the requested xi,xj point is in the
 C> forbidden zone, i.e. off the lambert map
 C> in the open space where the cone is cut.
 C> - if ierr.ge.1 then alat=999. and elon=999.

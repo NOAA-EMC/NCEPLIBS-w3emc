@@ -14,7 +14,7 @@ C> - Ralph Jones 1990-04-12 Convert to cray cft77 fortran.
 C>
 C> @param[in] XI I coordinate of the point.
 C> @param[in] XJ J coordinate of the point; both real*4.
-C> @param[in] ALAT1 Latitude  of lower left corner of grid (point (1,1)).
+C> @param[in] ALAT1 Latitude of lower left corner of grid (point (1,1)).
 C> @param[in] ALON1 Longitude of lower left corner of grid (point (1,1))
 C> all real*4.
 C> @param[in] ALATIN The latitude at which the mercator cylinder
