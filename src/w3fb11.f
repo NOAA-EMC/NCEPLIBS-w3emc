@@ -1,52 +1,43 @@
 C> @file
-C
-C> SUBPROGRAM:  W3FB11        LAT/LON TO LAMBERT(I,J) FOR GRIB
-C>   PRGMMR: STACKPOLE        ORG: NMC42       DATE:88-11-28
+C> @brief Lat/lon to lambert(i,j) for grib.
+C> @author John Stackpole @date 1988-11-25
+
+C> Converts the coordinates of a location on Earth given in
+C> the natural coordinate system of latitude/longitude to a grid
+C> coordinate system overlaid on a lambert conformal tangent cone
+C> projection true at a given n or s latitude. w3fb11() is the reverse
+C> of w3fb12(). uses grib specification of the location of the grid
 C>
-C> ABSTRACT: CONVERTS THE COORDINATES OF A LOCATION ON EARTH GIVEN IN
-C>   THE NATURAL COORDINATE SYSTEM OF LATITUDE/LONGITUDE TO A GRID
-C>   COORDINATE SYSTEM OVERLAID ON A LAMBERT CONFORMAL TANGENT CONE
-C>   PROJECTION TRUE AT A GIVEN N OR S LATITUDE. W3FB11 IS THE REVERSE
-C>   OF W3FB12. USES GRIB SPECIFICATION OF THE LOCATION OF THE GRID
+C> Program history log:
+C> - John Stackpole 1988-11-25
+C> - Ralph Jones 1990-04-12 Convert to cft77 fortran.
+C> - Ralph Jones 1994-04-28 Add save statement.
 C>
-C> PROGRAM HISTORY LOG:
-C>   88-11-25  ORIGINAL AUTHOR:  STACKPOLE, W/NMC42
-C>   90-04-12  R.E.JONES   CONVERT TO CFT77 FORTRAN
-C>   94-04-28  R.E.JONES   ADD SAVE STATEMENT
+C> @param[in] ALAT Latitude in degrees (negative in southern hemis).
+C> @param[in] ELON East longitude in degrees, real*4.
+C> @param[in] ALAT1 Latitude of lower left point of grid (point (1,1)).
+C> @param[in] ELON1 Longitude of lower left point of grid (point (1,1))
+C> all real*4.
+C> @param[in] DX Mesh length of grid in meters at tangent latitude.
+C> @param[in] ELONV The orientation of the grid. i.e.,
+C> the east longitude value of the vertical meridian
+C> which is parallel to the y-axis (or columns of
+C> of the grid) along which latitude increases as
+C> the y-coordinate increases. real*4
+C> this is also the meridian (on the back side of the
+C> tangent cone) along which the cut is made to lay
+C> the cone flat.
+C> @param[in] ALATAN The latitude at which the lambert cone is tangent to
+C> (touching) the spherical Earth. Set negative to indicate a
+C> southern hemisphere projection.
+C> @param[out] XI I coordinate of the point specified by alat, elon
+C> @param[out] XJ J coordinate of the point; both real*4
 C>
-C> USAGE:  CALL W3FB11 (ALAT,ELON,ALAT1,ELON1,DX,ELONV,ALATAN,XI,XJ)
-C>   INPUT ARGUMENT LIST:
-C>     ALAT     - LATITUDE IN DEGREES (NEGATIVE IN SOUTHERN HEMIS)
-C>     ELON     - EAST LONGITUDE IN DEGREES, REAL*4
-C>     ALAT1    - LATITUDE  OF LOWER LEFT POINT OF GRID (POINT (1,1))
-C>     ELON1    - LONGITUDE OF LOWER LEFT POINT OF GRID (POINT (1,1))
-C>                ALL REAL*4
-C>     DX       - MESH LENGTH OF GRID IN METERS AT TANGENT LATITUDE
-C>     ELONV    - THE ORIENTATION OF THE GRID.  I.E.,
-C>                THE EAST LONGITUDE VALUE OF THE VERTICAL MERIDIAN
-C>                WHICH IS PARALLEL TO THE Y-AXIS (OR COLUMNS OF
-C>                OF THE GRID) ALONG WHICH LATITUDE INCREASES AS
-C>                THE Y-COORDINATE INCREASES.  REAL*4
-C>                THIS IS ALSO THE MERIDIAN (ON THE BACK SIDE OF THE
-C>                TANGENT CONE) ALONG WHICH THE CUT IS MADE TO LAY
-C>                THE CONE FLAT.
-C>     ALATAN   - THE LATITUDE AT WHICH THE LAMBERT CONE IS TANGENT TO
-C>                (TOUCHING) THE SPHERICAL EARTH.
-C>                 SET NEGATIVE TO INDICATE A
-C>                 SOUTHERN HEMISPHERE PROJECTION.
+C> @note Formulae and notation loosely based on hoke, hayes,
+C> and renninger's "map projections and grid systems...", march 1981
+C> afgwc/tn-79/003.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     XI       - I COORDINATE OF THE POINT SPECIFIED BY ALAT, ELON
-C>     XJ       - J COORDINATE OF THE POINT; BOTH REAL*4
-C>
-C>   REMARKS: FORMULAE AND NOTATION LOOSELY BASED ON HOKE, HAYES,
-C>     AND RENNINGER'S "MAP PROJECTIONS AND GRID SYSTEMS...", MARCH 1981
-C>     AFGWC/TN-79/003
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author John Stackpole @date 1988-11-25
       SUBROUTINE W3FB11(ALAT,ELON,ALAT1,ELON1,DX,ELONV,ALATAN,XI,XJ)
 C
          SAVE
