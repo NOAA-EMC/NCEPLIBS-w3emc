@@ -1,38 +1,26 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI03      TRANSFERS DEFAULT INTEGERS TO 16 BIT INTS
-C>   PRGMMR: KEYSER           ORG: W/NMC22    DATE: 06-29-92
+C> @brief Transfers default integers to 16 bit ints.
+C> @author Dennis Keyser @date 1992-06-29
+
+C> Transfers an array of numbers from default integer
+C> words to 16 bit (IBM integer*2) IBM half-words.
 C>
-C> ABSTRACT: TRANSFERS AN ARRAY OF NUMBERS FROM DEFAULT INTEGER 
-C>   WORDS TO 16 BIT (IBM INTEGER*2) IBM HALF-WORDS.
+C> Program history log:
+C> - Dennis Keyser 1992-06-29
+C> - Stephen Gilbert 1998-11-17 Removed Cray references.
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-06-29  D. A. KEYSER (W/NMC22)
-C>   98-11-17  Gilbert       Removed Cray references
+C> @param[in] IN Starting address for array of default integers
+C> @param[in] NUM Number of numbers in 'IN' to transfer.
+C> @param[out] IDEST Starting address for array of 16 bit IBM half-words
+C> @param[out] IER Error return code as follows:
+C> IER = 0 - Transfer successful, all numbers
+C> - Transferred without overflow.
+C> IER = 1 - The transfer of one or more numbers
+C> - Resulted in an overflow.
 C>
-C> USAGE:    CALL W3FI03(IN,IDEST,NUM,IER)
-C>   INPUT ARGUMENT LIST:
-C>     IN       - STARTING ADDRESS FOR ARRAY OF DEFAULT INTEGERS
-C>     NUM      - NUMBER OF NUMBERS IN 'IN' TO TRANSFER.
+C> @note This is the inverse of library routine w3fi02().
 C>
-C>   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C>     IDEST    - STARTING ADDRESS FOR ARRAY OF 16 BIT IBM HALF-WORDS
-C>     IER      - ERROR RETURN CODE AS FOLLOWS:
-C>                  IER = 0 - TRANSFER SUCCESSFUL, ALL NUMBERS
-C>                          - TRANSFERRED WITHOUT OVERFLOW
-C>                  IER = 1 - THE TRANSFER OF ONE OR MORE NUMBERS
-C>                          - RESULTED IN AN OVERFLOW
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       NONE
-C>
-C> REMARKS: THIS IS THE INVERSE OF LIBRARY ROUTINE W3FI02.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM XL FORTRAN
-C>   MACHINE:  IBM SP
-C>
+C> @author Dennis Keyser @date 1992-06-29
       SUBROUTINE W3FI03(IN,IDEST,NUM,IER)
 C
       INTEGER(2)  IDEST(*)

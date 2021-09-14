@@ -1,40 +1,29 @@
 C> @file
-C
-C> SUBR: W3FI18   - NMC OCTAGON BOUNDARY FINDING SUBROUTINE
-C>   AUTHOR: HOWCROFT, J.       ORG: W342          DATE:    OCT 73
-C>   UPDATE: JONES, R.E.        ORG: W342          DATE: 02 JUL 84
+C> @brief NMC octagon boundary finding subroutine.
+C> @author James Howcroft @date 1973-10-15
+
+C> Relates the I,J coordinate point in a 65x65 grid-point
+C> array as being either inside, outside, or on the boundary of the
+C> NMC octagon centered in the 65x65 array.
 C>
-C> ABSTRACT: RELATES THE I,J COORDINATE POINT IN A 65X65 GRID-POINT
-C>   ARRAY AS BEING EITHER INSIDE, OUTSIDE, OR ON THE BOUNDARY OF THE
-C>   NMC OCTAGON CENTERED IN THE 65X65 ARRAY.
+C> Program history log:
+C> - James Howcroft 1973-10-15
+C> - Ralph Jones 1984-07-02 Convert to fortran 77.
+C> - Ralph Jones 1989-02-02 Convert to microsoft fortran 4.10.
+C> - Ralph Jones 1990-06-12 Convert to sun fortran 1.3.
+C> - Ralph Jones 1991-03-16 Convert to silicongraphics 3.3 fortran 77.
+C> - Ralph Jones 1993-03-29 Add save statement.
 C>
-C> PROGRAM HISTORY LOG:
-C>   73-10-15  HOWCROFT,J.
-C>   84-07-02  R.E.JONES    CONVERT TO FORTRAN 77
-C>   89-02-02  R.E.JONES    CONVERT TO MICROSOFT FORTRAN 4.10
-C>   90-06-12  R.E.JONES    CONVERT TO SUN FORTRAN 1.3
-C>   91-03-16  R.E.JONES    CONVERT TO SiliconGraphics 3.3 FORTRAN 77
-C>   93-03-29  R.E.JONES    ADD SAVE STATEMENT
+C> @param[in] I Coordinate identification of a point in the 65x65 array.
+C> @param[in] J Coordinate identification of a point in the 65x65 array.
+C> @param[out] NW Integer return code.
 C>
-C> USAGE: CALL W3FI18 (I, J, NW)
+C> Exit states:
+C> - NW = -1 Point is outside the octagon.
+C> - NW =  0 Point is on the octagon boundary.
+C> - NW = +1 Point is inside the octagon.
 C>
-C>   INPUT:
-C>     ' I' - COORDINATE IDENTIFICATION OF A POINT IN THE 65X65 ARRAY
-C>     ' J' - COORDINATE IDENTIFICATION OF A POINT IN THE 65X65 ARRAY
-C>   OUTPUT:
-C>     'NW' - INTEGER RETURN CODE
-C>
-C>   EXIT STATES:
-C>     NW = -1 POINT IS OUTSIDE THE OCTAGON
-C>     NW =  0 POINT IS ON THE OCTAGON BOUNDARY
-C>     NW = +1 POINT IS INSIDE THE OCTAGON
-C>
-C>   EXTERNAL REFERENCES: NONE
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048.
-C>
+C> @author James Howcroft @date 1973-10-15
       SUBROUTINE W3FI18(I,J,NW)
 C
       SAVE

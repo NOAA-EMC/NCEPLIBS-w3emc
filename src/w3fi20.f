@@ -1,40 +1,27 @@
 C> @file
-C
-C> SUBPROGRAM: W3FI20         CUT A 65 X 65 GRID TO A NMC 1977 POINT GRID
-C>   AUTHOR: JONES, R.E.      ORG: W342       DATE: 84-07-02
+C> @brief Cut a 65 x 65 grid to a nmc 1977 point grid.
+C> @author Ralph Jones @date 1984-07-02
+
+C> Extracts the NMC 1977 point octagon grid points out of
+C> a 65x65 (4225 point) array.
 C>
-C> ABSTRACT: EXTRACTS THE NMC 1977 POINT OCTAGON GRID POINTS OUT OF
-C>   A 65X65 (4225 POINT) ARRAY.
+C> Program history log:
+C> - Ralph Jones 1973-06-15
+C> - Ralph Jones 1984-07-02 Convert to vs fortran
+C> - Ralph Jones 1989-02-02 Convert to microsoft fortran 4.10
+C> - Ralph Jones 1990-08-22 Convert to sun fortran 1.3
+C> - Ralph Jones 1991-03-29 Convert to silicongraphics fortran
+C> - Ralph Jones 1993-03-29 Add save statement
 C>
-C> PROGRAM HISTORY LOG:
-C>   73-06-15  R.E.JONES
-C>   84-07-02  R.E.JONES   CONVERT TO VS FORTRAN
-C>   89-02-02  R.E.JONES   CONVERT TO MICROSOFT FORTRAN 4.10
-C>   90-08-22  R.E.JONES   CONVERT TO SUN FORTRAN 1.3
-C>   91-03-29  R.E.JONES   CONVERT TO SiliconGraphics FORTRAN
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
+C> @param[in] A REAL*4 (65 x 65 grid, 4225 point) array
+C> grid is office note 84 type 27 or 1b hex.
+C> @param[out] B 1977 point array (octagon) office note 84 type
+C> 0 or hex 0.
 C>
-C> USAGE:  CALL W3FI20 (A,B)
+C> @note Arrays A and B may be the same array or be equivalenced,
+C> in which case the first 1977 words of 'A' are written over.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     A      ARG LIST  REAL*4 (65 X 65 GRID, 4225 POINT) ARRAY
-C>                      GRID IS OFFICE NOTE 84 TYPE 27 OR 1B HEX
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     B      ARG LIST  1977 POINT ARRAY (OCTAGON) OFFICE NOTE 84 TYPE
-C>                      0 OR HEX 0.
-C>
-C>   REMARKS: ARRAYS A AND B MAY BE THE SAME ARRAY OR BE EQUIVALENCED,
-C>     IN WHICH CASE THE FIRST 1977 WORDS OF 'A' ARE WRITTEN OVER.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048.
-C>
+C> @author Ralph Jones @date 1984-07-02
       SUBROUTINE W3FI20(A,B)
 C
       REAL          A(*)

@@ -1,28 +1,20 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI01      DETERMINES MACHINE WORD LENGTH IN BYTES
-C>   PRGMMR: KEYSER           ORG: W/NMC22    DATE: 06-29-92
+C> @brief Determines machine word length in bytes.
+C> @author R. Kistler @date 1992-01-10
+
+C> Determines the number of bytes in a full word for the
+C> particular machine (IBM or cray).
 C>
-C> ABSTRACT: DETERMINES THE NUMBER OF BYTES IN A FULL WORD FOR THE
-C>   PARTICULAR MACHINE (IBM OR CRAY).
+C> Program history log:
+C> - R. Kistler 1992-01-10
+C> - Dennis Keyser 1992-05-22 Docblocked/commented.
+C> - Mark Iredell 1995-10-31 Removed saves and prints.
+C> - Stephen Gilbert 2001-06-07 Uses f90 standard routine bit_size to
+C> find integer word length
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-01-10  R. KISTLER (W/NMC23)
-C>   92-05-22  D. A. KEYSER -- DOCBLOCKED/COMMENTED
-C>   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C> 2001-06-07  Gilbert     Uses f90 standard routine bit_size to
-C>                         find integer word length
+C> @note Subprogram can be called from a multiprocessing environment.
 C>
-C> USAGE:    CALL W3FI01(LW)
-C>   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C>     LW       - MACHINE WORD LENGTH IN BYTES
-C>
-C> REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 77
-C>   MACHINE:  CRAY, WORKSTATIONS
-C>
+C> @author R. Kistler @date 1992-01-10
       SUBROUTINE W3FI01(LW)
 C
       INTEGER      LW

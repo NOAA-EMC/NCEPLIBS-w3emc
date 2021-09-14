@@ -1,50 +1,36 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FC07        GRID U-V TO EARTH U-V IN NORTH HEM.
-C>   PRGMMR: CHASE            ORG: NMC421      DATE:88-10-26
+C> @brief Grid U-V to Earth U-V in north hem.
+C> @author John Stackpole @date 1981-12-30
+
+C> Given the grid-oriented wind components on a northern
+C> hemisphere polar stereographic grid point, compute the Earth-
+C> oriented wind components at that point. If the input winds
+C> are at the north pole, the output components will be made
+C> consistent with the WMO standards for reporting winds at the
+C> north pole. (see office note 241 for WMO definition.)
 C>
-C> ABSTRACT: GIVEN THE GRID-ORIENTED WIND COMPONENTS ON A NORTHERN
-C>   HEMISPHERE POLAR STEREOGRAPHIC GRID POINT, COMPUTE THE EARTH-
-C>   ORIENTED WIND COMPONENTS AT THAT POINT.  IF THE INPUT WINDS
-C>   ARE AT THE NORTH POLE, THE OUTPUT COMPONENTS WILL BE MADE
-C>   CONSISTENT WITH THE WMO STANDARDS FOR REPORTING WINDS AT THE
-C>   NORTH POLE.  (SEE OFFICE NOTE 241 FOR WMO DEFINITION.)
+C> Program history log:
+C> - John Stackpole 1981-12-30
+C> - P. Chase 1988-10-13 Allow input and output to be the same
+C> - Ralph Jones 1991-03-06 Change to cray cft77 fortran
 C>
-C> PROGRAM HISTORY LOG:
-C>   81-12-30  STACKPOLE, J. D.
-C>   88-10-13  CHASE, P.   ALLOW INPUT AND OUTPUT TO BE THE SAME
-C>   91-03-06  R.E.JONES   CHANGE TO CRAY CFT77 FORTRAN
+C> @param[in] FFID REAL I-displacement from point to north pole
+C> @param[in] FFJD REAL J-displacement from point to north pole
+C> @param[in] FGV REAL Grid-oriented V-component
+C> @param[in] FGU REAL Grid-oriented U-component
+C> @param[out] FU REAL Earth-oriented U-component, positive from west
+C> may reference the same location as FGU.
+C> @param[out] FV REAL Earth-oriented V-component, positive from south
+C> may reference the same location as FGV.
 C>
-C> USAGE:    CALL W3FC07 (FFID, FFJD, FGU, FGV, FU, FV)
+C> @note Calculate FFID and FFJD as follows...
+C> FFID = real(ip - i)
+C> FFJD = real(jp - j)
+C> where (ip,jp) is the grid coordinates of the north pole and
+C> (i,j) is the grid coordinates of the point where FGU and FGV
+C> occur. See w3fc11 for a southern hemisphere companion subroutine.
 C>
-C>   INPUT ARGUMENT LIST:
-C>     FFID     - REAL   I-DISPLACEMENT FROM POINT TO NORTH POLE
-C>     FFJD     - REAL   J-DISPLACEMENT FROM POINT TO NORTH POLE
-C>     FGU      - REAL   GRID-ORIENTED U-COMPONENT
-C>     FGV      - REAL   GRID-ORIENTED V-COMPONENT
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     FU       - REAL   EARTH-ORIENTED U-COMPONENT, POSITIVE FROM WEST
-C>                MAY REFERENCE THE SAME LOCATION AS FGU.
-C>     FV       - REAL   EARTH-ORIENTED V-COMPONENT, POSITIVE FROM SOUTH
-C>                MAY REFERENCE THE SAME LOCATION AS FGV.
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       COMMON - SQRT
-C>
-C> REMARKS:  CALCULATE FFID AND FFJD AS FOLLOWS...
-C>         FFID = REAL(IP - I)
-C>         FFJD = REAL(JP - J)
-C>   WHERE (IP,JP) IS THE GRID COORDINATES OF THE NORTH POLE AND
-C>   (I,J) IS THE GRID COORDINATES OF THE POINT WHERE FGU AND FGV
-C>   OCCUR.
-C>        SEE W3FC11 FOR A SOUTHERN HEMISPHERE COMPANION SUBROUTINE.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author John Stackpole @date 1981-12-30
       SUBROUTINE W3FC07(FFID, FFJD, FGU, FGV, FU, FV)
 C
       SAVE
