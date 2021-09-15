@@ -1,41 +1,23 @@
 C> @file
-C
-C> SUBPROGRAM: W3FI52         COMPUTES SCALING CONSTANTS USED BY GRDPRT
-C>   AUTHOR: STACKPOLE,J.     ORG: W342       DATE: 85-12-03
-C>   AUTHOR: JONES,R.E.
+C> @brief Computes scaling constants used by grdprt().
+C> @author John Stackpole @date 1980-06-15
+
+C> Computes the four scaling constants used by grdprt(), w3fp03(),
+C> or w3fp05() from the 1st 5 identifier words in office note 84 format.
 C>
-C> ABSTRACT: COMPUTES THE FOUR SCALING CONSTANTS USED BY GRDPRT, W3FP03,
-C>   OR W3FP05 FROM THE 1ST 5 IDENTIFIER WORDS IN OFFICE NOTE 84 FORMAT.
+C> Program history log:
+C> - John Stackpole 1980-06-15
+C> - Ralph Jones 1985-12-03 Made subroutine in genout into this subr.
+C> - Ralph Jones 1989-07-07 Convert to microsoft fortran 4.10
+C> - Ralph Jones 1990-02-03 Convert to cray cft77 fortran
 C>
-C> PROGRAM HISTORY LOG:
-C>   80-06-15  J. STACKPOLE
-C>   85-12-03  R.E.JONES  MADE SUBROUTINE IN GENOUT INTO THIS SUBR.
-C>   89-07-07  R.E.JONES  CONVERT TO MICROSOFT FORTRAN 4.10
-C>   90-02-03  R.E.JONES  CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] IDENT First 5 id's in office note 84 format.
+C> @param[out] CNST 4 constant's used by grdprtO(), w3fp05(), or w3fp03()
+C> @param[out] IER
+C> - 0 = normal return.
+C> - 1 = ID'S IN IDENT ARE NOT IN O.N. 84 FORMAT
 C>
-C> USAGE:  CALL W3FI52(IDENT,CNST,IER)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     IDENT  ARG LIST  FIRST 5 ID'S IN OFFICE NOTE 84 FORMAT
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     CNST   ARG LIST  4 CONSTANT'S USED BY GRDPRT,W3FP05, OR W3FP03
-C>     IER    ARG LIST  0 = NORMAL RETURN
-C>                      1 = ID'S IN IDENT ARE NOT IN O.N. 84 FORMAT
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     W3FI33                                                  W3LIB
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: MICROSOFT FORTRAN 4.10 OPTIMIZING COMPILER
-C>   MACHINE:  IBM PC, AT, PS/2, 386, CLONES.
-C>
+C> @author John Stackpole @date 1980-06-15
       SUBROUTINE W3FI52(IDENT,CNST,IER)
 C
 CC       SET DEFAULT VALUES FOR NMC FIELDS  GRIDPRINTING

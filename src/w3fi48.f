@@ -1,39 +1,25 @@
 C> @file
-C
-C> SUBPROGRAM: W3FI48         CONVERT OFFICE NOTE 85 LABEL TO IBM
-C>   AUTHOR: JONES, R.E.      ORG: W342       DATE: 85-07-31
+C> @brief Convert office note 85 label to IBM.
+C> @author Ralph Jones @date 1985-07-31
+
+C> Converts office note 85 label from the cray
+C> format into a nas-9050 label. All ASCII characters are
+C> converted into EBCDIC characters. Binary or coded labels
+C> can be converted.
 C>
-C> ABSTRACT: CONVERTS OFFICE NOTE 85 LABEL FROM THE CRAY
-C>   FORMAT INTO A NAS-9050  LABEL. ALL ASCII CHARACTERS ARE
-C>   CONVERTED INTO EBCDIC CHARACTERS. BINARY OR CODED LABELS
-C>   CAN BE CONVERTED.
+C> Program history log:
+C> - Ralph Jones 1985-07-31
+C> - Ralph Jones 1989-10-24 Convert to cray cft77 fortran.
+C> - Boi Vuong 2002-10-15 Replaced function ichar with mova2i.
 C>
-C> PROGRAM HISTORY LOG:
-C>   85-07-31  R.E.JONES
-C>   89-10-24  R.E.JONES  CONVERT TO CRAY CFT77 FORTRAN
-C>   02-10-15  VUONG      REPLACED FUNCTION ICHAR WITH MOVA2I
+C> @param[in] ILABEL 4 64 bit words or 32 characters
+C> characters are in ASCII or binary.
+C> @param[out] NLABEL 4 64 bit words or 32 characters,
+C> characters are in EBCDIC or binary.
 C>
-C> USAGE:  CALL W3FI48 (ILABEL, NLABEL)
+C> @note See office note 85.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     ILABEL ARG LIST  4 64 BIT WORDS OR 32 CHARACTERS
-C>                      CHARACTERS ARE IN ASCII OR BINARY.
-C>
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     NLABEL ARG LIST  4 64 BIT WORDS OR 32 CHARACTERS,
-C>                      CHARACTERS ARE IN EBCDIC OR BINARY.
-C>
-C>   REMARKS: SEE OFFICE NOTE 85.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Ralph Jones @date 1985-07-31
       SUBROUTINE W3FI48(ILABEL,NLABEL)
 C
        CHARACTER*1    ILABEL(32)

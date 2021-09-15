@@ -1,58 +1,40 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI58   - PACK POSITIVE DIFFERENCES IN LEAST BITS
-C>   PRGMMR:  ALLARD, R.       ORG:  NMC411        DATE:  JULY 1987
+C> @brief Pack positive differences in least bits.
+C> @author Robert Allard @date 1987-09-02
+
+C> Converts an array of integer numbers into an array of
+C> positive differences (number(s) - minimum value) and packs the
+C> magnitude of each difference right-adjusted into the least
+C> number of bits that holds the largest difference.
 C>
-C> ABSTRACT:  CONVERTS AN ARRAY OF INTEGER NUMBERS INTO AN ARRAY OF
-C>   POSITIVE DIFFERENCES (NUMBER(S) - MINIMUM VALUE) AND PACKS THE
-C>   MAGNITUDE OF EACH DIFFERENCE RIGHT-ADJUSTED INTO THE LEAST
-C>   NUMBER OF BITS THAT HOLDS THE LARGEST DIFFERENCE.
+C> Program history log:
+C> - Robert Allard 1987-09-02
+C> - Ralph Jones 1988-10-02 Converted to cdc cyber 205 ftn200 fortran.
+C> - Ralph Jones 1990-05-17 Converted to cray cft77 fortran.
+C> - Ralph Jones 1990-05-18 Change name vbimpk to w3lib name w3fi58()
+C> - Mark Iredell 1996-05-14 Generalized computation of nbits.
+C> - Ebisuzaki 1998-06-30 Linux port.
 C>
-C> PROGRAM HISTORY LOG:
-C>   87-09-02  ALLARD
-C>   88-10-02  R.E.JONES   CONVERTED TO CDC CYBER 205 FTN200 FORTRAN
-C>   90-05-17  R.E.JONES   CONVERTED TO CRAY CFT77 FORTRAN
-C>   90-05-18  R.E.JONES   CHANGE NAME VBIMPK TO W3LIB NAME W3FI58
-C>   96-05-14  IREDELL     GENERALIZED COMPUTATION OF NBITS
-C>   98-06-30  EBISUZAKI   LINUX PORT
+C> @param[in] IFIELD Array of integer data for processing.
+C> @param[in] NPTS Number of data values to process in IFIELD (and nwork)
+C> where, npts > 0.
+C> @param[out] NWORK Work array with integer difference
+C> @param[out] NPFLD Array for packed data (character*1)
+C> (user is responsible for an adequate dimension.)
+C> @param[out] NBITS Number of bits used to pack data where, 0 < nbits < 32
+C> (the maximum difference without overflow is 2**31 -1)
+C> @param[out] LEN Number of packed bytes in npfld (set to 0 if no packing)
+C> where, len = (nbits * npts + 7) / 8 without remainder
+C> @param[out] KMIN Minimum value (subtracted from each datum). If this
+C> packed data is being used for grib data, the
+C> programer will have to convert the KMIN value to an
+C> IBM370 32 bit floating point number.
 C>
-C> USAGE:  CALL W3FI58(IFIELD,NPTS,NWORK,NPFLD,NBITS,LEN,KMIN)
+C> @note LEN = 0, NBITS = 0, and no packing performed if
+C> - (1) KMAX = KMIN  (a constant field)
+C> - (2) NPTS < 1  (see input argument)
 C>
-C>   INPUT:
-C>
-C>     IFIELD - ARRAY OF INTEGER DATA FOR PROCESSING
-C>     NPTS   - NUMBER OF DATA VALUES TO PROCESS IN IFIELD (AND NWORK)
-C>              WHERE, NPTS > 0
-C>
-C>   OUTPUT:
-C>
-C>     NWORK  - WORK ARRAY WITH INTEGER DIFFERENCE
-C>     NPFLD  - ARRAY FOR PACKED DATA (character*1)
-C>              (USER IS RESPONSIBLE FOR AN ADEQUATE DIMENSION.)
-C>     NBITS  - NUMBER OF BITS USED TO PACK DATA WHERE, 0 < NBITS < 32
-C>              (THE MAXIMUM DIFFERENCE WITHOUT OVERFLOW IS 2**31 -1)
-C>     LEN    - NUMBER OF PACKED BYTES IN NPFLD (SET TO 0 IF NO PACKING)
-C>              WHERE, LEN = (NBITS * NPTS + 7) / 8 WITHOUT REMAINDER
-C>     KMIN   - MINIMUM VALUE (SUBTRACTED FROM EACH DATUM). IF THIS
-C>              PACKED DATA IS BEING USED FOR GRIB DATA, THE
-C>              PROGRAMER WILL HAVE TO CONVERT THE KMIN VALUE TO AN
-C>              IBM370 32 BIT FLOATING POINT NUMBER.
-C>
-C>   SUBPROGRAMS CALLED:
-C>
-C>     W3LIB:  SBYTES, SBYTE
-C>
-C>   EXIT STATES:  NONE
-C>
-C>     NOTE:  LEN = 0, NBITS = 0, AND NO PACKING PERFORMED IF
-C>
-C>     (1) KMAX = KMIN  (A CONSTANT FIELD)
-C>     (2) NPTS < 1  (SEE INPUT ARGUMENT)
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Robert Allard @date 1987-09-02
       SUBROUTINE W3FI58(IFIELD,NPTS,NWORK,NPFLD,NBITS,LEN,KMIN)
 C
       PARAMETER(ALOG2=0.69314718056)

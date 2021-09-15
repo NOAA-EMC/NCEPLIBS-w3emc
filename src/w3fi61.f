@@ -1,60 +1,52 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI61        BUILD 40 CHAR COMMUNICATIONS PREFIX
-C>   PRGMMR: CAVANAUGH        ORG: NMC421      DATE:91-07-24
+C> @brief Build 40 char communications prefix.
+C> @author Bill Cavanaugh @date 1991-06-21
+
+C> Using information from the user, build a 40 character
+C> communications prefix and place in indicated location.
 C>
-C> ABSTRACT: USING INFORMATION FROM THE USER, BUILD A 40 CHARACTER
-C>   COMMUNICATIONS PREFIX AND PLACE IN INDICATED LOCATION.
+C> Program history log:
+C> - Bill Cavanaugh 1991-06-21
+C> - Ralph Jones 1991-09-20 Changes for silicongraphics 3.3 fortran 77.
+C> - Ralph Jones 1993-03-29 Add save statement.
+C> - Ralph Jones 1994-04-28 Change for cray 64 bit word size and
+C> for ASCII character set computers.
+C> - Boi Vuong 2002-10-15 Replaced function ichar with mova2i.
 C>
-C> PROGRAM HISTORY LOG:
-C>   91-06-21  CAVANAUGH
-C>   91-09-20  R.E.JONES   CHANGES FOR SiliconGraphics 3.3 FORTRAN 77
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   94-04-28  R.E.JONES   CHANGE FOR CRAY 64 BIT WORD SIZE AND
-C>                         FOR ASCII CHARACTER SET COMPUTERS
-C>   02-10-15  VUONG       REPLACED FUNCTION ICHAR WITH MOVA2I
+C> @param[in] ICAT Catalog number.
+C> @param[in] AREG AFOS regional addressing flags (6 positions)
+C> select any or all of the following. Selections
+C> will automatically be left justified and blank
+C> filled to 6 positions.
+C> If bulletins and/or messages are not to be routed
+C> to AFOS, then leave the field filled with blanks.
+C> - E - Eastern region
+C> - C - Central region
+C> - W - Western region
+C> - S - Southern region
+C> - A - Atlantic region
+C> - P - Pacific region
+C> @param[in] IERR Error return.
+C> @param[in] IBCKUP Backup indicator w/header key
+C> - 0 = Not a backup.
+C> - 1 = FD backup.
+C> - 2 = DF backup.
+C>  - Back up is only permitted for KU and KU bulletins.
+C> @param[in] IDATYP Data type indicator.
+C> - 0  = EBCIDIC data.
+C> - 11 = Binary data.
+C> - 12 = Psuedo-ASCII data.
+C> - 3  = ASCII data.
+C> @param[out] LOC Name of the array to receive the communications prefix.
 C>
-C> USAGE:    CALL W3FI61 (LOC,ICAT,AREG,IBCKUP,IDATYP,IERR)
-C>   INPUT ARGUMENT LIST:
-C>     ICAT     - CATALOG NUMBER
-C>     AREG     - AFOS REGIONAL ADDRESSING FLAGS (6 POSITIONS)
-C>                   SELECT ANY OR ALL OF THE FOLLOWING. SELECTIONS
-C>                   WILL AUTOMATICALLY BE LEFT JUSTIFIED AND BLANK
-C>                   FILLED TO 6 POSITIONS.
-C>                IF BULLETINS AND/OR MESSAGES ARE NOT TO BE ROUTED
-C>                   TO AFOS, THEN LEAVE THE FIELD FILLED WITH BLANKS.
-C>               E - EASTERN REGION
-C>               C - CENTRAL REGION
-C>               W - WESTERN REGION
-C>               S - SOUTHERN REGION
-C>               A - ATLANTIC REGION
-C>               P - PACIFIC REGION
-C>     IERR     - ERROR RETURN
-C>     IBCKUP   - BACKUP INDICATOR W/HEADER KEY
-C>                0 = NOT A BACKUP
-C>                1 = FD BACKUP
-C>                2 = DF BACKUP
-C>                    BACK UP IS ONLY PERMITTED FOR FD AND DF BULLETINS
-C>     IDATYP   - DATA TYPE INDICATOR
-C>                0  = EBCIDIC DATA
-C>                11 = BINARY DATA
-C>                12 = PSUEDO-ASCII DATA
-C>                3  = ASCII DATA
+C> @note Error returns
+C> IERR:
+C> - = 0 Normal return.
+C> - = 1 Incorrect backup flag.
+C> - = 2 A regional addressing flag is non-blank and non-standard entry.
+C> - = 3 Data type is non-standard entry.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     LOC      - NAME OF THE ARRAY TO RECEIVE THE COMMUNICATIONS PREFIX
-C>
-C> REMARKS: ERROR RETURNS
-C>                  IERR  = 0   NORMAL RETURN
-C>                        = 1   INCORRECT BACKUP FLAG
-C>                        = 2   A REGIONAL ADDRESSING FLAG IS
-C>                              NON-BLANK AND NON-STANDARD ENTRY
-C>                        = 3   DATA TYPE IS NON-STANDARD ENTRY
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author Bill Cavanaugh @date 1991-06-21
       SUBROUTINE W3FI61 (LOC,ICAT,AREG,IBCKUP,IDATYP,IERR)
       INTEGER        LOC(*)
       INTEGER        ICAT,IBCKUP,IDATYP
@@ -76,7 +68,7 @@ C
 C     BLANK WILL BE 40 HEX OR DECIMAL 64 ON AN IBM370 TYPE
 C     COMPUTER, THIS IS THE EBCDIC CHARACTER SET.
 C     BLANK WILL BE 20 HEX OR DECIMAL 32 ON A COMPUTER WITH THE
-C     ASCII CHARACTER SET. THIS WILL BE USED TO TEST FOR CHARACTER 
+C     ASCII CHARACTER SET. THIS WILL BE USED TO TEST FOR CHARACTER
 C     SETS TO FIND IBM370 TYPE COMPUTER.
 C
       DATA  BLANK /' '/
