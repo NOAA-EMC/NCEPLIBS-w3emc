@@ -1,56 +1,41 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI32      PACK ID'S INTO OFFICE NOTE 84 FORMAT
-C>   PRGMMR: NIEROW, A.       ORG: W345       DATE: 86-02-07
+C> @brief Pack id's into office note 84 format.
+C> @author Alan Nierow @date 1986-02-07
+
+C> Converts an array of the 27 data field identifiers into
+C> an array of the first 8 identification words of the format de-
+C> scribed in NMC office note 84 (89-06-15, page-35). On a cray
+C> they will fit into four 64 bit integer words.
 C>
-C> ABSTRACT: CONVERTS AN ARRAY OF THE 27 DATA FIELD IDENTIFIERS INTO
-C>   AN ARRAY OF THE FIRST 8 IDENTIFICATION WORDS OF THE FORMAT DE-
-C>   SCRIBED IN NMC OFFICE NOTE 84 (89-06-15, PAGE-35). ON A CRAY
-C>   THEY WILL FIT INTO FOUR 64 BIT INTEGER WORDS.
+C> Program history log:
+C> - Alan Nierow 1986-02-07
+C> - Ralph Jones 1989-10-24 Convert to cray cft77 fortran.
+C> - Ralph Jones 1991-03-19 Changes for big records.
+C> - Boi Vuong 1998-03-10 Remove the cdir$ integer=64 directive.
+C> - Stephen Gilbert 1999-03-15 Specified 8-byte integer array explicitly.
 C>
-C> PROGRAM HISTORY LOG:
-C>   86-02-07  A.NIEROW
-C>   89-10-24  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
-C>   91-03-19  R.E.JONES   CHANGES FOR BIG RECORDS
-C>   98-03-10  B. VUONG    REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
-C> 1999-03-15  Gilbert     Specified 8-byte integer array explicitly
+C> @param[in] LARRAY Integer array containing 27 data field
+C> identifiers (see o.n. 84)
+C> @param[out] KIDNT Integer array of 6 words, 12 office note 84 32 bit
+C> words, first 4 words are made by w3fi32(), if you are
+C> using packer w3ai00(), it will compute word 5 and 6.
+C> (office note 84 words 9,10, 11 and 12). If J the
+C> word count in word 27 of LARRAY is greater than
+C> 32743 then bits 15-0 of the 4th ID word are set to
+C> zero, J is stored in bits 31-0 of the 6th ID word.
+C> ID word 5 is set zero, bit 63-32 of the 6th ID
+C> word are set zero.
+C> @note bis are number left to right on the cray as 63-0.
 C>
-C> USAGE:    CALL W3FI32(LARRAY, KIDNT)
-C>   INPUT ARGUMENT LIST:
-C>     LARRAY   - INTEGER ARRAY CONTAINING 27 DATA FIELD
-C>                IDENTIFIERS (SEE O.N. 84)
+C> @note Exit states printed messages:
+C> If any number n in (LARRAY(i),i=1,27) is erroneously large:
+C> 'value in LARRAY(i)=n is too large to pack'
+C> if any number n in (LARRAY(i),i=1,27) is erroneously negative:
+C> 'value in LARRAY(i)=n should not be negative'
+C> in either of the above situations, that portion of the packed
+C> word corresponding to LARRAY(i) will be set to binary ones.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     KIDNT    - INTEGER ARRAY OF 6 WORDS, 12 OFFICE NOTE 84 32 BIT
-C>                WORDS, FIRST 4 WORDS ARE MADE BY W3FI32, IF YOU ARE
-C>                USING PACKER W3AI00, IT WILL COMPUTE WORD 5 AND 6.
-C>                (OFFICE NOTE 84 WORDS 9,10, 11 AND 12). IF J THE
-C>                WORD COUNT IN WORD 27 OF LARRAY IS GREATER THAN
-C>                32743 THEN BITS 15-0 OF THE 4TH ID WORD ARE SET TO
-C>                ZERO, J IS STORED IN BITS 31-0 OF THE 6TH ID WORD.
-C>                ID WORD 5 IS SET ZERO, BIT 63-32 OF THE 6TH ID
-C>                WORD ARE SET ZERO. NOTE: BIS ARE NUMBER LEFT TO
-C>                RIGHT ON THE CRAY AS 63-0.
-C>
-C>   OUTPUT FILES:
-C>     UNIT6    - STANDARD FORTRAN PRINT FILE
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       BIT MANIPULATION - IAND, IOR ISHFT
-C>
-C>   REMARKS: EXIT STATES PRINTED MESSAGES:
-C>     IF ANY NUMBER N IN (LARRAY(I),I=1,27) IS ERRONEOUSLY LARGE:
-C>       'VALUE IN LARRAY(I)=N IS TOO LARGE TO PACK'
-C>     IF ANY NUMBER N IN (LARRAY(I),I=1,27) IS ERRONEOUSLY NEGATIVE:
-C>       'VALUE IN LARRAY(I)=N SHOULD NOT BE NEGATIVE'
-C>     IN EITHER OF THE ABOVE SITUATIONS, THAT PORTION OF THE PACKED
-C>     WORD CORRESPONDING TO LARRAY(I) WILL BE SET TO BINARY ONES.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN    INTEGER=64
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author Alan Nierow @date 1986-02-07
       SUBROUTINE W3FI32(LARRAY,KIDNT)
 C
        INTEGER(8)        LARRAY(27)

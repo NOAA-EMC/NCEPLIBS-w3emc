@@ -1,40 +1,31 @@
 C> @file
-C
-C> SUBPROGRAM: W3FI04         FIND WORD SIZE, ENDIAN, CHARACTER SET
-C>   PRGMNR: JONES,R.E.       ORG: W/NMC42       DATE: 94-10-07
+C> @brief Find word size, endian, character set.
+C> @author Ralph Jones @date 1994-10-07
+
+C> Subroutine computes word size, the type of character
+C> set, ASCII or EBCDIC, and if the computer is big-endian, or
+C> little-endian.
 C>
-C> ABSTRACT: SUBROUTINE COMPUTES WORD SIZE, THE TYPE OF CHARACTER
-C>   SET, ASCII OR EBCDIC, AND IF THE COMPUTER IS BIG-ENDIAN, OR
-C>   LITTLE-ENDIAN.
+C> Program history log:
+C> - Relph Jones 1994-10-07
+C> - Stephen Gilbert 1998-07-08 Removed the Fortran SAVE Statement.
+C> The SAVE statement is not needed for this outine, and may have been
+C> causing errors using the f90 compiler under the 2.0 Programming Environment.
+C> - Boi Vuong 2002-10-15 Replaced Function ICHAR with mova2i
 C>
-C> PROGRAM HISTORY LOG:
-C>   94-10-07  R.E.JONES
-C>   98-07-08  Gilbert    -  Removed the Fortran SAVE Statement.
-C>                           The SAVE statement is not needed for this
-C>                           routine, and may have been causing errors
-C>                           using the f90 compiler under the 2.0
-C>                           Programming Environment.
-C>   02-10-15  Vuong         Replaced Function ICHAR with mova2i
+C> @param[out] IENDN Integer for big-endian or little-endian
+C> - =0 big-endian
+C> - =1 little-endian
+C> - =2 cannot compute
+C> @param[out] ITYPEC Integer for type of character set
+C> - =0 ASCII character set
+C> - =1 EBCDIC character set
+C> - =2 not ASCII or EBCDIC
+C> @param[out] LW Integer for words size of computer in bytes
+C> - =4 for 32 bit computers
+C> - =8 for 64 bit computers
 C>
-C> USAGE:  CALL W3FI04 (IENDN, ITYPEC, LW)
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     IENDN     -  INTEGER FOR BIG-ENDIAN OR LITTLE-ENDIAN
-C>                  = 0   BIG-ENDIAN
-C>                  = 1   LITTLE-ENDIAN
-C>                  = 2   CANNOT COMPUTE
-C>     ITYPEC    -  INTEGER FOR TYPE OF CHARACTER SET
-C>                  = 0   ASCII  CHARACTER SET
-C>                  = 1   EBCDIC CHARACTER SET
-C>                  = 2   NOT ASCII OR EBCDIC
-C>     LW        -  INTEGER FOR WORDS SIZE OF COMPUTER IN BYTES 
-C>                  = 4   FOR 32 BIT COMPUTERS
-C>                  = 8   FOR 64 BIT COMPUTERS  
-C>
-C> ATTRIBUTES:
-C>  LANGUAGE: CRAY CFT77 FORTRAN
-C>  MACHINE:  CRAY C916/256, Y-MP8/64, Y-MP EL92/256, J916/2048
-C>
+C> @author Ralph Jones @date 1994-10-07
       SUBROUTINE W3FI04(IENDN,ITYPEC,LW)
 C
       INTEGER       ITEST1
@@ -88,24 +79,24 @@ C
       ELSE
         LW = 4
       ENDIF
-C 
+C
 C     USING ITEST3 WITH Z'01020304' EQUIVALNCED TO CTEST3
-C     ON A 32 BIT BIG-ENDIAN COMPUTER 03 IS IN THE 3RD 
-C     BYTE OF A 4 BYTE WORD. ON A 32 BIT LITTLE-ENDIAN 
+C     ON A 32 BIT BIG-ENDIAN COMPUTER 03 IS IN THE 3RD
+C     BYTE OF A 4 BYTE WORD. ON A 32 BIT LITTLE-ENDIAN
 C     COMPUTER IT IS IN 2ND BYTE.
 C     ON A 64 BIT COMPUTER Z'01020304' IS RIGHT ADJUSTED IN
 C     A 64 BIT WORD, 03 IS IN THE 7TH BYTE.  ON A LITTLE-
 C     ENDIAN 64 BIT COMPUTER IT IS IN THE 2ND BYTE.
-C 
-      IF (LW.EQ.4) THEN           
+C
+      IF (LW.EQ.4) THEN
         IF (MOVA2I(CTEST3(3)).EQ.3) THEN
           IENDN = 0
-        ELSE IF (MOVA2I(CTEST3(3)).EQ.2) THEN 
+        ELSE IF (MOVA2I(CTEST3(3)).EQ.2) THEN
           IENDN = 1
         ELSE
           IENDN = 2
         END IF
-      ELSE IF (LW.EQ.8) THEN           
+      ELSE IF (LW.EQ.8) THEN
         IF (MOVA2I(CTEST3(7)).EQ.3) THEN
           IENDN = 0
         ELSE IF (MOVA2I(CTEST3(2)).EQ.3) THEN

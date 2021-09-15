@@ -1,33 +1,21 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI02      TRANSFERS ARRAY FROM 16 TO 64 BIT WORDS
-C>   PRGMMR: KEYSER           ORG: W/NMC22    DATE: 06-29-92
+C> @brief Transfers array from 16 to 64 bit words.
+C> @author Dennis Keyser @date 1992-06-29
+
+C> Transfers an array of numbers from 16 bit (ibm integer*2)
+C> IBM half-words to default integers.
 C>
-C> ABSTRACT: TRANSFERS AN ARRAY OF NUMBERS FROM 16 BIT (IBM INTEGER*2)
-C>   IBM HALF-WORDS TO DEFAULT INTEGERS.
+C> Program history log:
+C> - Dennis Keyser 1992-06-29
+C> - Stephen Gilbert 1998-11-17 Removed Cray references.
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-06-29  D. A. KEYSER (W/NMC22)
-C>   98-11-17  Gilbert       Removed Cray references
+C> @param[in] IN Starting address for array of 16 bit IBM half-words.
+C> @param[in] NUM Number of numbers in 'IN' to transfer.
+C> @param[out] IDEST Starting address for array of output integers.
 C>
-C> USAGE:    CALL W3FI02(IN,IDEST,NUM)
-C>   INPUT ARGUMENT LIST:
-C>     IN       - STARTING ADDRESS FOR ARRAY OF 16 BIT IBM HALF-WORDS
-C>     NUM      - NUMBER OF NUMBERS IN 'IN' TO TRANSFER.
+C> @note This is the inverse of library routine w3fi03.
 C>
-C>   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C>     IDEST    - STARTING ADDRESS FOR ARRAY OF OUTPUT INTEGERS
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       NONE
-C>
-C> REMARKS: THIS IS THE INVERSE OF LIBRARY ROUTINE W3FI03.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM XL FORTRAN 
-C>   MACHINE:  IBM SP
-C>
+C> @author Dennis Keyser @date 1992-06-29
       SUBROUTINE W3FI02(IN,IDEST,NUM)
 C
       INTEGER(2)  IN(*)
