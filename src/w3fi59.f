@@ -1,58 +1,49 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI59      FORM AND PACK POSITIVE, SCALED DIFFERENCES
-C>   PRGMMR:  ALLARD, R.      ORG: NMC41      DATE:  84-08-01
+C> @brief Form and pack positive, scaled differences.
+C> @author Robert Allard @date 1984-08-01
+
+C> Converts an array of single precision real numbers into
+C> an array of positive scaled differences (number(s) - minimum value),
+C> in integer format and packs the argument-specified number of
+C> significant bits from each difference.
 C>
-C> ABSTRACT:  CONVERTS AN ARRAY OF SINGLE PRECISION REAL NUMBERS INTO
-C>   AN ARRAY OF POSITIVE SCALED DIFFERENCES (NUMBER(S) - MINIMUM VALUE),
-C>   IN INTEGER FORMAT AND PACKS THE ARGUMENT-SPECIFIED NUMBER OF
-C>   SIGNIFICANT BITS FROM EACH DIFFERENCE.
+C> Program history log:
+C> - Robert Allard 1984-08-01  ALLARD
+C> - Ralph Jones 1990-05-17 Convert to cray cft77 fortran.
+C> - Ralph Jones 1990-05-18 Change name pakmag to w3lib name w3fi59().
+C> - Ralph Jones 1993-07-06 Add nint to do loop 2000 so numbers are
+C> rounded to nearest integer, not truncated.
+C> - Mark Iredell 1994-01-05 Computation of iscale fixed with respect to
+C> the 93-07-06 change.
+C> - Ebisuzaki 1998-06-30 Linux port.
 C>
-C> PROGRAM HISTORY LOG:
-C>   84-08-01  ALLARD      ORIGINAL AUTHOR
-C>   90-05-17  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
-C>   90-05-18  R.E.JONES   CHANGE NAME PAKMAG TO W3LIB NAME W3FI59
-C>   93-07-06  R.E.JONES   ADD NINT TO DO LOOP 2000 SO NUMBERS ARE
-C>                         ROUNDED TO NEAREST INTEGER, NOT TRUNCATED.
-C>   94-01-05  IREDELL     COMPUTATION OF ISCALE FIXED WITH RESPECT TO
-C>                         THE 93-07-06 CHANGE.
-C>   98-06-30  EBISUZAKI   LINUX PORT
+C> @param[in] FIELD Array of floating point data for processing (real)
+C> @param[in] NPTS Number of data values to process in field (and nwork)
+C> where, npts > 0
+C> @param[in] NBITS Number of significant bits of processed data to be packed
+C> where, 0 < nbits < 32+1
+C> @param[out] NWORK Array for integer conversion  (integer)
+C> if packing performed (see note below), the array will
+C> contain the pre-packed, right adjusted, scaled, integer
+C> differences upon return to the user.
+C> (the user may equivalence field and nwork. Same size.)
+C> @param[out] NPFLD Array for packed data (character*1)
+C> (dimension must be at least (nbits * npts) / 64 + 1)
+C> @param[out] ISCALE Power of 2 for restoring data, such that
+C> datum = (difference * 2**iscale) + rmin
+C> @param[out] LEN Number of packed bytes in npfld (set to 0 if no packing)
+C> where, len = (nbits * npts + 7) / 8 without remainder
+C> @param[out] RMIN Minimum value (reference value subtracted from input data)
+C> this is a cray floating point number, it will have to be
+C> converted to an ibm370 32 bit floating point number at
+C> some point in your program if you are packing grib data.
 C>
-C> USAGE:    CALL W3FI59(FIELD,NPTS,NBITS,NWORK,NPFLD,ISCALE,LEN,RMIN)
-C>   INPUT ARGUMENT LIST:
-C>     FIELD - ARRAY OF FLOATING POINT DATA FOR PROCESSING  (REAL)
-C>     NPTS  - NUMBER OF DATA VALUES TO PROCESS IN FIELD (AND NWORK)
-C>             WHERE, NPTS > 0
-C>     NBITS - NUMBER OF SIGNIFICANT BITS OF PROCESSED DATA TO BE PACKED
-C>             WHERE, 0 < NBITS < 32+1
+C> @note: Len = 0 and no packing performed if
+C> - (1)  RMAX = RMIN  (a constant field)
+C> - (2)  NBITS value out of range  (see input argument)
+C> - (3)  NPTS value less than 1  (see input argument)
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     NWORK - ARRAY FOR INTEGER CONVERSION  (INTEGER)
-C>             IF PACKING PERFORMED (SEE NOTE BELOW), THE ARRAY WILL
-C>             CONTAIN THE PRE-PACKED, RIGHT ADJUSTED, SCALED, INTEGER
-C>             DIFFERENCES UPON RETURN TO THE USER.
-C>             (THE USER MAY EQUIVALENCE FIELD AND NWORK.  SAME SIZE.)
-C>     NPFLD - ARRAY FOR PACKED DATA  (character*1)
-C>             (DIMENSION MUST BE AT LEAST (NBITS * NPTS) / 64 + 1  )
-C>     ISCALE- POWER OF 2 FOR RESTORING DATA, SUCH THAT
-C>             DATUM = (DIFFERENCE * 2**ISCALE) + RMIN
-C>     LEN   - NUMBER OF PACKED BYTES IN NPFLD (SET TO 0 IF NO PACKING)
-C>             WHERE, LEN = (NBITS * NPTS + 7) / 8 WITHOUT REMAINDER
-C>     RMIN  - MINIMUM VALUE (REFERENCE VALUE SUBTRACTED FROM INPUT DATA)
-C>             THIS IS A CRAY FLOATING POINT NUMBER, IT WILL HAVE TO BE
-C>             CONVERTED TO AN IBM370 32 BIT FLOATING POINT NUMBER AT
-C>             SOME POINT IN YOUR PROGRAM IF YOU ARE PACKING GRIB DATA.
-C>
-C> REMARKS:  LEN = 0 AND NO PACKING PERFORMED IF
-C>
-C>        (1)  RMAX = RMIN  (A CONSTANT FIELD)
-C>        (2)  NBITS VALUE OUT OF RANGE  (SEE INPUT ARGUMENT)
-C>        (3)  NPTS VALUE LESS THAN 1  (SEE INPUT ARGUMENT)
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, Y-MP8/864, Y-MP EL92/256, J916/2048
-C>
+C> @author Robert Allard @date 1984-08-01
       SUBROUTINE W3FI59(FIELD,NPTS,NBITS,NWORK,NPFLD,ISCALE,LEN,RMIN)
 C  NATURAL LOGARITHM OF 2 AND 0.5 PLUS NOMINAL SAFE EPSILON
       PARAMETER(ALOG2=0.69314718056,HPEPS=0.500001)
