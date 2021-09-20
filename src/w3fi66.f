@@ -1,81 +1,71 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI66        OFFICE NOTE 29 REPORT BLOCKER
-C>   PRGMMR: KEYSER           ORG: NMC22       DATE:92-06-29
+C> @brief Office note 29 report blocker.
+C> @author L. Marx @date 1990-01
+
+C> Blocks reports which have been packed into nmc office
+C> note 29 character format into fixed-length records. A report
+C> cannot span two records; If there is not enough room to fit
+C> the current report in the record, the subroutine returns to
+C> the calling program without any movement of data.
 C>
-C> ABSTRACT: BLOCKS REPORTS WHICH HAVE BEEN PACKED INTO NMC OFFICE
-C>   NOTE 29 CHARACTER FORMAT INTO FIXED-LENGTH RECORDS.  A REPORT
-C>   CANNOT SPAN TWO RECORDS; IF THERE IS NOT ENOUGH ROOM TO FIT
-C>   THE CURRENT REPORT IN THE RECORD, THE SUBROUTINE RETURNS TO
-C>   THE CALLING PROGRAM WITHOUT ANY MOVEMENT OF DATA.
+C> Program history log:
+C> - L. Marx 1990-01 Converted code from assembler
+C> to vs fortran; Expanded error return codes in 'NFLAG'.
+C> - Dennis Keyser 1991-08-23 Use same arguments as w3ai05();
+C> streamlined code; Docblocked and commented; diag-
+C> nostic print for errors.
+C> - Dennis Keyser 1992-06-29 Convert to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   90-01-??  L. MARX, UNIV. OF MD  -- CONVERTED CODE FROM ASSEMBLER
-C>                 TO VS FORTRAN; EXPANDED ERROR RETURN CODES IN 'NFLAG'
-C>   91-08-23  D. A. KEYSER, NMC22   -- USE SAME ARGUMENTS AS W3AI05;
-C>                 STREAMLINED CODE; DOCBLOCKED AND COMMENTED; DIAG-
-C>                 NOSTIC PRINT FOR ERRORS
-C>   92-06-29  D. A. KEYSER W/NMC22 -- CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] COCBUF Array containing a single packed report
+C> in office note 29/124 format.
+C> @param[in] NFLAG Marker indicating relative location (in bytes)
+C> of end of last report in COCBLK. Exception:
+C> NFLAG must be set to zero prior to blocking the first
+C> packed report into a new block. Subsequently, the
+C> value of NFLAG returned by the previous call to w3fi66()
+C> should be used as input. (see output argument list
+C> below.)  If NFLAG is negative, w3fi66() will return
+C> immediately without action.
+C> @param[in] NSIZE Maximum number of characters in COCBLK array
+C> (should be a multiple of 4)
+C> @param[inout] COCBLK Array holding a block of packed reports
+C> up to and including the previous (IN) / current (OUT) one
+C> ag marker indicating relative location (in bytes)
+C> of end of current report in COCBLK. NFLAG
+C> will be set to -1 if w3fi66() cannot fit the current
+C> packed report into the remainder of the block (i.e.,
+C> the block is full). NFLAG will not change from its
+C> input argument value if the string "end report" is
+C> not found at the end of the current report. (current
+C> packed report has invalid length and is not blocked)
 C>
-C> USAGE:    CALL W3FI66(COCBUF,COCBLK,NFLAG,NSIZE)
-C>   INPUT ARGUMENT LIST:
-C>     COCBUF   - CHARACTER*10 ARRAY CONTAINING A SINGLE PACKED REPORT
-C>              - IN OFFICE NOTE 29/124 FORMAT.
-C>     COCBLK   - CHARACTER*10 ARRAY HOLDING A BLOCK OF PACKED REPORTS
-C>              - UP TO AND INCLUDING THE PREVIOUS ONE
-C>     NFLAG    - MARKER INDICATING RELATIVE LOCATION (IN BYTES)
-C>              - OF END OF LAST REPORT IN COCBLK.  EXCEPTION:
-C>              - NFLAG MUST BE SET TO ZERO PRIOR TO BLOCKING THE FIRST
-C>              - PACKED REPORT INTO A NEW BLOCK.  SUBSEQUENTLY, THE
-C>              - VALUE OF NFLAG RETURNED BY THE PREVIOUS CALL TO W3FI66
-C>              - SHOULD BE USED AS INPUT. (SEE OUTPUT ARGUMENT LIST
-C>              - BELOW.)  IF NFLAG IS NEGATIVE, W3FI66 WILL RETURN
-C>              - IMMEDIATELY WITHOUT ACTION.
-C>     NSIZE    - MAXIMUM NUMBER OF CHARACTERS IN COCBLK ARRAY
-C>                (SHOULD BE A MULTIPLE OF 4)
+C> @note The user must set NFLAG to zero each time the array is
+C> to be filled with packed reports in office note 29/124 format.
+C> w3fi66() will then insert the first report and fill the remainder
+C> of the output array COCBLK with the string 'end record'.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     COCBLK   - CHARACTER*10 ARRAY HOLDING A BLOCK OF PACKED REPORTS
-C>              - UP TO AND INCLUDING THE CURRENT ONE
-C>     NFLAG    - MARKER INDICATING RELATIVE LOCATION (IN BYTES)
-C>              - OF END OF CURRENT REPORT IN COCBLK.  NFLAG
-C>              - WILL BE SET TO -1 IF W3FI66 CANNOT FIT THE CURRENT
-C>              - PACKED REPORT INTO THE REMAINDER OF THE BLOCK (I.E.,
-C>              - THE BLOCK IS FULL). NFLAG WILL NOT CHANGE FROM ITS
-C>              - INPUT ARGUMENT VALUE IF THE STRING "END REPORT" IS
-C>              - NOT FOUND AT THE END OF THE CURRENT REPORT. (CURRENT
-C>              - PACKED REPORT HAS INVALID LENGTH AND IS NOT BLOCKED)
+C> An attempt is made to insert a report in the output array
+C> each time w3fi66() is called. If the remaining portion of the
+C> output array is not large enough to hold the current report,
+C> w3fi66() sets NFLAG to -1. The user should then output the
+C> blocked record, set NFLAG to zero, and call w3fi66() again with
+C> the same report in the input array.
 C>
-C>   OUTPUT FILES:
-C>     FT06F001 - PRINTOUT
+C> After a given report is successfully blocked into COCBLK,
+C> w3fi66() sets NFLAG as a pointer for the next report to be blocked.
+C> this pointer is a relative address and a character count.
 C>
-C> REMARKS: THE USER MUST SET NFLAG TO ZERO EACH TIME THE ARRAY IS
-C>    TO BE FILLED WITH PACKED REPORTS IN OFFICE NOTE 29/124 FORMAT.
-C>    W3FI66 WILL THEN INSERT THE FIRST REPORT AND FILL THE REMAINDER
-C>    OF THE OUTPUT ARRAY COCBLK WITH THE STRING 'END RECORD'.
-C>         AN ATTEMPT IS MADE TO INSERT A REPORT IN THE OUTPUT ARRAY
-C>    EACH TIME W3FI66 IS CALLED.  IF THE REMAINING PORTION OF THE
-C>    OUTPUT ARRAY IS NOT LARGE ENOUGH TO HOLD THE CURRENT REPORT,
-C>    W3FI66 SETS NFLAG TO -1.  THE USER SHOULD THEN OUTPUT THE
-C>    BLOCKED RECORD, SET NFLAG TO ZERO, AND CALL W3FI66 AGAIN WITH
-C>    THE SAME REPORT IN THE INPUT ARRAY.
-C>       AFTER A GIVEN REPORT IS SUCCESSFULLY BLOCKED INTO COCBLK,
-C>    W3FI66 SETS NFLAG AS A POINTER FOR THE NEXT REPORT TO BE BLOCKED.
-C>    THIS POINTER IS A RELATIVE ADDRESS AND A CHARACTER COUNT.
-C>       THE THREE CHARACTERS SPECIFYING THE LENGTH OF THE REPORT
-C>    ARE CHECKED FOR VALID CHARACTER NUMBERS AND THE VALUE IS TESTED
-C>    FOR POINTING TO THE END OF THE REPORT (STRING "END REPORT"). IF
-C>    INVALID, THE REPORT IS NOT INSERTED INTO THE BLOCK AND THERE IS
-C>    AN IMMEDIATE RETURN TO THE USER.  IN THIS CASE, THE VALUE OF
-C>    NFLAG DOES NOT CHANGE FROM ITS INPUT VALUE.
+C> The three characters specifying the length of the report
+C> are checked for valid character numbers and the value is tested
+C> for pointing to the end of the report (string "end report"). If
+C> invalid, the report is not inserted into the block and there is
+C> an immediate return to the user. In this case, the value of
+C> NFLAG does not change from its input value.
 C>
-C>    NOTE: ENTRY W3AI05 DUPLICATES PROCESSING IN W3FI66 SINCE NO
-C>           ASSEMBLY LANGUAGE CODE IN CRAY W3LIB.
+C> @note Entry w3ai05() duplicates processing in w3fi66() since no
+C> assembly language code in cray w3lib.
 C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author L. Marx @date 1990-01
       SUBROUTINE W3FI66(COCBUF,COCBLK,NFLAG,NSIZE)
 C
       CHARACTER*10  COCBUF(*),COCBLK(*)

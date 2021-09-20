@@ -1,62 +1,49 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI62        BUILD 80-CHAR ON295 QUEUE DESCRIPTOR
-C>   PRGMMR: CAVANAUGH        ORG: NMC421      DATE:94-03-23
-C>
-C> ABSTRACT: BUILD 80 CHARACTER QUEUE DESCRIPTOR USING INFORMATION
-C>   SUPPLIED BY USER, PLACING THE COMPLETED QUEUE DESCRIPTOR IN THE
-C>   LOCATION SPECIFIED BY THE USER. (BASED ON OFFICE NOTE 295).
+C> @brief Build 80-char on295 queue descriptor.
+C> @author Bill Cavanaugh @date 1991-06-21
+
+C> Build 80 character queue descriptor using information
+C> supplied by user, placing the completed queue descriptor in the
+C> location specified by the user. (based on office note 295).
 C>
 C> PROGRAM HISTORY LOG:
-C>   91-06-21  CAVANAUGH
-C>   94-03-08  CAVANAUGH   MODIFIED TO ALLOW FOR BULLETIN SIZES THAT
-C>                         EXCEED 20000 BYTES
-C>   94-04-28  R.E.JONES   CHANGE FOR CRAY 64 BIT WORD SIZE AND
-C>                         FOR ASCII CHARACTER SET COMPUTERS
-C>   96-01-29  R.E.JONES   PRESET IERR TO ZERO
-C>   02-10-15  VUONG       REPLACED FUNCTION ICHAR WITH MOVA2I
+C> - Bill Cavanaugh 1991-06-21
+C> - Bill Cavanaugh 1994-03-08 Modified to allow for bulletin sizes that
+C> exceed 20000 bytes
+C> - Ralph Jones 1994-04-28 Change for cray 64 bit word size and
+C> for ASCII character set computers
+C> - Ralph Jones 1996-01-29 Preset IERR to zero
+C> - Boi Vuong 2002-10-15 Replaced function ichar with mova2i
 C>
-C> USAGE:    CALL W3FI62 (LOC,TTAAII,KARY,IERR)
-C>   INPUT ARGUMENT LIST:
-C>     TTAAII   - FIRST 6 CHARACTERS OF WMO HEADER
-C>     KARY     - INTEGER ARRAY CONTAINING USER INFORMATION
-C>               (1) = DAY OF MONTH
-C>               (2) = HOUR OF DAY
-C>               (3) = HOUR * 100 + MINUTE
-C>               (4) = CATALOG NUMBER
-C>               (5) = NUMBER OF 80 BYTE INCREMENTS
-C>               (6) = NUMBER OF BYTES IN LAST INCREMENT
-C>               (7) = TOTAL SIZE OF MESSAGE
-C>                     WMO HEADER + BODY OF MESSAGE IN BYTES
-C>                     (NOT INCLUDING QUEUE DESCRIPTOR)
+C> @param[in] TTAAII First 6 characters of WMO header
+C> @param[inout] KARY Integer array containing user information
+C> - (1) = Day of month
+C> - (2) = Hour of day
+C> - (3) = Hour * 100 + minute
+C> - (4) = Catalog number
+C> - (5) = Number of 80 byte increments
+C> - (6) = Number of bytes in last increment
+C> - (7) = Total size of message
+C> WMO header + body of message in bytes
+C> (not including queue descriptor)
+C> @param[out] LOC Location to receive queue descriptor
+C> @param[out] IERR Error return
 C>
-C>   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C>     LOC      - LOCATION TO RECEIVE QUEUE DESCRIPTOR
-C>     KARY     - SEE INPUT ARGUMENT LIST
-C>     IERR     - ERROR RETURN
+C> @note If total size is entered (kary(7)) then kary(5) and
+C> kary(6) will be calculated.
+C> If kary(5) and kary(6) are provided then kary(7) will
+C> be ignored.
 C>
-C>   SUBPROGRAMS CALLED: (LIST ALL CALLED FROM ANYWHERE IN CODES)
-C>     LIBRARY:
-C>       W3LIB    - GBYTE  W3FI01 W3AI15
+C> @note Equivalence array loc to integer array so it starts on
+C> a word boundary for sbyte subroutine.
 C>
-C> REMARKS: IF TOTAL SIZE IS ENTERED (KARY(7)) THEN KARY(5) AND
-C>               KARY(6) WILL BE CALCULATED.
-C>          IF KARY(5) AND KARY(6) ARE PROVIDED THEN KARY(7) WILL
-C>               BE IGNORED.
-C>          
-C> WARNING: EQUIVALENCE ARRAY LOC TO INTEGER ARRAY SO IT STARTS ON
-C>          A WORD BOUNDARY FOR SBYTE SUBROUTINE.
+C> Error returns:
+C> - IERR = 1 Total byte count and/or 80 byte increment
+C> count is missing. One or the other is
+C> required to complete the queue descriptor.
+C> - IERR = 2 Total size too small
 C>
-C>          ERROR RETURNS
-C>              IERR = 1    TOTAL BYTE COUNT AND/OR 80 BYTE INCREMENT
-C>                          COUNT IS MISSING. ONE OR THE OTHER IS
-C>                          REQUIRED TO COMPLETE THE QUEUE DESCRIPTOR.
-C>              IERR = 2    TOTAL SIZE TOO SMALL
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 77
-C>   MACHINE:  HDS
-C>
+C> @author Bill Cavanaugh @date 1991-06-21
       SUBROUTINE W3FI62 (LOC,TTAAII,KARY,IERR)
 C
       INTEGER       IHOLD(2)
@@ -75,7 +62,7 @@ C
 C     BLANK WILL BE 40 HEX OR DECIMAL 64 ON AN IBM370 TYPE
 C     COMPUTER, THIS IS THE EBCDIC CHARACTER SET.
 C     BLANK WILL BE 20 HEX OR DECIMAL 32 ON A COMPUTER WITH THE
-C     ASCII CHARACTER SET. THIS WILL BE USED TO TEST FOR CHARACTER 
+C     ASCII CHARACTER SET. THIS WILL BE USED TO TEST FOR CHARACTER
 C     SETS TO FIND IBM370 TYPE COMPUTER.
 C
       DATA  BLANK /' '/
