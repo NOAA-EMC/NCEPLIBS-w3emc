@@ -1,137 +1,132 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI64        NMC OFFICE NOTE 29 REPORT UNPACKER
-C>   PRGMMR: KEYSER           ORG: NMC22       DATE:92-08-06
+C> @brief NMC office note 29 report unpacker.
+C> @author L. Marx @date 1990-01
+
+C> Unpacks an array of upper-air reports that are packed in
+C> the format described by NMC office note 29, or unpacks an array
+C> of surface reports that are packed in the format described by NMC
+C> office note 124. Input character data are converted to integer,
+C> real or character type as specified in the category tables below.
+C> Missing integer data are replaced with 99999, missing real data
+C> are replaced with 99999.0 and missing character data are replaced
+C> with blanks. This library is similar to w3ai02() except w3ai02()
+C> was written in assembler and could not handle internal read errors
+C> (program calling w3ai02() would fail in this case w/o explanation).
 C>
-C> ABSTRACT: UNPACKS AN ARRAY OF UPPER-AIR REPORTS THAT ARE PACKED IN
-C>   THE FORMAT DESCRIBED BY NMC OFFICE NOTE 29, OR UNPACKS AN ARRAY
-C>   OF SURFACE REPORTS THAT ARE PACKED IN THE FORMAT DESCRIBED BY NMC
-C>   OFFICE NOTE 124.  INPUT CHARACTER DATA ARE CONVERTED TO INTEGER,
-C>   REAL OR CHARACTER TYPE AS SPECIFIED IN THE CATEGORY TABLES BELOW.
-C>   MISSING INTEGER DATA ARE REPLACED WITH 99999, MISSING REAL DATA
-C>   ARE REPLACED WITH 99999.0 AND MISSING CHARACTER DATA ARE REPLACED
-C>   WITH BLANKS.  THIS LIBRARY IS SIMILAR TO W3AI02 EXCEPT W3AI02
-C>   WAS WRITTEN IN ASSEMBLER AND COULD NOT HANDLE INTERNAL READ ERRORS
-C>   (PROGRAM CALLING W3AI02 WOULD FAIL IN THIS CASE W/O EXPLANATION).
+C> Program history log:
+C> - L. Marx 1990-01 Converted code from assembler
+C> to vs fortran; Expanded error return codes in 'NEXT'
+C> - Dennis Keyser 1991-07-22 Use same arguments as w3ai02() ;
+C> Streamlined code; Docblocked and commented; Diag-
+C> nostic print for errors; Attempts to skip to NEXT
+C> report in same record rather than exiting record.
+C> - Dennis Keyser 1991-08-12 Slight changes to make sub-
+C> program more portable; Test for absence of end-
+C> of-record indicator, will gracefully exit record.
+C> - Dennis Keyser 1992-06-29 Convert to cray cft77 fortran
+C> - Dennis Keyser 1992-08-06 Corrected error which could
+C> lead to the length for a concatenation operator
+C> being less than 1 when an input parameter spans
+C> across two 10-character words.
 C>
-C> PROGRAM HISTORY LOG:
-C>   90-01-??  L. MARX, UNIV. OF MD  -- CONVERTED CODE FROM ASSEMBLER
-C>                 TO VS FORTRAN; EXPANDED ERROR RETURN CODES IN 'NEXT'
-C>   91-07-22  D. A. KEYSER, NMC22   -- USE SAME ARGUMENTS AS W3AI02;
-C>                 STREAMLINED CODE; DOCBLOCKED AND COMMENTED; DIAG-
-C>                 NOSTIC PRINT FOR ERRORS; ATTEMPTS TO SKIP TO NEXT
-C>                 REPORT IN SAME RECORD RATHER THAN EXITING RECORD
-C>   91-08-12  D. A. KEYSER, NMC22   -- SLIGHT CHANGES TO MAKE SUB-
-C>                 PROGRAM MORE PORTABLE; TEST FOR ABSENCE OF END-
-C>                 OF-RECORD INDICATOR, WILL GRACEFULLY EXIT RECORD
-C>   92-06-29  D. A. KEYSER W/NMC22 -- CONVERT TO CRAY CFT77 FORTRAN
-C>   92-08-06  D. A. KEYSER, NMC22   -- CORRECTED ERROR WHICH COULD
-C>                 LEAD TO THE LENGTH FOR A CONCATENATION OPERATOR
-C>                 BEING LESS THAN 1 WHEN AN INPUT PARAMETER SPANS
-C>                 ACROSS TWO 10-CHARACTER WORDS
+C> @param[in] COCBUF Character*10 array containing a block of packed
+C> reports in nmc office note 29/124 format.
+C> @param[in] NEXT Marker indicating relative location (in bytes) of
+C> end of last report in COCBUF. Exception: NEXT must
+C> be set to zero prior to unpacking the first report of
+C> a new block of reports.  subsequently, the value of
+C> NEXT returned by the previous call to w3fi64 should
+C> be used as input.  (see output argument list below.)
+C> if NEXT is negative, w3fi64 will return immediately
+C> without action.
+C> @param[out] LOCRPT Array containing one unpacked report with pointers
+C> and counters to direct the user. Locrpt() must begin
+C> on a fullword boundary. Format is mixed, user must
+C> equivalence real and character arrays to this array
+C> (see below and remarks for content).
 C>
-C> USAGE:    CALL W3FI64(COCBUF,LOCRPT,NEXT)
-C>   INPUT ARGUMENT LIST:
-C>     COCBUF   - CHARACTER*10 ARRAY CONTAINING A BLOCK OF PACKED
-C>              - REPORTS IN NMC OFFICE NOTE 29/124 FORMAT.
-C>     NEXT     - MARKER INDICATING RELATIVE LOCATION (IN BYTES) OF
-C>              - END OF LAST REPORT IN COCBUF.  EXCEPTION: NEXT MUST
-C>              - BE SET TO ZERO PRIOR TO UNPACKING THE FIRST REPORT OF
-C>              - A NEW BLOCK OF REPORTS.  SUBSEQUENTLY, THE VALUE OF
-C>              - NEXT RETURNED BY THE PREVIOUS CALL TO W3FI64 SHOULD
-C>              - BE USED AS INPUT.  (SEE OUTPUT ARGUMENT LIST BELOW.)
-C>              - IF NEXT IS NEGATIVE, W3FI64 WILL RETURN IMMEDIATELY
-C>              - WITHOUT ACTION.
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     LOCRPT   - ARRAY CONTAINING ONE UNPACKED REPORT WITH POINTERS
-C>              - AND COUNTERS TO DIRECT THE USER.  LOCRPT MUST BEGIN
-C>              - ON A FULLWORD BOUNDARY.  FORMAT IS MIXED, USER MUST
-C>              - EQUIVALENCE REAL AND CHARACTER ARRAYS TO THIS ARRAY
-C>              - (SEE BELOW AND REMARKS FOR CONTENT).
-C>   ***************************************************************
-C>   WORD   CONTENT                   UNIT                 FORMAT
-C>   ----   ----------------------    -------------------  ---------
-C>     1    LATITUDE                  0.01 DEGREES         REAL
-C>     2    LONGITUDE                 0.01 DEGREES WEST    REAL
-C>     3    UNUSED
-C>     4    OBSERVATION TIME          0.01 HOURS (UTC)     REAL
-C>     5    RESERVED (3RD BYTE IS     4-CHARACTERS         CHAR*8
-C>          ON29 "25'TH CHAR.; 4TH    LEFT-JUSTIFIED
-C>          BYTE IS ON29 "26'TH
-C>          CHAR." (SEE ON29)
-C>     6    RESERVED (3RD BYTE IS     3-CHARACTERS         CHAR*8
-C>          ON29 "27'TH CHAR. (SEE    LEFT-JUSTIFIED
-C>          ON29)
-C>     7    STATION ELEVATION         METERS               REAL
-C>     8    INSTRUMENT TYPE           ON29 TABLE R.2       INTEGER
-C>     9    REPORT TYPE               ON29 TABLE R.1 OR    INTEGER
-C>                                    ON124 TABLE S.3
-C>    10    UNUNSED
-C>    11    STN. ID. (FIRST 4 CHAR.)  4-CHARACTERS         CHAR*8
-C>                                    LEFT-JUSTIFIED
-C>    12    STN. ID. (LAST  2 CHAR.)  2-CHARACTERS         CHAR*8
-C>                                    LEFT-JUSTIFIED
-C>
-C>    13    CATEGORY  1, NO. LEVELS   COUNT                INTEGER
-C>    14    CATEGORY  1, DATA INDEX   COUNT                INTEGER
-C>    15    CATEGORY  2, NO. LEVELS   COUNT                INTEGER
-C>    16    CATEGORY  2, DATA INDEX   COUNT                INTEGER
-C>    17    CATEGORY  3, NO. LEVELS   COUNT                INTEGER
-C>    18    CATEGORY  3, DATA INDEX   COUNT                INTEGER
-C>    19    CATEGORY  4, NO. LEVELS   COUNT                INTEGER
-C>    20    CATEGORY  4, DATA INDEX   COUNT                INTEGER
-C>    21    CATEGORY  5, NO. LEVELS   COUNT                INTEGER
-C>    22    CATEGORY  5, DATA INDEX   COUNT                INTEGER
-C>    23    CATEGORY  6, NO. LEVELS   COUNT                INTEGER
-C>    24    CATEGORY  6, DATA INDEX   COUNT                INTEGER
-C>    25    CATEGORY  7, NO. LEVELS   COUNT                INTEGER
-C>    26    CATEGORY  7, DATA INDEX   COUNT                INTEGER
-C>    27    CATEGORY  8, NO. LEVELS   COUNT                INTEGER
-C>    28    CATEGORY  8, DATA INDEX   COUNT                INTEGER
-C>    29    CATEGORY 51, NO. LEVELS   COUNT                INTEGER
-C>    30    CATEGORY 51, DATA INDEX   COUNT                INTEGER
-C>    31    CATEGORY 52, NO. LEVELS   COUNT                INTEGER
-C>    32    CATEGORY 52, DATA INDEX   COUNT                INTEGER
-C>    33    CATEGORY  9, NO. LEVELS   COUNT                INTEGER
-C>    34    CATEGORY  9, DATA INDEX   COUNT                INTEGER
-C> 35-42    ZEROED OUT - NOT USED                          INTEGER
-C>
-C> 43-END   UNPACKED DATA GROUPS      (SEE REMARKS)        MIXED
 C>   ***************************************************************
 C>
-C>     NEXT     - MARKER INDICATING RELATIVE LOCATION (IN BYTES)
-C>              - OF END OF CURRENT REPORT IN COCBUF.  NEXT WILL BE
-C>              - SET TO -1 IF W3FI64 ENCOUNTERS STRING 'END RECORD'
-C>              - IN PLACE OF THE NEXT REPORT.  THIS IS THE END OF THE
-C>              - BLOCK.  NO UNPACKING TAKES PLACE. NEXT IS SET TO-2
-C>              - WHEN INTERNAL (LOGIC) ERRORS HAVE BEEN DETECTED.
-C>              - NEXT IS SET TO -3 WHEN DATA COUNT CHECK FAILS.  IN
-C>              - BOTH OF THE LATTER CASES SOME DATA (E.G., HEADER
-C>              - INFORMATION) MAY BE UNPACKED INTO LOCRPT.
+C> |word   |  content                  | unit                 | format |
+C> | :---- | :----------------------   | :------------------- | :----- |
+C> |  1    | latitude                  | 0.01 degrees         | real   |
+C> |  2    | longitude                 | 0.01 degrees west    | real   |
+C> |  3    | unused                    |                      |        |
+C> |  4    | observation time          | 0.01 hours (utc)     | real   |
+C> |  5    | reserved (3rd byte is     | 4-characters         | char*8 |
+C> |       | on29 "25'th char.; 4th    | left-justified       |        |
+C> |       |byte is on29 "26'th        |                      |        |
+C> |       |char." (see on29)          |                      |        |
+C> |  6    |reserved (3rd byte is      | 3-characters         | char*8 |
+C> |       |on29 "27'th char. (see     |left-justified        |        |
+C> |       |on29)                      |                      |        |
+C> |  7    |station elevation          |meters                | real   |
+C> |  8    |instrument type            |on29 table r.2        | integer|
+C> |  9    |report type                |on29 table r.1 or     | integer|
+C> |       |on124 table s.3            |                      |        |
+C> |  10   |ununsed                    |                      |        |
+C> |  11   |stn. id. (first 4 char.)   | 4-characters         | char*8 |
+C> |       |left-justified             |                      |        |
+C> |  12   |stn. id. (last  2 char.)   | 2-characters         | char*8 |
+C> |       |left-justified             |                      |        |
+C> |  13   |category  1, no. levels    | count                | integer|
+C> |  14   |category  1, data index    | count                | integer|
+C> |  15   |category  2, no. levels    | count                | integer|
+C> |  16   |category  2, data index    | count                | integer|
+C> |  17   |category  3, no. levels    | count                | integer|
+C> |  18   |category  3, data index    | count                | integer|
+C> |  19   |category  4, no. levels    | count                | integer|
+C> |  20   |category  4, data index    | count                | integer|
+C> |  21   |category  5, no. levels    | count                | integer|
+C> |  22   |category  5, data index    | count                | integer|
+C> |  23   |category  6, no. levels    | count                | integer|
+C> |  24   |category  6, data index    | count                | integer|
+C> |  25   |category  7, no. levels    | count                | integer|
+C> |  26   |category  7, data index    | count                | integer|
+C> |  27   |category  8, no. levels    | count                | integer|
+C> |  28   |category  8, data index    | count                | integer|
+C> |  29   |category 51, no. levels    | count                | integer|
+C> |  30   |category 51, data index    | count                | integer|
+C> |  31   |category 52, no. levels    | count                | integer|
+C> |  32   |category 52, data index    | count                | integer|
+C> |  33   |category  9, no. levels    | count                | integer|
+C> |  34   |category  9, data index    | count                | integer|
+C> | 35-42 |  zeroed out - not used    |                      | integer|
+C> | 43-end| unpacked data groups     |(see remarks)         | mixed|
 C>
-C>   OUTPUT FILES:
-C>     FT06F001 - PRINTOUT
+C> ***************************************************************
 C>
-C> REMARKS: AFTER FIRST READING AND PROCESSING THE OFFICE NOTE 85
-C>   (FIRST) DATE RECORD, THE USER'S FORTRAN PROGRAM BEGINS A READ
-C>   LOOP AS FOLLOWS..  FOR EACH ITERATION A BLOCKED INPUT REPORT IS
-C>   READ INTO ARRAY COCBUF.  NOW TEST THE FIRST TEN CHARACTERS IN
-C>   COCBUF FOR THE STRING 'ENDOF FILE' (SIC).  THIS STRING SIGNALS
-C>   THE END OF INPUT.  OTHERWISE, SET THE MARKER 'NEXT' TO ZERO AND
-C>   BEGIN THE UNPACKING LOOP.
-C>        EACH ITERATION OF THE UNPACKING LOOP CONSISTS OF A CALL TO
-C>   W3FI64 WITH THE CURRENT VALUE OF 'NEXT'.  IF 'NEXT' IS -1 UPON
-C>   RETURNING FROM W3FI64, IT HAS REACHED THE END OF THE INPUT
-C>   RECORD, AND THE USER'S PROGRAM SHOULD READ THE NEXT RECORD AS
-C>   ABOVE.  IF 'NEXT' IS -2 OR -3 UPON RETURNING, THERE IS A GRIEVOUS
-C>   ERROR IN THE CURRENT PACKED INPUT RECORD, AND THE USER'S PROGRAM
-C>   SHOULD PRINT IT FOR EXAMINATION BY AUTOMATION DIVISION PERSONNEL.
-C>   IF 'NEXT' IS POSITIVE, THE OUTPUT STRUCTURE LOCRPT CONTAINS
-C>   AN UNPACKED REPORT, AND THE USER'S PROGRAM SHOULD PROCESS IT AT
-C>   THIS POINT, SUBSEQUENTLY REPEATING THE UNPACKING LOOP.
+C> NEXT: Marker indicating relative location (in bytes)
+C> of end of current report in COCBUF. NEXT will be
+C> set to -1 if w3fi64() encounters string 'end record'
+C> in place of the NEXT report. This is the end of the
+C> block. No unpacking takes place. NEXT is set to-2
+C> when internal (logic) errors have been detected.
+C> NEXT is set to -3 when data count check fails. In
+C> both of the latter cases some data (e.g., header
+C> information) may be unpacked into LOCRPT.
+C>
+C> @note After first reading and processing the office note 85
+C> (first) date record, the user's fortran program begins a read
+C> loop as follows. For each iteration a blocked input report is
+C> read into array COCBUF. Now test the first ten characters in
+C> COCBUF for the string 'endof file' (sic). This string signals
+C> the end of input. Otherwise, set the marker 'NEXT' to zero and
+C> begin the unpacking loop.
+C>
+C> Each iteration of the unpacking loop consists of a call to
+C> w3fi64() with the current value of 'NEXT'. If 'NEXT' is -1 upon
+C> returning from w3fi64(), it has reached the end of the input
+C> record, and the user's program should read the next record as
+C> above. If 'NEXT' is -2 or -3 upon returning, there is a grievous
+C> error in the current packed input record, and the user's program
+C> should print it for examination by automation division personnel.
+C> If 'NEXT' is positive, the output structure locrpt contains
+C> an unpacked report, and the user's program should process it at
+C> this point, subsequently repeating the unpacking loop.
 C>
 C>   EXAMPLE:
+C> @code{.F}
 C>         CHARACTER*10 COCBUF(644)
 C>         CHARACTER*8  COCRPT(1608)
 C>         CHARACTER*3  CQUMAN(20)
@@ -139,7 +134,7 @@ C>         INTEGER    LOCRPT(1608)
 C>         REAL    ROCRPT(1608),GEOMAN(20),TMPMAN(20),DPDMAN(20),
 C>        $ WDRMAN(20),WSPMAN(20)
 C>         EQUIVALENCE (COCRPT,LOCRPT,ROCRPT)
-C>         ..........
+C>
 C>   C READ AND PROCESS THE OFFICE NOTE 85 DATE RECORD
 C>         ..........
 C>   C --- BEGIN READ LOOP
@@ -174,217 +169,226 @@ C>            END IF
 C>            ..... ETC .....
 C>            GO TO 20
 C>            ...............
+C> @endcode
 C>
-C>     DATA FROM THE ON29/124 RECORD IS UNPACKED INTO FIXED LOCATIONS
-C>     IN WORDS 1-12 AND INTO INDEXED LOCATIONS IN WORD 43 AND
-C>     FOLLOWING.  STUDY ON29 APPENDIX C/ON124 APPENDIX S.2 CAREFULLY.
-C>     EACH CATEGORY (OR GROUP OF FIELDS) IN THE PACKED REPORT HAS A
-C>     CORRESPONDING LAYOUT IN LOCATIONS IN ARRAY LOCRPT THAT MAY BE
-C>     FOUND BY USING THE CORRESPONDING INDEX AMOUNT FROM WORDS 14, 16,
-C>     ..., 34, IN ARRAY LOCRPT.  FOR INSTANCE, IF A REPORT CONTAINS
-C>     ONE OR MORE PACKED CATEGORY 3 DATA GROUPS (WIND DATA AT VARIABLE
-C>     PRESSURE LEVELS) THAT DATA WILL BE UNPACKED INTO BINARY AND
-C>     AND CHARACTER FIELDS IN ONE OR MORE UNPACKED CATEGORY 3 DATA
-C>     GROUPS AS DESCRIBED BELOW.  THE NUMBER OF LEVELS WILL BE STORED
-C>     IN WORD 17 AND THE INDEX IN FULLWORDS OF THE FIRST LEVEL OF
-C>     UNPACKED DATA IN THE OUTPUT ARRAY WILL BE STORED IN WORD 18.
-C>     THE SECOND LEVEL, IF ANY, WILL BE STORED BEGINNING FOUR WORDS
-C>     FURTHER ON, AND SO FORTH UNTIL THE COUNT IN WORD 17 IS
-C>     EXHAUSTED.  THE FIELD LAYOUT IN EACH CATEGORY IS GIVEN BELOW...
+C> Data from the on29/124 record is unpacked into fixed locations
+C> in words 1-12 and into indexed locations in word 43 and
+C> following. Study on29 appendix c/on124 appendix s.2 carefully.
+C> Each category (or group of fields) in the packed report has a
+C> corresponding layout in locations in array LOCRPT that may be
+C> found by using the corresponding index amount from words 14, 16,
+C> ..., 34, in array LOCRPT.  For instance, if a report contains
+C> one or more packed category 3 data groups (wind data at variable
+C> pressure levels) that data will be unpacked into binary and
+C> and character fields in one or more unpacked category 3 data
+C> groups as described below. The number of levels will be stored
+C> in word 17 and the index in fullwords of the first level of
+C> unpacked data in the output array will be stored in word 18.
+C> The second level, if any, will be stored beginning four words
+C> further on, and so forth until the count in word 17 is
+C> exhausted. The field layout in each category is given below...
 C>
-C>     CATEGORY 1 - MANDATORY LEVEL DATA
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    GEOPOTENTIAL         METERS              REAL
-C>       2    TEMPERATURE          0.1 DEGREES C       REAL
-C>       3    DEWPOINT DEPRESSION  0.1 DEGREES C       REAL
-C>       4    WIND DIRECTION       DEGREES             REAL
-C>       5    WIND SPEED           KNOTS               REAL
-C>       6    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 GEOPOTENTIAL    ON29 TABLE Q.A
-C>                 TEMPERATURE     ON29 TABLE Q.A
-C>                 DEWPOINT DEPR.  ON29 TABLE Q.C
-C>                 WIND            ON29 TABLE Q.A
+C> ***************************************************************
+C> - CATEGORY 1 - MANDATORY LEVEL DATA
+C>     |WORD   |PARAMETER            |UNITS               |FORMAT
+C>     |:----   |:---------            |:-----------------   |:-------------|
+C>     |  1    |GEOPOTENTIAL         |METERS              |REAL|
+C>     |  2    |TEMPERATURE          |0.1 DEGREES C       |REAL|
+C>     |  3    |DEWPOINT DEPRESSION  |0.1 DEGREES C       |REAL|
+C>     |  4    |WIND DIRECTION       |DEGREES             |REAL|
+C>     |  5    |WIND SPEED           |KNOTS               |REAL|
+C>     |  6    |QUALITY MARKERS:     |EACH 1-CHARACTER    |CHAR*8|
+C>     |       |                     |LEFT-JUSTIFIED| |
+C>     |       |     GEOPOTENTIAL    |ON29 TABLE Q.A| |
+C>     |       |     TEMPERATURE     |ON29 TABLE Q.A| |
+C>     |       |     DEWPOINT DEPR.  |ON29 TABLE Q.C| |
+C>     |       |     WIND            |ON29 TABLE Q.A| |
 C>
-C>     CATEGORY 2 - TEMPERATURE AT VARIABLE PRESSURE
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    PRESSURE             0.1 MILLIBARS       REAL
-C>       2    TEMPERATURE          0.1 DEGREES C       REAL
-C>       3    DEWPOINT DEPRESSION  0.1 DEGREES C       REAL
-C>       4    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 PRESSURE        ON29 TABLE Q.B
-C>                 TEMPERATURE     ON29 TABLE Q.A
-C>                 DEWPOINT DEPR.  ON29 TABLE Q.C
-C>                 NOT USED        BLANK
+C> ***************************************************************
+C> - CATEGORY 2 - TEMPERATURE AT VARIABLE PRESSURE
+C>     |WORD   |PARAMETER            |UNITS               | FORMAT|
+C>     |----   |---------            |-----------------   | -------------|
+C>     |  1    |PRESSURE             |0.1 MILLIBARS       | REAL|
+C>     |  2    |TEMPERATURE          |0.1 DEGREES C       | REAL|
+C>     |  3    |DEWPOINT DEPRESSION  |0.1 DEGREES C       | REAL|
+C>     |  4    |QUALITY MARKERS:     |EACH 1-CHARACTER    | CHAR*8|
+C>     |       |                     |LEFT-JUSTIFIED| |
+C>     |       |     PRESSURE        |ON29 TABLE Q.B| |
+C>     |       |     TEMPERATURE     |ON29 TABLE Q.A| |
+C>     |       |     DEWPOINT DEPR.  |ON29 TABLE Q.C| |
+C>     |       |     NOT USED        |BLANK| |
 C>
-C>     CATEGORY 3 - WINDS AT VARIABLE PRESSURE
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    PRESSURE             0.1 MILLIBARS       REAL
-C>       2    WIND DIRECTION       DEGREES             REAL
-C>       3    WIND SPEED           KNOTS               REAL
-C>       4    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 PRESSURE        ON29 TABLE Q.B
-C>                 WIND            ON29 TABLE Q.A
-C>                 NOT USED        BLANK
-C>                 NOT USED        BLANK
+C> ***************************************************************
+C> - CATEGORY 3 - WINDS AT VARIABLE PRESSURE
+C>     |WORD   |PARAMETER           | UNITS               | FORMAT|
+C>     |----   |---------           | -----------------   | -------------|
+C>     |  1    |PRESSURE            | 0.1 MILLIBARS       | REAL|
+C>     |  2    |WIND DIRECTION      | DEGREES             | REAL|
+C>     |  3    |WIND SPEED          | KNOTS               | REAL|
+C>     |  4    |QUALITY MARKERS:    | EACH 1-CHARACTER    | CHAR*8|
+C>     |       |                    | LEFT-JUSTIFIED| |
+C>     |       |     PRESSURE       | ON29 TABLE Q.B| |
+C>     |       |     WIND           | ON29 TABLE Q.A| |
+C>     |       |     NOT USED       | BLANK| |
+C>     |       |     NOT USED       | BLANK| |
 C>
-C>     CATEGORY 4 - WINDS AT VARIABLE HEIGHTS
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    GEOPOTENTIAL         METERS              REAL
-C>       2    WIND DIRECTION       DEGREES             REAL
-C>       3    WIND SPEED           KNOTS               REAL
-C>       4    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 GEOPOTENTIAL    ON29 TABLE Q.B
-C>                 WIND            ON29 TABLE Q.A
-C>                 NOT USED        BLANK
-C>                 NOT USED        BLANK
+C> ***************************************************************
+C> - CATEGORY 4 - WINDS AT VARIABLE HEIGHTS
+C>     |WORD   |PARAMETER            |UNITS               |FORMAT|
+C>     |----   |---------            |-----------------   |-------------|
+C>     |  1    |GEOPOTENTIAL         |METERS              |REAL|
+C>     |  2    |WIND DIRECTION       |DEGREES             |REAL|
+C>     |  3    |WIND SPEED           |KNOTS               |REAL|
+C>     |  4    |QUALITY MARKERS:     |EACH 1-CHARACTER    |CHAR*8|
+C>     |       |                     |LEFT-JUSTIFIED| |
+C>     |       |     GEOPOTENTIAL    |ON29 TABLE Q.B| |
+C>     |       |     WIND            |ON29 TABLE Q.A| |
+C>     |       |     NOT USED        |BLANK| |
+C>     |       |     NOT USED        |BLANK| |
 C>
-C>     CATEGORY 5 - TROPOPAUSE DATA
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    GEOPOTENTIAL         METERS              REAL
-C>       2    TEMPERATURE          0.1 DEGREES C       REAL
-C>       3    DEWPOINT DEPRESSION  0.1 DEGREES C       REAL
-C>       4    WIND DIRECTION       DEGREES             REAL
-C>       5    WIND SPEED           KNOTS               REAL
-C>       6    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 PRESSURE        ON29 TABLE Q.B
-C>                 TEMPERATURE     ON29 TABLE Q.A
-C>                 DEWPOINT DEPR.  ON29 TABLE Q.C
-C>                 WIND            ON29 TABLE Q.A
+C> ***************************************************************
+C> - CATEGORY 5 - TROPOPAUSE DATA
+C>     |WORD   |PARAMETER            |UNITS               |FORMAT|
+C>     |----   |---------            |-----------------   |-------------|
+C>     |  1    |GEOPOTENTIAL         |METERS              |REAL|
+C>     |  2    |TEMPERATURE          |0.1 DEGREES C       |REAL|
+C>     |  3    |DEWPOINT DEPRESSION  |0.1 DEGREES C       |REAL|
+C>     |  4    |WIND DIRECTION       |DEGREES             |REAL|
+C>     |  5    |WIND SPEED           |KNOTS               |REAL|
+C>     |  6    |QUALITY MARKERS:     |EACH 1-CHARACTER    |CHAR*8|
+C>     |       |                     |LEFT-JUSTIFIED| |
+C>     |       |     PRESSURE        |ON29 TABLE Q.B| |
+C>     |       |     TEMPERATURE     |ON29 TABLE Q.A| |
+C>     |       |     DEWPOINT DEPR.  |ON29 TABLE Q.C| |
+C>     |       |     WIND            |ON29 TABLE Q.A| |
 C>
-C>     CATEGORY 6 - CONSTANT-LEVEL DATA (AIRCRAFT, SAT. CLOUD-DRIFT)
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    PRESSURE ALTITUDE    METERS              REAL
-C>       2    TEMPERATURE          0.1 DEGREES C       REAL
-C>       3    DEWPOINT DEPRESSION  0.1 DEGREES C       REAL
-C>       4    WIND DIRECTION       DEGREES             REAL
-C>       5    WIND SPEED           KNOTS               REAL
-C>       6    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 PRESSURE        ON29 TABLE Q.6
-C>                 TEMPERATURE     ON29 TABLE Q.6
-C>                 DEWPOINT DEPR.  ON29 TABLE Q.6
-C>                 WIND            ON29 TABLE Q.6C
+C> ***************************************************************
+C> - CATEGORY 6 - CONSTANT-LEVEL DATA (AIRCRAFT, SAT. CLOUD-DRIFT)
+C>     |WORD  | PARAMETER            |UNITS               |FORMAT|
+C>     |----  | ---------            |-----------------   |-------------|
+C>     |  1   | PRESSURE ALTITUDE    |METERS              |REAL|
+C>     |  2   | TEMPERATURE          |0.1 DEGREES C       |REAL|
+C>     |  3   | DEWPOINT DEPRESSION  |0.1 DEGREES C       |REAL|
+C>     |  4   | WIND DIRECTION       |DEGREES             |REAL|
+C>     |  5   | WIND SPEED           |KNOTS               |REAL|
+C>     |  6   | QUALITY MARKERS:     |EACH 1-CHARACTER    |CHAR*8|
+C>     |      |                      |LEFT-JUSTIFIED| |
+C>     |      |      PRESSURE        |ON29 TABLE Q.6| |
+C>     |      |      TEMPERATURE     |ON29 TABLE Q.6| |
+C>     |      |      DEWPOINT DEPR.  |ON29 TABLE Q.6| |
+C>     |      |      WIND            |ON29 TABLE Q.6C | |
 C>
-C>     CATEGORY 7 - CLOUD COVER
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    PRESSURE             0.1 MILLIBARS       REAL
-C>       2    AMOUNT OF CLOUDS     PER CENT            REAL
-C>       3    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 PRESSURE        ON29 TABLE Q.7
-C>                 CLOUD AMOUNT    ON29 TABLE Q.7
-C>                 NOT USED        BLANK
-C>                 NOT USED        BLANK
+C> ***************************************************************
+C> - CATEGORY 7 - CLOUD COVER
+C>     |WORD   |PARAMETER            |UNITS               |FORMAT|
+C>     |----   |---------            |-----------------   |-------------|
+C>     |  1    |PRESSURE             |0.1 MILLIBARS       |REAL|
+C>     |  2    |AMOUNT OF CLOUDS     |PER CENT            |REAL|
+C>     |  3    |QUALITY MARKERS:     |EACH 1-CHARACTER    |CHAR*8|
+C>     |       |                     |LEFT-JUSTIFIED| |
+C>     |       |     PRESSURE        |ON29 TABLE Q.7| |
+C>     |       |     CLOUD AMOUNT    |ON29 TABLE Q.7| |
+C>     |       |     NOT USED        |BLANK| |
+C>     |       |     NOT USED        |BLANK| |
 C>
-C>     CATEGORY 8 - ADDITIONAL DATA
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    SPECIFIED IN ON29    VARIABLE            REAL
-C>            TABLE 101.1 OR
-C>            ON124 TABLE SM.8A.1
-C>       2    FORM OF ADD'L DATA   CODE FIGURE FROM    REAL
-C>                                 ON29 TABLE 101 OR
-C>                                 ON124 TABLE SM.8A
-C>       3    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 VALUE 1         ON29 TABLE Q.8 OR
-C>                                 ON124 TABLE SM.8B
-C>                 VALUE 2         ON29 TABLE Q.8A OR
-C>                                 ON124 TABLE SM.8C
-C>                 NOT USED        BLANK
-C>                 NOT USED        BLANK
+C> ***************************************************************
+C> - CATEGORY 8 - ADDITIONAL DATA
+C>     |WORD   |PARAMETER           | UNITS                |FORMAT|
+C>     |----   |---------           | -----------------    |-------------|
+C>     |  1    |SPECIFIED IN ON29   | VARIABLE             |REAL|
+C>     |       |TABLE 101.1 OR      | | |
+C>     |       |ON124 TABLE SM.8A.1 | | |
+C>     |  2    |FORM OF ADD'L DATA   |CODE FIGURE FROM     |REAL|
+C>     |       |                     |ON29 TABLE 101 OR | |
+C>     |       |                     |ON124 TABLE SM.8A | |
+C>     |  3    |QUALITY MARKERS:     |EACH 1-CHARACTER     |CHAR*8|
+C>     |       |                     |LEFT-JUSTIFIED | |
+C>     |       |     VALUE 1         |ON29 TABLE Q.8 OR | |
+C>     |       |                     |ON124 TABLE SM.8B | |
+C>     |       |     VALUE 2         |ON29 TABLE Q.8A OR | |
+C>     |       |                     |ON124 TABLE SM.8C | |
+C>     |       |     NOT USED        |BLANK | |
+C>     |       |     NOT USED        |BLANK | |
 C>
-C>     CATEGORY 51 - SURFACE DATA
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    SEA-LEVEL PRESSURE   0.1 MILLIBARS       REAL
-C>       2    STATION PRESSURE     0.1 MILLIBARS       REAL
-C>       3    WIND DIRECTION       DEGREES             REAL
-C>       4    WIND SPEED           KNOTS               REAL
-C>       5    AIR TEMPERATURE      0.1 DEGREES C       REAL
-C>       6    DEWPOINT DEPRESSION  0.1 DEGREES C       REAL
-C>       7    MAXIMUM TEMPERATURE  0.1 DEGREES C       REAL
-C>       8    MINIMUM TEMPERATURE  0.1 DEGREES C       REAL
-C>       9    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 S-LEVEL PRESS.  ON124 TABLE SM.51
-C>                 STATION PRESS.  ON124 TABLE SM.51
-C>                 WIND            ON124 TABLE SM.51
-C>                 AIR TEMPERATURE ON124 TABLE SM.51
-C>      10    QUALITY MARKERS:     EACH 1-CHARACTER    CHAR*8
-C>                                 LEFT-JUSTIFIED
-C>                 DEWPOINT DEPR.  ON124 TABLE SM.51
-C>                 NOT USED        BLANK
-C>                 NOT USED        BLANK
-C>                 NOT USED        BLANK
-C>      11    HORIZ. VISIBILITY    WMO CODE TABLE 4300 INTEGER
-C>      12    PRESENT WEATHER      WMO CODE TABLE 4677 INTEGER
-C>      13    PAST WEATHER         WMO CODE TABLE 4561 INTEGER
-C>      14    TOTAL CLOUD COVER N  WMO CODE TABLE 2700 INTEGER
-C>      15    CLOUD COVER OF C/LN  WMO CODE TABLE 2700 INTEGER
-C>      16    CLOUD TYPE OF C/L    WMO CODE TABLE 0513 INTEGER
-C>      17    CLOUD HEIGHT OF C/L  WMO CODE TABLE 1600 INTEGER
-C>      18    CLOUD TYPE OF C/M    WMO CODE TABLE 0515 INTEGER
-C>      19    CLOUD TYPE OF C/H    WMO CODE TABLE 0509 INTEGER
-C>      20    CHARACTERISTIC OF    WMO CODE TABLE 0200 INTEGER
-C>            3-HR PRESS TENDENCY
-C>      21    AMT. PRESS TENDENCY  0.1 MILLIBARS       REAL
-C>            (50.0 WILL BE ADDED TO INDICATE 24-HR TENDENCY)
+C> ***************************************************************
+C> - CATEGORY 51 - SURFACE DATA
+C>     |WORD   |PARAMETER            |UNITS               |FORMAT|
+C>     |----   |---------            |-----------------   |-------------|
+C>     |  1    |SEA-LEVEL PRESSURE   |0.1 MILLIBARS       |REAL|
+C>     |  2    |STATION PRESSURE     |0.1 MILLIBARS       |REAL|
+C>     |  3    |WIND DIRECTION       |DEGREES             |REAL|
+C>     |  4    |WIND SPEED           |KNOTS               |REAL|
+C>     |  5    |AIR TEMPERATURE      |0.1 DEGREES C       |REAL|
+C>     |  6    |DEWPOINT DEPRESSION  |0.1 DEGREES C       |REAL|
+C>     |  7    |MAXIMUM TEMPERATURE  |0.1 DEGREES C       |REAL|
+C>     |  8    |MINIMUM TEMPERATURE  |0.1 DEGREES C       |REAL|
+C>     |  9    |QUALITY MARKERS:     |EACH 1-CHARACTER    |CHAR*8|
+C>     |       |                     |LEFT-JUSTIFIED| |
+C>     |       |     S-LEVEL PRESS.  |ON124 TABLE SM.51| |
+C>     |       |     STATION PRESS.  |ON124 TABLE SM.51| |
+C>     |       |     WIND            |ON124 TABLE SM.51| |
+C>     |       |     AIR TEMPERATURE |ON124 TABLE SM.51| |
+C>     | 10    |QUALITY MARKERS:     |EACH 1-CHARACTER    |CHAR*8|
+C>     |       |                     |LEFT-JUSTIFIED| |
+C>     |       |     DEWPOINT DEPR.  |ON124 TABLE SM.51| |
+C>     |       |     NOT USED        |BLANK| |
+C>     |       |     NOT USED        |BLANK| |
+C>     |       |     NOT USED        |BLANK| |
+C>     | 11    |HORIZ. VISIBILITY    |WMO CODE TABLE 4300  |INTEGER|
+C>     | 12    |PRESENT WEATHER      |WMO CODE TABLE 4677  |INTEGER|
+C>     | 13    |PAST WEATHER         |WMO CODE TABLE 4561  |INTEGER|
+C>     | 14    |TOTAL CLOUD COVER N  |WMO CODE TABLE 2700  |INTEGER|
+C>     | 15    |CLOUD COVER OF C/LN  |WMO CODE TABLE 2700  |INTEGER|
+C>     | 16    |CLOUD TYPE OF C/L    |WMO CODE TABLE 0513  |INTEGER|
+C>     | 17    |CLOUD HEIGHT OF C/L  |WMO CODE TABLE 1600  |INTEGER|
+C>     | 18    |CLOUD TYPE OF C/M    |WMO CODE TABLE 0515  |INTEGER|
+C>     | 19    |CLOUD TYPE OF C/H    |WMO CODE TABLE 0509  |INTEGER|
+C>     | 20    |CHARACTERISTIC OF    |WMO CODE TABLE 0200  |INTEGER|
+C>     |       |3-HR PRESS TENDENCY | | |
+C>     | 21    |AMT. PRESS TENDENCY  |0.1 MILLIBARS |      REAL|
+C>     |       |(50.0 WILL BE ADDED TO INDICATE 24-HR TENDENCY)| | |
 C>
-C>     CATEGORY 52 - ADDITIONAL SURFACE DATA
-C>     WORD   PARAMETER            UNITS               FORMAT
-C>     ----   ---------            -----------------   -------------
-C>       1    6-HR PRECIPITATION   0.01 INCH           INTEGER
-C>       2    SNOW DEPTH           INCH                INTEGER
-C>       3    24-HR PRECIPITATION  0.01 INCH           INTEGER
-C>       4    DURATION OF PRECIP.  NO. 6-HR PERIODS    INTEGER
-C>       5    PERIOD OF WAVES      SECONDS             INTEGER
-C>       6    HEIGHT OF WAVES      0.5 METERS          INTEGER
-C>       7    SWELL DIRECTION      WMO CODE TABLE 0877 INTEGER
-C>       8    SWELL PERIOD         SECONDS             INTEGER
-C>       9    SWELL HEIGHT         0.5 METERS          INTEGER
-C>      10    SEA SFC TEMPERATURE  0.1 DEGREES C       INTEGER
-C>      11    SPECIAL PHEN, GEN'L                      INTEGER
-C>      12    SPECIAL PHEN, DET'L                      INTEGER
-C>      13    SHIP'S COURSE        WMO CODE TABLE 0700 INTEGER
-C>      14    SHIP'S AVERAGE SPEED WMO CODE TABLE 4451 INTEGER
-C>      15    WATER EQUIVALENT OF  0.01 INCH           INTEGER
-C>            SNOW AND/OR ICE
+C> ***************************************************************
+C> - CATEGORY 52 - ADDITIONAL SURFACE DATA
+C>     |WORD  | PARAMETER            |UNITS               |FORMAT|
+C>     |----  | ---------            |-----------------   |-------------|
+C>     |  1   | 6-HR PRECIPITATION   |0.01 INCH           |INTEGER|
+C>     |  2   | SNOW DEPTH           |INCH                |INTEGER|
+C>     |  3   | 24-HR PRECIPITATION  |0.01 INCH           |INTEGER|
+C>     |  4   | DURATION OF PRECIP.  |NO. 6-HR PERIODS    |INTEGER|
+C>     |  5   | PERIOD OF WAVES      |SECONDS             |INTEGER|
+C>     |  6   | HEIGHT OF WAVES      |0.5 METERS          |INTEGER|
+C>     |  7   | SWELL DIRECTION      |WMO CODE TABLE 0877 |INTEGER|
+C>     |  8   | SWELL PERIOD         |SECONDS             |INTEGER|
+C>     |  9   | SWELL HEIGHT         |0.5 METERS          |INTEGER|
+C>     | 10   | SEA SFC TEMPERATURE  |0.1 DEGREES C       |INTEGER|
+C>     | 11   | SPECIAL PHEN, GEN'L   |                   |INTEGER|
+C>     | 12   | SPECIAL PHEN, DET'L   |                   |INTEGER|
+C>     | 13   | SHIP'S COURSE        |WMO CODE TABLE 0700 |INTEGER|
+C>     | 14   | SHIP'S AVERAGE SPEED |WMO CODE TABLE 4451 |INTEGER|
+C>     | 15   | WATER EQUIVALENT OF  0.01 INCH |          |INTEGER|
+C>     |      | SNOW AND/OR ICE| | |
 C>
-C>     CATEGORY 9 - PLAIN LANGUAGE DATA (ALPHANUMERIC TEXT)
-C>     WORD   BYTES  PARAMETER                                  FORMAT
-C>     ----   -----  ---------------------------------------    --------
-C>       1       1   INDICATOR OF CONTENT (ON124 TABLE SM.9)    CHAR*8
-C>                     (1 CHARACTER)
-C>             2-4   PLAIN LANGUAGE DATA, TEXT CHARACTERS 1-3
-C>             4-8   NOT USED (BLANK)
-C>       2     1-4   PLAIN LANGUAGE DATA, TEXT CHARACTERS 4-7   CHAR*8
-C>             4-8   NOT USED (BLANK)
-C>       3     1-4   PLAIN LANGUAGE DATA, TEXT CHARACTERS 8-11  CHAR*8
-C>             4-8   NOT USED (BLANK)
+C> ***************************************************************
+C> - CATEGORY 9 - PLAIN LANGUAGE DATA (ALPHANUMERIC TEXT)
+C>     |WORD   |BYTES  |PARAMETER                                  |FORMAT |
+C>     |----   |-----  |---------------------------------------    |-------- |
+C>     |  1    |   1   |INDICATOR OF CONTENT (ON124 TABLE SM.9)    |CHAR*8 |
+C>     |       |       |  (1 CHARACTER)| |
+C>     |       | 2-4   |PLAIN LANGUAGE DATA, TEXT CHARACTERS 1-3| |
+C>     |       | 4-8   |NOT USED (BLANK) | |
+C>     |  2    | 1-4   |PLAIN LANGUAGE DATA, TEXT CHARACTERS 4-7   |CHAR*8 |
+C>     |       | 4-8   |NOT USED (BLANK)| |
+C>     |  3    | 1-4   |PLAIN LANGUAGE DATA, TEXT CHARACTERS 8-11  |CHAR*8 |
+C>     |       | 4-8   |NOT USED (BLANK)| |
 C>
-C>     ONE REPORT MAY UNPACK INTO MORE THAN ONE CATEGORY HAVING
-C>     MULTIPLE LEVELS.  THE UNUSED PORTION OF LOCRPT IS NOT CLEARED.
+C> @note One report may unpack into more than one category having
+C> multiple levels. The unused portion of LOCRPT is not cleared.
 C>
-C>    NOTE: ENTRY W3AI02 DUPLICATES PROCESSING IN W3FI64 SINCE NO
-C>           ASSEMBLY LANGUAGE CODE IN CRAY W3LIB.
+C> @note Entry w3ai02() duplicates processing in w3fi64() since no
+C> assembly language code in cray w3lib.
 C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author L. Marx @date 1990-01
       SUBROUTINE W3FI64(COCBUF,LOCRPT,NEXT)
 C
       CHARACTER*12  HOLD

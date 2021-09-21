@@ -1,364 +1,348 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI63        UNPK GRIB FIELD TO GRIB GRID
-C>   PRGMMR: FARLEY           ORG: NMC421      DATE:94-11-22
+C> @brief Unpk grib field to grib grid.
+C> @author Bill Cavanaugh @date 1991-09-13
+
+C> Unpack a grib (edition 1) field to the exact grid
+C> specified in the grib message, isolate the bit map, and make
+C> the values of the product descripton section (pds) and the
+C> grid description section (gds) available in return arrays.
 C>
-C> ABSTRACT: UNPACK A GRIB (EDITION 1) FIELD TO THE EXACT GRID
-C>   SPECIFIED IN THE GRIB MESSAGE, ISOLATE THE BIT MAP, AND MAKE
-C>   THE VALUES OF THE PRODUCT DESCRIPTON SECTION (PDS) AND THE
-C>   GRID DESCRIPTION SECTION (GDS) AVAILABLE IN RETURN ARRAYS.
-C>
-C>   WHEN DECODING IS COMPLETED, DATA AT EACH GRID POINT HAS BEEN
-C>          RETURNED IN THE UNITS SPECIFIED IN THE GRIB MANUAL.
+C> When decoding is completed, data at each grid point has been
+C> returned in the units specified in the grib manual.
 C>
 C> PROGRAM HISTORY LOG:
-C>   91-09-13  CAVANAUGH
-C>   91-11-12  CAVANAUGH   MODIFIED SIZE OF ECMWF GRIDS 5-8
-C>   91-12-22  CAVANAUGH   CORRECTED PROCESSING OF MERCATOR PROJECTIONS
-C>                         IN GRID DEFINITION SECTION (GDS) IN
-C>                         ROUTINE FI633
-C>   92-08-05  CAVANAUGH   CORRECTED MAXIMUM GRID SIZE TO ALLOW FOR
-C>                         ONE DEGREE BY ONE DEGREE GLOBAL GRIDS
-C>   92-08-27  CAVANAUGH   CORRECTED TYPO ERROR, ADDED CODE TO COMPARE
-C>                         TOTAL BYTE SIZE FROM SECTION 0 WITH SUM OF
-C>                         SECTION SIZES.
-C>   92-10-21  CAVANAUGH   CORRECTIONS WERE MADE (IN FI634) TO REDUCE
-C>                         PROCESSING TIME FOR INTERNATIONAL GRIDS.
-C>                         REMOVED A TYPOGRAPHICAL ERROR IN FI635.
-C>   93-01-07  CAVANAUGH   CORRECTIONS WERE MADE (IN FI635) TO
-C>                         FACILITATE USE OF THESE ROUTINES ON A PC.
-C>                         A TYPOGRAPHICAL ERROR WAS ALSO CORRECTED
-C>   93-01-13  CAVANAUGH   CORRECTIONS WERE MADE (IN FI632) TO
-C>                         PROPERLY HANDLE CONDITION WHEN
-C>                         TIME RANGE INDICATOR = 10.
-C>                         ADDED U.S.GRID 87.
-C>   93-02-04  CAVANAUGH   ADDED U.S.GRIDS 85 AND 86
-C>   93-02-26  CAVANAUGH   ADDED GRIDS 2, 3, 37 THRU 44,AND
-C>                         GRIDS 55, 56, 90, 91, 92, AND 93 TO
-C>                         LIST OF U.S. GRIDS.
-C>   93-04-07  CAVANAUGH   ADDED GRIDS 67 THRU 77 TO
-C>                         LIST OF U.S. GRIDS.
-C>   93-04-20  CAVANAUGH   INCREASED MAX SIZE TO ACCOMODATE
-C>                         GAUSSIAN GRIDS.
-C>   93-05-26  CAVANAUGH   CORRECTED GRID RANGE SELECTION IN FI634
-C>                         FOR RANGES 67-71 & 75-77
-C>   93-06-08  CAVANAUGH   CORRECTED FI635 TO ACCEPT GRIB MESSAGES
-C>                         WITH SECOND ORDER PACKING. ADDED ROUTINE FI636
-C>                         TO PROCESS MESSAGES WITH SECOND ORDER PACKING.
-C>   93-09-22  CAVANAUGH   MODIFIED TO EXTRACT SUB-CENTER NUMBER FROM
-C>                         PDS BYTE 26
-C>   93-10-13  CAVANAUGH   MODIFIED FI634 TO CORRECT GRID SIZES FOR
-C>                         GRIDS 204 AND 208
-C>   93-10-14  CAVANAUGH   INCREASED SIZE OF KGDS TO INCLUDE ENTRIES FOR
-C>                         NUMBER OF POINTS IN GRID AND NUMBER OF WORDS
-C>                         IN EACH ROW
-C>   93-12-08  CAVANAUGH   CORRECTED TEST FOR EDITION NUMBER INSTEAD
-C>                         OF VERSION NUMBER
-C>   93-12-15  CAVANAUGH   MODIFIED SECOND ORDER POINTERS TO FIRST ORDER
-C>                         VALUES AND SECOND ORDER VALUES CORRECTLY
-C>                         IN ROUTINE FI636
-C>   94-03-02  CAVANAUGH   ADDED CALL TO W3FI83 WITHIN DECODER.  USER
-C>                         NO LONGER NEEDS TO MAKE CALL TO THIS ROUTINE
-C>   94-04-22  CAVANAUGH   MODIFIED FI635, FI636 TO PROCESS ROW BY ROW
-C>                         SECOND ORDER PACKING, ADDED SCALING CORRECTION
-C>                         TO FI635, AND CORRECTED TYPOGRAPHICAL ERRORS
-C>                         IN COMMENT FIELDS IN FI634
-C>   94-05-17  CAVANAUGH   CORRECTED ERROR IN FI633 TO EXTRACT RESOLUTION
-C>                         FOR LAMBERT-CONFORMAL GRIDS. ADDED CLARIFYING
-C>                         INFORMATION TO DOCBLOCK ENTRIES
-C>   94-05-25  CAVANAUGH   ADDED CODE TO PROCESS COLUMN BY COLUMN AS WELL
-C>                         AS ROW BY ROW ORDERING OF SECOND ORDER DATA
-C>   94-06-27  CAVANAUGH   ADDED PROCESSING FOR GRIDS 45, 94 AND 95.
-C>                         INCLUDES CONSTRUCTION OF SECOND ORDER BIT MAPS
-C>                         FOR THINNED GRIDS IN FI636.
-C>   94-07-08  CAVANAUGH   COMMENTED OUT PRINT OUTS USED FOR DEBUGGING
-C>   94-09-08  CAVANAUGH   ADDED GRIDS 220, 221, 223 FOR FNOC
-C>   94-11-10  FARLEY      INCREASED MXSIZE FROM 72960 TO 260000
-C>                         FOR .5 DEGREE SST ANALYSIS FIELDS
-C>   94-12-06  R.E.JONES   CHANGES IN FI632 FOR PDS GREATER THAN 28
-C>   95-02-14  R.E.JONES   CORRECT IN FI633 FOR NAVY WAFS GRIB
-C>   95-03-20  M.BALDWIN   FI633 MODIFICATION TO GET
-C>                         DATA REP TYPES [KGDS(1)] 201 AND 202 TO WORK.
-C>   95-04-10  E.ROGERS    ADDED GRIDS 96 AND 97 FOR ETA MODEL IN FI634.
-C>   95-04-26  R.E.JONES   FI636 CORECTION FOR 2ND ORDER COMPLEX
-C>                         UNPACKING. R
-C>   95-05-19  R.E.JONES   ADDED GRID 215, 20 KM AWIPS GRID
-C>   95-07-06  R.E.JONES   ADDED GAUSSIAN T62, T126 GRID 98, 126
-C>   95-10-19  R.E.JONES   ADDED GRID 216, 45 KM ETA AWIPS ALASKA GRID 
-C>   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C>   96-03-07  R.E.JONES   CONTINUE UNPACK WITH KRET ERROR 9 IN FI631. 
-C>   96-08-19  R.E.JONES   ADDED MERCATOR GRIDS 8 AND 53, AND GRID 196
-C>   97-02-12  W BOSTELMAN CORRECTS ECMWF US GRID 2 PROCESSING
-C>   98-06-17  IREDELL     REMOVED ALTERNATE RETURN IN FI637
-C>   98-08-31  IREDELL     ELIMINATED NEED FOR MXSIZE
-C>   98-09-02  Gilbert     Corrected error in map size for U.S. Grid 92
-C>   98-09-08  BALDWIN     ADD DATA REP TYPE [KGDS(1)] 203
-C>   01-03-08  ROGERS      CHANGED ETA GRIDS 90-97, ADDED ETA GRIDS
-C>                         194, 198. ADDED AWIPS GRIDS 241,242,243,
-C>                         245, 246, 247, 248, AND 250
-C>   01-03-19  VUONG       ADDED AWIPS GRIDS 238,239,240, AND 244
-C> 2001-06-06  GILBERT     Changed gbyte/sbyte calls to refer to 
-C>                         Wesley Ebisuzaki's endian independent
-C>                         versions gbytec/sbytec.
-C>                         Removed equivalences.
-C>   01-05-03  ROGERS      ADDED GRID 249  (12KM FOR ALASKA)
-C>   01-10-10  ROGERS      REDEFINED GRID 218 FOR 12 KM ETA
-C>                         REDEFINED GRID 192 FOR NEW 32-KM ETA GRID
-C>   02-03-27  VUONG       ADDED RSAS GRID 88 AND AWIPS GRIDS 219, 220,
-C>                         223, 224, 225, 226, 227, 228, 229, 230, 231,
-C>                         232, 233, 234, 235, 251, AND 252
-C>   02-08-06  ROGERS      REDEFINED GRIDS 90-93,97,194,245-250 FOR THE
-C>                         8KM HI-RES-WINDOW MODEL AND ADD AWIPS GRID 253
-C> 2003-06-30  GILBERT     SET NEW VALUES IN ARRAY KPTR TO PASS BACK ADDITIONAL
-C>                         PACKING INFO.
-C>                         KPTR(19) - BINARY SCALE FACTOR
-C>                         KPTR(20) - NUM BITS USED TO PACK EACH DATUM
-C> 2003-06-30  GILBERT     ADDED GRIDS 145 and 146 for CMAQ
-C>                         and GRID 175 for AWIPS over GUAM.
-C> 2003-07-08  VUONG       ADDED GRIDS 110, 127, 171, 172 AND MODIFIED GRID 170
-C> 2004-09-02  VUONG       ADDED AWIPS GRIDS 147, 148, 173 AND 254
-C> 2005-01-04  COOKE       ADDED AWIPS GRIDS 160 AND 161
-C> 2005-03-03  VUONG       MOVED GRID 170 TO GRID 174 AND ADD GRID 170
-C> 2005-03-21  VUONG       ADDED AWIPS GRID 130
-C> 2005-10-11  VUONG       ADDED AWIPS GRID 163
-C> 2006-12-12  VUONG       ADDED AWIPS GRID 120
-C> 2007-04-12  VUONG       ADDED AWIPS 176 AND  DATA REP TYPE KGDS(1) 204
-C> 2007-06-11  VUONG       ADDED NEW GRIDS 11 TO 18 AND 122 TO 125 AND 138
-C>                         AND 180 TO 183
-C> 2007-11-06  VUONG       CHANGED GRID 198 FROM ARAKAWA STAGGERED E-GRID TO POLAR
-C>                         STEREOGRAPGIC GRID ADDED NEW GRID 10, 99, 150, 151, 197
-C> 2008-01-17  VUONG       ADDED NEW GRID 195 AND CHANGED GRID 196 (ARAKAWA-E TO MERCATOR)
-C> 2009-05-21  VUONG       MODIFIED TO HANDLE GRID 45
-C> 2010-05-11  VUONG       DATA REP TYPE KGDS(1) 205
-C> 2010-02-18  VUONG       ADDED GRID 128, 139 AND 140
-C> 2010-07-20  GAYNO       ADDED ROTATED LAT/LON "A,B,C,D" STAGGERS -> KGDS(1) 205
-C> 2010-08-05  VUONG       ADDED NEW GRID 184, 199, 83 AND
-C>                         REDEFINED GRID 90 FOR NEW RTMA CONUS 1.27-KM
-C>                         REDEFINED GRID 91 FOR NEW RTMA ALASKA 2.976-KM
-C>                         REDEFINED GRID 92 FOR NEW RTMA ALASKA 1.488-KM
-C> 2010-09-08  ROGERS      CHANGED GRID 94 TO ALASKA 6KM STAGGERED B-GRID
-C>                         CHANGED GRID 95 TO PUERTO RICO 3KM STAGGERED B-GRID
-C>                         CHANGED GRID 96 TO HAWAII 3KM STAGGERED B-GRID
-C>                         CHANGED GRID 96 TO HAWAII 3KM STAGGERED B-GRID
-C>                         CHANGED GRID 97 TO CONUS 4KM STAGGERED B-GRID
-C>                         CHANGED GRID 99 TO NAM 12KM STAGGERED B-GRID
-C>                         ADDED GRID 179 (12 KM POLAR STEREOGRAPHIC OVER NORTH AMERICA)
-C>                         CHANGED GRID 194 TO 3KM MERCATOR GRID OVER PUERTO RICO
-C>                         CORRECTED LATITUDE OF SW CORNER POINT OF GRID 151
-C> 2011-10-12  VUONG       ADDED GRID 129, 187, 188, 189 AND 193
-C> 2012-04-16  VUONG       ADDED NEW GRID 132, 200
-C> 2017-07-17  VUONG       CORRECT GRID 161 NUMBER OF POINT Nj from 102 to 103
-C>                         AND MAP SIZE FROM 13974 TO 14111
+C> - Bill Cavanaugh 1991-09-13
+C> - Bill Cavanaugh 1991-11-12 Modified size of ecmwf grids 5-8
+C> - Bill Cavanaugh 1991-12-22 Corrected processing of mercator projections
+C> in grid definition section (gds) in
+C> routine fi633
+C> - Bill Cavanaugh 1992-08-05 Corrected maximum grid size to allow for
+C> one degree by one degree global grids
+C> - Bill Cavanaugh 1992-08-27 Corrected typo error, added code to compare
+C> total byte size from section 0 with sum of
+C> section sizes.
+C> - Bill Cavanaugh 1992-10-21 Corrections were made (in fi634) to reduce
+C> processing time for international grids.
+C> removed a typographical error in fi635.
+C> - Bill Cavanaugh 1993-01-07 Corrections were made (in fi635) to
+C> facilitate use of these routines on a pc.
+C> a typographical error was also corrected
+C> - Bill Cavanaugh 1993-01-13 Corrections were made (in fi632) to
+C> properly handle condition when
+C> time range indicator = 10.
+C> added u.s.grid 87.
+C> - Bill Cavanaugh 1993-02-04 Added u.s.grids 85 and 86
+C> - Bill Cavanaugh 1993-02-26 Added grids 2, 3, 37 thru 44,and
+C> grids 55, 56, 90, 91, 92, and 93 to
+C> list of u.s. grids.
+C> - Bill Cavanaugh 1993-04-07 Added grids 67 thru 77 to
+C> list of u.s. grids.
+C> - Bill Cavanaugh 1993-04-20 Increased max size to accomodate
+C> gaussian grids.
+C> - Bill Cavanaugh 1993-05-26 Corrected grid range selection in fi634
+C> for ranges 67-71 & 75-77
+C> - Bill Cavanaugh 1993-06-08 Corrected fi635 to accept grib messages
+C> with second order packing. added routine fi636
+C> to process messages with second order packing.
+C> - Bill Cavanaugh 1993-09-22 Modified to extract sub-center number from
+C> pds byte 26
+C> - Bill Cavanaugh 1993-10-13 Modified fi634 to correct grid sizes for
+C> grids 204 and 208
+C> - Bill Cavanaugh 1993-10-14 Increased size of kgds to include entries for
+C> number of points in grid and number of words
+C> in each row
+C> - Bill Cavanaugh 1993-12-08 Corrected test for edition number instead
+C> of version number
+C> - Bill Cavanaugh 1993-12-15 Modified second order pointers to first order
+C> values and second order values correctly
+C> in routine fi636
+C> - Bill Cavanaugh 1994-03-02 Added call to w3fi83 within decoder.  user
+C> no longer needs to make call to this routine
+C> - Bill Cavanaugh 1994-04-22 Modified fi635, fi636 to process row by row
+C> second order packing, added scaling correction
+C> to fi635, and corrected typographical errors
+C> in comment fields in fi634
+C> - Bill Cavanaugh 1994-05-17 COrrected error in fi633 to extract resolution
+C> for lambert-conformal grids. added clarifying
+C> information to docblock entries
+C> - Bill Cavanaugh 1994-05-25 Added code to process column by column as well
+C> as row by row ordering of second order data
+C> - Bill Cavanaugh 1994-06-27 Added processing for grids 45, 94 and 95.
+C> includes construction of second order bit maps
+C> for thinned grids in fi636.
+C> - Bill Cavanaugh 1994-07-08 Commented out print outs used for debugging
+C> - Bill Cavanaugh 1994-09-08 Added grids 220, 221, 223 for fnoc
+C> - Farley 1994-11-10 Increased mxsize from 72960 to 260000
+C> for .5 degree sst analysis fields
+C> - Ralph Jones 1994-12-06 Changes in fi632 for pds greater than 28
+C> - Ralph Jones 1995-02-14 Correct in fi633 for navy wafs grib
+C> - M Baldwin 1995-03-20 Fi633 modification to get
+C> data rep types [kgds(1)] 201 and 202 to work.
+C> - M. Baldwin 1995-04-10 Added grids 96 and 97 for eta model in fi634.
+C> - Ralph Jones 1995-04-26 Fi636 corection for 2nd order complex
+C> unpacking. r
+C> - Ralph Jones 1995-05-19 Added grid 215, 20 km awips grid
+C> - Ralph Jones 1995-07-06 Added gaussian t62, t126 grid 98, 126
+C> - Ralph Jones 1995-10-19 Added grid 216, 45 km eta awips alaska grid
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - Ralph Jones 1996-03-07 Continue unpack with kret error 9 in fi631.
+C> - Ralph Jones 1996-08-19 Added mercator grids 8 and 53, and grid 196
+C> - W. Bostelman 1997-02-12 Corrects ecmwf us grid 2 processing
+C> - Mark Iredell 1998-06-17 Removed alternate return in fi637
+C> - Mark Iredell 1998-08-31 Eliminated need for mxsize
+C> - Stephen Gilbert 1998-09-02 Corrected error in map size for U.S. Grid 92
+C> - M. Baldwin 1998-09-08 Add data rep type [kgds(1)] 203
+C> - Eric Rogers 2001-03-08 Changed eta grids 90-97, added eta grids
+C> 194, 198. added awips grids 241,242,243,
+C> 245, 246, 247, 248, and 250
+C> - Boi Vuong 2001-03-19 Added awips grids 238,239,240, and 244
+C> - Stephen Gilbert 2001-06-06 Changed gbyte/sbyte calls to refer to
+C> Wesley Ebisuzaki's endian independent
+C> versions gbytec/sbytec.
+C> Removed equivalences.
+C> - Eric Rogers 2001-05-03 Added grid 249  (12km for alaska)
+C> - Eric Rogers 2001-10-10 Redefined grid 218 for 12 km eta
+C> redefined grid 192 for new 32-km eta grid
+C> - Boi Vuong 2002-03-27  VUONG       Added rsas grid 88 and awips grids 219, 220,
+C> 223, 224, 225, 226, 227, 228, 229, 230, 231,
+C> 232, 233, 234, 235, 251, and 252
+C> - Eric Rogers 2002-08-06 Redefined grids 90-93,97,194,245-250 for the
+C> 8km hi-res-window model and add awips grid 253
+C> - Stephen Gilbert 2003-06-30 Set new values in array kptr to pass back additional
+C> packing info.
+C> kptr(19) - binary scale factor
+C> kptr(20) - num bits used to pack each datum
+C> - Stephen Gilbert 2003-06-30 Added grids 145 and 146 for cmaq
+C> and grid 175 for awips over guam.
+C> - Boi Vuong 2003-07-08 Added grids 110, 127, 171, 172 and modified grid 170
+C> - Boi Vuong 2004-09-02 Added awips grids 147, 148, 173 and 254
+C> 2005-01-04  COOKE       Added awips grids 160 and 161
+C> - Boi Vuong 2005-03-03 Moved grid 170 to grid 174 and add grid 170
+C> - Boi Vuong 2005-03-21 Added awips grid 130
+C> - Boi Vuong 2005-10-11 Added awips grid 163
+C> - Boi Vuong 2006-12-12 Added awips grid 120
+C> - Boi Vuong 2007-04-12 Added awips 176 and  data rep type kgds(1) 204
+C> - Boi Vuong 2007-06-11 Added new grids 11 to 18 and 122 to 125 and 138
+C> and 180 to 183
+C> - Boi Vuong 2007-11-06 Changed grid 198 from arakawa staggered e-grid to polar
+C> stereograpgic grid added new grid 10, 99, 150, 151, 197
+C> - Boi Vuong 2008-01-17 Added new grid 195 and changed grid 196 (arakawa-e to mercator)
+C> - Boi Vuong 2009-05-21 Modified to handle grid 45
+C> - Boi Vuong 2010-05-11 Data rep type kgds(1) 205
+C> - Boi Vuong 2010-02-18 Added grid 128, 139 and 140
+C> 2010-07-20 Added rotated lat/lon "a,b,c,d" staggers -> kgds(1) 205
+C> - Boi Vuong 2010-08-05 Added new grid 184, 199, 83 and
+C> redefined grid 90 for new rtma conus 1.27-km
+C> redefined grid 91 for new rtma alaska 2.976-km
+C> redefined grid 92 for new rtma alaska 1.488-km
+C> - Eric Rogers 2010-09-08 Changed grid 94 to alaska 6km staggered b-grid
+C> changed grid 95 to puerto rico 3km staggered b-grid
+C> changed grid 96 to hawaii 3km staggered b-grid
+C> changed grid 96 to hawaii 3km staggered b-grid
+C> changed grid 97 to conus 4km staggered b-grid
+C> changed grid 99 to nam 12km staggered b-grid
+C> added grid 179 (12 km polar stereographic over north america)
+C> changed grid 194 to 3km mercator grid over puerto rico
+C> corrected latitude of sw corner point of grid 151
+C> - Boi Vuong 2011-10-12 Added grid 129, 187, 188, 189 and 193
+C> - Boi Vuong 2012-04-16 Added new grid 132, 200
+C> - Boi Vuong 2017-07-17 Correct grid 161 number of point nj from 102 to 103
+C> and map size from 13974 to 14111
 C>
-C> USAGE:    CALL W3FI63(MSGA,KPDS,KGDS,KBMS,DATA,KPTR,KRET)
-C>   INPUT ARGUMENT LIST:
-C>     MSGA     - GRIB FIELD - "GRIB" THRU "7777"   CHAR*1
-C>                   (MESSAGE CAN BE PRECEDED BY JUNK CHARS)
+C> @param[in] MSGA Grib field - "grib" thru "7777"   char*1
+C> (message can be preceded by junk chars)
+C> @param[out] DATA Array containing data elements
+C> @param[out] KPDS Array containing pds elements.  (edition 1)
+C> - 1 Id of center
+C> - 2 Generating process id number
+C> - 3 Grid definition
+C> - 4 Gds/bms flag (right adj copy of octet 8)
+C> - 5 Indicator of parameter
+C> - 6 Type of level
+C> - 7 Height/pressure , etc of level
+C> - 8 Year including (century-1)
+C> - 9 Month of year
+C> - 10 Day of month
+C> - 11 Hour of day
+C> - 12 Minute of hour
+C> - 13 Indicator of forecast time unit
+C> - 14 Time range 1
+C> - 15 Time range 2
+C> - 16 Time range flag
+C> - 17 Number included in average
+C> - 18 Version nr of grib specification
+C> - 19 Version nr of parameter table
+C> - 20 Nr missing from average/accumulation
+C> - 21 Century of reference time of data
+C> - 22 Units decimal scale factor
+C> - 23 Subcenter number
+C> - 24 Pds byte 29, for nmc ensemble products
+C>  - 128 If forecast field error
+C>  - 64 If bias corrected fcst field
+C>  - 32 If smoothed field
+C>  - Warning: can be combination of more than 1
+C> - 25 Pds byte 30, not used
+C> - 26-35 Reserved
+C> - 36-N Consecutive bytes extracted from program
+C> Definition section (pds) of grib message
+C> @param[out] KGDS ARRAY CONTAINING GDS ELEMENTS.
+C>  - 1) Data representation type
+C>  - 19 Number of vertical coordinate parameters
+C>  - 20 Octet number of the list of vertical coordinate
+C>    Parameters Or Octet number of the list of numbers of points
+C>    In each row Or 255 if neither are present
+C>  - 21 For grids with pl, number of points in grid
+C>  - 22 Number of words in each row
+C> - LATITUDE/LONGITUDE GRIDS
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag (right adj copy of octet 17)
+C>  - 7 La(2) latitude of extreme point
+C>  - 8 Lo(2) longitude of extreme point
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag (right adj copy of octet 28)
+C> - GAUSSIAN  GRIDS
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag  (right adj copy of octet 17)
+C>  - 7 La(2) latitude of extreme point
+C>  - 8 Lo(2) longitude of extreme point
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 N - nr of circles pole to equator
+C>  - 11 Scanning mode flag (right adj copy of octet 28)
+C>  - 12 Nv - nr of vert coord parameters
+C>  - 13 Pv - octet nr of list of vert coord parameters or
+C>    Pl - location of the list of numbers of points in
+C>    each row (if no vert coord parameters are present or
+C>    255 if neither are present
+C> - POLAR STEREOGRAPHIC GRIDS
+C>  - 2 N(i) nr points along lat circle
+C>  - 3 N(j) nr points along lon circle
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag  (right adj copy of octet 17)
+C>  - 7 Lov grid orientation
+C>  - 8 Dx - x direction increment
+C>  - 9 Dy - y direction increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode (right adj copy of octet 28)
+C> - SPHERICAL HARMONIC COEFFICIENTS
+C>  - 2) J pentagonal resolution parameter
+C>  - 3) K pentagonal resolution parameter
+C>  - 4) M pentagonal resolution parameter
+C>  - 5) Representation type
+C>  - 6) Coefficient storage mode
+C> - MERCATOR GRIDS
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag (right adj copy of octet 17)
+C>  - 7 La(2) latitude of last grid point
+C>  - 8 Lo(2) longitude of last grid point
+C>  - 9 Latit - latitude of projection intersection
+C>  - 10 Reserved
+C>  - 11 Scanning mode flag (right adj copy of octet 28)
+C>  - 12 Longitudinal dir grid length
+C>  - 13 Latitudinal dir grid length
+C> - LAMBERT CONFORMAL GRIDS
+C>  - 2 Nx nr points along x-axis
+C>  - 3 Ny nr points along y-axis
+C>  - 4 La1 lat of origin (lower left)
+C>  - 5 Lo1 lon of origin (lower left)
+C>  - 6 Resolution (right adj copy of octet 17)
+C>  - 7 Lov - orientation of grid
+C>  - 8 Dx - x-dir increment
+C>  - 9 Dy - y-dir increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode flag (right adj copy of octet 28)
+C>  - 12 Latin 1 - first lat from pole of secant cone inter
+C>  - 13 Latin 2 - second lat from pole of secant cone inter
+C> - E-STAGGERED ARAKAWA ROTATED LAT/LON GRIDS (TYPE 203)
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag (right adj copy of octet 17)
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag (right adj copy of octet 28)
+C> - CURVILINEAR ORTHIGINAL GRID (TYPE 204)
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 Reserved set to 0
+C>  - 5 Reserved set to 0
+C>  - 6 Resolution flag (right adj copy of octet 17)
+C>  - 7 Reserved set to 0
+C>  - 8 Reserved set to 0
+C>  - 9 Reserved set to 0
+C>  - 10 Reserved set to 0
+C>  - 11 Scanning mode flag (right adj copy of octet 28)
+C> - ROTATED LAT/LON A,B,C,D-STAGGERED (TYPE 205)
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 La(1) latitude of first point
+C>  - 5 Lo(1) longitude of first point
+C>  - 6 Resolution flag (right adj copy of octet 17)
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag (right adj copy of octet 28)
+C>  - 12 Latitude of last point
+C>  - 13 Longitude of last point
+C> @param[out] KBMS Bitmap describing location of output elements.
+C> (always constructed)
+C> @param[out] KPTR Array containing storage for following parameters
+C> - 1 Total length of grib message
+C> - 2 Length of indicator (section  0)
+C> - 3 Length of pds (section  1)
+C> - 4 Length of gds (section  2)
+C> - 5 Length of bms (section  3)
+C> - 6 Length of bds (section  4)
+C> - 7 Value of current byte
+C> - 8 Bit pointer
+C> - 9 Grib start bit nr
+C> - 10 Grib/grid element count
+C> - 11 Nr unused bits at end of section 3
+C> - 12 Bit map flag (copy of bms octets 5,6)
+C> - 13 Nr unused bits at end of section 2
+C> - 14 Bds flags (right adj copy of octet 4)
+C> - 15 Nr unused bits at end of section 4
+C> - 16 Reserved
+C> - 17 Reserved
+C> - 18 Reserved
+C> - 19 Binary scale factor
+C> - 20 Num bits used to pack each datum
+C> @param[out] KRET Flag indicating quality of completion
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     DATA     - ARRAY CONTAINING DATA ELEMENTS
-C>     KPDS     - ARRAY CONTAINING PDS ELEMENTS.  (EDITION 1)
-C>          (1)   - ID OF CENTER
-C>          (2)   - GENERATING PROCESS ID NUMBER
-C>          (3)   - GRID DEFINITION
-C>          (4)   - GDS/BMS FLAG (RIGHT ADJ COPY OF OCTET 8)
-C>          (5)   - INDICATOR OF PARAMETER
-C>          (6)   - TYPE OF LEVEL
-C>          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C>          (8)   - YEAR INCLUDING (CENTURY-1)
-C>          (9)   - MONTH OF YEAR
-C>          (10)  - DAY OF MONTH
-C>          (11)  - HOUR OF DAY
-C>          (12)  - MINUTE OF HOUR
-C>          (13)  - INDICATOR OF FORECAST TIME UNIT
-C>          (14)  - TIME RANGE 1
-C>          (15)  - TIME RANGE 2
-C>          (16)  - TIME RANGE FLAG
-C>          (17)  - NUMBER INCLUDED IN AVERAGE
-C>          (18)  - VERSION NR OF GRIB SPECIFICATION
-C>          (19)  - VERSION NR OF PARAMETER TABLE
-C>          (20)  - NR MISSING FROM AVERAGE/ACCUMULATION
-C>          (21)  - CENTURY OF REFERENCE TIME OF DATA
-C>          (22)  - UNITS DECIMAL SCALE FACTOR
-C>          (23)  - SUBCENTER NUMBER
-C>          (24)  - PDS BYTE 29, FOR NMC ENSEMBLE PRODUCTS
-C>                  128 IF FORECAST FIELD ERROR
-C>                   64 IF BIAS CORRECTED FCST FIELD
-C>                   32 IF SMOOTHED FIELD
-C>                  WARNING: CAN BE COMBINATION OF MORE THAN 1
-C>          (25)  - PDS BYTE 30, NOT USED
-C>       (26-35)  - RESERVED
-C>       (36-N)   - CONSECUTIVE BYTES EXTRACTED FROM PROGRAM
-C>                  DEFINITION SECTION (PDS) OF GRIB MESSAGE
-C>     KGDS     - ARRAY CONTAINING GDS ELEMENTS.
-C>          (1)   - DATA REPRESENTATION TYPE
-C>          (19)  - NUMBER OF VERTICAL COORDINATE PARAMETERS
-C>          (20)  - OCTET NUMBER OF THE LIST OF VERTICAL COORDINATE
-C>                  PARAMETERS
-C>                  OR
-C>                  OCTET NUMBER OF THE LIST OF NUMBERS OF POINTS
-C>                  IN EACH ROW
-C>                  OR
-C>                  255 IF NEITHER ARE PRESENT
-C>          (21)  - FOR GRIDS WITH PL, NUMBER OF POINTS IN GRID
-C>          (22)  - NUMBER OF WORDS IN EACH ROW
-C>       LATITUDE/LONGITUDE GRIDS
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LA(2) LATITUDE OF EXTREME POINT
-C>          (8)   - LO(2) LONGITUDE OF EXTREME POINT
-C>          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C>          (10)  - DJ LATITUDINAL DIRECTION INCREMENT
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>       GAUSSIAN  GRIDS
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG  (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LA(2) LATITUDE OF EXTREME POINT
-C>          (8)   - LO(2) LONGITUDE OF EXTREME POINT
-C>          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C>          (10)  - N - NR OF CIRCLES POLE TO EQUATOR
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>          (12)  - NV - NR OF VERT COORD PARAMETERS
-C>          (13)  - PV - OCTET NR OF LIST OF VERT COORD PARAMETERS
-C>                             OR
-C>                  PL - LOCATION OF THE LIST OF NUMBERS OF POINTS IN
-C>                       EACH ROW (IF NO VERT COORD PARAMETERS
-C>                       ARE PRESENT
-C>                             OR
-C>                  255 IF NEITHER ARE PRESENT
-C>       POLAR STEREOGRAPHIC GRIDS
-C>          (2)   - N(I) NR POINTS ALONG LAT CIRCLE
-C>          (3)   - N(J) NR POINTS ALONG LON CIRCLE
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG  (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LOV GRID ORIENTATION
-C>          (8)   - DX - X DIRECTION INCREMENT
-C>          (9)   - DY - Y DIRECTION INCREMENT
-C>          (10)  - PROJECTION CENTER FLAG
-C>          (11)  - SCANNING MODE (RIGHT ADJ COPY OF OCTET 28)
-C>       SPHERICAL HARMONIC COEFFICIENTS
-C>          (2)   - J PENTAGONAL RESOLUTION PARAMETER
-C>          (3)   - K      "          "         "
-C>          (4)   - M      "          "         "
-C>          (5)   - REPRESENTATION TYPE
-C>          (6)   - COEFFICIENT STORAGE MODE
-C>       MERCATOR GRIDS
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LA(2) LATITUDE OF LAST GRID POINT
-C>          (8)   - LO(2) LONGITUDE OF LAST GRID POINT
-C>          (9)   - LATIT - LATITUDE OF PROJECTION INTERSECTION
-C>          (10)  - RESERVED
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>          (12)  - LONGITUDINAL DIR GRID LENGTH
-C>          (13)  - LATITUDINAL DIR GRID LENGTH
-C>       LAMBERT CONFORMAL GRIDS
-C>          (2)   - NX NR POINTS ALONG X-AXIS
-C>          (3)   - NY NR POINTS ALONG Y-AXIS
-C>          (4)   - LA1 LAT OF ORIGIN (LOWER LEFT)
-C>          (5)   - LO1 LON OF ORIGIN (LOWER LEFT)
-C>          (6)   - RESOLUTION (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LOV - ORIENTATION OF GRID
-C>          (8)   - DX - X-DIR INCREMENT
-C>          (9)   - DY - Y-DIR INCREMENT
-C>          (10)  - PROJECTION CENTER FLAG
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>          (12)  - LATIN 1 - FIRST LAT FROM POLE OF SECANT CONE INTER
-C>          (13)  - LATIN 2 - SECOND LAT FROM POLE OF SECANT CONE INTER
-C>       E-STAGGERED ARAKAWA ROTATED LAT/LON GRIDS (TYPE 203)
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF ORIGIN
-C>          (5)   - LO(1) LONGITUDE OF ORIGIN
-C>          (6)   - RESOLUTION FLAG (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LA(2) LATITUDE OF CENTER
-C>          (8)   - LO(2) LONGITUDE OF CENTER
-C>          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C>          (10)  - DJ LATITUDINAL DIRECTION INCREMENT
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>       CURVILINEAR ORTHIGINAL GRID (TYPE 204)
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - RESERVED SET TO 0
-C>          (5)   - RESERVED SET TO 0
-C>          (6)   - RESOLUTION FLAG (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - RESERVED SET TO 0
-C>          (8)   - RESERVED SET TO 0
-C>          (9)   - RESERVED SET TO 0
-C>          (10)  - RESERVED SET TO 0
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>       ROTATED LAT/LON A,B,C,D-STAGGERED (TYPE 205)
-C>          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C>          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C>          (4)   - LA(1) LATITUDE OF FIRST POINT
-C>          (5)   - LO(1) LONGITUDE OF FIRST POINT
-C>          (6)   - RESOLUTION FLAG (RIGHT ADJ COPY OF OCTET 17)
-C>          (7)   - LA(2) LATITUDE OF CENTER
-C>          (8)   - LO(2) LONGITUDE OF CENTER
-C>          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C>          (10)  - DJ LATITUDINAL DIRECTION INCREMENT
-C>          (11)  - SCANNING MODE FLAG (RIGHT ADJ COPY OF OCTET 28)
-C>          (12)  - LATITUDE OF LAST POINT
-C>          (13)  - LONGITUDE OF LAST POINT
-C>     KBMS       - BITMAP DESCRIBING LOCATION OF OUTPUT ELEMENTS.
-C>                            (ALWAYS CONSTRUCTED)
-C>     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C>          (1)   - TOTAL LENGTH OF GRIB MESSAGE
-C>          (2)   - LENGTH OF INDICATOR (SECTION  0)
-C>          (3)   - LENGTH OF PDS       (SECTION  1)
-C>          (4)   - LENGTH OF GDS       (SECTION  2)
-C>          (5)   - LENGTH OF BMS       (SECTION  3)
-C>          (6)   - LENGTH OF BDS       (SECTION  4)
-C>          (7)   - VALUE OF CURRENT BYTE
-C>          (8)   - BIT POINTER
-C>          (9)   - GRIB START BIT NR
-C>         (10)   - GRIB/GRID ELEMENT COUNT
-C>         (11)   - NR UNUSED BITS AT END OF SECTION 3
-C>         (12)   - BIT MAP FLAG (COPY OF BMS OCTETS 5,6)
-C>         (13)   - NR UNUSED BITS AT END OF SECTION 2
-C>         (14)   - BDS FLAGS (RIGHT ADJ COPY OF OCTET 4)
-C>         (15)   - NR UNUSED BITS AT END OF SECTION 4
-C>         (16)   - RESERVED
-C>         (17)   - RESERVED
-C>         (18)   - RESERVED
-C>         (19)   - BINARY SCALE FACTOR
-C>         (20)   - NUM BITS USED TO PACK EACH DATUM
-C>     KRET       - FLAG INDICATING QUALITY OF COMPLETION
+C> @note When decoding is completed, data at each grid point has been
+C> returned in the units specified in the grib manual.
 C>
-C> REMARKS: WHEN DECODING IS COMPLETED, DATA AT EACH GRID POINT HAS BEEN
-C>          RETURNED IN THE UNITS SPECIFIED IN THE GRIB MANUAL.
+C> - Values for return flag (kret)
+C>  - 0 - Normal return, no errors
+C>  - 1 - 'grib' not found in first 100 chars
+C>  - 2 - '7777' not in correct location
+C>  - 3 - Unpacked field is larger than 260000
+C>  - 4 - Gds/ grid not one of currently accepted values
+C>  - 5 - Grid not currently avail for center indicated
+C>  - 8 - Temp gds indicated, but gds flag is off
+C>  - 9 - Gds indicates size mismatch with std grid
+C>  - 10 - Incorrect center indicator
+C>  - 11 - Binary data section (bds) not completely processed.
+C>  program is not set to process flag combinations
+C>  shown in octets 4 and 14.
+C>  - 12 - Binary data section (bds) not completely processed.
+C>  program is not set to process flag combinations
 C>
-C>          VALUES FOR RETURN FLAG (KRET)
-C>     KRET = 0 - NORMAL RETURN, NO ERRORS
-C>          = 1 - 'GRIB' NOT FOUND IN FIRST 100 CHARS
-C>          = 2 - '7777' NOT IN CORRECT LOCATION
-C>          = 3 - UNPACKED FIELD IS LARGER THAN 260000
-C>          = 4 - GDS/ GRID NOT ONE OF CURRENTLY ACCEPTED VALUES
-C>          = 5 - GRID NOT CURRENTLY AVAIL FOR CENTER INDICATED
-C>          = 8 - TEMP GDS INDICATED, BUT GDS FLAG IS OFF
-C>          = 9 - GDS INDICATES SIZE MISMATCH WITH STD GRID
-C>          =10 - INCORRECT CENTER INDICATOR
-C>          =11 - BINARY DATA SECTION (BDS) NOT COMPLETELY PROCESSED.
-C>                PROGRAM IS NOT SET TO PROCESS FLAG COMBINATIONS
-C>                SHOWN IN OCTETS 4 AND 14.
-C>          =12 - BINARY DATA SECTION (BDS) NOT COMPLETELY PROCESSED.
-C>                PROGRAM IS NOT SET TO PROCESS FLAG COMBINATIONS
-C>
-C>   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 90
-C>
+C> @author Bill Cavanaugh @date 1991-09-13
       SUBROUTINE W3FI63(MSGA,KPDS,KGDS,KBMS,DATA,KPTR,KRET)
 C                                                         4 AUG 1988
 C                               W3FI63
@@ -803,75 +787,64 @@ C         PRINT *,'FI635 NOT PROGRAMMED FOR EDITION NR',KPDS(18)
 C
   900 RETURN
       END
+
+C> @brief Find 'grib' chars & reset pointers
+C> @author Bill Cavanaugh @date 1991-09-13
+
+C> Find 'grib; characters and set pointers to the next
+C> byte following 'grib'. If they exist extract counts from gds and
+C> bms. Extract count from bds. Determine if sum of counts actually
+C> places terminator '7777' at the correct location.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1991-09-13
+C> - Mark Iredell 1995-10-31 Removed saves and prints.
+C>
+C> @param[in] MSGA Grib field - "grib" thru "7777"
+C> @param[inout] KPTR Array containing storage for following parameters
+C> - 1 Total length of grib message
+C> - 2 Length of indicator (section  0)
+C> - 3 Length of pds (section  1)
+C> - 4 Length of gds (section  2)
+C> - 5 Length of bms (section  3)
+C> - 6 Length of bds (section  4)
+C> - 7 Value of current byte
+C> - 8 Bit pointer
+C> - 9 Grib start bit nr
+C> - 10 Grib/grid element count
+C> - 11 Nr unused bits at end of section 3
+C> - 12 Bit map flag
+C> - 13 Nr unused bits at end of section 2
+C> - 14 Bds flags
+C> - 15 Nr unused bits at end of section 4
+C> @param[out] KPDS Array containing pds elements.
+C> - 1 Id of center
+C> - 2 Model identification
+C> - 3 Grid identification
+C> - 4 Gds/bms flag
+C> - 5 Indicator of parameter
+C> - 6 Type of level
+C> - 7 Height/pressure , etc of level
+C> - 8 Year of century
+C> - 9 Month of year
+C> - 10 Day of month
+C> - 11 Hour of day
+C> - 12 Minute of hour
+C> - 13 Indicator of forecast time unit
+C> - 14 Time range 1
+C> - 15 Time range 2
+C> - 16 Time range flag
+C> - 17 Number included in average
+C> @param[out] KRET Error return
+C>
+C> @note
+C> ERROR RETURNS
+C> KRET:
+C> - 1 NO 'GRIB'
+C> - 2 NO '7777' OR MISLOCATED (BY COUNTS)
+C>
+C> @author Bill Cavanaugh @date 1991-09-13
       SUBROUTINE FI631(MSGA,KPTR,KPDS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI631       FIND 'GRIB' CHARS & RESET POINTERS
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 91-09-13
-C
-C ABSTRACT: FIND 'GRIB; CHARACTERS AND SET POINTERS TO THE NEXT
-C   BYTE FOLLOWING 'GRIB'. IF THEY EXIST EXTRACT COUNTS FROM GDS AND
-C   BMS. EXTRACT COUNT FROM BDS. DETERMINE IF SUM OF COUNTS ACTUALLY
-C   PLACES TERMINATOR '7777' AT THE CORRECT LOCATION.
-C
-C PROGRAM HISTORY LOG:
-C   91-09-13  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI631(MSGA,KPTR,KPDS,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA       - GRIB FIELD - "GRIB" THRU "7777"
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - TOTAL LENGTH OF GRIB MESSAGE
-C          (2)   - LENGTH OF INDICATOR (SECTION  0)
-C          (3)   - LENGTH OF PDS       (SECTION  1)
-C          (4)   - LENGTH OF GDS       (SECTION  2)
-C          (5)   - LENGTH OF BMS       (SECTION  3)
-C          (6)   - LENGTH OF BDS       (SECTION  4)
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - BIT POINTER
-C          (9)   - GRIB START BIT NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C         (11)   - NR UNUSED BITS AT END OF SECTION 3
-C         (12)   - BIT MAP FLAG
-C         (13)   - NR UNUSED BITS AT END OF SECTION 2
-C         (14)   - BDS FLAGS
-C         (15)   - NR UNUSED BITS AT END OF SECTION 4
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR OF CENTURY
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C     KPTR       - SEE INPUT LIST
-C     KRET       - ERROR RETURN
-C
-C REMARKS:
-C     ERROR RETURNS
-C     KRET  = 1  -  NO 'GRIB'
-C             2  -  NO '7777' OR MISLOCATED (BY COUNTS)
-C
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  HDS9000
-C
-C$$$
 C
 C                       INCOMING MESSAGE HOLDER
       CHARACTER*1   MSGA(*)
@@ -963,83 +936,73 @@ C         PRINT *,'FI631 7777 AT',KPTR(8)
 C     PRINT *,'KPTR',(KPTR(I),I=1,16)
       RETURN
       END
+
+
+C> @brief Gather info from product definition sec.
+C> @author Bill Cavanaugh @date 1991-09-13
+
+C> Extract information from the product description
+C> sec  , and generate label information to permit storage
+C> in office note 84 format.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1991-09-13
+C> - Bill Cavanaugh 1993-12-08 Corrected test for edition number instead
+C> of version number.
+C> - Mark Iredell 1995-10-31 Removed saves and prints.
+C> - M. Baldwin 1999-01-20 Modified to handle grid 237.
+C>
+C> @param[in] MSGA Array containing grib message.
+C> @param[inout] KPTR Array containing storage for following parameters.
+C> - 1 Total length of grib message
+C> - 2 Length of indicator (section  0)
+C> - 3 Length of pds (section  1)
+C> - 4 Length of gds (section  2)
+C> - 5 Length of bms (section  3)
+C> - 6 Length of bds (section  4)
+C> - 7 Value of current byte
+C> - 8 Bit pointer
+C> - 9 Grib start bit nr
+C> - 10 Grib/grid element count
+C> - 11 Nr unused bits at end of section 3
+C> - 12 Bit map flag
+C> - 13 Nr unused bits at end of section 2
+C> - 14 Bds flags
+C> - 15 Nr unused bits at end of section 4
+C> @param[out] KPDS Array containing pds elements.
+C> - 1 Id of center
+C> - 2 Model identification
+C> - 3 Grid identification
+C> - 4 Gds/bms flag
+C> - 5 Indicator of parameter
+C> - 6 Type of level
+C> - 7 Height/pressure , etc of level
+C> - 8 Year of century
+C> - 9 Month of year
+C> - 10 Day of month
+C> - 11 Hour of day
+C> - 12 Minute of hour
+C> - 13 Indicator of forecast time unit
+C> - 14 Time range 1
+C> - 15 Time range 2
+C> - 16 Time range flag
+C> - 17 Number included in average
+C> - 18
+C> - 19
+C> - 20 Number missing from avgs/accumulations
+C> - 21 Century
+C> - 22 Units decimal scale factor
+C> - 23 Subcenter
+C> @param[out] KRET Error return.
+C>
+C> @note ERROR RETURN:
+C> - 0 - NO ERRORS
+C> - 8 - TEMP GDS INDICATED, BUT NO GDS
+C>
+C> @author Bill Cavanaugh @date 1991-09-13
+
       SUBROUTINE FI632(MSGA,KPTR,KPDS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI632       GATHER INFO FROM PRODUCT DEFINITION SEC
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 91-09-13
-C
-C ABSTRACT: EXTRACT INFORMATION FROM THE PRODUCT DESCRIPTION
-C   SEC  , AND GENERATE LABEL INFORMATION TO PERMIT STORAGE
-C   IN OFFICE NOTE 84 FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C   91-09-13  CAVANAUGH
-C   93-12-08  CAVANAUGH   CORRECTED TEST FOR EDITION NUMBER INSTEAD
-C                         OF VERSION NUMBER
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   99-01-20  BALDWIN     MODIFIED TO HANDLE GRID 237
-C
-C USAGE:    CALL FI632(MSGA,KPTR,KPDS,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA      - ARRAY CONTAINING GRIB MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - TOTAL LENGTH OF GRIB MESSAGE
-C          (2)   - LENGTH OF INDICATOR (SECTION  0)
-C          (3)   - LENGTH OF PDS       (SECTION  1)
-C          (4)   - LENGTH OF GDS       (SECTION  2)
-C          (5)   - LENGTH OF BMS       (SECTION  3)
-C          (6)   - LENGTH OF BDS       (SECTION  4)
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - BIT POINTER
-C          (9)   - GRIB START BIT NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C         (11)   - NR UNUSED BITS AT END OF SECTION 3
-C         (12)   - BIT MAP FLAG
-C         (13)   - NR UNUSED BITS AT END OF SECTION 2
-C         (14)   - BDS FLAGS
-C         (15)   - NR UNUSED BITS AT END OF SECTION 4
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR OF CENTURY
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C          (18)  -
-C          (19)  -
-C          (20)  - NUMBER MISSING FROM AVGS/ACCUMULATIONS
-C          (21)  - CENTURY
-C          (22)  - UNITS DECIMAL SCALE FACTOR
-C          (23)  - SUBCENTER
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET   - ERROR RETURN
-C
-C REMARKS:
-C        ERROR RETURN = 0 - NO ERRORS
-C                     = 8 - TEMP GDS INDICATED, BUT NO GDS
-C
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  HDS9000
-C
-C$$$
+
 C
 C                       INCOMING MESSAGE HOLDER
       CHARACTER*1   MSGA(*)
@@ -1256,151 +1219,136 @@ C                         PRINT *,' W/NMC42)'
       END IF
       RETURN
       END
+
+C> @brief Extract info from grib-gds
+C> @author Bill Cavanaugh @date 1991-09-13
+
+C> Extract information on unlisted grid to allow
+C> conversion to office note 84 format.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1991-09-13
+C> - M. Baldwin 1995-03-20 fi633 modification to get
+C> data rep types [kgds(1)] 201 and 202 to work.
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - M. Baldwin 1998-09-08 Add data rep type [kgds(1)] 203
+C> - Boi Vuong 2007-04-24 Add data rep type [kgds(1)] 204
+C> - George Gayno 2010-07-20 Add data rep type [kgds(1)] 205
+C>
+C> @param[in] MSGA Array containing grib message
+C> @param[inout] KPTR Array containing storage for following parameters
+C> - 1 Total length of grib message
+C> - 2 Length of indicator (section  0)
+C> - 3 Length of pds (section  1)
+C> - 4 Length of gds (section  2)
+C> - 5 Length of bms (section  3)
+C> - 6 Length of bds (section  4)
+C> - 7 Value of current byte
+C> - 8 Bit pointer
+C> - 9 Grib start bit nr
+C> - 10 Grib/grid element count
+C> - 11 Nr unused bits at end of section 3
+C> - 12 Bit map flag
+C> - 13 Nr unused bits at end of section 2
+C> - 14 Bds flags
+C> - 15 Nr unused bits at end of section 4
+C> @param[out] KGDS Array containing gds elements.
+C>  - 1) Data representation type
+C>  - 19 Number of vertical coordinate parameters
+C>  - 20 Octet number of the list of vertical coordinate
+C>  parameters Or Octet number of the list of numbers of points
+C>  in each row Or 255 if neither are present.
+C>  - 21 For grids with pl, number of points in grid
+C>  - 22 Number of words in each row
+C> - Longitude grids
+C>  - 2) N(i) nr points on latitude circle
+C>  - 3) N(j) nr points on longitude meridian
+C>  - 4) La(1) latitude of origin
+C>  - 5) Lo(1) longitude of origin
+C>  - 6) Resolution flag
+C>  - 7) La(2) latitude of extreme point
+C>  - 8) Lo(2) longitude of extreme point
+C>  - 9) Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C> - Polar stereographic grids
+C>  - 2) N(i) nr points along lat circle
+C>  - 3) N(j) nr points along lon circle
+C>  - 4) La(1) latitude of origin
+C>  - 5) Lo(1) longitude of origin
+C>  - 6) Reserved
+C>  - 7) Lov grid orientation
+C>  - 8) Dx - x direction increment
+C>  - 9) Dy - y direction increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode
+C> - Spherical harmonic coefficients
+C>  - 2 J pentagonal resolution parameter
+C>  - 3 K pentagonal resolution parameter
+C>  - 4 M pentagonal resolution parameter
+C>  - 5 Representation type
+C>  - 6 Coefficient storage mode
+C> - Mercator grids
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of last grid point
+C>  - 8 Lo(2) longitude of last grid point
+C>  - 9 Latin - latitude of projection intersection
+C>  - 10 Reserved
+C>  - 11 Scanning mode flag
+C>  - 12 Longitudinal dir grid length
+C>  - 13 Latitudinal dir grid length
+C> - Lambert conformal grids
+C>  - 2 Nx nr points along x-axis
+C>  - 3 Ny nr points along y-axis
+C>  - 4 La1 lat of origin (lower left)
+C>  - 5 Lo1 lon of origin (lower left)
+C>  - 6 Resolution (right adj copy of octet 17)
+C>  - 7 Lov - orientation of grid
+C>  - 8 Dx - x-dir increment
+C>  - 9 Dy - y-dir increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode flag
+C>  - 12 Latin 1 - first lat from pole of secant cone inter
+C>  - 13 Latin 2 - second lat from pole of secant cone inter
+C> - Staggered arakawa rotated lat/lon grids (203 e stagger)
+C>  - 2 N(i) nr points on rotated latitude circle
+C>  - 3 N(j) nr points on rotated longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C> - Staggered arakawa rotated lat/lon grids (205 a,b,c,d staggers)
+C>  - 2 N(i) nr points on rotated latitude circle
+C>  - 3 N(j) nr points on rotated longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C>  - 12 Latitude of last point
+C>  - 13 Longitude of last point
+C> @param[out] KRET Error return
+C>
+C> @note
+C> - KRET
+C>  - 0
+C>  - 4   - Data representation type not currently acceptable
+C>
+C> @author Bill Cavanaugh @date 1991-09-13
+
       SUBROUTINE FI633(MSGA,KPTR,KGDS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI633       EXTRACT INFO FROM GRIB-GDS
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 91-09-13
-C
-C ABSTRACT: EXTRACT INFORMATION ON UNLISTED GRID TO ALLOW
-C   CONVERSION TO OFFICE NOTE 84 FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C   91-09-13  CAVANAUGH
-C   95-03-20  M.BALDWIN   FI633 MODIFICATION TO GET
-C                         DATA REP TYPES [KGDS(1)] 201 AND 202 TO WORK.
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   98-09-08  BALDWIN     ADD DATA REP TYPE [KGDS(1)] 203
-C   07-04-24  VUONG       ADD DATA REP TYPE [KGDS(1)] 204
-C   10-07-20  GAYNO       ADD DATA REP TYPE [KGDS(1)] 205
-C                        
-C
-C USAGE:    CALL FI633(MSGA,KPTR,KGDS,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA      - ARRAY CONTAINING GRIB MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - TOTAL LENGTH OF GRIB MESSAGE
-C          (2)   - LENGTH OF INDICATOR (SECTION  0)
-C          (3)   - LENGTH OF PDS       (SECTION  1)
-C          (4)   - LENGTH OF GDS       (SECTION  2)
-C          (5)   - LENGTH OF BMS       (SECTION  3)
-C          (6)   - LENGTH OF BDS       (SECTION  4)
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - BIT POINTER
-C          (9)   - GRIB START BIT NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C         (11)   - NR UNUSED BITS AT END OF SECTION 3
-C         (12)   - BIT MAP FLAG
-C         (13)   - NR UNUSED BITS AT END OF SECTION 2
-C         (14)   - BDS FLAGS
-C         (15)   - NR UNUSED BITS AT END OF SECTION 4
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KGDS     - ARRAY CONTAINING GDS ELEMENTS.
-C          (1)   - DATA REPRESENTATION TYPE
-C          (19)  - NUMBER OF VERTICAL COORDINATE PARAMETERS
-C          (20)  - OCTET NUMBER OF THE LIST OF VERTICAL COORDINATE
-C                  PARAMETERS
-C                  OR
-C                  OCTET NUMBER OF THE LIST OF NUMBERS OF POINTS
-C                  IN EACH ROW
-C                  OR
-C                  255 IF NEITHER ARE PRESENT
-C          (21)  - FOR GRIDS WITH PL, NUMBER OF POINTS IN GRID
-C          (22)  - NUMBER OF WORDS IN EACH ROW
-C       LATITUDE/LONGITUDE GRIDS
-C          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C          (4)   - LA(1) LATITUDE OF ORIGIN
-C          (5)   - LO(1) LONGITUDE OF ORIGIN
-C          (6)   - RESOLUTION FLAG
-C          (7)   - LA(2) LATITUDE OF EXTREME POINT
-C          (8)   - LO(2) LONGITUDE OF EXTREME POINT
-C          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C          (10)  - DJ LATITUDINAL DIRECTION INCREMENT
-C          (11)  - SCANNING MODE FLAG
-C       POLAR STEREOGRAPHIC GRIDS
-C          (2)   - N(I) NR POINTS ALONG LAT CIRCLE
-C          (3)   - N(J) NR POINTS ALONG LON CIRCLE
-C          (4)   - LA(1) LATITUDE OF ORIGIN
-C          (5)   - LO(1) LONGITUDE OF ORIGIN
-C          (6)   - RESERVED
-C          (7)   - LOV GRID ORIENTATION
-C          (8)   - DX - X DIRECTION INCREMENT
-C          (9)   - DY - Y DIRECTION INCREMENT
-C          (10)  - PROJECTION CENTER FLAG
-C          (11)  - SCANNING MODE
-C       SPHERICAL HARMONIC COEFFICIENTS
-C          (2)   - J PENTAGONAL RESOLUTION PARAMETER
-C          (3)   - K      "          "         "
-C          (4)   - M      "          "         "
-C          (5)   - REPRESENTATION TYPE
-C          (6)   - COEFFICIENT STORAGE MODE
-C       MERCATOR GRIDS
-C          (2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C          (3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C          (4)   - LA(1) LATITUDE OF ORIGIN
-C          (5)   - LO(1) LONGITUDE OF ORIGIN
-C          (6)   - RESOLUTION FLAG
-C          (7)   - LA(2) LATITUDE OF LAST GRID POINT
-C          (8)   - LO(2) LONGITUDE OF LAST GRID POINT
-C          (9)   - LATIN - LATITUDE OF PROJECTION INTERSECTION
-C          (10)  - RESERVED
-C          (11)  - SCANNING MODE FLAG
-C          (12)  - LONGITUDINAL DIR GRID LENGTH
-C          (13)  - LATITUDINAL DIR GRID LENGTH
-C       LAMBERT CONFORMAL GRIDS
-C          (2)   - NX NR POINTS ALONG X-AXIS
-C          (3)   - NY NR POINTS ALONG Y-AXIS
-C          (4)   - LA1 LAT OF ORIGIN (LOWER LEFT)
-C          (5)   - LO1 LON OF ORIGIN (LOWER LEFT)
-C          (6)   - RESOLUTION (RIGHT ADJ COPY OF OCTET 17)
-C          (7)   - LOV - ORIENTATION OF GRID
-C          (8)   - DX - X-DIR INCREMENT
-C          (9)   - DY - Y-DIR INCREMENT
-C          (10)  - PROJECTION CENTER FLAG
-C          (11)  - SCANNING MODE FLAG
-C          (12)  - LATIN 1 - FIRST LAT FROM POLE OF SECANT CONE INTER
-C          (13)  - LATIN 2 - SECOND LAT FROM POLE OF SECANT CONE INTER
-C       STAGGERED ARAKAWA ROTATED LAT/LON GRIDS (203 E STAGGER)
-C          (2)   - N(I) NR POINTS ON ROTATED LATITUDE CIRCLE
-C          (3)   - N(J) NR POINTS ON ROTATED LONGITUDE MERIDIAN
-C          (4)   - LA(1) LATITUDE OF ORIGIN
-C          (5)   - LO(1) LONGITUDE OF ORIGIN
-C          (6)   - RESOLUTION FLAG
-C          (7)   - LA(2) LATITUDE OF CENTER
-C          (8)   - LO(2) LONGITUDE OF CENTER
-C          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C          (10)  - DJ LATITUDINAL DIRECTION INCREMENT
-C          (11)  - SCANNING MODE FLAG
-C       STAGGERED ARAKAWA ROTATED LAT/LON GRIDS (205 A,B,C,D STAGGERS)
-C          (2)   - N(I) NR POINTS ON ROTATED LATITUDE CIRCLE
-C          (3)   - N(J) NR POINTS ON ROTATED LONGITUDE MERIDIAN
-C          (4)   - LA(1) LATITUDE OF ORIGIN
-C          (5)   - LO(1) LONGITUDE OF ORIGIN
-C          (6)   - RESOLUTION FLAG
-C          (7)   - LA(2) LATITUDE OF CENTER
-C          (8)   - LO(2) LONGITUDE OF CENTER
-C          (9)   - DI LONGITUDINAL DIRECTION OF INCREMENT
-C          (10)  - DJ LATITUDINAL DIRECTION INCREMENT
-C          (11)  - SCANNING MODE FLAG
-C          (12)  - LATITUDE OF LAST POINT
-C          (13)  - LONGITUDE OF LAST POINT
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET       - ERROR RETURN
-C
-C REMARKS:
-C     KRET = 0
-C          = 4   - DATA REPRESENTATION TYPE NOT CURRENTLY ACCEPTABLE
-C
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  HDS9000
-C
-C$$$
+
 C  ************************************************************
 C                       INCOMING MESSAGE HOLDER
       CHARACTER*1   MSGA(*)
@@ -1779,97 +1727,174 @@ C
       END IF
       RETURN
       END
+
+
+C> @brief Extract or generate bit map for output
+C> @author Bill Cavanaugh @date 1991-09-13
+
+C> If bit map sec is available in grib message, extract
+C> for program use, otherwise generate an appropriate bit map.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1991-09-13
+C> - Bill Cavanaugh 1991-11-12 Modified size of ecmwf grids 5 - 8.
+C> - Mark Iredell 1995-10-31 removed saves and prints
+C> - W. Bostelman 1997-02-12 corrects ecmwf us grid 2 processing
+C> - Mark Iredell 1997-09-19 vectorized bitmap decoder
+C> - Stephen Gilbert 1998-09-02 corrected error in map size for u.s. grid 92
+C> - M. Baldwin 1998-09-08 add grids 190,192
+C> - M. Baldwin 1999-01-20 add grids 236,237
+C> - Eric Rogers 2001-10-02 redefined grid #218 for 12 km eta
+C> redefined grid 192 for new 32-km eta grid
+C> - Stephen Gilbert 2003-06-30 added grids 145 and 146 for cmaq
+C> and grid 175 for awips over guam.
+C> - Boi Vuong 2004-09-02 Added awips grids 147, 148, 173 and 254
+C> - Boi Vuong 2006-12-12 Added awips grids 120
+C> - Boi Vuong 2007-04-20 Added awips grids 176
+C> - Boi Vuong 2007-06-11 Added awips grids 11 to 18 and 122 to 125
+C> and 180 to 183
+C> - Boi Vuong 2010-08-05 Added new grid 184, 199, 83 and
+C> redefined grid 90 for new rtma conus 1.27-km
+C> redefined grid 91 for new rtma alaska 2.976-km
+C> redefined grid 92 for new rtma alaska 1.488-km
+C> - Boi Vuong 2012-02-28 Added new grid 200
+C>
+C> @param[in] MSGA Bufr message
+C> @param[inout] KPTR Array containing storage for following parameters
+C> - 1 Total length of grib message
+C> - 2 Length of indicator (section  0)
+C> - 3 Length of pds (section  1)
+C> - 4 Length of gds (section  2)
+C> - 5 Length of bms (section  3)
+C> - 6 Length of bds (section  4)
+C> - 7 Value of current byte
+C> - 8 Bit pointer
+C> - 9 Grib start bit nr
+C> - 10 Grib/grid element count
+C> - 11 Nr unused bits at end of section 3
+C> - 12 Bit map flag
+C> - 13 Nr unused bits at end of section 2
+C> - 14 Bds flags
+C> - 15 Nr unused bits at end of section 4
+C> @param[in] KPDS Array containing pds elements.
+C> - 1 Id of center
+C> - 2 Model identification
+C> - 3 Grid identification
+C> - 4 Gds/bms flag
+C> - 5 Indicator of parameter
+C> - 6 Type of level
+C> - 7 Height/pressure , etc of level
+C> - 8 Year of century
+C> - 9 Month of year
+C> - 10 Day of month
+C> - 11 Hour of day
+C> - 12 Minute of hour
+C> - 13 Indicator of forecast time unit
+C> - 14 Time range 1
+C> - 15 Time range 2
+C> - 16 Time range flag
+C> - 17 Number included in average
+C> @param[in] KGDS Array containing gds elements.
+C>  - 1) Data representation type
+C>  - 19 Number of vertical coordinate parameters
+C>  - 20 Octet number of the list of vertical coordinate
+C>  parameters Or Octet number of the list of numbers of points
+C>  in each row Or 255 if neither are present.
+C>  - 21 For grids with pl, number of points in grid
+C>  - 22 Number of words in each row
+C> - Longitude grids
+C>  - 2) N(i) nr points on latitude circle
+C>  - 3) N(j) nr points on longitude meridian
+C>  - 4) La(1) latitude of origin
+C>  - 5) Lo(1) longitude of origin
+C>  - 6) Resolution flag
+C>  - 7) La(2) latitude of extreme point
+C>  - 8) Lo(2) longitude of extreme point
+C>  - 9) Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C> - Polar stereographic grids
+C>  - 2) N(i) nr points along lat circle
+C>  - 3) N(j) nr points along lon circle
+C>  - 4) La(1) latitude of origin
+C>  - 5) Lo(1) longitude of origin
+C>  - 6) Reserved
+C>  - 7) Lov grid orientation
+C>  - 8) Dx - x direction increment
+C>  - 9) Dy - y direction increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode
+C> - Spherical harmonic coefficients
+C>  - 2 J pentagonal resolution parameter
+C>  - 3 K pentagonal resolution parameter
+C>  - 4 M pentagonal resolution parameter
+C>  - 5 Representation type
+C>  - 6 Coefficient storage mode
+C> - Mercator grids
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of last grid point
+C>  - 8 Lo(2) longitude of last grid point
+C>  - 9 Latin - latitude of projection intersection
+C>  - 10 Reserved
+C>  - 11 Scanning mode flag
+C>  - 12 Longitudinal dir grid length
+C>  - 13 Latitudinal dir grid length
+C> - Lambert conformal grids
+C>  - 2 Nx nr points along x-axis
+C>  - 3 Ny nr points along y-axis
+C>  - 4 La1 lat of origin (lower left)
+C>  - 5 Lo1 lon of origin (lower left)
+C>  - 6 Resolution (right adj copy of octet 17)
+C>  - 7 Lov - orientation of grid
+C>  - 8 Dx - x-dir increment
+C>  - 9 Dy - y-dir increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode flag
+C>  - 12 Latin 1 - first lat from pole of secant cone inter
+C>  - 13 Latin 2 - second lat from pole of secant cone inter
+C> - Staggered arakawa rotated lat/lon grids (203 e stagger)
+C>  - 2 N(i) nr points on rotated latitude circle
+C>  - 3 N(j) nr points on rotated longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C> - Staggered arakawa rotated lat/lon grids (205 a,b,c,d staggers)
+C>  - 2 N(i) nr points on rotated latitude circle
+C>  - 3 N(j) nr points on rotated longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C>  - 12 Latitude of last point
+C>  - 13 Longitude of last point
+C> @param[out] KBMS Bitmap describing location of output elements.
+C> @param[out] KRET Error return
+C>
+C> @note
+C> - KRET
+C>  -  0 - No error
+C>  -  5 - Grid not avail for center indicated
+C>  - 10 - Incorrect center indicator
+C>  - 12 - Bytes 5-6 are not zero in bms, predefined bit map
+C>  not provided by this center
+C>
+C> @author Bill Cavanaugh @date 1991-09-13
+
       SUBROUTINE FI634(MSGA,KPTR,KPDS,KGDS,KBMS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI634       EXTRACT OR GENERATE BIT MAP FOR OUTPUT
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 91-09-13
-C
-C ABSTRACT: IF BIT MAP SEC   IS AVAILABLE IN GRIB MESSAGE, EXTRACT
-C   FOR PROGRAM USE, OTHERWISE GENERATE AN APPROPRIATE BIT MAP.
-C
-C PROGRAM HISTORY LOG:
-C   91-09-13  CAVANAUGH
-C   91-11-12  CAVANAUGH   MODIFIED SIZE OF ECMWF GRIDS 5 - 8.
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   97-02-12  W BOSTELMAN CORRECTS ECMWF US GRID 2 PROCESSING
-C   97-09-19  IREDELL     VECTORIZED BITMAP DECODER
-C   98-09-02  GILBERT     CORRECTED ERROR IN MAP SIZE FOR U.S. GRID 92
-C   98-09-08  BALDWIN     ADD GRIDS 190,192
-C   99-01-20  BALDWIN     ADD GRIDS 236,237
-C   01-10-02  ROGERS      REDEFINED GRID #218 FOR 12 KM ETA
-C                         REDEFINED GRID 192 FOR NEW 32-KM ETA GRID
-C 2003-06-30  GILBERT      ADDED GRIDS 145 and 146 for CMAQ
-C                          and GRID 175 for AWIPS over GUAM.
-C 2004-09-02  VUONG       ADDED AWIPS GRIDS 147, 148, 173 AND 254
-C 2006-12-12  VUONG       ADDED AWIPS GRIDS 120
-C 2007-04-20  VUONG       ADDED AWIPS GRIDS 176
-C 2007-06-11  VUONG       ADDED AWIPS GRIDS 11 TO 18 AND 122 TO 125
-C                         AND 180 TO 183
-C 2010-08-05  VUONG       ADDED NEW GRID 184, 199, 83 AND
-C                         REDEFINED GRID 90 FOR NEW RTMA CONUS 1.27-KM
-C                         REDEFINED GRID 91 FOR NEW RTMA ALASKA 2.976-KM
-C                         REDEFINED GRID 92 FOR NEW RTMA ALASKA 1.488-KM
-C 2012-02-28  VUONG       ADDED NEW GRID 200
-C
-C USAGE:    CALL FI634(MSGA,KPTR,KPDS,KGDS,KBMS,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA       - BUFR MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - TOTAL LENGTH OF GRIB MESSAGE
-C          (2)   - LENGTH OF INDICATOR (SECTION  0)
-C          (3)   - LENGTH OF PDS       (SECTION  1)
-C          (4)   - LENGTH OF GDS       (SECTION  2)
-C          (5)   - LENGTH OF BMS       (SECTION  3)
-C          (6)   - LENGTH OF BDS       (SECTION  4)
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - BIT POINTER
-C          (9)   - GRIB START BIT NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C         (11)   - NR UNUSED BITS AT END OF SECTION 3
-C         (12)   - BIT MAP FLAG
-C         (13)   - NR UNUSED BITS AT END OF SECTION 2
-C         (14)   - BDS FLAGS
-C         (15)   - NR UNUSED BITS AT END OF SECTION 4
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C          (1)   - ID OF CENTER
-C          (2)   - MODEL IDENTIFICATION
-C          (3)   - GRID IDENTIFICATION
-C          (4)   - GDS/BMS FLAG
-C          (5)   - INDICATOR OF PARAMETER
-C          (6)   - TYPE OF LEVEL
-C          (7)   - HEIGHT/PRESSURE , ETC OF LEVEL
-C          (8)   - YEAR OF CENTURY
-C          (9)   - MONTH OF YEAR
-C          (10)  - DAY OF MONTH
-C          (11)  - HOUR OF DAY
-C          (12)  - MINUTE OF HOUR
-C          (13)  - INDICATOR OF FORECAST TIME UNIT
-C          (14)  - TIME RANGE 1
-C          (15)  - TIME RANGE 2
-C          (16)  - TIME RANGE FLAG
-C          (17)  - NUMBER INCLUDED IN AVERAGE
-C
-C   OUTPUT ARGUMENT LIST:
-C     KBMS       - BITMAP DESCRIBING LOCATION OF OUTPUT ELEMENTS.
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET       - ERROR RETURN
-C
-C REMARKS:
-C     KRET   = 0 - NO ERROR
-C            = 5 - GRID NOT AVAIL FOR CENTER INDICATED
-C            =10 - INCORRECT CENTER INDICATOR
-C            =12 - BYTES 5-6 ARE NOT ZERO IN BMS, PREDEFINED BIT MAP
-C                  NOT PROVIDED BY THIS CENTER
-C
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  HDS9000
-C
-C$$$
+
 C
 C                       INCOMING MESSAGE HOLDER
       CHARACTER*1   MSGA(*)
@@ -2835,34 +2860,26 @@ C     PRINT *,'EXIT FI634'
       RETURN
       END
 C-----------------------------------------------------------------------
+
+C> @brief Extract bit map.
+C> @author Mark Iredell @date 1997-09-19
+
+C> Extract the packed bitmap into a logical array.
+C>
+C> Program history log:
+C>   97-09-19 Vectorized bitmap decoder.
+C>
+C> @param[in] NPTS XInteger number of points in the bitmap field
+C> @param[in] NSKP Integer number of bits to skip in grib message
+C> @param[in] MSGA Character*1 grib message
+C> @param[out] KBMS Logical*1 bitmap
+C>
+C> @note Subprogram can be called from a multiprocessing environment.
+C>
+C> @author Mark Iredell @date 1997-09-19
+
       SUBROUTINE FI634X(NPTS,NSKP,MSGA,KBMS)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI634X      EXTRACT BIT MAP
-C   PRGMMR: IREDELL          ORG: W/NP23     DATE: 91-09-19
-C
-C ABSTRACT: EXTRACT THE PACKED BITMAP INTO A LOGICAL ARRAY.
-C
-C PROGRAM HISTORY LOG:
-C   97-09-19  IREDELL     VECTORIZED BITMAP DECODER
-C
-C USAGE:    CALL FI634X(NPTS,NSKP,MSGA,KBMS)
-C   INPUT ARGUMENT LIST:
-C     NPTS       - INTEGER NUMBER OF POINTS IN THE BITMAP FIELD
-C     NSKP       - INTEGER NUMBER OF BITS TO SKIP IN GRIB MESSAGE
-C     MSGA       - CHARACTER*1 GRIB MESSAGE
-C
-C   OUTPUT ARGUMENT LIST:
-C     KBMS       - LOGICAL*1 BITMAP
-C
-C REMARKS:
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  CRAY
-C
-C$$$
+
       CHARACTER*1   MSGA(*)
       LOGICAL*1     KBMS(NPTS)
       INTEGER       ICHK(NPTS)
@@ -2871,98 +2888,172 @@ C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       KBMS=ICHK.NE.0
 C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       END
+
+
+C> @brief Extract grib data elements from bds
+C> @author Bill Cavanaugh @date 1991-09-13
+
+C> Extract grib data from binary data section and place
+C> into output array in proper position.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1991-09-13
+C> - Bill Cavanaugh 1994-04-01 Modified code to include decimal scaling when
+C> calculating the value of data points specified
+C> as being equal to the reference value
+C> - Farley 1994-11-10 Increased mxsize from 72960 to 260000
+C> for .5 degree sst analysis fields.
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - Mark Iredell 1998-08-31 Eliminated need for mxsize
+C>
+C> @param[in] MSGA Array containing grib message
+C> @param[inout] KPTR Array containing storage for following parameters
+C> - 1 Total length of grib message
+C> - 2 Length of indicator (section  0)
+C> - 3 Length of pds (section  1)
+C> - 4 Length of gds (section  2)
+C> - 5 Length of bms (section  3)
+C> - 6 Length of bds (section  4)
+C> - 7 Value of current byte
+C> - 8 Bit pointer
+C> - 9 Grib start bit nr
+C> - 10 Grib/grid element count
+C> - 11 Nr unused bits at end of section 3
+C> - 12 Bit map flag
+C> - 13 Nr unused bits at end of section 2
+C> - 14 Bds flags
+C> - 15 Nr unused bits at end of section 4
+C> - 16 Reserved
+C> - 17 Reserved
+C> - 18 Reserved
+C> - 19 Binary scale factor
+C> - 20 Num bits used to pack each datum
+C> @param[in] KPDS Array containing pds elements.
+C> See initial routine
+C> @param[in] KGDS Array containing gds elements.
+C>  - 1) Data representation type
+C>  - 19 Number of vertical coordinate parameters
+C>  - 20 Octet number of the list of vertical coordinate
+C>  parameters Or Octet number of the list of numbers of points
+C>  in each row Or 255 if neither are present.
+C>  - 21 For grids with pl, number of points in grid
+C>  - 22 Number of words in each row
+C> - Longitude grids
+C>  - 2) N(i) nr points on latitude circle
+C>  - 3) N(j) nr points on longitude meridian
+C>  - 4) La(1) latitude of origin
+C>  - 5) Lo(1) longitude of origin
+C>  - 6) Resolution flag
+C>  - 7) La(2) latitude of extreme point
+C>  - 8) Lo(2) longitude of extreme point
+C>  - 9) Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C> - Polar stereographic grids
+C>  - 2) N(i) nr points along lat circle
+C>  - 3) N(j) nr points along lon circle
+C>  - 4) La(1) latitude of origin
+C>  - 5) Lo(1) longitude of origin
+C>  - 6) Reserved
+C>  - 7) Lov grid orientation
+C>  - 8) Dx - x direction increment
+C>  - 9) Dy - y direction increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode
+C> - Spherical harmonic coefficients
+C>  - 2 J pentagonal resolution parameter
+C>  - 3 K pentagonal resolution parameter
+C>  - 4 M pentagonal resolution parameter
+C>  - 5 Representation type
+C>  - 6 Coefficient storage mode
+C> - Mercator grids
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of last grid point
+C>  - 8 Lo(2) longitude of last grid point
+C>  - 9 Latin - latitude of projection intersection
+C>  - 10 Reserved
+C>  - 11 Scanning mode flag
+C>  - 12 Longitudinal dir grid length
+C>  - 13 Latitudinal dir grid length
+C> - Lambert conformal grids
+C>  - 2 Nx nr points along x-axis
+C>  - 3 Ny nr points along y-axis
+C>  - 4 La1 lat of origin (lower left)
+C>  - 5 Lo1 lon of origin (lower left)
+C>  - 6 Resolution (right adj copy of octet 17)
+C>  - 7 Lov - orientation of grid
+C>  - 8 Dx - x-dir increment
+C>  - 9 Dy - y-dir increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode flag
+C>  - 12 Latin 1 - first lat from pole of secant cone inter
+C>  - 13 Latin 2 - second lat from pole of secant cone inter
+C> - Staggered arakawa rotated lat/lon grids (203 e stagger)
+C>  - 2 N(i) nr points on rotated latitude circle
+C>  - 3 N(j) nr points on rotated longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C> - Staggered arakawa rotated lat/lon grids (205 a,b,c,d staggers)
+C>  - 2 N(i) nr points on rotated latitude circle
+C>  - 3 N(j) nr points on rotated longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C>  - 12 Latitude of last point
+C>  - 13 Longitude of last point
+C> @param[in] KBMS Bitmap describing location of output elements.
+C> -KBDS Information extracted from binary data section
+C>  - KBDS(1)  - N1
+C>  - KBDS(2)  - N2
+C>  - KBDS(3)  - P1
+C>  - KBDS(4)  - P2
+C>  - KBDS(5)  - Bit pointer to 2nd order widths
+C>  - KBDS(6)  - Bit pointer to 2nd order bit maps
+C>  - KBDS(7)  - Bit pointer to first order values
+C>  - KBDS(8)  - Bit pointer to second order values
+C>  - KBDS(9)  - Bit pointer start of bds
+C>  - KBDS(10) - Bit pointer main bit map
+C>  - KBDS(11) - Binary scaling
+C>  - KBDS(12) - Decimal scaling
+C>  - KBDS(13) - Bit width of first order values
+C>  - KBDS(14) - Bit map flag
+C> 0 = no second order bit map
+C> 1 = second order bit map present
+C> - KBDS(15) - Second order bit width
+C> - KBDS(16) - Constant / different widths
+C> 0 = constant widths
+C> 1 = different widths
+C> - KBDS(17) - Single datum / matrix
+C>  - 0 = single datum at each grid point
+C>  - 1 = matrix of values at each grid point
+C>  - (18-20) - Unused
+C> @param[out] DATA Real*4 array of gridded elements in grib message.
+C> @param[out] KRET Error return
+C>
+C> @note
+C> - Error return
+C>  - 3 = Unpacked field is larger than 65160
+C>  - 6 = Does not match nr of entries for this grib/grid
+C>  - 7 = Number of bits in fill too large
+C>
+C> @author Bill Cavanaugh @date 1991-09-13
       SUBROUTINE FI635(MSGA,KPTR,KPDS,KGDS,KBMS,DATA,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI635         EXTRACT GRIB DATA ELEMENTS FROM BDS
-C   PRGMMR: BILL CAVANAUGH   ORG: W/NMC42    DATE: 91-09-13
-C
-C ABSTRACT: EXTRACT GRIB DATA FROM BINARY DATA SECTION AND PLACE
-C           INTO OUTPUT ARRAY IN PROPER POSITION.
-C
-C PROGRAM HISTORY LOG:
-C   91-09-13  CAVANAUGH
-C   94-04-01  CAVANAUGH  MODIFIED CODE TO INCLUDE DECIMAL SCALING WHEN
-C                        CALCULATING THE VALUE OF DATA POINTS SPECIFIED
-C                        AS BEING EQUAL TO THE REFERENCE VALUE
-C   94-11-10  FARLEY     INCREASED MXSIZE FROM 72960 TO 260000
-C                        FOR .5 DEGREE SST ANALYSIS FIELDS
-C   95-10-31  IREDELL    REMOVED SAVES AND PRINTS
-C   98-08-31  IREDELL    ELIMINATED NEED FOR MXSIZE
-C
-C USAGE:    CALL FI635(MSGA,KPTR,KPDS,KGDS,KBMS,DATA,KRET)
-C   INPUT ARGUMENT LIST:
-C     MSGA       - ARRAY CONTAINING GRIB MESSAGE
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C          (1)   - TOTAL LENGTH OF GRIB MESSAGE
-C          (2)   - LENGTH OF INDICATOR (SECTION  0)
-C          (3)   - LENGTH OF PDS       (SECTION  1)
-C          (4)   - LENGTH OF GDS       (SECTION  2)
-C          (5)   - LENGTH OF BMS       (SECTION  3)
-C          (6)   - LENGTH OF BDS       (SECTION  4)
-C          (7)   - VALUE OF CURRENT BYTE
-C          (8)   - BIT POINTER
-C          (9)   - GRIB START BIT NR
-C         (10)   - GRIB/GRID ELEMENT COUNT
-C         (11)   - NR UNUSED BITS AT END OF SECTION 3
-C         (12)   - BIT MAP FLAG
-C         (13)   - NR UNUSED BITS AT END OF SECTION 2
-C         (14)   - BDS FLAGS
-C         (15)   - NR UNUSED BITS AT END OF SECTION 4
-C         (16)   - RESERVED
-C         (17)   - RESERVED
-C         (18)   - RESERVED
-C         (19)   - BINARY SCALE FACTOR
-C         (20)   - NUM BITS USED TO PACK EACH DATUM
-C     KPDS     - ARRAY CONTAINING PDS ELEMENTS.
-C                  SEE INITIAL ROUTINE
-C     KBMS       - BITMAP DESCRIBING LOCATION OF OUTPUT ELEMENTS.
-C
-C   OUTPUT ARGUMENT LIST:
-C     KBDS       - INFORMATION EXTRACTED FROM BINARY DATA SECTION
-C     KBDS(1)  - N1
-C     KBDS(2)  - N2
-C     KBDS(3)  - P1
-C     KBDS(4)  - P2
-C     KBDS(5)  - BIT POINTER TO 2ND ORDER WIDTHS
-C     KBDS(6)  -  "    "     "   "   "    BIT MAPS
-C     KBDS(7)  -  "    "     "  FIRST ORDER VALUES
-C     KBDS(8)  -  "    "     "  SECOND ORDER VALUES
-C     KBDS(9)  -  "    "     START OF BDS
-C     KBDS(10) -  "    "     MAIN BIT MAP
-C     KBDS(11) - BINARY SCALING
-C     KBDS(12) - DECIMAL SCALING
-C     KBDS(13) - BIT WIDTH OF FIRST ORDER VALUES
-C     KBDS(14) - BIT MAP FLAG
-C                 0 = NO SECOND ORDER BIT MAP
-C                 1 = SECOND ORDER BIT MAP PRESENT
-C     KBDS(15) - SECOND ORDER BIT WIDTH
-C     KBDS(16) - CONSTANT / DIFFERENT WIDTHS
-C                 0 = CONSTANT WIDTHS
-C                 1 = DIFFERENT WIDTHS
-C     KBDS(17) - SINGLE DATUM / MATRIX
-C                 0 = SINGLE DATUM AT EACH GRID POINT
-C                 1 = MATRIX OF VALUES AT EACH GRID POINT
-C       (18-20)- UNUSED
-C
-C     DATA       - REAL*4 ARRAY OF GRIDDED ELEMENTS IN GRIB MESSAGE.
-C     KPTR       - ARRAY CONTAINING STORAGE FOR FOLLOWING PARAMETERS
-C                  SEE INPUT LIST
-C     KRET       - ERROR RETURN
-C
-C REMARKS:
-C     ERROR RETURN
-C              3 = UNPACKED FIELD IS LARGER THAN 65160
-C              6 = DOES NOT MATCH NR OF ENTRIES FOR THIS GRIB/GRID
-C              7 = NUMBER OF BITS IN FILL TOO LARGE
-C
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  HDS9000
-C
-C$$$
+
 C
       CHARACTER*1   MSGA(*)
 C
@@ -3472,65 +3563,142 @@ C  --------------
 C     PRINT *,'EXIT FI635'
       RETURN
       END
+
+C> @brief Process second order packing.
+C> @author Bill Cavanaugh @date 1992-09-22
+
+C> Process second order packing from the binary data section
+C> (bds) for single data items grid point data.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-06-08
+C> - Bill Cavanaugh 1993-12-15 Modified second order pointers to first order
+C> values and second order values correctly.
+C> - Ralph Jones 1995-04-26 Fi636 corection for 2nd order complex
+C> Unpacking.
+C> - Mark Iredell 1995-10-31 Saves and prints.
+C>
+C> @param[in] MSGA Array containing grib message
+C> @param[in] REFNCE Reference value
+C> @param[in] KPTR Work array
+C> @param[out] DATA Location of output array
+C> - KBDS Working array
+C>  - KBDS(1) N1
+C>  - KBDS(2) N2
+C>  - KBDS(3) P1
+C>  - KBDS(4) P2
+C>  - KBDS(5) Bit pointer to 2nd order widths
+C>  - KBDS(6) Bit pointer to 2nd order bit maps
+C>  - KBDS(7) Bit pointer to first order values
+C>  - KBDS(8) Bit pointer to second order values
+C>  - KBDS(9) Bit pointer start of bds
+C>  - KBDS(10) Bit pointer main bit map
+C>  - KBDS(11) Binary scaling
+C>  - KBDS(12) Decimal scaling
+C>  - KBDS(13) Bit width of first order values
+C>  - KBDS(14) Bit map flag
+C>   - 0 = No second order bit map
+C>   - 1 = Second order bit map present
+C>  - KBDS(15) Second order bit width
+C>  - KBDS(16) Constant / different widths
+C>   - 0 = Constant widths
+C>   - 1 = Different widths
+C>  - KBDS(17) Single datum / matrix
+C>   - 0 = Single datum at each grid point
+C>   - 1 = Matrix of values at each grid point
+C>  - KBDS(18-20) Unused
+C> @param[in] KBMS
+C> @param[in] KPDS
+C> @param[in] KGDS Array containing gds elements.
+C>  - 1) Data representation type
+C>  - 19 Number of vertical coordinate parameters
+C>  - 20 Octet number of the list of vertical coordinate
+C>  parameters Or Octet number of the list of numbers of points
+C>  in each row Or 255 if neither are present.
+C>  - 21 For grids with pl, number of points in grid
+C>  - 22 Number of words in each row
+C> - Longitude grids
+C>  - 2) N(i) nr points on latitude circle
+C>  - 3) N(j) nr points on longitude meridian
+C>  - 4) La(1) latitude of origin
+C>  - 5) Lo(1) longitude of origin
+C>  - 6) Resolution flag
+C>  - 7) La(2) latitude of extreme point
+C>  - 8) Lo(2) longitude of extreme point
+C>  - 9) Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C> - Polar stereographic grids
+C>  - 2) N(i) nr points along lat circle
+C>  - 3) N(j) nr points along lon circle
+C>  - 4) La(1) latitude of origin
+C>  - 5) Lo(1) longitude of origin
+C>  - 6) Reserved
+C>  - 7) Lov grid orientation
+C>  - 8) Dx - x direction increment
+C>  - 9) Dy - y direction increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode
+C> - Spherical harmonic coefficients
+C>  - 2 J pentagonal resolution parameter
+C>  - 3 K pentagonal resolution parameter
+C>  - 4 M pentagonal resolution parameter
+C>  - 5 Representation type
+C>  - 6 Coefficient storage mode
+C> - Mercator grids
+C>  - 2 N(i) nr points on latitude circle
+C>  - 3 N(j) nr points on longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of last grid point
+C>  - 8 Lo(2) longitude of last grid point
+C>  - 9 Latin - latitude of projection intersection
+C>  - 10 Reserved
+C>  - 11 Scanning mode flag
+C>  - 12 Longitudinal dir grid length
+C>  - 13 Latitudinal dir grid length
+C> - Lambert conformal grids
+C>  - 2 Nx nr points along x-axis
+C>  - 3 Ny nr points along y-axis
+C>  - 4 La1 lat of origin (lower left)
+C>  - 5 Lo1 lon of origin (lower left)
+C>  - 6 Resolution (right adj copy of octet 17)
+C>  - 7 Lov - orientation of grid
+C>  - 8 Dx - x-dir increment
+C>  - 9 Dy - y-dir increment
+C>  - 10 Projection center flag
+C>  - 11 Scanning mode flag
+C>  - 12 Latin 1 - first lat from pole of secant cone inter
+C>  - 13 Latin 2 - second lat from pole of secant cone inter
+C> - Staggered arakawa rotated lat/lon grids (203 e stagger)
+C>  - 2 N(i) nr points on rotated latitude circle
+C>  - 3 N(j) nr points on rotated longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C> - Staggered arakawa rotated lat/lon grids (205 a,b,c,d staggers)
+C>  - 2 N(i) nr points on rotated latitude circle
+C>  - 3 N(j) nr points on rotated longitude meridian
+C>  - 4 La(1) latitude of origin
+C>  - 5 Lo(1) longitude of origin
+C>  - 6 Resolution flag
+C>  - 7 La(2) latitude of center
+C>  - 8 Lo(2) longitude of center
+C>  - 9 Di longitudinal direction of increment
+C>  - 10 Dj latitudinal direction increment
+C>  - 11 Scanning mode flag
+C>  - 12 Latitude of last point
+C>  - 13 Longitude of last point
+C>
+C> @author Bill Cavanaugh @date 1992-09-22
       SUBROUTINE FI636 (DATA,MSGA,KBMS,REFNCE,KPTR,KPDS,KGDS)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI636       PROCESS SECOND ORDER PACKING
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 92-09-22
-C
-C ABSTRACT: PROCESS SECOND ORDER PACKING FROM THE BINARY DATA SECTION
-C   (BDS) FOR SINGLE DATA ITEMS GRID POINT DATA
-C
-C PROGRAM HISTORY LOG:
-C   93-06-08  CAVANAUGH
-C   93-12-15  CAVANAUGH   MODIFIED SECOND ORDER POINTERS TO FIRST ORDER
-C                         VALUES AND SECOND ORDER VALUES CORRECTLY.
-C   95-04-26  R.E.JONES   FI636 CORECTION FOR 2ND ORDER COMPLEX
-C                         UNPACKING.
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI636 (DATA,MSGA,KBMS,REFNCE,KPTR,KPDS,KGDS)
-C   INPUT ARGUMENT LIST:
-C
-C     MSGA     - ARRAY CONTAINING GRIB MESSAGE
-C     REFNCE   - REFERENCE VALUE
-C     KPTR     - WORK ARRAY
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     DATA     - LOCATION OF OUTPUT ARRAY
-C              WORKING ARRAY
-C     KBDS(1)  - N1
-C     KBDS(2)  - N2
-C     KBDS(3)  - P1
-C     KBDS(4)  - P2
-C     KBDS(5)  - BIT POINTER TO 2ND ORDER WIDTHS
-C     KBDS(6)  -  "    "     "   "   "    BIT MAPS
-C     KBDS(7)  -  "    "     "  FIRST ORDER VALUES
-C     KBDS(8)  -  "    "     "  SECOND ORDER VALUES
-C     KBDS(9)  -  "    "     START OF BDS
-C     KBDS(10) -  "    "     MAIN BIT MAP
-C     KBDS(11) - BINARY SCALING
-C     KBDS(12) - DECIMAL SCALING
-C     KBDS(13) - BIT WIDTH OF FIRST ORDER VALUES
-C     KBDS(14) - BIT MAP FLAG
-C                 0 = NO SECOND ORDER BIT MAP
-C                 1 = SECOND ORDER BIT MAP PRESENT
-C     KBDS(15) - SECOND ORDER BIT WIDTH
-C     KBDS(16) - CONSTANT / DIFFERENT WIDTHS
-C                 0 = CONSTANT WIDTHS
-C                 1 = DIFFERENT WIDTHS
-C     KBDS(17) - SINGLE DATUM / MATRIX
-C                 0 = SINGLE DATUM AT EACH GRID POINT
-C                 1 = MATRIX OF VALUES AT EACH GRID POINT
-C       (18-20)- UNUSED
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  HDS, CRAY
-C
-C$$$
+
       REAL         DATA(*)
       REAL         REFN
       REAL         REFNCE
@@ -3771,45 +3939,33 @@ C  **************************************************************
 C     PRINT *,'EXIT FI636'
       RETURN
       END
+
+C> @brief Grib grid/size test.
+C> @author Bill Cavanaugh @date 1991-09-13
+
+C> To test when gds is available to see if size mismatch
+C> on existing grids (by center) is indicated.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1991-09-13
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - M. Bostelman 1997-02-12 Corrects ecmwf us grid 2 processing
+C> - Mark Iredell 1998-06-17 Removed alternate return
+C> - M. Baldwin 1999-01-20 Modify to handle grid 237
+C> - Boi Vuong 1909-05-21 Modify to handle grid 45
+C>
+C> @param[inout] J Size for indicated grid modified for ecmwf-us 2
+C> @param[in] KPDS
+C> @param[in] KGDS
+C> @param[out] KRET Error return (a mismatch was detected if kret is not zero)
+C>
+C> @note
+C> - KRET:
+C>  - 9 - Gds indicates size mismatch with std grid
+C>
+C> @author Bill Cavanaugh @date 1991-09-13
       SUBROUTINE FI637(J,KPDS,KGDS,KRET)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI637       GRIB GRID/SIZE TEST
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 91-09-13
-C
-C ABSTRACT: TO TEST WHEN GDS IS AVAILABLE TO SEE IF SIZE MISMATCH
-C   ON EXISTING GRIDS (BY CENTER) IS INDICATED
-C
-C PROGRAM HISTORY LOG:
-C   91-09-13  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   97-02-12  W BOSTELMAN CORRECTS ECMWF US GRID 2 PROCESSING
-C   98-06-17  IREDELL     REMOVED ALTERNATE RETURN
-C   99-01-20  BALDWIN    MODIFY TO HANDLE GRID 237
-C   09-05-21  VUONG      MODIFY TO HANDLE GRID 45
-C
-C USAGE:    CALL FI637(J,KPDS,KGDS,KRET)
-C   INPUT ARGUMENT LIST:
-C     J        - SIZE FOR INDICATED GRID
-C     KPDS     -
-C     KGDS     -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     J        - SIZE FOR INDICATED GRID MODIFIED FOR ECMWF-US 2
-C     KRET     - ERROR RETURN
-C                (A MISMATCH WAS DETECTED IF KRET IS NOT ZERO)
-C
-C REMARKS:
-C     KRET     -
-C          = 9 - GDS INDICATES SIZE MISMATCH WITH STD GRID
-C
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  HDS
-C
-C$$$
+
       INTEGER       KPDS(*)
       INTEGER       KGDS(*)
       INTEGER       J
@@ -3854,7 +4010,7 @@ C  ---------------------------------------
           KRET  = 9
           IF (KPDS(3).GE.1.AND.KPDS(3).LE.16) THEN
               IF (I.NE.J) THEN
-                IF (KPDS(3) .NE. 2) THEN 
+                IF (KPDS(3) .NE. 2) THEN
                   RETURN
                 ELSEIF (I .NE. 10512) THEN ! Test for US Grid 2
                   RETURN

@@ -1,95 +1,80 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI65        NMC OFFICE NOTE 29 REPORT PACKER
-C>   PRGMMR: KEYSER           ORG: NP22        DATE:1998-08-07
+C> @brief NMC office note 29 report packer.
+C> @author L. Marx @date 1990-01
+
+C> Packs an array of upper-air reports into the format
+C> described by NMC office note 29, or packs an array of surface
+C> reports into the format described by NMC office note 124. Input
+C> integer, real or character type as specified in the category
+C> tables in the write-up for w3fi64() (the office note 29 report
+C> packer) are converted to character data. Missing character data
+C> are specified as strings of 9's except for that converted from
+C> input character type which are generally specified as blanks.
+C> This library is similar to w3ai03() except w3ai03() was written in
+C> assembler.
 C>
-C> ABSTRACT: PACKS AN ARRAY OF UPPER-AIR REPORTS INTO THE FORMAT
-C>   DESCRIBED BY NMC OFFICE NOTE 29, OR PACKS AN ARRAY OF SURFACE
-C>   REPORTS INTO THE FORMAT DESCRIBED BY NMC OFFICE NOTE 124.  INPUT
-C>   INTEGER, REAL OR CHARACTER TYPE AS SPECIFIED IN THE CATEGORY
-C>   TABLES IN THE WRITE-UP FOR W3FI64 (THE OFFICE NOTE 29 REPORT
-C>   PACKER) ARE CONVERTED TO CHARACTER DATA.  MISSING CHARACTER DATA
-C>   ARE SPECIFIED AS STRINGS OF 9'S EXCEPT FOR THAT CONVERTED FROM
-C>   INPUT CHARACTER TYPE WHICH ARE GENERALLY SPECIFIED AS BLANKS.
-C>   THIS LIBRARY IS SIMILAR TO W3AI03 EXCEPT W3AI03 WAS WRITTEN IN
-C>   ASSEMBLER.
+C> Program history log:
+C> - L. Marx 1990-01 Converted code from assembler
+C> to vs fortran.
+C> - Dennis Keyser 1991-08-23 Use same arguments as w3ai03() ;
+C> Streamlined code; Docblocked and commented.
+C> - Dennis Keyser 1992-06-29 Convert to cray cft77 fortran.
+C> - Dennis Keyser 1992-07-09 Checks the number of characters
+C> used by each variable prior to conversion from
+C> integer to character format; If this number is
+C> greater than the number of characters allocated for
+C> the variable the variable is packed as "missing"
+C> (i.e., stores as all 9's).
+C> - Dennis Keyser 1993-06-28 Initializes number of words in
+C> report to 42 in case "strange" report with no data
+C> in any category encountered (used to be zero, but
+C> such "strange" reports caused code to fail).
+C> - Dennis Keyser 1993-12-22 Corrected error which resulted
+C> in storage of 0's in place of actual data in a
+C> category when that category was the only one with
+C> data.
+C> - Dennis Keyser 1998-08-07 Fortran 90-compliant - split an
+C> if statement into 2-parts to prevent f90 floating
+C> point exception error that can now occur in some
+C> cases (did not occur in f77).
 C>
-C> PROGRAM HISTORY LOG:
-C> 1990-01-??  L. MARX, UNIV. OF MD  -- CONVERTED CODE FROM ASSEMBLER
-C>                 TO VS FORTRAN
-C> 1991-08-23  D. A. KEYSER, NMC22   -- USE SAME ARGUMENTS AS W3AI03;
-C>                 STREAMLINED CODE; DOCBLOCKED AND COMMENTED
-C> 1992-06-29  D. A. KEYSER W/NMC22 -- CONVERT TO CRAY CFT77 FORTRAN
-C> 1992-07-09  D. A. KEYSER, NMC22   -- CHECKS THE NUMBER OF CHARACTERS
-C>                 USED BY EACH VARIABLE PRIOR TO CONVERSION FROM
-C>                 INTEGER TO CHARACTER FORMAT; IF THIS NUMBER IS
-C>                 GREATER THAN THE NUMBER OF CHARACTERS ALLOCATED FOR
-C>                 THE VARIABLE THE VARIABLE IS PACKED AS "MISSING"
-C>                 (I.E., STORES AS ALL 9'S)
-C> 1993-06-28  D. A. KEYSER, NMC22   -- INITIALIZES NUMBER OF WORDS IN
-C>                 REPORT TO 42 IN CASE "STRANGE" REPORT WITH NO DATA
-C>                 IN ANY CATEGORY ENCOUNTERED (USED TO BE ZERO, BUT
-C>                 SUCH "STRANGE" REPORTS CAUSED CODE TO FAIL)
-C> 1993-12-22  D. A. KEYSER, NMC22   -- CORRECTED ERROR WHICH RESULTED
-C>                 IN STORAGE OF 0'S IN PLACE OF ACTUAL DATA IN A
-C>                 CATEGORY WHEN THAT CATEGORY WAS THE ONLY ONE WITH
-C>                 DATA
-C> 1998-08-07  D. A. KEYSER, NP22    -- FORTRAN 90-COMPLIANT - SPLIT AN
-C>                 IF STATEMENT INTO 2-PARTS TO PREVENT F90 FLOATING
-C>                 POINT EXCEPTION ERROR THAT CAN NOW OCCUR IN SOME
-C>                 CASES (DID NOT OCCUR IN F77)
+C> @param[in] LOCRPT Integer array containing one unpacked report.
+C> LOCRPT must begin on a fullword boundary. Format
+C> is mixed, user must equivalence real and character
+C> arrays to this array (see w3fi64 write-up for
+C> content).
+C> @param[out] COCBUF CHARACTER*10 Array containing a packed report in
+C> NMC office note 29/124 format.
 C>
-C> USAGE:    CALL W3FI65(LOCRPT,COCBUF)
-C>   INPUT ARGUMENT LIST:
-C>     LOCRPT   - INTEGER ARRAY CONTAINING ONE UNPACKED REPORT.
-C>              - LOCRPT MUST BEGIN ON A FULLWORD BOUNDARY.  FORMAT
-C>              - IS MIXED, USER MUST EQUIVALENCE REAL AND CHARACTER
-C>              - ARRAYS TO THIS ARRAY (SEE W3FI64 WRITE-UP FOR
-C>              - CONTENT).
+C> @note After first creating and writing out the office note 85
+C> (first) date record, the user's fortran program begins a packing
+C> loop as follows.. Each iteration of the packing loop consists of
+C> a call first to w3fi65() to pack the report into COCBUF, then a call
+C> to w3fi66() with the current value of 'NFLAG' (set to zero for first
+C> call) to block the packed report into a record (see w3fi66() write-
+C> up). if 'NFLAG' is -1 upon returning from w3fi66(), the remaining
+C> portion of the record is not large enough to hold the current
+C> packed report. The user should write out the record, set 'NFLAG'
+C> to zero, call w3fi66() to write the packed report to the beginning
+C> of the next record, and repeat the packing loop. If 'NFLAG' is
+C> positive, a packed report has been blocked into the record and
+C> the user should continue the packing loop.
+C> When all reports have been packed and blocked, the user
+C> should write out this last record (which is not full but contains
+C> fill information supplied by w3fi66()). One final record containing
+C> the string 'endof file' (sic) followed by blank fill must be
+C> written out to signal the end of the data set.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     COCBUF   - CHARACTER*10 ARRAY CONTAINING A PACKED REPORT IN
-C>              - NMC OFFICE NOTE 29/124 FORMAT.
+C> @note 1: The packed report will have the categories ordered as
+C> follows:  1, 2, 3, 4, 5, 6, 7, 51, 52, 8, 9.
+C> @note 2: The input unpacked report must be in the format spec-
+C> ified in the w3fi64() office note 29 report unpacker write-up.
+C> @note 3: The unused porion of cocbuf is not cleared.
+
+C> @note Entry w3ai03() duplicates processing in w3fi65() since no
+C> assembly language code in cray w3lib.
 C>
-C>
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       W3LIB    - W3FI01
-C>
-C>
-C> REMARKS: AFTER FIRST CREATING AND WRITING OUT THE OFFICE NOTE 85
-C>   (FIRST) DATE RECORD, THE USER'S FORTRAN PROGRAM BEGINS A PACKING
-C>   LOOP AS FOLLOWS..  EACH ITERATION OF THE PACKING LOOP CONSISTS OF
-C>   A CALL FIRST TO W3FI65 TO PACK THE REPORT INTO COCBUF, THEN A CALL
-C>   TO W3FI66 WITH THE CURRENT VALUE OF 'NFLAG' (SET TO ZERO FOR FIRST
-C>   CALL) TO BLOCK THE PACKED REPORT INTO A RECORD (SEE W3FI66 WRITE-
-C>   UP). IF 'NFLAG' IS -1 UPON RETURNING FROM W3FI66, THE REMAINING
-C>   PORTION OF THE RECORD IS NOT LARGE ENOUGH TO HOLD THE CURRENT
-C>   PACKED REPORT.  THE USER SHOULD WRITE OUT THE RECORD, SET 'NFLAG'
-C>   TO ZERO, CALL W3FI66 TO WRITE THE PACKED REPORT TO THE BEGINNING
-C>   OF THE NEXT RECORD, AND REPEAT THE PACKING LOOP.  IF 'NFLAG' IS
-C>   POSITIVE, A PACKED REPORT HAS BEEN BLOCKED INTO THE RECORD AND
-C>   THE USER SHOULD CONTINUE THE PACKING LOOP.
-C>        WHEN ALL REPORTS HAVE BEEN PACKED AND BLOCKED, THE USER
-C>   SHOULD WRITE OUT THIS LAST RECORD (WHICH IS NOT FULL BUT CONTAINS
-C>   FILL INFORMATION SUPPLIED BY W3FI66).  ONE FINAL RECORD CONTAINING
-C>   THE STRING 'ENDOF FILE' (SIC) FOLLOWED BY BLANK FILL MUST BE
-C>   WRITTEN OUT TO SIGNAL THE END OF THE DATA SET.
-C>
-C>        NOTE1: THE PACKED REPORT WILL HAVE THE CATEGORIES ORDERED AS
-C>   FOLLOWS:  1, 2, 3, 4, 5, 6, 7, 51, 52, 8, 9.
-C>        NOTE2: THE INPUT UNPACKED REPORT MUST BE IN THE FORMAT SPEC-
-C>   IFIED IN THE W3FI64 OFFICE NOTE 29 REPORT UNPACKER WRITE-UP.
-C>        NOTE3: THE UNUSED PORION OF COCBUF IS NOT CLEARED.
-C>
-C>    NOTE: ENTRY W3AI03 DUPLICATES PROCESSING IN W3FI65 SINCE NO
-C>           ASSEMBLY LANGUAGE CODE IN CRAY W3LIB.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 90
-C>   MACHINE:  CRAY, SGI
-C>
+C> @author L. Marx @date 1990-01
       SUBROUTINE W3FI65(LOCRPT,COCBUF)
 C
       CHARACTER*12  HOLD
