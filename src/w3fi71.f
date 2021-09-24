@@ -1,303 +1,293 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI71      MAKE ARRAY USED BY GRIB PACKER FOR GDS
-C>   PRGMMR: R.E.JONES        ORG: W/NMC42    DATE: 93-03-26
+C> @brief Make array used by grib packer for gds.
+C> @author Ralph Jones @date 1992-02-21
+
+C> W3FI71 Makes a 18, 37, 55, 64, or 91 word integer array
+C> used by w3fi72() grib packer to make the grid description section
+C> (gds) - section 2.
 C>
-C> ABSTRACT: W3FI71 MAKES A 18, 37, 55, 64, OR 91 WORD INTEGER ARRAY
-C>     USED BY W3FI72 GRIB PACKER TO MAKE THE GRID DESCRIPTION SECTION
-C>     (GDS) - SECTION 2.
+C> Program history log:
+C> - Ralph Jones 1992-02-21
+C> - M. Farley 1992-07-01 Added remarks for 'igds' array elements.
+C> added lambert conformal grids and enlarged
+C> idgs array from 14 to 18 words.
+C> - Ralph Jones 1992-10-03 Added corrections to awips grib tables
+C> - Ralph Jones 1992-10-16 Add gaussian grid 126 to tables
+C> - Ralph Jones 1992-10-18 Corrections to lambert conformal tables
+C> and other tables
+C> - Ralph Jones 1992-10-19 Add gaussian grid  98 to tables
+C> - Ralph Jones 1993-01-25 Add on84 grids 87, 106, 107 to tables
+C> - Ralph Jones 1993-03-10 Add on84 grids 1, 55, 56 to tables
+C> - Ralph Jones 1993-03-26 Add grib grids 2, 3 to tables
+C> - Ralph Jones 1993-03-29 Add save statement
+C> - Ralph Jones 1993-06-15 Add grib grids 37 to 44 to tables
+C> - Ralph Jones 1993-09-29 Gaussian grid document not correct,
+C> w3fi74 will be changed to agree with
+C> it. gaussian grid 98 table has wrong
+C> value.
+C> - Ralph Jones 1993-10-12 Changes for on388 rev. oct 8,1993 for
+C> grid 204, 208.
+C> - Ralph Jones 1993-10-13 Correction for grids 37-44, bytes 7-8,
+C> 24-25 set to all bits 1 for missing.
+C> - Ralph Jones 1993-11-23 Add grids 90-93 for eta model
+C> add grid 4 for 720*361 .5 deg. grid
+C> - Ralph Jones 1994-04-12 Correction for grid 28
+C> - Ralph Jones 1994-06-01 Add grid 45, 288*145 1.25 deg. grid
+C> - Ralph Jones 1994-06-22 Add grids 94, 95 for eta model
+C> - Ralph Jones 1995-04-11 Add grids 96, 97 for eta model
+C> - Ralph Jones 1995-05-19 Add from 20 km eta model awips grid 215
+C> - Ralph Jones 1995-10-19 Add from 20 km eta model alaska grid 216
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - Mark Iredell 1996-05-08 Correct first latitude for grids 27 and 28
+C> - Ralph Jones 1996-07-02 Add from 10 km eta model olympic grid 218
+C> - Ralph Jones 1996-07-02 Add 196 for eta model
+C> - Ralph Jones 1996-08-15 Add o.n. 84 grid 8 and 53 as grib grid 8
+C> and 53
+C> - Ralph Jones 1996-11-29 Correction to tables for grid 21-26, 61-64
+C> - Mark Iredell 1997-01-31 Correct first latitude for grid 30
+C> - Mark Iredell 1997-10-20 Correct last longitude for grid 98
+C> - Stephen Gilbert 1998-07-07 Add grids 217 and 219 through 235
+C> - Baldwin 1998-09-21 Add grids 190, 192 for eta model
+C> - Bladwin 1999-01-20 Add grids 236, 237
+C> - Mark Iredell 1999-08-18 Add grid 170
+C> - Eric Rogers 2001-03-08 Changed eta grids 90-97, added eta grids
+C> 194, 198. added awips grids 241,242,243,
+C> 245, 246, 247, 248, and 250
+C> - Boi Vuong 2001-03-19 Added awips grids 238,239,240, and 244
+C> - Boi Vuong 2001-04-02 Correct last longitude for grid 225
+C> - Eric Rogers 2001-05-03 Added grid 249
+C> - Eric Rogers 2001-10-10 Redefined 218 for 12-km eta
+C> redefined grid 192 for new 32-km eta grid
+C> - Boi Vuong 2002-03-27 Added rsas grid 88 and awips grids 251 and 252
+C> - Eric Rogers 2002-08-06 Redefined grids 90-93,97,194,245-250 for the
+C> 8km hi-res-window model and add awips grid 253
+C> - Stephen Gilbert 2003-06-30 Added grids 145 and 146 for cmaq
+C> and grid 175 for awips over guam.
+C> - Boi Vuong 2003-07-08 Corrected latitude for grid 253 and 170, add grid
+C> 110, 127, 171 and 172
+C> - Boi Vuong 2004-08-05 Corrected latitude for grid 253
+C> - Stephen Gilbert 2004-09-01 Corrected the orientation and projection center flag
+C> for southern hemisphere grids 28, 172, 220 and 224
+C> - Boi Vuong 2004-09-02 Added grids 147, 148, 173 and 254
+C> - Matt Cooke 2005-01-04 Added grids 160, 161 and corrected longitude of orientation for grid 172
+C> - Boi Vuong 2005-03-03 Moved grid 170 to grid 174 and add grid 170
+C> - Boi Vuong 2005-03-21 Added grids 130
+C> - Boi Vuong 2005-09-12 Added grids 163
+C> - Boi Vuong 2006-10-27 Corrected x and y-direction grid length for grids 252
+C> - Boi Vuong 2006-11-16 Changed the longitude from negative to positive degree for grids 252
+C> - Boi Vuong 2006-12-12 Changed data representation type (octet 6) from 0 to 1 for grid 254
+C> add grid 120 (curvilinear orthogonal grid)
+C> - Boi Vuong 2006-12-27 Corrected the lat/lon direction increment for grid 160
+C> - Boi Vuong 2007-03-21 Corrected the lat/lon direction increment, resoulution,
+C> scanning mode for grid 235 and grid type 204 for grid 120
+C> - Boi Vuong 2007-04-24 Corrected the lat/lon direction increment, resoulution,
+C> for grids (219,173,220,171,233,238,239,244,253) and added
+C> grid 176.
+C> - Boi Vuong 2007-06-11 Added new grids (11,12,13,14,15,16,18,122,123,124,125,138
+C> 180, 181, 182, 183) and corrected the lat/lon direction
+C> increment for grid 240.
+C> - Boi Vuong 2007-11-06 Corrected the scanning mode for grids (11,12,13,14,15,16,18)
+C> changed grid 198 from arakawa staggered e-grid to polar
+C> stereographic grid added new grid 10, 99, 150, 151, 197
+C> - Boi Vuong 2008-01-17 Added new grid 195 and changed grid 196 (arakawa-e to mercator)
+C> - Boi Vuong 2010-02-15 Modified to correct latitude for grid 151 and added
+C> - Boi Vuong 2010-06-01 Modified to correct latitude and longitude for grid 196
+C> - Boi Vuong 2010-08-05 Added new grid 184, 199, 83 and
+C> redefined grid 90 for new rtma conus 1.27-km
+C> redefined grid 91 for new rtma alaska 2.976-km
+C> redefined grid 92 for new rtma alaska 1.488-km
+C> - Eric Rogers 2010-09-08 Changed grid 94 to alaska 6km staggered b-grid
+C> changed grid 95 to puerto rico 3km staggered b-grid
+C> changed grid 96 to hawaii 3km staggered b-grid
+C> changed grid 96 to hawaii 3km staggered b-grid
+C> changed grid 97 to conus 4km staggered b-grid
+C> changed grid 99 to nam 12km staggered b-grid
+C> added grid 179 (12 km polar stereographic over north america)
+C> changed grid 194 to 3km mercator grid over puerto rico
+C> corrected latitude of sw corner point of grid 151
+C> - Boi Vuong 2011-10-12 Added grid 129, 187, 188, 189 and 193
+C> - Boi Vuong 2012-04-16 Added grid 132, 200
+C> - Boi Vuong 2012-11-07 Corrected grid 174 for res. and comp. flag set to 128
+C> - Boi Vuong 2017-07-17 Correct grid 161 number of point nj from 102 to 103
+C> and map size from 13974 to 14111
+C> - Boi Vuong 2020-06-15 Corrected grid 200,212,216 and 236 for res. and comp. flag
+C> set to 136 and south pole to -90.00
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-02-21  R.E.JONES
-C>   92-07-01  M. FARLEY    ADDED REMARKS FOR 'IGDS' ARRAY ELEMENTS.
-C>                          ADDED LAMBERT CONFORMAL GRIDS AND ENLARGED
-C>                          IDGS ARRAY FROM 14 TO 18 WORDS.
-C>   92-10-03  R.E.JONES    ADDED CORRECTIONS TO AWIPS GRIB TABLES
-C>   92-10-16  R.E.JONES    ADD GAUSSIAN GRID 126 TO TABLES
-C>   92-10-18  R.E.JONES    CORRECTIONS TO LAMBERT CONFORMAL TABLES
-C>                          AND OTHER TABLES
-C>   92-10-19  R.E.JONES    ADD GAUSSIAN GRID  98 TO TABLES
-C>   93-01-25  R.E.JONES    ADD ON84 GRIDS 87, 106, 107 TO TABLES
-C>   93-03-10  R.E.JONES    ADD ON84 GRIDS 1, 55, 56 TO TABLES
-C>   93-03-26  R.E.JONES    ADD GRIB GRIDS 2, 3 TO TABLES
-C>   93-03-29  R.E.JONES    ADD SAVE STATEMENT
-C>   93-06-15  R.E.JONES    ADD GRIB GRIDS 37 TO 44 TO TABLES
-C>   93-09-29  R.E.JONES    GAUSSIAN GRID DOCUMENT NOT CORRECT,
-C>                          W3FI74 WILL BE CHANGED TO AGREE WITH
-C>                          IT. GAUSSIAN GRID 98 TABLE HAS WRONG
-C>                          VALUE.
-C>   93-10-12  R.E.JONES    CHANGES FOR ON388 REV. OCT 8,1993 FOR
-C>                          GRID 204, 208.
-C>   93-10-13  R.E.JONES    CORRECTION FOR GRIDS 37-44, BYTES 7-8,
-C>                          24-25 SET TO ALL BITS 1 FOR MISSING.
-C>   93-11-23  R.E.JONES    ADD GRIDS 90-93 FOR ETA MODEL
-C>                          ADD GRID 4 FOR 720*361 .5 DEG. GRID
-C>   94-04-12  R.E.JONES    CORRECTION FOR GRID 28
-C>   94-06-01  R.E.JONES    ADD GRID 45, 288*145 1.25 DEG. GRID
-C>   94-06-22  R.E.JONES    ADD GRIDS 94, 95 FOR ETA MODEL
-C>   95-04-11  R.E.JONES    ADD GRIDS 96, 97 FOR ETA MODEL
-C>   95-05-19  R.E.JONES    ADD FROM 20 KM ETA MODEL AWIPS GRID 215
-C>   95-10-19  R.E.JONES    ADD FROM 20 KM ETA MODEL ALASKA GRID 216
-C>   95-10-31  IREDELL      REMOVED SAVES AND PRINTS
-C>   96-05-08  IREDELL      CORRECT FIRST LATITUDE FOR GRIDS 27 AND 28
-C>   96-07-02  R.E.JONES    ADD FROM 10 KM ETA MODEL OLYMPIC GRID 218
-C>   96-07-02  R.E.JONES    ADD 196 FOR ETA MODEL
-C>   96-08-15  R.E.JONES    ADD O.N. 84 GRID 8 AND 53 AS GRIB GRID 8
-C>                          AND 53
-C>   96-11-29  R.E.JONES    CORRECTION TO TABLES FOR GRID 21-26, 61-64
-C>   97-01-31  IREDELL      CORRECT FIRST LATITUDE FOR GRID 30
-C>   97-10-20  IREDELL      CORRECT LAST LONGITUDE FOR GRID 98
-C>   98-07-07  Gilbert      Add grids 217 and 219 through 235
-C>   98-09-21  BALDWIN      ADD GRIDS 190, 192 FOR ETA MODEL
-C>   99-01-20  BALDWIN      ADD GRIDS 236, 237
-C>   99-08-18  IREDELL      ADD GRID 170
-C>   01-03-08  ROGERS       CHANGED ETA GRIDS 90-97, ADDED ETA GRIDS
-C>                          194, 198. ADDED AWIPS GRIDS 241,242,243,
-C>                          245, 246, 247, 248, AND 250
-C>   01-03-19  VUONG        ADDED AWIPS GRIDS 238,239,240, AND 244
-C>   01-04-02  VUONG        CORRECT LAST LONGITUDE FOR GRID 225
-C>   01-05-03  ROGERS       ADDED GRID 249
-C>   01-10-10  ROGERS       REDEFINED 218 FOR 12-KM ETA
-C>                          REDEFINED GRID 192 FOR NEW 32-KM ETA GRID
-C>   02-03-27  VUONG        ADDED RSAS GRID 88 AND AWIPS GRIDS 251 AND 252
-C>   02-08-06  ROGERS       REDEFINED GRIDS 90-93,97,194,245-250 FOR THE
-C>                          8KM HI-RES-WINDOW MODEL AND ADD AWIPS GRID 253
-C> 2003-06-30  GILBERT      ADDED GRIDS 145 and 146 for CMAQ
-C>                          and GRID 175 for AWIPS over GUAM.
-C> 2003-07-08  VUONG        CORRECTED LATITUDE FOR GRID 253 AND 170, ADD GRID
-C>                          110, 127, 171 AND 172
-C> 2004-08-05  VUONG        CORRECTED LATITUDE FOR GRID 253
-C> 2004-09-01  GILBERT      Corrected the orientation and projection center flag
-C>                          for southern hemisphere grids 28, 172, 220 and 224
-C> 2004-09-02  VUONG        ADDED GRIDS 147, 148, 173 AND 254
-C> 2005-01-04  COOKE        Added grids 160, 161 and corrected longitude of orientation for grid 172  
-C> 2005-03-03  VUONG        MOVED GRID 170 TO GRID 174 AND ADD GRID 170
-C> 2005-03-21  VUONG        ADDED GRIDS 130
-C> 2005-09-12  VUONG        ADDED GRIDS 163
-C> 2006-10-27  VUONG        CORRECTED X AND Y-DIRECTION GRID LENGTH FOR GRIDS 252
-C> 2006-11-16  VUONG        CHANGED THE LONGITUDE FROM NEGATIVE TO POSITIVE DEGREE FOR GRIDS 252
-C> 2006-12-12  VUONG        CHANGED DATA REPRESENTATION TYPE (OCTET 6) FROM 0 TO 1 FOR GRID 254
-C>                          ADD GRID 120 (CURVILINEAR ORTHOGONAL GRID)
-C> 2006-12-27  VUONG        CORRECTED THE LAT/LON DIRECTION INCREMENT FOR GRID 160
-C> 2007-03-21  VUONG        CORRECTED THE LAT/LON DIRECTION INCREMENT, RESOULUTION,
-C>                          SCANNING MODE FOR GRID 235 AND GRID TYPE 204 FOR GRID 120
-C> 2007-04-24  VUONG        CORRECTED THE LAT/LON DIRECTION INCREMENT, RESOULUTION,
-C>                          FOR GRIDS (219,173,220,171,233,238,239,244,253) AND ADDED
-C>                          GRID 176.
-C> 2007-06-11  VUONG        ADDED NEW GRIDS (11,12,13,14,15,16,18,122,123,124,125,138
-C>                          180, 181, 182, 183) AND CORRECTED THE LAT/LON DIRECTION
-C>                          INCREMENT FOR GRID 240.
-C> 2007-11-06  VUONG        CORRECTED THE SCANNING MODE FOR GRIDS (11,12,13,14,15,16,18)
-C>                          CHANGED GRID 198 FROM ARAKAWA STAGGERED E-GRID TO POLAR 
-C>                          STEREOGRAPHIC GRID ADDED NEW GRID 10, 99, 150, 151, 197
-C> 2008-01-17  VUONG        ADDED NEW GRID 195 AND CHANGED GRID 196 (ARAKAWA-E TO MERCATOR)
-C> 2010-02-15  VUONG        MODIFIED TO CORRECT LATITUDE FOR GRID 151 AND ADDED
-C> 2010-06-01  VUONG        MODIFIED TO CORRECT LATITUDE AND LONGITUDE FOR GRID 196
-C> 2010-08-05  VUONG        ADDED NEW GRID 184, 199, 83 AND
-C>                          REDEFINED GRID 90 FOR NEW RTMA CONUS 1.27-KM
-C>                          REDEFINED GRID 91 FOR NEW RTMA ALASKA 2.976-KM
-C>                          REDEFINED GRID 92 FOR NEW RTMA ALASKA 1.488-KM
-C> 2010-09-08  ROGERS       CHANGED GRID 94 TO ALASKA 6KM STAGGERED B-GRID
-C>                          CHANGED GRID 95 TO PUERTO RICO 3KM STAGGERED B-GRID
-C>                          CHANGED GRID 96 TO HAWAII 3KM STAGGERED B-GRID
-C>                          CHANGED GRID 96 TO HAWAII 3KM STAGGERED B-GRID
-C>                          CHANGED GRID 97 TO CONUS 4KM STAGGERED B-GRID
-C>                          CHANGED GRID 99 TO NAM 12KM STAGGERED B-GRID
-C>                          ADDED GRID 179 (12 KM POLAR STEREOGRAPHIC OVER NORTH AMERICA)
-C>                          CHANGED GRID 194 TO 3KM MERCATOR GRID OVER PUERTO RICO
-C>                          CORRECTED LATITUDE OF SW CORNER POINT OF GRID 151
-C> 2011-10-12  VUONG        ADDED GRID 129, 187, 188, 189 and 193
-C> 2012-04-16  VUONG        ADDED GRID 132, 200
-C> 2012-11-07  VUONG        CORRECTED GRID 174 FOR RES. AND COMP. FLAG SET TO 128
-C> 2017-07-17  VUONG        CORRECT GRID 161 NUMBER OF POINT Nj from 102 to 103
-C>                          AND MAP SIZE FROM 13974 TO 14111
-C> 2020-06-15  VUONG        CORRECTED GRID 200,212,216 and 236 FOR RES. AND COMP. FLAG
-C>                          SET TO 136 AND SOUTH POLE TO -90.00
+C> @param[in] IGRID GRIB grid number, or office note 84 grid number
+C> @param[out] IGDS 18, 37, 55, 64, or 91 word integer array with
+C> information to make a grib grid description section.
+C> @param[out] IERR:
+C> - 0  Correct exit
+C> - 1  Grid type in igrid is not in table
 C>
-C> USAGE:    CALL W3FI71 (IGRID, IGDS, IERR)
-C>   INPUT ARGUMENT LIST:
-C>     IGRID       - GRIB GRID NUMBER, OR OFFICE NOTE 84 GRID NUMBER
+C> @note
+C> - 1) Office note grid type 26 is 6 in grib, 26 is an
+C> international exchange grid.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     IGDS      - 18, 37, 55, 64, OR 91 WORD INTEGER ARRAY WITH
-C>                 INFORMATION TO MAKE A GRIB GRID DESCRIPTION SECTION.
-C>     IERR       - 0  CORRECT EXIT
-C>                  1  GRID TYPE IN IGRID IS NOT IN TABLE
+C> - 2) Values returned in 18, 37, 55, 64, or 91 word integer array
+C> igds vary depending on grid representation type.
 C>
-C> REMARKS:
-C>    1) OFFICE NOTE GRID TYPE 26 IS 6 IN GRIB, 26 IS AN
-C>       INTERNATIONAL EXCHANGE GRID.
+C> - LAT/LON GRID:
+C>  - IGDS( 1) = number of vertical coordinates
+C>  - IGDS( 2) = pv, pl or 255
+C>  - IGDS( 3) = data representation type (code table 6)
+C>  - IGDS( 4) = no. of points along a latitude
+C>  - IGDS( 5) = no. of points along a longitude meridian
+C>  - IGDS( 6) = latitude of origin (south - ive)
+C>  - IGDS( 7) = longitude of origin (west -ive)
+C>  - IGDS( 8) = resolution flag (code table 7)
+C>  - IGDS( 9) = latitude of extreme point (south - ive)
+C>  - IGDS(10) = longitude of extreme point (west - ive)
+C>  - IGDS(11) = latitude increment
+C>  - IGDS(12) = longitude increment
+C>  - IGDS(13) = scanning mode flags (code table 8)
+C>  - IGDS(14) = ... through ...
+C>  - IGDS(18) =   ... not used for this grid
+C>  - IGDS(19) - igds(91) for grids 37-44, number of points
+C>  -            in each of 73 rows.
 C>
-C>    2) VALUES RETURNED IN 18, 37, 55, 64, OR 91 WORD INTEGER ARRAY
-C>        IGDS VARY DEPENDING ON GRID REPRESENTATION TYPE.
+C> - GAUSSIAN GRID:
+C>  - IGDS( 1) = ... through ...
+C>  - IGDS(10) =   ... same as lat/lon grid
+C>  - IGDS(11) = number of latitude lines between a pole
+C>  -            and the equator
+C>  - IGDS(12) = longitude increment
+C>  - IGDS(13) = scanning mode flags (code table 8)
+C>  - IGDS(14) = ... through ...
+C>  - IGDS(18) =   ... not used for this grid
 C>
-C>       LAT/LON GRID:
-C>           IGDS( 1) = NUMBER OF VERTICAL COORDINATES
-C>           IGDS( 2) = PV, PL OR 255
-C>           IGDS( 3) = DATA REPRESENTATION TYPE (CODE TABLE 6)
-C>           IGDS( 4) = NO. OF POINTS ALONG A LATITUDE
-C>           IGDS( 5) = NO. OF POINTS ALONG A LONGITUDE MERIDIAN
-C>           IGDS( 6) = LATITUDE OF ORIGIN (SOUTH - IVE)
-C>           IGDS( 7) = LONGITUDE OF ORIGIN (WEST -IVE)
-C>           IGDS( 8) = RESOLUTION FLAG (CODE TABLE 7)
-C>           IGDS( 9) = LATITUDE OF EXTREME POINT (SOUTH - IVE)
-C>           IGDS(10) = LONGITUDE OF EXTREME POINT (WEST - IVE)
-C>           IGDS(11) = LATITUDE INCREMENT
-C>           IGDS(12) = LONGITUDE INCREMENT
-C>           IGDS(13) = SCANNING MODE FLAGS (CODE TABLE 8)
-C>           IGDS(14) = ... THROUGH ...
-C>           IGDS(18) =   ... NOT USED FOR THIS GRID
-C>           IGDS(19) - IGDS(91) FOR GRIDS 37-44, NUMBER OF POINTS
-C>                      IN EACH OF 73 ROWS.
+C> - SPHERICAL HARMONICS:
+C>  - IGDS( 1) = number of vertical coordinates
+C>  - IGDS( 2) = pv, pl or 255
+C>  - IGDS( 3) = data representation type (code table 6)
+C>  - IGDS( 4) = j - pentagonal resolution parameter
+C>  - IGDS( 5) = k - pentagonal resolution parameter
+C>  - IGDS( 6) = m - pentagonal resolution parameter
+C>  - IGDS( 7) = representation type (code table 9)
+C>  - IGDS( 8) = representation mode (code table 10)
+C>  - IGDS( 9) = ... through ...
+C>  - IGDS(18) =   ... not used for this grid
 C>
-C>       GAUSSIAN GRID:
-C>           IGDS( 1) = ... THROUGH ...
-C>           IGDS(10) =   ... SAME AS LAT/LON GRID
-C>           IGDS(11) = NUMBER OF LATITUDE LINES BETWEEN A POLE
-C>                      AND THE EQUATOR
-C>           IGDS(12) = LONGITUDE INCREMENT
-C>           IGDS(13) = SCANNING MODE FLAGS (CODE TABLE 8)
-C>           IGDS(14) = ... THROUGH ...
-C>           IGDS(18) =   ... NOT USED FOR THIS GRID
+C> - POLAR STEREOGRAPHIC:
+C>  - IGDS( 1) = number of vertical coordinates
+C>  - IGDS( 2) = pv, pl or 255
+C>  - IGDS( 3) = data representation type (code table 6)
+C>  - IGDS( 4) = no. of points along x-axis
+C>  - IGDS( 5) = no. of points along y-axis
+C>  - IGDS( 6) = latitude of origin (south -ive)
+C>  - IGDS( 7) = longitute of origin (west -ive)
+C>  - IGDS( 8) = resolution flag (code table 7)
+C>  - IGDS( 9) = longitude of meridian parallel to y-axis
+C>  - IGDS(10) = x-direction grid length (increment)
+C>  - IGDS(11) = y-direction grid length (increment)
+C>  - IGDS(12) = projection center flag (0=north pole on plane,
+C>  -                                    1=south pole on plane,
+C>  - IGDS(13) = scanning mode flags (code table 8)
+C>  - IGDS(14) = ... through ...
+C>  - IGDS(18) =   .. not used for this grid
 C>
-C>       SPHERICAL HARMONICS:
-C>           IGDS( 1) = NUMBER OF VERTICAL COORDINATES
-C>           IGDS( 2) = PV, PL OR 255
-C>           IGDS( 3) = DATA REPRESENTATION TYPE (CODE TABLE 6)
-C>           IGDS( 4) = J - PENTAGONAL RESOLUTION PARAMETER
-C>           IGDS( 5) = K - PENTAGONAL RESOLUTION PARAMETER
-C>           IGDS( 6) = M - PENTAGONAL RESOLUTION PARAMETER
-C>           IGDS( 7) = REPRESENTATION TYPE (CODE TABLE 9)
-C>           IGDS( 8) = REPRESENTATION MODE (CODE TABLE 10)
-C>           IGDS( 9) = ... THROUGH ...
-C>           IGDS(18) =   ... NOT USED FOR THIS GRID
+C> - MERCATOR:
+C>  - IGDS( 1) = ... through ...
+C>  - IGDS(12) =   ... same as lat/lon grid
+C>  - IGDS(13) = latitude at which projection cylinder
+C>  -              intersects earth
+C>  - IGDS(14) = scanning mode flags
+C>  - IGDS(15) = ... through ...
+C>  - IGDS(18) =   .. not used for this grid
 C>
-C>       POLAR STEREOGRAPHIC:
-C>           IGDS( 1) = NUMBER OF VERTICAL COORDINATES
-C>           IGDS( 2) = PV, PL OR 255
-C>           IGDS( 3) = DATA REPRESENTATION TYPE (CODE TABLE 6)
-C>           IGDS( 4) = NO. OF POINTS ALONG X-AXIS
-C>           IGDS( 5) = NO. OF POINTS ALONG Y-AXIS
-C>           IGDS( 6) = LATITUDE OF ORIGIN (SOUTH -IVE)
-C>           IGDS( 7) = LONGITUTE OF ORIGIN (WEST -IVE)
-C>           IGDS( 8) = RESOLUTION FLAG (CODE TABLE 7)
-C>           IGDS( 9) = LONGITUDE OF MERIDIAN PARALLEL TO Y-AXIS
-C>           IGDS(10) = X-DIRECTION GRID LENGTH (INCREMENT)
-C>           IGDS(11) = Y-DIRECTION GRID LENGTH (INCREMENT)
-C>           IGDS(12) = PROJECTION CENTER FLAG (0=NORTH POLE ON PLANE,
-C>                                              1=SOUTH POLE ON PLANE,
-C>           IGDS(13) = SCANNING MODE FLAGS (CODE TABLE 8)
-C>           IGDS(14) = ... THROUGH ...
-C>           IGDS(18) =   .. NOT USED FOR THIS GRID
+C> - LAMBERT CONFORMAL:
+C>  - IGDS( 1) = number of vertical coordinates
+C>  - IGDS( 2) = pv, pl or 255
+C>  - IGDS( 3) = data representation type (code table 6)
+C>  - IGDS( 4) = no. of points along x-axis
+C>  - IGDS( 5) = no. of points along y-axis
+C>  - IGDS( 6) = latitude of origin (south -ive)
+C>  - IGDS( 7) = longitute of origin (west -ive)
+C>  - IGDS( 8) = resolution flag (code table 7)
+C>  - IGDS( 9) = longitude of meridian parallel to y-axis
+C>  - IGDS(10) = x-direction grid length (increment)
+C>  - IGDS(11) = y-direction grid length (increment)
+C>  - IGDS(12) = projection center flag (0=north pole on plane,
+C>  -                                    1=south pole on plane,
+C>  - IGDS(13) = scanning mode flags (code table 8)
+C>  - IGDS(14) = not used
+C>  - IGDS(15) = first latitude from the pole at which the
+C>  -            secant cone cuts the sperical earth
+C>  - IGDS(16) = second latitude ...
+C>  - IGDS(17) = latitude of south pole (millidegrees)
+C>  - IGDS(18) = longitude of south pole (millidegrees)
 C>
-C>       MERCATOR:
-C>           IGDS( 1) = ... THROUGH ...
-C>           IGDS(12) =   ... SAME AS LAT/LON GRID
-C>           IGDS(13) = LATITUDE AT WHICH PROJECTION CYLINDER
-C>                        INTERSECTS EARTH
-C>           IGDS(14) = SCANNING MODE FLAGS
-C>           IGDS(15) = ... THROUGH ...
-C>           IGDS(18) =   .. NOT USED FOR THIS GRID
+C> - ARAKAWA SEMI-STAGGERED E-GRID ON ROTATED LAT/LON GRID
+C>  - IGDS( 1) = number of vertical coordinates
+C>  - IGDS( 2) = pv, pl or 255
+C>  - IGDS( 3) = data representation type (code table 6) [201]
+C>  - IGDS( 4) = ni  - total number of actual data points
+C>  -                  included on grid
+C>  - IGDS( 5) = nj  - dummy second dimension; set=1
+C>  - IGDS( 6) = la1 - latitude  of first grid point
+C>  - IGDS( 7) = lo1 - longitude of first grid point
+C>  - IGDS( 8) = resolution and component flag (code table 7)
+C>  - IGDS( 9) = la2 - number of mass points along
+C>  -                  southernmost row of grid
+C>  - IGDS(10) = lo2 - number of rows in each column
+C>  - IGDS(11) = di  - longitudinal direction increment
+C>  - IGDS(12) = dj  - latitudinal  direction increment
+C>  - IGDS(13) = scanning mode flags (code table 8)
+C>  - IGDS(14) = ... through ...
+C>  - IGDS(18) = ... not used for this grid (set to zero)
 C>
-C>       LAMBERT CONFORMAL:
-C>           IGDS( 1) = NUMBER OF VERTICAL COORDINATES
-C>           IGDS( 2) = PV, PL OR 255
-C>           IGDS( 3) = DATA REPRESENTATION TYPE (CODE TABLE 6)
-C>           IGDS( 4) = NO. OF POINTS ALONG X-AXIS
-C>           IGDS( 5) = NO. OF POINTS ALONG Y-AXIS
-C>           IGDS( 6) = LATITUDE OF ORIGIN (SOUTH -IVE)
-C>           IGDS( 7) = LONGITUTE OF ORIGIN (WEST -IVE)
-C>           IGDS( 8) = RESOLUTION FLAG (CODE TABLE 7)
-C>           IGDS( 9) = LONGITUDE OF MERIDIAN PARALLEL TO Y-AXIS
-C>           IGDS(10) = X-DIRECTION GRID LENGTH (INCREMENT)
-C>           IGDS(11) = Y-DIRECTION GRID LENGTH (INCREMENT)
-C>           IGDS(12) = PROJECTION CENTER FLAG (0=NORTH POLE ON PLANE,
-C>                                              1=SOUTH POLE ON PLANE,
-C>           IGDS(13) = SCANNING MODE FLAGS (CODE TABLE 8)
-C>           IGDS(14) = NOT USED
-C>           IGDS(15) = FIRST LATITUDE FROM THE POLE AT WHICH THE
-C>                      SECANT CONE CUTS THE SPERICAL EARTH
-C>           IGDS(16) = SECOND LATITUDE ...
-C>           IGDS(17) = LATITUDE OF SOUTH POLE (MILLIDEGREES)
-C>           IGDS(18) = LONGITUDE OF SOUTH POLE (MILLIDEGREES)
+C> - ARAKAWA FILLED E-GRID ON ROTATED LAT/LON GRID
+C>  - IGDS( 1) = number of vertical coordinates
+C>  - IGDS( 2) = pv, pl or 255
+C>  - IGDS( 3) = data representation type (code table 6) [202]
+C>  - IGDS( 4) = ni  - total number of actual data points
+C>  -                  included on grid
+C>  - IGDS( 5) = nj  - dummy second dimention; set=1
+C>  - IGDS( 6) = la1 - latitude latitude of first grid point
+C>  - IGDS( 7) = lo1 - longitude of first grid point
+C>  - IGDS( 8) = resolution and component flag (code table 7)
+C>  - IGDS( 9) = la2 - number of (zonal) points in each row
+C>  - IGDS(10) = lo2 - number of (meridional) points in each
+C>  -                  column
+C>  - IGDS(11) = di  - longitudinal direction increment
+C>  - IGDS(12) = dj  - latitudinal  direction increment
+C>  - IGDS(13) = scanning mode flags (code table 8)
+C>  - IGDS(14) = ... through ...
+C>  - IGDS(18) = ... not used for this grid
 C>
-C>       ARAKAWA SEMI-STAGGERED E-GRID ON ROTATED LAT/LON GRID
-C>           IGDS( 1) = NUMBER OF VERTICAL COORDINATES
-C>           IGDS( 2) = PV, PL OR 255
-C>           IGDS( 3) = DATA REPRESENTATION TYPE (CODE TABLE 6) [201]
-C>           IGDS( 4) = NI  - TOTAL NUMBER OF ACTUAL DATA POINTS
-C>                            INCLUDED ON GRID
-C>           IGDS( 5) = NJ  - DUMMY SECOND DIMENSION; SET=1
-C>           IGDS( 6) = LA1 - LATITUDE  OF FIRST GRID POINT
-C>           IGDS( 7) = LO1 - LONGITUDE OF FIRST GRID POINT
-C>           IGDS( 8) = RESOLUTION AND COMPONENT FLAG (CODE TABLE 7)
-C>           IGDS( 9) = LA2 - NUMBER OF MASS POINTS ALONG
-C>                            SOUTHERNMOST ROW OF GRID
-C>           IGDS(10) = LO2 - NUMBER OF ROWS IN EACH COLUMN
-C>           IGDS(11) = DI  - LONGITUDINAL DIRECTION INCREMENT
-C>           IGDS(12) = DJ  - LATITUDINAL  DIRECTION INCREMENT
-C>           IGDS(13) = SCANNING MODE FLAGS (CODE TABLE 8)
-C>           IGDS(14) = ... THROUGH ...
-C>           IGDS(18) = ... NOT USED FOR THIS GRID (SET TO ZERO)
+C> - ARAKAWA STAGGERED E-GRID ON ROTATED LAT/LON GRID
+C>  - IGDS( 1) = number of vertical coordinates
+C>  - IGDS( 2) = pv, pl or 255
+C>  - IGDS( 3) = data representation type (code table 6) [203]
+C>  - IGDS( 4) = ni  - number of data points in each row
+C>  - IGDS( 5) = nj  - number of rows
+C>  - IGDS( 6) = la1 - latitude of first grid point
+C>  - IGDS( 7) = lo1 - longitude of first grid point
+C>  - IGDS( 8) = resolution and component flag (code table 7)
+C>  - IGDS( 9) = la2 - central latitude
+C>  - IGDS(10) = lo2 - central longtitude
+C>  - IGDS(11) = di  - longitudinal direction increment
+C>  - IGDS(12) = dj  - latitudinal  direction increment
+C>  - IGDS(13) = scanning mode flags (code table 8)
+C>  - IGDS(14) = ... through ...
+C>  - IGDS(18) = ... not used for this grid
 C>
-C>       ARAKAWA FILLED E-GRID ON ROTATED LAT/LON GRID
-C>           IGDS( 1) = NUMBER OF VERTICAL COORDINATES
-C>           IGDS( 2) = PV, PL OR 255
-C>           IGDS( 3) = DATA REPRESENTATION TYPE (CODE TABLE 6) [202]
-C>           IGDS( 4) = NI  - TOTAL NUMBER OF ACTUAL DATA POINTS
-C>                            INCLUDED ON GRID
-C>           IGDS( 5) = NJ  - DUMMY SECOND DIMENTION; SET=1
-C>           IGDS( 6) = LA1 - LATITUDE LATITUDE OF FIRST GRID POINT
-C>           IGDS( 7) = LO1 - LONGITUDE OF FIRST GRID POINT
-C>           IGDS( 8) = RESOLUTION AND COMPONENT FLAG (CODE TABLE 7)
-C>           IGDS( 9) = LA2 - NUMBER OF (ZONAL) POINTS IN EACH ROW
-C>           IGDS(10) = LO2 - NUMBER OF (MERIDIONAL) POINTS IN EACH
-C>                            COLUMN
-C>           IGDS(11) = DI  - LONGITUDINAL DIRECTION INCREMENT
-C>           IGDS(12) = DJ  - LATITUDINAL  DIRECTION INCREMENT
-C>           IGDS(13) = SCANNING MODE FLAGS (CODE TABLE 8)
-C>           IGDS(14) = ... THROUGH ...
-C>           IGDS(18) = ... NOT USED FOR THIS GRID
-C>
-C>       ARAKAWA STAGGERED E-GRID ON ROTATED LAT/LON GRID
-C>           IGDS( 1) = NUMBER OF VERTICAL COORDINATES
-C>           IGDS( 2) = PV, PL OR 255
-C>           IGDS( 3) = DATA REPRESENTATION TYPE (CODE TABLE 6) [203]
-C>           IGDS( 4) = NI  - NUMBER OF DATA POINTS IN EACH ROW
-C>           IGDS( 5) = NJ  - NUMBER OF ROWS
-C>           IGDS( 6) = LA1 - LATITUDE OF FIRST GRID POINT
-C>           IGDS( 7) = LO1 - LONGITUDE OF FIRST GRID POINT
-C>           IGDS( 8) = RESOLUTION AND COMPONENT FLAG (CODE TABLE 7)
-C>           IGDS( 9) = LA2 - CENTRAL LATITUDE
-C>           IGDS(10) = LO2 - CENTRAL LONGTITUDE
-C>           IGDS(11) = DI  - LONGITUDINAL DIRECTION INCREMENT
-C>           IGDS(12) = DJ  - LATITUDINAL  DIRECTION INCREMENT
-C>           IGDS(13) = SCANNING MODE FLAGS (CODE TABLE 8)
-C>           IGDS(14) = ... THROUGH ...
-C>           IGDS(18) = ... NOT USED FOR THIS GRID
-C>
-C>       CURVILINEAR ORTHOGONAL GRID
-C>           IGDS( 1) = NUMBER OF VERTICAL COORDINATES
-C>           IGDS( 2) = PV, PL OR 255
-C>           IGDS( 3) = DATA REPRESENTATION TYPE (CODE TABLE 6) [204]
-C>           IGDS( 4) = NI  - NUMBER OF DATA POINTS IN EACH ROW
-C>           IGDS( 5) = NJ  - NUMBER OF ROWS
-C>           IGDS( 6) = RESERVED (SET TO 0)
-C>           IGDS( 7) = RESERVED (SET TO 0)
-C>           IGDS( 8) = RESOLUTION AND COMPONENT FLAG (CODE TABLE 7)
-C>           IGDS( 9) = RESERVED (SET TO 0)
-C>           IGDS(10) = RESERVED (SET TO 0)
-C>           IGDS(11) = RESERVED (SET TO 0)
-C>           IGDS(12) = RESERVED (SET TO 0)
-C>           IGDS(13) = SCANNING MODE FLAGS (CODE TABLE 8)
-C>           IGDS(14) = ... THROUGH ...
-C>           IGDS(18) = ... NOT USED FOR THIS GRID
-C>
-C>   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 90
-C>   MACHINE:  IBM SP
+C> - CURVILINEAR ORTHOGONAL GRID
+C>  - IGDS( 1) = number of vertical coordinates
+C>  - IGDS( 2) = pv, pl or 255
+C>  - IGDS( 3) = data representation type (code table 6) [204]
+C>  - IGDS( 4) = ni  - number of data points in each row
+C>  - IGDS( 5) = nj  - number of rows
+C>  - IGDS( 6) = reserved (set to 0)
+C>  - IGDS( 7) = reserved (set to 0)
+C>  - IGDS( 8) = resolution and component flag (code table 7)
+C>  - IGDS( 9) = reserved (set to 0)
+C>  - IGDS(10) = reserved (set to 0)
+C>  - IGDS(11) = reserved (set to 0)
+C>  - IGDS(12) = reserved (set to 0)
+C>  - IGDS(13) = scanning mode flags (code table 8)
+C>  - IGDS(14) = ... through ...
+C>  - IGDS(18) = ... not used for this grid
 C>
       SUBROUTINE W3FI71 (IGRID, IGDS, IERR)
 C
@@ -717,13 +707,13 @@ C
       DATA  GRD148/ 0, 255, 3, 442,265,  21821, -120628,   8,  -97000,
      &   12000,  12000, 0, 64, 0, 33000, 45000, 0, 0/
       DATA  GRD150/ 0, 255, 0, 401,201,   5000, -100000, 128,   25000,
-     &  -60000,   100, 100, 64, 0, 0, 0, 0, 0/ 
+     &  -60000,   100, 100, 64, 0, 0, 0, 0, 0/
       DATA  GRD151/ 0, 255, 5, 478, 429, -7450,  215860,   8,  -110000,
      &  33812, 33812,   0, 64, 0, 0, 0, 0, 0/
       DATA  GRD160/ 0, 255, 5, 180,156,  19132, -185837,   8, -150000,
      &   47625,  47625, 0, 64, 0, 0, 0, 0, 0/
       DATA  GRD161/ 0, 255, 0, 137,103,  50750,  271750,  72,    -250,
-     &  -19750,    500,500, 0, 0, 0, 0, 0, 0/ 
+     &  -19750,    500,500, 0, 0, 0, 0, 0, 0/
       DATA  GRD163/ 0, 255, 3,1008,722,  20600, -118300,   8,  -95000,
      &    5000,   5000, 0, 64, 0, 38000, 38000, 0, 0/
       DATA  GRD170/ 0, 255, 4, 512, 256, 89463,       0, 128,  -89463,
@@ -852,9 +842,9 @@ C
      &   40635,  40635, 0, 64, 0, 25000, 25000, -90000, 0/
       DATA  GRD237/ 0, 255, 3,  54, 47,  16201,  285720,   8, -107000,
      &   32463,  32463, 0, 64, 0, 50000, 50000, 0, 0/
-      DATA  GRD238/ 0, 255, 0, 275, 203,  50250, 261750, 128,    -250,   
+      DATA  GRD238/ 0, 255, 0, 275, 203,  50250, 261750, 128,    -250,
      &   -29750, 250, 250,  0, 0, 0, 0, 0, 0/
-      DATA  GRD239/ 0, 255, 0, 155, 123, 75250,  159500, 128,   44750, 
+      DATA  GRD239/ 0, 255, 0, 155, 123, 75250,  159500, 128,   44750,
      &  -123500, 250, 500,  0, 0, 0, 0, 0, 0/
       DATA  GRD240/ 0, 255, 5, 1121, 881, 23098, -119036,  8, -105000,
      &   4763,  4763, 0, 64, 0, 0, 0, 0, 0/
@@ -864,7 +854,7 @@ C
      &   11250,  11250, 0, 64, 0, 0, 0, 0, 0/
       DATA  GRD243/ 0, 255, 0, 126,101,  10000, -170000, 128,   50000,
      &  -120000, 400, 400, 64, 0, 0, 0, 0, 0/
-      DATA  GRD244/ 0, 255, 0, 275, 203,  50250, 261750, 128,    -250,   
+      DATA  GRD244/ 0, 255, 0, 275, 203,  50250, 261750, 128,    -250,
      &   -29750, 250,  250, 0, 0, 0, 0, 0, 0/
       DATA  GRD245/ 0, 255, 3, 336,372,  22980, -92840,   8,   -80000,
      &   8000,  8000, 0, 64, 0, 35000, 35000, 0, 0/

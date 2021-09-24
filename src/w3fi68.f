@@ -1,97 +1,86 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI68      CONVERT 25 WORD ARRAY TO GRIB PDS
-C>   PRGMMR: R.E.JONES        ORG: W/NMC42    DATE: 91-05-14
+C> @brief Convert 25 word array to grib pds
+C> @author Ralph Jones @date 1991-05-08
+
+C> Converts an array of 25, or 27 integer words into a
+C> grib product definition section (pds) of 28 bytes , or 30 bytes.
+C> if pds bytes > 30, they are set to zero.
 C>
-C> ABSTRACT: CONVERTS AN ARRAY OF 25, OR 27 INTEGER WORDS INTO A
-C>   GRIB PRODUCT DEFINITION SECTION (PDS) OF 28 BYTES , OR 30 BYTES.
-C>   IF PDS BYTES > 30, THEY ARE SET TO ZERO.
+C> Program history log:
+C> - Ralph Jones 1991-05-08
+C> - Ralph Jones 1992-09-25 Change to 25 words of input, level
+C> can be in two words. (10,11)
+C> - Ralph Jones 1993-01-08 Change for time range indicator if 10,
+C> store time p1 in pds bytes 19-20.
+C> - Ralph Jones 1993-01-26 Correction for fixed height above
+C> ground level
+C> - Ralph Jones 1993-03-29 Add save statement
+C> - Bill Cavanaugh 1993-06-24 Modified program to allow for generation
+C> of pds greater than 28 bytes (the desired
+C> pds size is in id(1).
+C> - Farley 1993-09-30 Change to allow for subcenter id; put
+C> id(24) into pds(26).
+C> - Ralph Jones 1993-10-12 Changes for on388 rev. oct 9,1993, new
+C> levels 125, 200, 201.
+C> - Ralph Jones 1994-02-23 Take out sbytes, replace with do loop
+C> - Ralph Jones 1994-04-14 Changes for on388 rev. mar 24,1994, new
+C> levels 115,116.
+C> - Ralph Jones 1994-12-04 Change to add id words 26, 27 for pds
+C> bytes 29 and 30.
+C> - Ralph Jones 1995-09-07 Change for new level 117, 119.
+C> - Mark Iredell 1995-10-31 REmoved saves and prints
+C> - Ebisuzaki 1998-06-30 Linux port
+C> - Stephen Gilbert 2001-06-05 Changed fortran intrinsic function OR() to
+C> f90 standard intrinsic IOR().
+C> - Mark Iredell 2003-02-25 Recognize level type 126
+C> - D. C. Stokes 2005-05-06 Recognize level types 235, 237, 238
 C>
-C> PROGRAM HISTORY LOG:
-C>   91-05-08  R.E.JONES
-C>   92-09-25  R.E.JONES   CHANGE TO 25 WORDS OF INPUT, LEVEL
-C>                         CAN BE IN TWO WORDS. (10,11)
-C>   93-01-08  R.E.JONES   CHANGE FOR TIME RANGE INDICATOR IF 10,
-C>                         STORE TIME P1 IN PDS BYTES 19-20.
-C>   93-01-26  R.E.JONES   CORRECTION FOR FIXED HEIGHT ABOVE
-C>                         GROUND LEVEL
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   93-06-24  CAVANOUGH   MODIFIED PROGRAM TO ALLOW FOR GENERATION
-C>                         OF PDS GREATER THAN 28 BYTES (THE DESIRED
-C>                         PDS SIZE IS IN ID(1).
-C>   93-09-30  FARLEY      CHANGE TO ALLOW FOR SUBCENTER ID; PUT
-C>                         ID(24) INTO PDS(26).
-C>   93-10-12  R.E.JONES   CHANGES FOR ON388 REV. OCT 9,1993, NEW
-C>                         LEVELS 125, 200, 201.
-C>   94-02-23  R.E.JONES   TAKE OUT SBYTES, REPLACE WITH DO LOOP
-C>   94-04-14  R.E.JONES   CHANGES FOR ON388 REV. MAR 24,1994, NEW
-C>                         LEVELS 115,116.
-C>   94-12-04  R.E.JONES   CHANGE TO ADD ID WORDS 26, 27 FOR PDS
-C>                         BYTES 29 AND 30.
-C>   95-09-07  R.E.JONES   CHANGE FOR NEW LEVEL 117, 119.
-C>   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C>   98-06-30  EBISUZAKI   LINUX PORT
-C> 2001-06-05  GILBERT     Changed fortran intrinsic function OR() to
-C>                         f90 standard intrinsic IOR().
-C> 2003-02-25  IREDELL     RECOGNIZE LEVEL TYPE 126
-C> 2005-05-06  D.C.STOKES  RECOGNIZE LEVEL TYPES 235, 237, 238
+C> @param[in] ID 25,27 word integer array.
+C> @param[out] PDS 28 30 or greater character pds for edition 1.
 C>
-C> USAGE:    CALL W3FI68 (ID, PDS)
-C>   INPUT ARGUMENT LIST:
-C>     ID       - 25, 27 WORD INTEGER ARRAY
-C>   OUTPUT ARGUMENT LIST:
-C>     PDS      - 28 30,  OR GREATER CHARACTER PDS FOR EDITION 1
+C> @note Layout of 'id' array:
+C> - ID(1)  = Number of bytes in product definition section (pds)
+C> - ID(2)  = Parameter table version number
+C> - ID(3)  = Identification of originating center
+C> - ID(4)  = Model identification (allocated by originating center)
+C> - ID(5)  = Grid identification
+C> - ID(6)  = 0 if no gds section, 1 if gds section is included
+C> - ID(7)  = 0 if no bms section, 1 if bms section is included
+C> - ID(8)  = Indicator of parameter and units (table 2)
+C> - ID(9)  = Indicator of type of level       (table 3)
+C> - ID(10) = Value 1 of level  (0 for 1-100,102,103,105,107
+C> 109,111,113,115,117,119,125,126,160,200,201,235,237,238
+C> level is in id word 11)
+C> - ID(11) = Value 2 of level
+C> - ID(12) = Year of century
+C> - ID(13) = Month of year
+C> - ID(14) = Day of month
+C> - ID(15) = Hour of day
+C> - ID(16) = Minute of hour   (in most cases set to 0)
+C> - ID(17) = Fcst time unit
+C> - ID(18) = P1 period of time
+C> - ID(19) = P2 period of time
+C> - ID(20) = Time range indicator
+C> - ID(21) = Number included in average
+C> - ID(22) = Number missing from averages
+C> - ID(23) = Century  (20, change to 21 on jan. 1, 2001)
+C> - ID(24) = Subcenter identification
+C> - ID(25) = Scaling power of 10
+C> - ID(26) = Flag byte, 8 on/off flags
+C>          |BIT NUMBER  |VALUE  |ID(26) |  DEFINITION|
+C>          | :--------- | :---  | :---  | : ----------- |
+C>          |1           |0      |0      |FULL FCST FIELD|
+C>          |            |1      |128    |FCST ERROR FIELD|
+C>          |2           |0      |0      |ORIGINAL FCST FIELD|
+C>          |            |1      |64     |BIAS CORRECTED FCST FIELD|
+C>          |3           |0      |0      |ORIGINAL RESOLUTION RETAINED|
+C>          |            |1      |32     |SMOOTHED FIELD|
+C> @note ID(26) can be the sum of bits 1, 2, 3.
+C> bits 4-8 not used, set to zero
+C> if ID(1) is 28, you do not need ID(26) and ID(27).
+C> - ID(27) = unused, set to 0 so pds byte 30 is set to zero.
 C>
-C> REMARKS: LAYOUT OF 'ID' ARRAY:
-C>     ID(1)  = NUMBER OF BYTES IN PRODUCT DEFINITION SECTION (PDS)
-C>     ID(2)  = PARAMETER TABLE VERSION NUMBER
-C>     ID(3)  = IDENTIFICATION OF ORIGINATING CENTER
-C>     ID(4)  = MODEL IDENTIFICATION (ALLOCATED BY ORIGINATING CENTER)
-C>     ID(5)  = GRID IDENTIFICATION
-C>     ID(6)  = 0 IF NO GDS SECTION, 1 IF GDS SECTION IS INCLUDED
-C>     ID(7)  = 0 IF NO BMS SECTION, 1 IF BMS SECTION IS INCLUDED
-C>     ID(8)  = INDICATOR OF PARAMETER AND UNITS (TABLE 2)
-C>     ID(9)  = INDICATOR OF TYPE OF LEVEL       (TABLE 3)
-C>     ID(10) = VALUE 1 OF LEVEL  (0 FOR 1-100,102,103,105,107
-C>              109,111,113,115,117,119,125,126,160,200,201,
-C>              235,237,238
-C>              LEVEL IS IN ID WORD 11)
-C>     ID(11) = VALUE 2 OF LEVEL
-C>     ID(12) = YEAR OF CENTURY
-C>     ID(13) = MONTH OF YEAR
-C>     ID(14) = DAY OF MONTH
-C>     ID(15) = HOUR OF DAY
-C>     ID(16) = MINUTE OF HOUR   (IN MOST CASES SET TO 0)
-C>     ID(17) = FCST TIME UNIT
-C>     ID(18) = P1 PERIOD OF TIME
-C>     ID(19) = P2 PERIOD OF TIME
-C>     ID(20) = TIME RANGE INDICATOR
-C>     ID(21) = NUMBER INCLUDED IN AVERAGE
-C>     ID(22) = NUMBER MISSING FROM AVERAGES
-C>     ID(23) = CENTURY  (20, CHANGE TO 21 ON JAN. 1, 2001)
-C>     ID(24) = SUBCENTER IDENTIFICATION
-C>     ID(25) = SCALING POWER OF 10
-C>     ID(26) = FLAG BYTE, 8 ON/OFF FLAGS
-C>              BIT NUMBER  VALUE  ID(26)   DEFINITION
-C>              1           0      0      FULL FCST FIELD
-C>                          1      128    FCST ERROR FIELD
-C>              2           0      0      ORIGINAL FCST FIELD
-C>                          1      64     BIAS CORRECTED FCST FIELD
-C>              3           0      0      ORIGINAL RESOLUTION RETAINED
-C>                          1      32     SMOOTHED FIELD
-C>              NOTE: ID(26) CAN BE THE SUM OF BITS 1, 2, 3.
-C>              BITS 4-8 NOT USED, SET TO ZERO
-C>              IF ID(1) IS 28, YOU DO NOT NEED ID(26) AND ID(27).
-C>     ID(27) = UNUSED, SET TO 0 SO PDS BYTE 30 IS SET TO ZERO.
-C>
-C>   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: SiliconGraphics 3.5 FORTRAN 77
-C>   MACHINE:  SiliconGraphics IRIS-4D/25, 35, INDIGO, Indy
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048
-C>
+C> @author Ralph Jones @date 1991-05-08
       SUBROUTINE W3FI68 (ID, PDS)
 C
       INTEGER        ID(*)

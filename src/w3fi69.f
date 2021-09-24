@@ -1,40 +1,30 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI69      CONVERT PDS TO 25, OR 27 WORD ARRAY
-C>   PRGMMR: R.E.JONES        ORG: W/NMC42    DATE: 91-05-14
+C> @brief Convert pds to 25, or 27 word array.
+C> @author Ralph Jones @date 1991-05-14
+
+C> Converts an edition 1 grib produce definition section (pds)
+C> to a 25, or 27 word integer array.
 C>
-C> ABSTRACT: CONVERTS AN EDITION 1 GRIB PRODUCE DEFINITION SECTION (PDS)
-C>   TO A 25, OR 27 WORD INTEGER ARRAY.
-C> 
-C> PROGRAM HISTORY LOG:
-C>   91-05-14  R.E.JONES 
-C>   92-09-25  R.E.JONES   CHANGE LEVEL TO USE ONE OR TWO WORDS
-C>   93-01-08  R.E.JONES   CHANGE FOR TIME RANGE INDICATOR IF 10
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   93-10-21  R.E.JONES   CHANGES FOR ON388 REV. OCT 9,1993, NEW
-C>                         LEVELS 125, 200, 201.
-C>   94-04-14  R.E.JONES   CHANGES FOR ON388 REV. MAR 24,1994, NEW
-C>                         LEVELS 115, 116.
-C>   94-12-04  R.E.JONES   CHANGES FOR 27 WORD INTEGER ARRAY IF
-C>                         PDS IS GREATER THAN 28 BYTES. 
-C>   95-09-07  R.E.JONES   CHANGES FOR LEVEL 117, 119. 
-C>   98-12-21  Gilbert    Replaced Function ICHAR with mova2i.
+C> Program history log:
+C> - Ralph Jones 1991-05-14
+C> - Ralph Jones 1992-09-25 Change level to use one or two words
+C> - Ralph Jones 1993-01-08 Change for time range indicator if 10
+C> - Ralph Jones 1993-03-29 Add save statement
+C> - Ralph Jones 1993-10-21 Changes for on388 rev. oct 9,1993, new
+C> levels 125, 200, 201.
+C> - Ralph Jones 1994-04-14 Changes for on388 rev. mar 24,1994, new
+C> levels 115, 116.
+C> - Ralph Jones 1994-12-04 Changes for 27 word integer array if
+C> pds is greater than 28 bytes.
+C> - Ralph Jones 1995-09-07 Changes for level 117, 119.
+C> - Stephen Gilbert 1998-12-21 Replaced Function ICHAR with mova2i.
 C>
-C> USAGE:    CALL W3FI69 (PDS, ID)
-C>   INPUT ARGUMENT LIST:
-C>     PDS      - 28 TO 100 CHARACTER PRODUCT DEFINITION SECTION 
-C>                (PDS) 
-C>   OUTPUT ARGUMENT LIST:
-C>     ID       - 25, OR 27 WORD INTEGER ARRAY
+C> @param[in] PDS 28 to 100 character product definition section (pds) .
+C> @param[out] ID 25, or 27 word integer array.
 C>
-C> REMARKS: LIST CAVEATS, OTHER HELPFUL HINTS OR INFORMATION
+C> @note List caveats, other helpful hints or information.
 C>
-C> ATTRIBUTES:
-C>   LANGUAGE: SiliconGraphics 3.5 FORTRAN 77
-C>   MACHINE:  SiliconGraphics IRIS-4D/25, 35, INDIGO, Indy
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, J916/2048
-C>
+C> @author Ralph Jones @date 1991-05-14
       SUBROUTINE W3FI69 (PDS, ID)
 C
       INTEGER        ID(*)
@@ -43,15 +33,15 @@ C
 C
       SAVE
 C
-C     ID(1)  = NUMBER OF BYTES IN PDS 
-C     ID(2)  = PARAMETER TABLE VERSION NUMBER     
-C     ID(3)  = IDENTIFICATION OF ORIGINATING CENTER 
+C     ID(1)  = NUMBER OF BYTES IN PDS
+C     ID(2)  = PARAMETER TABLE VERSION NUMBER
+C     ID(3)  = IDENTIFICATION OF ORIGINATING CENTER
 C     ID(4)  = MODEL IDENTIFICATION (ALLOCATED BY ORIGINATING CENTER)
 C     ID(5)  = GRID IDENTIFICATION
 C     ID(6)  = 0 IF NO GDS SECTION, 1 IF GDS SECTION IS INCLUDED
 C     ID(7)  = 0 IF NO BMS SECTION, 1 IF BMS SECTION IS INCLUDED
-C     ID(8)  = INDICATOR OF PARAMETER AND UNITS 
-C     ID(9)  = INDICATOR OF TYPE OF LEVEL OR LAYER 
+C     ID(8)  = INDICATOR OF PARAMETER AND UNITS
+C     ID(9)  = INDICATOR OF TYPE OF LEVEL OR LAYER
 C     ID(10) = LEVEL 1
 C     ID(11) = LEVEL 2
 C     ID(12) = YEAR OF CENTURY
@@ -69,7 +59,7 @@ C     ID(23) = CENTURY
 C     ID(24) = IDENTIFICATION OF SUB-CENTER (TABLE 0 - PART 2)
 C     ID(25) = SCALING POWER OF 10
 C     ID(26) = FLAG BYTE, 8 ON/OFF FLAGS
-C              BIT NUMBER  VALUE  ID(26)   DEFINITION   
+C              BIT NUMBER  VALUE  ID(26)   DEFINITION
 C              1           0      0      FULL FCST FIELD
 C                          1      128    FCST ERROR FIELD
 C              2           0      0      ORIGINAL FCST FIELD
@@ -86,13 +76,13 @@ C
         ID(2)  = mova2i(PDS(4))
         ID(3)  = mova2i(PDS(5))
         ID(4)  = mova2i(PDS(6))
-        ID(5)  = mova2i(PDS(7)) 
+        ID(5)  = mova2i(PDS(7))
         ID(6)  = IAND(ISHFT(mova2i(PDS(8)),-7),1)
         ID(7)  = IAND(ISHFT(mova2i(PDS(8)),-6),1)
         ID(8)  = mova2i(PDS(9))
         ID(9)  = mova2i(PDS(10))
         I9     = mova2i(PDS(10))
-C 
+C
 C       TEST ID(9) FOR 1-100, 102,103, 105, 107, 109,
 C       111,113,115,117,119,160,200,201, IF TRUE, SET ID(10) TO 0,
 C       AND STORE 16 BIT VALUE (BYTES 11 & 12) THE LEVEL IN ID(11).
@@ -137,12 +127,12 @@ C
         ISCALE = mova2i(PDS(27)) * 256 + mova2i(PDS(28))
         IF (IAND(ISCALE,32768).NE.0) THEN
           ISCALE = -IAND(ISCALE,32767)
-        END IF 
+        END IF
         ID(25) = ISCALE
         IF (ID(1).GT.28) THEN
           ID(26) = mova2i(PDS(29))
           ID(27) = mova2i(PDS(30))
         END IF
-C      
-      RETURN 
+C
+      RETURN
       END

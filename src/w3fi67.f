@@ -1,272 +1,240 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI67        BUFR MESSAGE DECODER
-C>   PRGMMR: CAVANAUGH        ORG: NMC421      DATE:93-04-21
+C> @brief BUFR message decoder.
+C> @author Bill Cavanaugh @date 1988-08-31
+
+C> This set of routines will decode a BUFR message and
+C> place information extracted from the BUFR message into selected
+C> arrays for the user. Those arrays are described in the output
+C> argument list. This routine does not include ifod processing.
 C>
-C> ABSTRACT: THIS SET OF ROUTINES WILL DECODE A BUFR MESSAGE AND
-C>   PLACE INFORMATION EXTRACTED FROM THE BUFR MESSAGE INTO SELECTED
-C>   ARRAYS FOR THE USER. THOSE ARRAYS ARE DESCRIBED IN THE OUTPUT
-C>   ARGUMENT LIST. THIS ROUTINE DOES NOT INCLUDE IFOD PROCESSING.
+C> Program history log:
+C> - Bill Cavanaugh 1988-08-31
+C> - Bill Cavanaugh 1990-12-07 Now utilizing gbyte routines to gather
+C> and separate bit fields. This should improve
+C> (decrease) the time it takes to decode any
+C> BUFR message. Have entered coding that will
+C> permit processing BUFR editions 1 and 2.
+C> Improved and corrected the conversion into
+C> ifod format of decoded BUFR messages.
+C> - Bill Cavanaugh 1991-01-18 Program/routines modified to properly handle
+C> serial profiler data.
+C> - Bill Cavanaugh 1991-04-04 Modified to handle text supplied thru
+C> descriptor 2 05 yyy.
+C> - Bill Cavanaugh 1991-04-17 Errors in extracting and scaling data
+C> corrected. Improved handling of nested queue descriptors is added.
+C> - Bill Cavanaugh 1991-05-10 Array 'data' has been enlarged to real*8
+C> to better contain very large numbers more accurately. The preious size
+C> real*4 could not contain sufficient significant digits. Coding has been
+C> introduced to process new table c descriptor 2 06 yyy which permits in
+C> line processing of a local descriptor even if the descriptor is not
+C> contained in the users table b. A second routine to process ifod messages
+C> (ifod0) has been removed in favor of the improved processing of the one
+C> remaining (ifod1). New coding has been introduced to permit processing of
+C> BUFR messages based on BUFR edition up to and including edition 2. Please
+C> note increased size requirements for arrays ident(20) and iptr(40).
+C> - Bill Cavanaugh 1991-07-26 Add array mtime to calling sequence to
+C> permit inclusion of receipt/transfer times to ifod messages.
+C> - Bill Cavanaugh 1991-09-25 All processing of decoded BUFR data into
+C> ifod (a local use reformat of BUFR data) has been isolated from this set of
+C> routines. For those interested in the ifod form, see w3fl05 in the w3lib
+C> routines.
+C> - Processing of BUFR messages containing delayed replication has been
+C> altered so that single subsets (reports) and and a matching descriptor list
+C> for that particular subset will be passed to the user will be passed to the
+C> user one at a time to assure that each subset can be fully defined with a
+C> minimum of reprocessing.
+C> - Processing of associated fields has been tested with messages containing
+C> non-compressed data.
+C> - In order to facilitate user processing a matching list of scale factors
+C> are included with the expanded descriptor list (mstack).
+C> - Bill Cavanaugh 1991-11-21 Processing of descriptor 2 03 yyy
+C> has corrected to agree with fm94 standards.
+C> - Bill Cavanaugh 1991-12-19 Calls to fi6703() and fi6704() have been
+C> corrected to agree called program argument list. Some additional entries
+C> have been included for communicating with data access routines. Additional
+C> error exit provided for the case where table b is damaged.
+C> - Bill Cavanaugh 1992-01-24 Routines fi6701(), fi6703() and fi6704()
+C> have been modified to handle associated fields all descriptors are set to
+C> echo to mstack(1,n)
+C> - Bill Cavanaugh 1992-05-21 Further expansion of information collected from
+C> within upper air soundings has produced the necessity to expand some of the
+C> processing and output arrays. (see remarks below)
+C> - Bill Cavanaugh 1992-06-29 Corrected descriptor denoting height of
+C> each wind level for profiler conversions.
+C> - Bill Cavanaugh 1992-07-23 Expansion of table b requires adjustment
+C> of arrays to contain table b values needed to assist in the decoding process.
+C> - Arrays containing data from table b:
+C>  - kdesc descriptor
+C>  - aname descriptor name
+C>  - aunits units for descriptor
+C>  - mscale scale for value of descriptor
+C>  - mref reference value for descriptor
+C>  - mwidth bit width for value of descriptor
+C>  - Bill Cavanaugh 1992-09-09 First encounter with operator descriptor
+C> 2 05 yyy showed error in decoding. That error is corrected with this
+C> implementation. Further testing of upper air data has encountered the
+C> condition of large (many level) soundings arrays in the decoder have been
+C> expanded (again) to allow for this condition.
+C> - Bill Cavanaugh 1992-10-02 Modified routine to reformat profiler data
+C> (fi6709) to show descriptors, scale value and data in proper order.
+C> Corrected an error that prevented user from assigning the second dimension
+C> of kdata(500,*).
+C> - Bill Cavanaugh 1992-10-20 Removed error that prevented full implementation
+C> of previous corrections and made corrections to table b to bring it up to
+C> date. Changes include proper reformat of profiler data and user capability
+C> for assigning second dimension of kdata array.
+C> - Bill Cavanaugh 1993-01-26 Added routine fi6710() to permit reformatting
+C> profiler data in BUFR edition 2.
 C>
-C> PROGRAM HISTORY LOG:
-C>   88-08-31  CAVANAUGH
-C>   90-12-07  CAVANAUGH   NOW UTILIZING GBYTE ROUTINES TO GATHER
-C>                         AND SEPARATE BIT FIELDS. THIS SHOULD IMPROVE
-C>                         (DECREASE) THE TIME IT TAKES TO DECODE ANY
-C>                         BUFR MESSAGE. HAVE ENTERED CODING THAT WILL
-C>                         PERMIT PROCESSING BUFR EDITIONS 1 AND 2.
-C>                         IMPROVED AND CORRECTED THE CONVERSION INTO
-C>                         IFOD FORMAT OF DECODED BUFR MESSAGES.
-C>   91-01-18  CAVANAUGH   PROGRAM/ROUTINES MODIFIED TO PROPERLY HANDLE
-C>                         SERIAL PROFILER DATA.
-C>   91-04-04  CAVANAUGH   MODIFIED TO HANDLE TEXT SUPPLIED THRU
-C>                         DESCRIPTOR 2 05 YYY.
-C>   91-04-17  CAVANAUGH   ERRORS IN EXTRACTING AND SCALING DATA
-C>                         CORRECTED. IMPROVED HANDLING OF NESTED
-C>                         QUEUE DESCRIPTORS IS ADDED.
-C>   91-05-10  CAVANAUGH - ARRAY 'DATA' HAS BEEN ENLARGED TO REAL*8
-C>                         TO BETTER CONTAIN VERY LARGE NUMBERS MORE
-C>                         ACCURATELY. THE PREIOUS SIZE REAL*4 COULD NOT
-C>                         CONTAIN SUFFICIENT SIGNIFICANT DIGITS.
-C>                       - CODING HAS BEEN INTRODUCED TO PROCESS NEW
-C>                         TABLE C DESCRIPTOR 2 06 YYY WHICH PERMITS IN
-C>                         LINE PROCESSING OF A LOCAL DESCRIPTOR EVEN IF
-C>                         THE DESCRIPTOR IS NOT CONTAINED IN THE USERS
-C>                         TABLE B.
-C>                       - A SECOND ROUTINE TO PROCESS IFOD MESSAGES
-C>                         (IFOD0) HAS BEEN REMOVED IN FAVOR OF THE
-C>                         IMPROVED PROCESSING OF THE ONE
-C>                         REMAINING (IFOD1).
-C>                       - NEW CODING HAS BEEN INTRODUCED TO PERMIT
-C>                         PROCESSING OF BUFR MESSAGES BASED ON BUFR
-C>                         EDITION UP TO AND INCLUDING EDITION 2.
-C>                         PLEASE NOTE INCREASED SIZE REQUIREMENTS
-C>                         FOR ARRAYS IDENT(20) AND IPTR(40).
-C>   91-07-26  CAVANAUGH - ADD ARRAY MTIME TO CALLING SEQUENCE TO
-C>                         PERMIT INCLUSION OF RECEIPT/TRANSFER TIMES
-C>                         TO IFOD MESSAGES.
-C>   91-09-25  CAVANAUGH -     ALL PROCESSING OF DECODED BUFR DATA INTO
-C>                         IFOD (A LOCAL USE REFORMAT OF BUFR DATA)
-C>                         HAS BEEN ISOLATED FROM THIS SET OF ROUTINES.
-C>                         FOR THOSE INTERESTED IN THE IFOD FORM,
-C>                         SEE W3FL05 IN THE W3LIB ROUTINES.
-C>                             PROCESSING OF BUFR MESSAGES CONTAINING
-C>                         DELAYED REPLICATION HAS BEEN ALTERED SO THAT
-C>                         SINGLE SUBSETS (REPORTS) AND AND A MATCHING
-C>                         DESCRIPTOR LIST FOR THAT PARTICULAR  SUBSET
-C>                         WILL BE PASSED TO THE USER WILL BE PASSED TO
-C>                         THE USER ONE AT A TIME TO ASSURE THAT EACH
-C>                         SUBSET CAN BE FULLY DEFINED WITH A MINIMUM
-C>                         OF REPROCESSING.
-C>                             PROCESSING OF ASSOCIATED FIELDS HAS BEEN
-C>                         TESTED WITH MESSAGES CONTAINING NON-COMPRESSED
-C>                         DATA.
-C>                             IN ORDER TO FACILITATE USER PROCESSING
-C>                         A MATCHING LIST OF SCALE FACTORS ARE INCLUDED
-C>                         WITH THE EXPANDED DESCRIPTOR LIST (MSTACK).
-C>   91-11-21  CAVANAUGH -     PROCESSING OF DESCRIPTOR 2 03 YYY
-C>                         HAS CORRECTED TO AGREE WITH FM94 STANDARDS.
-C>   91-12-19  CAVANAUGH -     CALLS TO FI6703 AND FI6704 HAVE BEEN
-C>                         CORRECTED TO AGREE CALLED PROGRAM ARGUMENT
-C>                         LIST. SOME ADDITIONAL ENTRIES HAVE BEEN
-C>                         INCLUDED FOR COMMUNICATING WITH DATA ACCESS
-C>                         ROUTINES. ADDITIONAL ERROR EXIT PROVIDED FOR
-C>                         THE CASE WHERE TABLE B IS DAMAGED.
-C>   92-01-24  CAVANAUGH -    ROUTINES FI6701, FI6703 AND FI6704
-C>                         HAVE BEEN MODIFIED TO HANDLE ASSOCIATED FIELDS
-C>                         ALL DESCRIPTORS ARE SET TO ECHO TO MSTACK(1,N)
-C>   92-05-21  CAVANAUGH -    FURTHER EXPANSION OF INFORMATION COLLECTED
-C>                         FROM WITHIN UPPER AIR SOUNDINGS HAS PRODUCED
-C>                         THE NECESSITY TO EXPAND SOME OF THE PROCESSING
-C>                         AND OUTPUT ARRAYS. (SEE REMARKS BELOW)
-C>   92-06-29  CAVANAUGH -    CORRECTED DESCRIPTOR DENOTING HEIGHT OF
-C>                         EACH WIND LEVEL FOR PROFILER CONVERSIONS.
-C>   92-07-23  CAVANAUGH -    EXPANSION OF TABLE B REQUIRES ADJUSTMENT
-C>                         OF ARRAYS TO CONTAIN TABLE B VALUES NEEDED TO
-C>                         ASSIST IN THE DECODING PROCESS.
-C>            ARRAYS CONTAINING DATA FROM TABLE B
-C>                    KDESC    - DESCRIPTOR
-C>                    ANAME    - DESCRIPTOR NAME
-C>                    AUNITS   - UNITS FOR DESCRIPTOR
-C>                    MSCALE   - SCALE FOR VALUE OF DESCRIPTOR
-C>                    MREF     - REFERENCE VALUE FOR DESCRIPTOR
-C>                    MWIDTH   - BIT WIDTH FOR VALUE OF DESCRIPTOR
-C>   92-09-09  CAVANAUGH -    FIRST ENCOUNTER WITH OPERATOR DESCRIPTOR
-C>                     2 05 YYY SHOWED ERROR IN DECODING. THAT ERROR
-C>                     IS CORRECTED WITH THIS IMPLEMENTATION. FURTHER
-C>                     TESTING OF UPPER AIR DATA HAS ENCOUNTERED
-C>                     THE CONDITION OF LARGE (MANY LEVEL) SOUNDINGS
-C>                     ARRAYS IN THE DECODER HAVE BEEN EXPANDED (AGAIN)
-C>                     TO ALLOW FOR THIS CONDITION.
-C>   92-10-02  CAVANAUGH -   MODIFIED ROUTINE TO REFORMAT PROFILER DATA
-C>                     (FI6709) TO SHOW DESCRIPTORS, SCALE VALUE AND
-C>                     DATA IN PROPER ORDER.  CORRECTED AN ERROR THAT
-C>                     PREVENTED USER FROM ASSIGNING THE SECOND DIMENSION
-C>                     OF KDATA(500,*).
-C>   92-10-20  CAVANAUGH -   REMOVED ERROR THAT PREVENTED FULL
-C>                     IMPLEMENTATION OF PREVIOUS CORRECTIONS AND
-C>                     MADE CORRECTIONS TO TABLE B TO BRING IT UP TO
-C>                     DATE. CHANGES INCLUDE PROPER REFORMAT OF PROFILER
-C>                     DATA AND USER CAPABILITY FOR ASSIGNING SECOND
-C>                     DIMENSION OF KDATA ARRAY.
-C>   93-01-26  CAVANAUGH -   ADDED ROUTINE FI6710 TO PERMIT REFORMATTING
-C>                     PROFILER DATA IN BUFR EDITION 2.
+C> @param[in] MSGA Array containing supposed bufr message.
+C> @param[out] ISTACK Original array of descriptors extracted from
+C> source bufr message.
+C> @param[out] MSTACK (A,B)
+C> - LEVEL B - Descriptor number
+C> - LEVEL A = 1 Descriptor
+C>  - = 2 10**N Scaling to return to original value
+C> @param[out] IPTR Utility array.
+C> - IPTR( 1)- Error return.
+C> - IPTR( 2)- Byte count section 1.
+C> - IPTR( 3)- Pointer to start of section 1.
+C> - IPTR( 4)- Byte count section 2.
+C> - IPTR( 5)- Pointer to start of section 2.
+C> - IPTR( 6)- Byte count section 3.
+C> - IPTR( 7)- Pointer to start of section 3.
+C> - IPTR( 8)- Byte count section 4.
+C> - IPTR( 9)- Pointer to start of section 4.
+C> - IPTR(10)- Start of requested subset, reserved for dar.
+C> - IPTR(11)- Current descriptor ptr in iwork.
+C> - IPTR(12)- Last descriptor pos in iwork.
+C> - IPTR(13)- Last descriptor pos in istack.
+C> - IPTR(14)- Number of table b entries.
+C> - IPTR(15)- Requested subset pointer, reserved for dar.
+C> - IPTR(16)- Indicator for existance of section 2.
+C> - IPTR(17)- Number of reports processed.
+C> - IPTR(18)- Ascii/text event.
+C> - IPTR(19)- Pointer to start of bufr message.
+C> - IPTR(20)- Number of lines from table d.
+C> - IPTR(21)- Table b switch.
+C> - IPTR(22)- Table d switch.
+C> - IPTR(23)- Code/flag table switch.
+C> - IPTR(24)- Aditional words added by text info.
+C> - IPTR(25)- Current bit number.
+C> - IPTR(26)- Data width change.
+C> - IPTR(27)- Data scale change.
+C> - IPTR(28)- Data reference value change.
+C> - IPTR(29)- Add data associated field.
+C> - IPTR(30)- Signify characters.
+C> - IPTR(31)- Number of expanded descriptors in mstack.
+C> - IPTR(32)- Current descriptor segment f.
+C> - IPTR(33)- Current descriptor segment x.
+C> - IPTR(34)- Current descriptor segment y.
+C> - IPTR(35)- Unused.
+C> - IPTR(36)- Next descriptor may be undecipherable.
+C> - IPTR(37)- Unused.
+C> - IPTR(38)- Unused.
+C> - IPTR(39)- Delayed replication flag.
+C>  - 0 - No delayed replication.
+C>  - 1 - Message contains delayed replication.
+C> - IPTR(40)- Number of characters in text for curr descriptor.
+C> @param[out] IDENT Array contains message information extracted from bufr message
+C> - IDENT( 1)-Edition number (byte 4, section 1).
+C> - IDENT( 2)-Originating center (bytes 5-6, section 1).
+C> - IDENT( 3)-Update sequence (byte 7, section 1).
+C> - IDENT( 4)-Optional section (byte 8, section 1).
+C> - IDENT( 5)-Bufr message type (byte 9, section 1).
+C>  - 0 = Surface (land)
+C>  - 1 = Surface (ship)
+C>  - 2 = Vertical soundings other than satellite
+C>  - 3 = Vertical soundings (satellite)
+C>  - 4 = Sngl lvl upper-air other than satellite
+C>  - 5 = Sngl lvl upper-air (satellite)
+C>  - 6 = Radar
+C> - IDENT( 6)-Bufr msg sub-type (byte 10, section 1)
+C> | type | sbtyp |
+C> | :--- | :---- |
+C> | 2    |  7   = profiler |
+C> - IDENT(7) - bytes 11-12, section 1).
+C> - IDENT(8) - Year of century (byte 13, section 1).
+C> - IDENT(9) - Month of year (byte 14, section 1).
+C> - IDENT(10) - Day of month (byte 15, section 1).
+C> - IDENT(11) - Hour of day (byte 16, section 1).
+C> - IDENT(12) - Minute of hour (byte 17, section 1).
+C> - IDENT(13) - Rsvd by adp centers (byte 18, section 1).
+C> - IDENT(14) - Nr of data subsets (byte 5-6, section 3).
+C> - IDENT(15) - Observed flag (byte 7, bit 1, section 3).
+C> - IDENT(16) - Compression flag (byte 7, bit 2, section 3).
+C> - IDENT(17) - Master table number (byte 4, section 1, ed 2 or gtr).
+C> @param[out] KDATA Array containing decoded reports from bufr message.
+C> @param[in] KNR
+C> kdata(report number,parameter number) arrays containing data from table b
+C> - ANAME Descriptor name.
+C> - AUNITS Units for descriptor.
+C> - MSCALE Scale for value of descriptor.
+C> - MREF Reference value for descriptor.
+C> - MWIDTH Bit width for value of descriptor.
+C> @param[out] INDEX Pointer to available subset.
 C>
-C> USAGE:    CALL W3FI67(IPTR,IDENT,MSGA,ISTACK,MSTACK,KDATA,KNR,INDEX)
-C>   INPUT ARGUMENT LIST:
-C>     MSGA     - ARRAY CONTAINING SUPPOSED BUFR MESSAGE
+C> @note Error returns:
+C> - IPTR(1):
+C>  - = 1 'BUFR' Not found in first 125 characters.
+C>  - = 2 '7777' Not found in location determined by
+C>  by using counts found in each section. one or
+C>  more sections have an erroneous byte count or
+C>  characters '7777' are not in test message.
+C>  - = 3 Message contains a descriptor with f=0 that does
+C>  not exist in table b.
+C>  - = 4 Message contains a descriptor with f=3 that does
+C>  not exist in table d.
+C>  - = 5 Message contains a descriptor with f=2 with the
+C>  value of x outside the range 1-5.
+C>  - = 6 Descriptor element indicated to have a flag value
+C>  does not have an entry in the flag table
+C>  (to be activated).
+C>  - = 7 Descriptor indicated to have a code value does
+C>  not have an entry in the code table
+C>  (to be activated).
+C>  - = 8 Error reading table d.
+C>  - = 9 Error reading table b.
+C>  - = 10 Error reading code/flag table.
+C>  - = 11 Descriptor 2 04 004 not followed by 0 31 021.
+C>  - = 12 Data descriptor operator qualifier does not follow
+C>  delayed replication descriptor.
+C>  - = 13 Bit width on ascii characters not a multiple of 8.
+C>  - = 14 Subsets = 0, no content bulletin.
+C>  - = 20 Exceeded count for delayed replication pass.
+C>  - = 21 Exceeded count for non-delayed replication pass.
+C>  - = 22 Section 1 count exceeds 10000.
+C>  - = 23 Section 2 count exceeds 10000.
+C>  - = 24 Section 3 count exceeds 10000.
+C>  - = 25 Section 4 count exceeds 10000.
+C>  - = 27 Non zero lowest on text data.
+C>  - = 28 Nbinc not nr of characters.
+C>  - = 29 Table b appears to be damaged.
+C>  - = 99 No more subsets (reports) available in current
+C>  bufr mesage.
+C>  - = 400 Number of subsets exceeds capability of routine.
+C>  - = 401 Number of parameters (and associated fields)
+C>  exceeds limits of this program.
+C>  - = 500 Value for nbinc has been found that exceeds
+C>  standard width plus any bit width change
+C>  check all bit widths up to point of error.
+C>  - = 501 Corrected width for descriptor is 0 or less.
 C>
-C>   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C>     ISTACK   - ORIGINAL ARRAY OF DESCRIPTORS EXTRACTED FROM
-C>                SOURCE BUFR MESSAGE.
-C>     MSTACK(A,B)-LEVEL B - DESCRIPTOR NUMBER
-C>                 LEVEL A = 1 DESCRIPTOR
-C>                         = 2 10**N SCALING TO RETURN TO ORIGINAL VALUE
-C>     IPTR     - UTILITY ARRAY
-C>         IPTR( 1)- ERROR RETURN
-C>         IPTR( 2)- BYTE COUNT SECTION 1
-C>         IPTR( 3)- POINTER TO START OF SECTION 1
-C>         IPTR( 4)- BYTE COUNT SECTION 2
-C>         IPTR( 5)- POINTER TO START OF SECTION 2
-C>         IPTR( 6)- BYTE COUNT SECTION 3
-C>         IPTR( 7)- POINTER TO START OF SECTION 3
-C>         IPTR( 8)- BYTE COUNT SECTION 4
-C>         IPTR( 9)- POINTER TO START OF SECTION 4
-C>         IPTR(10)- START OF REQUESTED SUBSET, RESERVED FOR DAR
-C>         IPTR(11)- CURRENT DESCRIPTOR PTR IN IWORK
-C>         IPTR(12)- LAST DESCRIPTOR POS IN IWORK
-C>         IPTR(13)- LAST DESCRIPTOR POS IN ISTACK
-C>         IPTR(14)- NUMBER OF TABLE B ENTRIES
-C>         IPTR(15)- REQUESTED SUBSET POINTER, RESERVED FOR DAR
-C>         IPTR(16)- INDICATOR FOR EXISTANCE OF SECTION 2
-C>         IPTR(17)- NUMBER OF REPORTS PROCESSED
-C>         IPTR(18)- ASCII/TEXT EVENT
-C>         IPTR(19)- POINTER TO START OF BUFR MESSAGE
-C>         IPTR(20)- NUMBER OF LINES FROM TABLE D
-C>         IPTR(21)- TABLE B SWITCH
-C>         IPTR(22)- TABLE D SWITCH
-C>         IPTR(23)- CODE/FLAG TABLE SWITCH
-C>         IPTR(24)- ADITIONAL WORDS ADDED BY TEXT INFO
-C>         IPTR(25)- CURRENT BIT NUMBER
-C>         IPTR(26)- DATA WIDTH CHANGE
-C>         IPTR(27)- DATA SCALE CHANGE
-C>         IPTR(28)- DATA REFERENCE VALUE CHANGE
-C>         IPTR(29)- ADD DATA ASSOCIATED FIELD
-C>         IPTR(30)- SIGNIFY CHARACTERS
-C>         IPTR(31)- NUMBER OF EXPANDED DESCRIPTORS IN MSTACK
-C>         IPTR(32)- CURRENT DESCRIPTOR SEGMENT F
-C>         IPTR(33)- CURRENT DESCRIPTOR SEGMENT X
-C>         IPTR(34)- CURRENT DESCRIPTOR SEGMENT Y
-C>         IPTR(35)- UNUSED
-C>         IPTR(36)- NEXT DESCRIPTOR MAY BE UNDECIPHERABLE
-C>         IPTR(37)- UNUSED
-C>         IPTR(38)- UNUSED
-C>         IPTR(39)- DELAYED REPLICATION FLAG
-C>                      0 - NO DELAYED REPLICATION
-C>                      1 - MESSAGE CONTAINS DELAYED REPLICATION
-C>         IPTR(40)- NUMBER OF CHARACTERS IN TEXT FOR CURR DESCRIPTOR
-C>     IDENT    - ARRAY CONTAINS MESSAGE INFORMATION EXTRACTED FROM
-C>                  BUFR MESSAGE -
-C>         IDENT( 1)-EDITION NUMBER     (BYTE 4, SECTION 1)
-C>         IDENT( 2)-ORIGINATING CENTER (BYTES 5-6, SECTION 1)
-C>         IDENT( 3)-UPDATE SEQUENCE    (BYTE 7, SECTION 1)
-C>         IDENT( 4)-OPTIONAL SECTION   (BYTE 8, SECTION 1)
-C>         IDENT( 5)-BUFR MESSAGE TYPE  (BYTE 9, SECTION 1)
-C>                  0 = SURFACE (LAND)
-C>                  1 = SURFACE (SHIP)
-C>                  2 = VERTICAL SOUNDINGS OTHER THAN SATELLITE
-C>                  3 = VERTICAL SOUNDINGS (SATELLITE)
-C>                  4 = SNGL LVL UPPER-AIR OTHER THAN SATELLITE
-C>                  5 = SNGL LVL UPPER-AIR (SATELLITE)
-C>                  6 = RADAR
-C>         IDENT( 6)-BUFR MSG SUB-TYPE  (BYTE 10, SECTION 1)
-C>              TYPE SBTYP
-C>               2     7   = PROFILER
-C>         IDENT( 7)-                   (BYTES 11-12, SECTION 1)
-C>         IDENT( 8)-YEAR OF CENTURY    (BYTE 13, SECTION 1)
-C>         IDENT( 9)-MONTH OF YEAR      (BYTE 14, SECTION 1)
-C>         IDENT(10)-DAY OF MONTH       (BYTE 15, SECTION 1)
-C>         IDENT(11)-HOUR OF DAY        (BYTE 16, SECTION 1)
-C>         IDENT(12)-MINUTE OF HOUR     (BYTE 17, SECTION 1)
-C>         IDENT(13)-RSVD BY ADP CENTERS(BYTE 18, SECTION 1)
-C>         IDENT(14)-NR OF DATA SUBSETS (BYTE 5-6, SECTION 3)
-C>         IDENT(15)-OBSERVED FLAG      (BYTE 7, BIT 1, SECTION 3)
-C>         IDENT(16)-COMPRESSION FLAG   (BYTE 7, BIT 2, SECTION 3)
-C>         IDENT(17)-MASTER TABLE NUMBER(BYTE 4, SECTION 1, ED 2 OR GTR)
-C>     KDATA    - ARRAY CONTAINING DECODED REPORTS FROM BUFR MESSAGE.
-C>                KDATA(REPORT NUMBER,PARAMETER NUMBER)
-C>            ARRAYS CONTAINING DATA FROM TABLE B
-C>     ANAME    - DESCRIPTOR NAME
-C>     AUNITS   - UNITS FOR DESCRIPTOR
-C>     MSCALE   - SCALE FOR VALUE OF DESCRIPTOR
-C>     MREF     - REFERENCE VALUE FOR DESCRIPTOR
-C>     MWIDTH   - BIT WIDTH FOR VALUE OF DESCRIPTOR
-C>     INDEX    - POINTER TO AVAILABLE SUBSET
+C>  On the initial call to w3fi67() with a bufr message the argument
+C>  index must be set to zero (index = 0). on the return from w3fi67()
+C>  'index' will be set to the next available subset/report. when
+C>  there are no more subsets available a 99 err return will occur.
 C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       W3LIB    -         GBYTE GBYTES
+C>  If the original bufr message does not contain delayed replication
+C>  the bufr message will be completely decoded and 'index' will point
+C>  to the first decoded subset. The users will then have the option
+C>  of indexing through the subsets on their own or by recalling this
+C>  routine (without resetting 'index') to have the routine do the
+C>  indexing.
 C>
-C> REMARKS: ERROR RETURNS:
-C>    IPTR(1) = 1   'BUFR' NOT FOUND IN FIRST 125 CHARACTERS
-C>            = 2   '7777' NOT FOUND IN LOCATION DETERMINED BY
-C>                  BY USING COUNTS FOUND IN EACH SECTION. ONE OR
-C>                  MORE SECTIONS HAVE AN ERRONEOUS BYTE COUNT OR
-C>                  CHARACTERS '7777' ARE NOT IN TEST MESSAGE.
-C>            = 3   MESSAGE CONTAINS A DESCRIPTOR WITH F=0 THAT DOES
-C>                  NOT EXIST IN TABLE B.
-C>            = 4   MESSAGE CONTAINS A DESCRIPTOR WITH F=3 THAT DOES
-C>                  NOT EXIST IN TABLE D.
-C>            = 5   MESSAGE CONTAINS A DESCRIPTOR WITH F=2 WITH THE
-C>                  VALUE OF X OUTSIDE THE RANGE 1-5.
-C>            = 6   DESCRIPTOR ELEMENT INDICATED TO HAVE A FLAG VALUE
-C>                  DOES NOT HAVE AN ENTRY IN THE FLAG TABLE.
-C>                  (TO BE ACTIVATED)
-C>            = 7   DESCRIPTOR INDICATED TO HAVE A CODE VALUE DOES
-C>                  NOT HAVE AN ENTRY IN THE CODE TABLE.
-C>                  (TO BE ACTIVATED)
-C>            = 8   ERROR READING TABLE D
-C>            = 9   ERROR READING TABLE B
-C>            = 10  ERROR READING CODE/FLAG TABLE
-C>            = 11  DESCRIPTOR 2 04 004 NOT FOLLOWED BY 0 31 021
-C>            = 12  DATA DESCRIPTOR OPERATOR QUALIFIER DOES NOT FOLLOW
-C>                  DELAYED REPLICATION DESCRIPTOR.
-C>            = 13  BIT WIDTH ON ASCII CHARACTERS NOT A MULTIPLE OF 8
-C>            = 14  SUBSETS = 0, NO CONTENT BULLETIN
-C>            = 20  EXCEEDED COUNT FOR DELAYED REPLICATION PASS
-C>            = 21  EXCEEDED COUNT FOR NON-DELAYED REPLICATION PASS
-C>            = 22  SECTION 1 COUNT EXCEEDS 10000
-C>            = 23  SECTION 2 COUNT EXCEEDS 10000
-C>            = 24  SECTION 3 COUNT EXCEEDS 10000
-C>            = 25  SECTION 4 COUNT EXCEEDS 10000
-C>            = 27  NON ZERO LOWEST ON TEXT DATA
-C>            = 28  NBINC NOT NR OF CHARACTERS
-C>            = 29  TABLE B APPEARS TO BE DAMAGED
-C>            = 99  NO MORE SUBSETS (REPORTS) AVAILABLE IN CURRENT
-C>                  BUFR MESAGE
-C>            = 400 NUMBER OF SUBSETS EXCEEDS CAPABILITY OF ROUTINE
-C>            = 401 NUMBER OF PARAMETERS (AND ASSOCIATED FIELDS)
-C>                  EXCEEDS LIMITS OF THIS PROGRAM.
-C>            = 500 VALUE FOR NBINC HAS BEEN FOUND THAT EXCEEDS
-C>                  STANDARD WIDTH PLUS ANY BIT WIDTH CHANGE.
-C>                  CHECK ALL BIT WIDTHS UP TO POINT OF ERROR.
-C>            = 501 CORRECTED WIDTH FOR DESCRIPTOR IS 0 OR LESS
-C>
-C>        ON THE INITIAL CALL TO W3FI67 WITH A BUFR MESSAGE THE ARGUMENT
-C>    INDEX MUST BE SET TO ZERO (INDEX = 0). ON THE RETURN FROM W3FI67
-C>    'INDEX' WILL BE SET TO THE NEXT AVAILABLE SUBSET/REPORT. WHEN
-C>    THERE ARE NO MORE SUBSETS AVAILABLE A 99 ERR RETURN WILL OCCUR.
-C>
-C>    IF THE ORIGINAL BUFR MESSAGE DOES NOT CONTAIN DELAYED REPLICATION
-C>    THE BUFR MESSAGE WILL BE COMPLETELY DECODED AND 'INDEX' WILL POINT
-C>    TO THE FIRST DECODED SUBSET. THE USERS WILL THEN HAVE THE OPTION
-C>    OF INDEXING THROUGH THE SUBSETS ON THEIR OWN OR BY RECALLING THIS
-C>    ROUTINE (WITHOUT RESETTING 'INDEX') TO HAVE THE ROUTINE DO THE
-C>    INDEXING.
-C>
-C>    IF THE ORIGINAL BUFR MESSAGE DOES CONTAIN DELAYED REPLICATION
-C>    ONE SUBSET/REPORT WILL BE DECODED AT A TIME AND PASSED BACK TO
-C>    THE USER. THIS IS NOT AN OPTION.
+C>  If the original bufr message does contain delayed replication
+C>  one subset/report will be decoded at a time and passed back to
+C>  the user. this is not an option.
 C>
 C>  =============================================
 C>   TO USE THIS ROUTINE
@@ -291,6 +259,7 @@ C>          ELSE
 C>              PROCESS DECODED INFORMATION AS REQUIRED
 C>          END IF
 C>       7. GO TO 3
+C>
 C>  =============================================
 C>       THE ARRAYS TO CONTAIN THE OUTPUT INFORMATION ARE DEFINED
 C>       AS FOLLOWS:
@@ -624,64 +593,51 @@ C 154         CONTINUE
       END IF
       RETURN
       END
+
+C> @brief Data extraction.
+C> @author Bill Cavanaugh @date 1988-09-01
+
+C> Control the extraction of data from section 4 based on
+C> data descriptors.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-09-01
+C> - Bill Cavanaugh 1991-01-18 Corrections to properly handle non-compressed
+C> data.
+C> - Bill Cavanaugh 1991-09-23 Coding added to handle single subsets with
+C> delayed replication.
+C> - Bill Cavanaugh 1992-01-24 Modified to echo descriptors to mstack(1,n)
+C>
+C> @param[in] IPTR See w5fi67 routine docblock.
+C> @param[in] IDENT See w3fi67 routine docblock.
+C> @param[in] MSGA Array containing bufr message.
+C> @param[inout] ISTACK [in] Original array of descriptors extracted from
+C> source bufr message. [out] Arrays containing data from table b.
+C> @param[in] MSTACK Working array of descriptors (expanded)and scaling
+C> factor.
+C> @param[inout] KDESC Image of current descriptor.
+C> @param[in] INDEX
+C> @param KNR
+C> @param[out] IWORK Working descriptor list
+C> @param IVALS
+C> @param[out] KDATA Array containing decoded reports from bufr message
+C> kdata(report number,parameter number).
+C> @param[out] ANAME Descriptor name..
+C> @param[out] AUNITS Units for descriptor.
+C> @param[out] MSCALE Scale for value of descriptor.
+C> @param[out] MREF Reference value for descriptor.
+C> @param[out] MWIDTH Bit width for value of descriptor.
+C>
+C> @note Error return:
+C> - IPTR(1)
+C>  - = 8   ERROR READING TABLE B
+C>  - = 9   ERROR READING TABLE D
+C>  - = 11  ERROR OPENING TABLE B
+C>
+C> @author Bill Cavanaugh @date 1988-09-01
       SUBROUTINE FI6701(IPTR,IDENT,MSGA,ISTACK,IWORK,ANAME,KDATA,IVALS,
      *               MSTACK,AUNITS,KDESC,MWIDTH,MREF,MSCALE,KNR,INDEX)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6701      DATA EXTRACTION
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 88-09-01
-C
-C ABSTRACT: CONTROL THE EXTRACTION OF DATA FROM SECTION 4 BASED ON
-C   DATA DESCRIPTORS.
-C
-C PROGRAM HISTORY LOG:
-C   88-09-01  CAVANAUGH
-C   91-01-18  CAVANAUGH   CORRECTIONS TO PROPERLY HANDLE NON-COMPRESSED
-C                         DATA.
-C   91-09-23  CAVANAUGH   CODING ADDED TO HANDLE SINGLE SUBSETS WITH
-C                         DELAYED REPLICATION.
-C   92-01-24  CAVANAUGH   MODIFIED TO ECHO DESCRIPTORS TO MSTACK(1,N)
-C
-C USAGE:    CALL FI6701(IPTR,IDENT,MSGA,ISTACK,IWORK,ANAME,KDATA,
-C    *               MSTACK,AUNITS,KDESC,MWIDTH,MREF,MSCALE,KNR,INDEX)
-C   INPUT ARGUMENT LIST:
-C     IPTR     - SEE W5FI67 ROUTINE DOCBLOCK
-C     IDENT    - SEE W3FI67 ROUTINE DOCBLOCK
-C     MSGA     - ARRAY CONTAINING BUFR MESSAGE
-C     ISTACK   - ORIGINAL ARRAY OF DESCRIPTORS EXTRACTED FROM
-C                SOURCE BUFR MESSAGE.
-C     MSTACK   - WORKING ARRAY OF DESCRIPTORS (EXPANDED)AND SCALING
-C                FACTOR
-C     KDESC    - IMAGE OF CURRENT DESCRIPTOR
-C     INDEX    -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     IWORK    - WORKING DESCRIPTOR LIST
-C     KDATA    - ARRAY CONTAINING DECODED REPORTS FROM BUFR MESSAGE.
-C                KDATA(REPORT NUMBER,PARAMETER NUMBER)
-C     ISTACK   - SEE ABOVE
-C            ARRAYS CONTAINING DATA FROM TABLE B
-C     KDESC    - SEE ABOVE
-C     ANAME    - DESCRIPTOR NAME
-C     AUNITS   - UNITS FOR DESCRIPTOR
-C     MSCALE   - SCALE FOR VALUE OF DESCRIPTOR
-C     MREF     - REFERENCE VALUE FOR DESCRIPTOR
-C     MWIDTH   - BIT WIDTH FOR VALUE OF DESCRIPTOR
-C
-C   SUBPROGRAMS CALLED:
-C     LIBRARY:
-C       W3LIB    - FI6702 FI6705 FI6706 FI6707 FI6708
-C
-C REMARKS: ERROR RETURN:
-C     IPTR(1) = 8   ERROR READING TABLE B
-C             = 9   ERROR READING TABLE D
-C             = 11  ERROR OPENING TABLE B
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
       SAVE
 C
       CHARACTER*40   ANAME(*)
@@ -950,55 +906,40 @@ C         PRINT *,'RETURN WITH',IPTR(17),' NON-COMPRESSED REPORTS'
       IPTR(1)  = 9
       RETURN
       END
-C -----------------------------------------------------
+C> @brief Process standard descriptor.
+C> @author Bill Cavanaugh @date 1988-09-01
+
+C> Process a standard descriptor (f = 0) and store data
+C> in output array.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-09-01
+C> - Bill Cavanaugh 1991-04-04 Changed to pass width of text fields in bytes.
+C>
+C> @param[in] IPTR See w3fi67 routine docblock.
+C> @param[in] IDENT See w3fi67 routine docblock.
+C> @param[in] MSGA Array containing bufr message.
+C> @param[inout] KDATA Array containing decoded reports from bufr message.
+C> KDATA(Report number, parameter number)
+C> @param[inout] KDESC Image of current descriptor.
+C> @param[in] MSTACK
+C> @param LL
+C> @param[out] AUNITS Units for descriptor.
+C> @param[out] MSCALE Scale for value of descriptor.
+C> @param[out] MREF Reference value for descriptor.
+C> @param[out] MWIDTH Bit width for value of descriptor.
+C> @param JDESC
+C> @param[in] IVALS Array of single parameter values.
+C> @param J
+C>
+C> @note Error return:
+C> IPTR(1) = 3 - Message contains a descriptor with f=0
+C> that does not exist in table b.
+C>
+C> @author Bill Cavanaugh @date 1988-09-01
       SUBROUTINE FI6702(IPTR,IDENT,MSGA,KDATA,KDESC,LL,MSTACK,AUNITS,
      *                  MWIDTH,MREF,MSCALE,JDESC,IVALS,J)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6702      PROCESS STANDARD DESCRIPTOR
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 88-09-01
-C
-C ABSTRACT: PROCESS A STANDARD DESCRIPTOR (F = 0) AND STORE DATA
-C   IN OUTPUT ARRAY.
-C
-C PROGRAM HISTORY LOG:
-C   88-09-01  CAVANAUGH
-C   91-04-04  CAVANAUGH   CHANGED TO PASS WIDTH OF TEXT FIELDS IN BYTES
-C
-C USAGE:    CALL FI6702(IPTR,IDENT,MSGA,KDATA,KDESC,LL,MSTACK,AUNITS,
-C                       MWIDTH,MREF,MSCALE,JDESC,IVALS,J)
-C   INPUT ARGUMENT LIST:
-C     IPTR     - SEE W3FI67 ROUTINE DOCBLOCK
-C     IDENT    - SEE W3FI67 ROUTINE DOCBLOCK
-C     MSGA     - ARRAY CONTAINING BUFR MESSAGE
-C     KDATA    - ARRAY CONTAINING DECODED REPORTS FROM BUFR MESSAGE.
-C                KDATA(REPORT NUMBER,PARAMETER NUMBER)
-C     KDESC    - IMAGE OF CURRENT DESCRIPTOR
-C     ANAME    - LIST OF NAME OF DESCRIPTOR CONTENTS
-C     MSTACK   -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KDATA    - SEE ABOVE
-C     KDESC    - SEE ABOVE
-C            ARRAYS CONTAINING DATA FROM TABLE B
-C     AUNITS   - UNITS FOR DESCRIPTOR
-C     MSCALE   - SCALE FOR VALUE OF DESCRIPTOR
-C     MREF     - REFERENCE VALUE FOR DESCRIPTOR
-C     MWIDTH   - BIT WIDTH FOR VALUE OF DESCRIPTOR
-C
-C   SUBPROGRAMS CALLED:
-C     LIBRARY:
-C       W3LIB    - FI6703 FI6704
-C
-C REMARKS: ERROR RETURN:
-C IPTR(1) = 3     - MESSAGE CONTAINS A DESCRIPTOR WITH F=0
-C                   THAT DOES NOT EXIST IN TABLE B.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
       SAVE
 C                                          TABLE B ENTRY
       CHARACTER*24   ASKEY
@@ -1116,56 +1057,39 @@ C                                   NOT COMPRESSED
       END IF
       RETURN
       END
-C -----------------------------------------------------
+C> @brief Process compressed data and place individual elements into output
+C> array
+C> @author Bill Cavanaugh @date 1988-09-01
+
+C> Program history log:
+C> - Bill Cavanaugh 1988-09-01
+C> - Bill Cavanaugh 1991-04-04 Text handling portion of this routine
+C> modified to hanle width of fields in bytes.
+C> - Bill Cavanaugh 1991-04-17 Tests showed that the same data in compressed
+C> and uncompressed form gave different results. This has been corrected.
+C> - Bill Cavanaugh 1991-06-21 Processing of text data has been changed to
+C> provide exact reproduction of all characters.
+C>
+C> @param[in] IPTR See w3fi67() routine docblock.
+C> @param[in] IDENT See w3fi67() routine docblock.
+C> @param[in] MSGA Array containing bufr message, mstack.
+C> @param[in] MSTACK
+C> @param[in] IVALS Array of single parameter values.
+C> @param[inout] J
+C> @param[out] KDATA Array containing decoded reports from bufr message.
+C> kdata(report number,parameter number).
+C> @param JDESC
+C> Arrays Containing data from table b.
+C> @param[out] MSCALE Scale for value of descriptor.
+C> @param[out] MREF Reference value for descriptor.
+C> @param[out] MWIDTH Bit width for value of descriptor.
+C>
+C> @note List caveats, other helpful hints or information.
+C>
+C> @author Bill Cavanaugh @date 1988-09-01
       SUBROUTINE FI6703(IPTR,IDENT,MSGA,KDATA,IVALS,MSTACK,
      *                      MWIDTH,MREF,MSCALE,J,JDESC)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6703      PROCESS COMPRESSED DATA
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 88-09-01
-C
-C ABSTRACT: PROCESS COMPRESSED DATA AND PLACE INDIVIDUAL ELEMENTS
-C   INTO OUTPUT ARRAY.
-C
-C PROGRAM HISTORY LOG:
-C   88-09-01  CAVANAUGH
-C   91-04-04  CAVANAUGH  TEXT HANDLING PORTION OF THIS ROUTINE
-C                        MODIFIED TO HANLE WIDTH OF FIELDS IN BYTES.
-C   91-04-17  CAVANAUGH  TESTS SHOWED THAT THE SAME DATA IN COMPRESSED
-C                        AND UNCOMPRESSED FORM GAVE DIFFERENT RESULTS.
-C                        THIS HAS BEEN CORRECTED.
-C   91-06-21  CAVANAUGH  PROCESSING OF TEXT DATA HAS BEEN CHANGED TO
-C                        PROVIDE EXACT REPRODUCTION OF ALL CHARACTERS.
-C
-C USAGE:    CALL FI6703(IPTR,IDENT,MSGA,KDATA,IVALS,MSTACK,
-C                           MWIDTH,MREF,MSCALE,J,JDESC)
-C   INPUT ARGUMENT LIST:
-C     IPTR     - SEE W3FI67 ROUTINE DOCBLOCK
-C     IDENT    - SEE W3FI67 ROUTINE DOCBLOCK
-C     MSGA     - ARRAY CONTAINING BUFR MESSAGE,MSTACK,
-C     IVALS    - ARRAY OF SINGLE PARAMETER VALUES
-C     J        -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KDATA    - ARRAY CONTAINING DECODED REPORTS FROM BUFR MESSAGE.
-C                KDATA(REPORT NUMBER,PARAMETER NUMBER)
-C     J        -
-C            ARRAYS CONTAINING DATA FROM TABLE B
-C     MSCALE   - SCALE FOR VALUE OF DESCRIPTOR
-C     MREF     - REFERENCE VALUE FOR DESCRIPTOR
-C     MWIDTH   - BIT WIDTH FOR VALUE OF DESCRIPTOR
-C
-C   SUBPROGRAMS CALLED:
-C     LIBRARY:
-C       W3LIB    - GBYTE  GBYTES W3AI39
-C
-C REMARKS: LIST CAVEATS, OTHER HELPFUL HINTS OR INFORMATION
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
       SAVE
 C
       INTEGER        MSGA(*),JDESC,MSTACK(2,*)
@@ -1391,56 +1315,38 @@ C1800         FORMAT (2X,I4,2X,3A4)
       END IF
       RETURN
       END
-C -----------------------------------------------------
+C> @brief Process data that is not compressed.
+C> @author Bill Cavanaugh @date 1988-09-01
+
+C> Program history log:
+C> - Bill Cavanaugh 1988-09-01
+C> - Bill Cavanaugh 1991-01-18 Modified to properly handle non-compressed
+C> data.
+C> - Bill Cavanaugh 1991-04-04 Text handling portion of this routine
+C> modified to handle field width in bytes.
+C> - Bill Cavanaugh 1991-04-17 Tests showed that the same data in compressed
+C> and uncompressed form gave different results. This has been corrected.
+C>
+C> @param[in] IPTR See w3fi67 routine docblock
+C> @param[in] MSGA Array containing bufr message
+C> @param[inout] IVALS Array of single parameter values
+C> @param[out] KDATA Array containing decoded reports from bufr message.
+C> kdata(report number,parameter number)
+C> @param[inout] J [in] ? [out] arrays containing data from table b
+C> @param[out] MSCALE Scale for value of descriptor
+C> @param[in] MSTACK
+C> @param LL
+C> @param JDESC
+C> @param[out] MREF Reference value for descriptor
+C> @param[out] MWIDTH Bit width for value of descriptor
+C>
+C> @note Error return:
+C> - IPTR(1) = 13 - Bit width on ASCII chars not a multiple of 8.
+C>
+C> @author Bill Cavanaugh @date 1988-09-01
       SUBROUTINE FI6704(IPTR,MSGA,KDATA,IVALS,MSTACK,
      *                      MWIDTH,MREF,MSCALE,J,LL,JDESC)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6704      PROCESS SERIAL DATA
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 88-09-01
-C
-C ABSTRACT: PROCESS DATA THAT IS NOT COMPRESSED
-C
-C PROGRAM HISTORY LOG:
-C   88-09-01  CAVANAUGH
-C   91-01-18  CAVANAUGH   MODIFIED TO PROPERLY HANDLE NON-COMPRESSED
-C                         DATA.
-C   91-04-04  CAVANAUGH   TEXT HANDLING PORTION OF THIS ROUTINE
-C                         MODIFIED TO HANDLE FIELD WIDTH IN BYTES.
-C   91-04-17  CAVANAUGH  TESTS SHOWED THAT THE SAME DATA IN COMPRESSED
-C                        AND UNCOMPRESSED FORM GAVE DIFFERENT RESULTS.
-C                        THIS HAS BEEN CORRECTED.
-C
-C USAGE:    CALL FI6704(IPTR,MSGA,KDATA,IVALS,MSTACK,
-C                           MWIDTH,MREF,MSCALE,J,LL,JDESC)
-C   INPUT ARGUMENT LIST:
-C     IPTR     - SEE W3FI67 ROUTINE DOCBLOCK
-C     MSGA     - ARRAY CONTAINING BUFR MESSAGE
-C     IVALS     - ARRAY OF SINGLE PARAMETER VALUES
-C     J        -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KDATA    - ARRAY CONTAINING DECODED REPORTS FROM BUFR MESSAGE.
-C                KDATA(REPORT NUMBER,PARAMETER NUMBER)
-C     IVALS     - SEE ABOVE
-C     J        - SEE ABOVE
-C            ARRAYS CONTAINING DATA FROM TABLE B
-C     MSCALE   - SCALE FOR VALUE OF DESCRIPTOR
-C     MREF     - REFERENCE VALUE FOR DESCRIPTOR
-C     MWIDTH   - BIT WIDTH FOR VALUE OF DESCRIPTOR
-C
-C   SUBPROGRAMS CALLED:
-C     LIBRARY:
-C       W3LIB    - GBYTE
-C
-C REMARKS: ERROR RETURN:
-C IPTR(1) = 13   - BIT WIDTH ON ASCII CHARS NOT A MULTIPLE OF 8
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
        SAVE
 C
       INTEGER        MSGA(*)
@@ -1571,50 +1477,38 @@ C                        TURN OFF TEXT
       END IF
       RETURN
       END
-C -----------------------------------------------------
+C> @brief Process a replication descriptor, must extract number
+C> of replications of n descriptors from the data stream.
+C> @author Bill Cavanaugh @date 1988-09-01
+
+C> Process a replication descriptor, must extract number
+C> of replications of n descriptors from the data stream.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-09-01
+C>
+C> @param[in] IWORK Working descriptor list
+C> @param[in] IPTR See w3fi67 routine docblock
+C> @param[in] IDENT See w3fi67 routine docblock
+C> @param[inout] LX X portion of current descriptor
+C> @param[inout] LY Y portion of current descriptor
+C> @param[out] KDATA Array containing decoded reports from bufr message.
+C> kdata(report number,parameter number)
+C> @param LL
+C> @param KNR
+C> @param MSTACK
+C> @param MSGA
+C>
+C> @note Error return:
+C> - IPTR(1)
+C>  - = 12  Data descriptor qualifier does not follow
+C> delayed replication descriptor.
+C>  - = 20  Exceeded count for delayed replication pass.
+C>
+C> @author Bill Cavanaugh @date 1988-09-01
       SUBROUTINE FI6705(IPTR,IDENT,MSGA,IWORK,LX,LY,
      *                                          KDATA,LL,KNR,MSTACK)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6705      PROCESS A REPLICATION DESCRIPTOR
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 88-09-01
-C
-C ABSTRACT: PROCESS A REPLICATION DESCRIPTOR, MUST EXTRACT NUMBER
-C   OF REPLICATIONS OF N DESCRIPTORS FROM THE DATA STREAM.
-C
-C PROGRAM HISTORY LOG:
-C   88-09-01  CAVANAUGH
-C   YY-MM-DD  MODIFIER2   DESCRIPTION OF CHANGE
-C
-C USAGE:    CALL FI6705(IPTR,IDENT,MSGA,IWORK,LX,LY,
-C    *                                          KDATA,LL,KNR,MSTACK)
-C   INPUT ARGUMENT LIST:
-C     IWORK    - WORKING DESCRIPTOR LIST
-C     IPTR     - SEE W3FI67 ROUTINE DOCBLOCK
-C     IDENT    - SEE W3FI67 ROUTINE DOCBLOCK
-C     LX       - X PORTION OF CURRENT DESCRIPTOR
-C     LY       - Y PORTION OF CURRENT DESCRIPTOR
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KDATA    - ARRAY CONTAINING DECODED REPORTS FROM BUFR MESSAGE.
-C                KDATA(REPORT NUMBER,PARAMETER NUMBER)
-C     LX       - SEE ABOVE
-C     LY       - SEE ABOVE
-C
-C   SUBPROGRAMS CALLED:
-C     LIBRARY:
-C       W3LIB    - GBYTES FI6708
-C
-C REMARKS: ERROR RETURN:
-C    IPTR(1) = 12  DATA DESCRIPTOR QUALIFIER DOES NOT FOLLOW
-C                  DELAYED REPLICATION DESCRIPTOR
-C            = 20  EXCEEDED COUNT FOR DELAYED REPLICATION PASS
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
       SAVE
 C
       INTEGER        IPTR(*),KNR(*)
@@ -1734,50 +1628,50 @@ C         PRINT *,'FI6705 B',ICURR,IWORK(ICURR)
       IPTR(11)  = IPICK
       RETURN
       END
+
+C> @brief Process operator descriptors.
+C> @author Bill Cavanaugh @date 1988-09-01
+
+C> Extract and save indicated change values for use
+C> until changes are rescinded, or extract text strings indicated
+C> through 2 05 yyy.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-09-01
+C> - Bill Cavanaugh 1991-04-04 Modified to handle descriptor 2 05 yyy
+C> - Bill Cavanaugh 1991-05-10 Coding has been added to process proposed
+C> table c descriptor 2 06 yyy.
+C> - Bill Cavanaugh 1991-11-21 Coding has been added to properly process
+C> table c descriptor 2 03 yyy, the change
+C> to new reference value for selected
+C> descriptors.
+C>
+C> @param[in] IPTR See w3fi67 routine docblock.
+C> @param[in] LX X portion of current descriptor.
+C> @param[in] LY Y portion of current descriptor.
+C> @param[out] KDATA Array containing decoded reports from bufr message.
+C> kdata(report number,parameter number)
+C> arrays containing data from table b
+C> @param[out] MSCALE Scale for value of descriptor
+C> @param[out] MREF Reference value for descriptor
+C> @param[out] MWIDTH Bit width for value of descriptor
+C> @param IDENT
+C> @param MSGA
+C> @param IVALS
+C> @param MSTACK
+C> @param J
+C> @param LL
+C> @param KDESC
+C> @param IWORK
+C> @param JDESC
+C>
+C> @note Error return:
+C> - IPTR(1) = 5 - Erroneous x value in data descriptor operator
+C>
+C> @author Bill Cavanaugh @date 1988-09-01
       SUBROUTINE FI6706 (IPTR,LX,LY,IDENT,MSGA,KDATA,IVALS,MSTACK,
      *                       MWIDTH,MREF,MSCALE,J,LL,KDESC,IWORK,JDESC)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6706      PROCESS OPERATOR DESCRIPTORS
-C   PRGMMR: CAVANAUGH        ORG: W/NMCX42   DATE: 88-09-01
-C
-C ABSTRACT: EXTRACT AND SAVE INDICATED CHANGE VALUES FOR USE
-C   UNTIL CHANGES ARE RESCINDED, OR EXTRACT TEXT STRINGS INDICATED
-C   THROUGH 2 05 YYY.
-C
-C PROGRAM HISTORY LOG:
-C   88-09-01  CAVANAUGH
-C   91-04-04  CAVANAUGH   MODIFIED TO HANDLE DESCRIPTOR 2 05 YYY
-C   91-05-10  CAVANAUGH   CODING HAS BEEN ADDED TO PROCESS PROPOSED
-C                         TABLE C DESCRIPTOR 2 06 YYY.
-C   91-11-21  CAVANAUGH   CODING HAS BEEN ADDED TO PROPERLY PROCESS
-C                         TABLE C DESCRIPTOR 2 03 YYY, THE CHANGE
-C                         TO NEW REFERENCE VALUE FOR SELECTED
-C                         DESCRIPTORS.
-C
-C USAGE:    CALL FI6706 (IPTR,LX,LY,IDENT,MSGA,KDATA,IVALS,MSTACK,
-C    *                       MWIDTH,MREF,MSCALE,J,LL,KDESC,IWORK,JDESC)
-C   INPUT ARGUMENT LIST:
-C     IPTR     - SEE W3FI67 ROUTINE DOCBLOCK
-C     LX       - X PORTION OF CURRENT DESCRIPTOR
-C     LY       - Y PORTION OF CURRENT DESCRIPTOR
-C
-C   OUTPUT ARGUMENT LIST:
-C     KDATA    - ARRAY CONTAINING DECODED REPORTS FROM BUFR MESSAGE.
-C                KDATA(REPORT NUMBER,PARAMETER NUMBER)
-C            ARRAYS CONTAINING DATA FROM TABLE B
-C     MSCALE   - SCALE FOR VALUE OF DESCRIPTOR
-C     MREF     - REFERENCE VALUE FOR DESCRIPTOR
-C     MWIDTH   - BIT WIDTH FOR VALUE OF DESCRIPTOR
-C
-C REMARKS: ERROR RETURN:
-C IPTR(1) = 5   - ERRONEOUS X VALUE IN DATA DESCRIPTOR OPERATOR
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
       SAVE
       INTEGER        IPTR(*),KDATA(500,*),IVALS(*)
       INTEGER        IDENT(*),IWORK(*)
@@ -1899,40 +1793,26 @@ C         PRINT *,'SET TO SKIP',LY,' BIT FIELD'
       ENDIF
       RETURN
       END
+
+C> @brief Substitute descriptor queue for queue descriptor
+C> @author Bill Cavanaugh @date 1988-09-01
+
+C> Substitute descriptor queue for queue descriptor
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1988-09-01
+C> - Bill Cavanaugh 1991-04-17 Improved handling of nested queue descriptors.
+C> - Bill Cavanaugh 1991-05-28 Improved handling of nested queue descriptors.
+C> based on tests with live data.
+C>
+C> @param[in] IWORK Working descriptor list.
+C> @param[in] IPTR See w3fi67 routine docblock.
+C> @param[in] ITBLD Array containing descriptor queues.
+C> @param[in] JDESC Queue descriptor to be expanded.
+C>
+C> @author Bill Cavanaugh @date 1988-09-01
       SUBROUTINE FI6707(IPTR,IWORK,ITBLD,JDESC)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6707      PROCESS QUEUE DESCRIPTOR
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 88-09-01
-C
-C ABSTRACT: SUBSTITUTE DESCRIPTOR QUEUE FOR QUEUE DESCRIPTOR
-C
-C PROGRAM HISTORY LOG:
-C   88-09-01  CAVANAUGH
-C   91-04-17  CAVANAUGH   IMPROVED HANDLING OF NESTED QUEUE DESCRIPTORS
-C   91-05-28  CAVANAUGH   IMPROVED HANDLING OF NESTED QUEUE DESCRIPTORS
-C                         BASED ON TESTS WITH LIVE DATA.
-C
-C USAGE:    CALL FI6707(IPTR,IWORK,ITBLD,JDESC)
-C   INPUT ARGUMENT LIST:
-C     IWORK    - WORKING DESCRIPTOR LIST
-C     IPTR     - SEE W3FI67 ROUTINE DOCBLOCK
-C     LAST     - INDEX TO LAST DESCRIPTOR
-C     ITBLD    - ARRAY CONTAINING DESCRIPTOR QUEUES
-C     JDESC    - QUEUE DESCRIPTOR TO BE EXPANDED
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     ISTACK   - SEE ABOVE
-C
-C   SUBPROGRAMS CALLED:
-C     LIBRARY:
-C       W3LIB    - NONE
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
       SAVE
 C
       INTEGER        IPTR(*),JDESC
@@ -2022,34 +1902,24 @@ C                                RESET POINTERS
       IPTR(11)   = IPTR(11) - 1
       RETURN
       END
-C -----------------------------------------------------
+C> @brief Subroutine FI6708
+C> @author Bill Cavanaugh @date 1989-01-17
+
+C> Program history log:
+C> - Bill Cavanaugh 1988-09-01
+C>
+C> @param[inout] IPTR See w3fi67() routine docblock.
+C> @param[in] IWORK Working descriptor list.
+C> @param LF
+C> @param LX
+C> @param LY
+C> @param[in] JDESC Queue descriptor to be expanded.
+C>
+C> @note List caveats, other helpful hints or information.
+C>
+C> @author Bill Cavanaugh @date 1989-01-17
       SUBROUTINE FI6708(IPTR,IWORK,LF,LX,LY,JDESC)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6708
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 89-01-17
-C
-C ABSTRACT:
-C
-C PROGRAM HISTORY LOG:
-C   88-09-01  CAVANAUGH
-C   YY-MM-DD  MODIFIER1   DESCRIPTION OF CHANGE
-C
-C USAGE:    CALL FI6708(IPTR,IWORK,LF,LX,LY,JDESC)
-C   INPUT ARGUMENT LIST:
-C     IPTR     - SEE W3FI67 ROUTINE DOCBLOCK
-C     IWORK    - WORKING DESCRIPTOR LIST
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     IPTR     - SEE ABOVE
-C
-C REMARKS: LIST CAVEATS, OTHER HELPFUL HINTS OR INFORMATION
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
       SAVE
       INTEGER       IPTR(*),IWORK(*),LF,LX,LY,JDESC
 C
@@ -2065,53 +1935,43 @@ C     PRINT *,' CURRENT DESCRIPTOR BEING TESTED IS',LF,LX,LY
       IPTR(11) = IPTR(11) + 1
       RETURN
       END
+C> @brief Reformat decoded profiler data to show heights instead of
+C> height increments.
+C> @author Bill Cavanaugh @date 1990-02-14
+
+C> Reformat decoded profiler data to show heights instead of
+C> height increments.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1990-02-14
+C>
+C> @param[in] IDENT Array contains message information extracted from
+C> BUFR message:
+C> - IDENT( 1)-EDITION NUMBER     (BYTE 4, SECTION 1)
+C> - IDENT( 2)-ORIGINATING CENTER (BYTES 5-6, SECTION 1)
+C> - IDENT( 3)-UPDATE SEQUENCE    (BYTE 7, SECTION 1)
+C> - IDENT( 4)-                   (BYTE 8, SECTION 1)
+C> - IDENT( 5)-BUFR MESSAGE TYPE  (BYTE 9, SECTION 1)
+C> - IDENT( 6)-BUFR MSG SUB-TYPE  (BYTE 10, SECTION 1)
+C> - IDENT( 7)-                   (BYTES 11-12, SECTION 1)
+C> - IDENT( 8)-YEAR OF CENTURY    (BYTE 13, SECTION 1)
+C> - IDENT( 9)-MONTH OF YEAR      (BYTE 14, SECTION 1)
+C> - IDENT(10)-DAY OF MONTH       (BYTE 15, SECTION 1)
+C> - IDENT(11)-HOUR OF DAY        (BYTE 16, SECTION 1)
+C> - IDENT(12)-MINUTE OF HOUR     (BYTE 17, SECTION 1)
+C> - IDENT(13)-RSVD BY ADP CENTERS(BYTE 18, SECTION 1)
+C> - IDENT(14)-NR OF DATA SUBSETS (BYTE 5-6, SECTION 3)
+C> - IDENT(15)-OBSERVED FLAG      (BYTE 7, BIT 1, SECTION 3)
+C> - IDENT(16)-COMPRESSION FLAG   (BYTE 7, BIT 2, SECTION 3)
+C> @param[in] MSTACK Working descriptor list and scaling factor
+C> @param[in] KDATA Array containing decoded reports
+C> @param[in] IPTR See w3fi67
+C>
+C> @note List caveats, other helpful hints or information.
+C>
+C> @author Bill Cavanaugh @date 1990-02-14
       SUBROUTINE FI6709(IDENT,MSTACK,KDATA,IPTR)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6709      REFORMAT PROFILER W HGT INCREMENTS
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 90-02-14
-C
-C ABSTRACT: REFORMAT DECODED PROFILER DATA TO SHOW HEIGHTS INSTEAD OF
-C     HEIGHT INCREMENTS.
-C
-C PROGRAM HISTORY LOG:
-C   90-02-14  CAVANAUGH
-C
-C USAGE:    CALL FI6709(IDENT,MSTACK,KDATA,IPTR)
-C   INPUT ARGUMENT LIST:
-C     IDENT    - ARRAY CONTAINS MESSAGE INFORMATION EXTRACTED FROM
-C                  BUFR MESSAGE -
-C         IDENT( 1)-EDITION NUMBER     (BYTE 4, SECTION 1)
-C         IDENT( 2)-ORIGINATING CENTER (BYTES 5-6, SECTION 1)
-C         IDENT( 3)-UPDATE SEQUENCE    (BYTE 7, SECTION 1)
-C         IDENT( 4)-                   (BYTE 8, SECTION 1)
-C         IDENT( 5)-BUFR MESSAGE TYPE  (BYTE 9, SECTION 1)
-C         IDENT( 6)-BUFR MSG SUB-TYPE  (BYTE 10, SECTION 1)
-C         IDENT( 7)-                   (BYTES 11-12, SECTION 1)
-C         IDENT( 8)-YEAR OF CENTURY    (BYTE 13, SECTION 1)
-C         IDENT( 9)-MONTH OF YEAR      (BYTE 14, SECTION 1)
-C         IDENT(10)-DAY OF MONTH       (BYTE 15, SECTION 1)
-C         IDENT(11)-HOUR OF DAY        (BYTE 16, SECTION 1)
-C         IDENT(12)-MINUTE OF HOUR     (BYTE 17, SECTION 1)
-C         IDENT(13)-RSVD BY ADP CENTERS(BYTE 18, SECTION 1)
-C         IDENT(14)-NR OF DATA SUBSETS (BYTE 5-6, SECTION 3)
-C         IDENT(15)-OBSERVED FLAG      (BYTE 7, BIT 1, SECTION 3)
-C         IDENT(16)-COMPRESSION FLAG   (BYTE 7, BIT 2, SECTION 3)
-C     MSTACK   - WORKING DESCRIPTOR LIST AND SCALING FACTOR
-C     DATA     - ARRAY CONTAINING DECODED REPORTS
-C     KSET2    - INTERIM DATA ARRAY
-C     KPROFL   - INTERIM DESCRIPTOR ARRAY
-C     IPTR     - SEE W3FI67
-C
-C   OUTPUT FILES:
-C
-C REMARKS: LIST CAVEATS, OTHER HELPFUL HINTS OR INFORMATION
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
       SAVE
 C  ----------------------------------------------------------------
 C
@@ -2462,57 +2322,43 @@ C                        MOVE REFORMATTED DESCRIPTORS TO MSTACK ARRAY
       IPTR(31) = JK
       RETURN
       END
+C> @brief Reformat profiler edition 2 data
+C> @author Bill Cavanaugh @date 1993-01-27
+
+C> Reformat profiler data in edition 2
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-01-27
+C>
+C> @param[in] IDENT Array contains message information extracted from
+C> BUFR message:
+C> - IDENT( 1)-Edition number     (byte 4, section 1)
+C> - IDENT( 2)-Originating center (bytes 5-6, section 1)
+C> - IDENT( 3)-Update sequence    (byte 7, section 1)
+C> - IDENT( 4)-                   (byte 8, section 1)
+C> - IDENT( 5)-BUFR message type  (byte 9, section 1)
+C> - IDENT( 6)-BUFR msg sub-type  (byte 10, section 1)
+C> - IDENT( 7)-                   (bytes 11-12, section 1)
+C> - IDENT( 8)-Year of century    (byte 13, section 1)
+C> - IDENT( 9)-Month of year      (byte 14, section 1)
+C> - IDENT(10)-Day of month       (byte 15, section 1)
+C> - IDENT(11)-Hour of day        (byte 16, section 1)
+C> - IDENT(12)-Minute of hour     (byte 17, section 1)
+C> - IDENT(13)-Rsvd by adp centers(byte 18, section 1)
+C> - IDENT(14)-Nr of data subsets (byte 5-6, section 3)
+C> - IDENT(15)-Observed flag      (byte 7, bit 1, section 3)
+C> - IDENT(16)-Compression flag   (byte 7, bit 2, section 3)
+C> @param[in] MSTACK Working descriptor list and scaling factor
+C> @param[in] KDATA Array containing decoded reports from bufr message.
+C> kdata(report number,parameter number)
+C> (report number limited to value of input argument
+C> maxr and parameter number limited to value of input
+C> argument maxd)
+C> @param[in] IPTR See w3fi67
+C>
+C> @author Bill Cavanaugh @date 1993-01-27
       SUBROUTINE FI6710(IDENT,MSTACK,KDATA,IPTR)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI6710      REFORMAT PROFILER EDITION 2  DATA
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-01-21
-C
-C ABSTRACT: REFORMAT PROFILER DATA IN EDITION 2
-C
-C PROGRAM HISTORY LOG:
-C   93-01-27  CAVANAUGH
-C   YY-MM-DD  MODIFIER1   DESCRIPTION OF CHANGE
-C
-C USAGE:    CALL FI6710(IDENT,MSTACK,KDATA,IPTR)
-C   INPUT ARGUMENT LIST:
-C     IDENT    - ARRAY CONTAINS MESSAGE INFORMATION EXTRACTED FROM
-C                  BUFR MESSAGE -
-C         IDENT( 1)-EDITION NUMBER     (BYTE 4, SECTION 1)
-C         IDENT( 2)-ORIGINATING CENTER (BYTES 5-6, SECTION 1)
-C         IDENT( 3)-UPDATE SEQUENCE    (BYTE 7, SECTION 1)
-C         IDENT( 4)-                   (BYTE 8, SECTION 1)
-C         IDENT( 5)-BUFR MESSAGE TYPE  (BYTE 9, SECTION 1)
-C         IDENT( 6)-BUFR MSG SUB-TYPE  (BYTE 10, SECTION 1)
-C         IDENT( 7)-                   (BYTES 11-12, SECTION 1)
-C         IDENT( 8)-YEAR OF CENTURY    (BYTE 13, SECTION 1)
-C         IDENT( 9)-MONTH OF YEAR      (BYTE 14, SECTION 1)
-C         IDENT(10)-DAY OF MONTH       (BYTE 15, SECTION 1)
-C         IDENT(11)-HOUR OF DAY        (BYTE 16, SECTION 1)
-C         IDENT(12)-MINUTE OF HOUR     (BYTE 17, SECTION 1)
-C         IDENT(13)-RSVD BY ADP CENTERS(BYTE 18, SECTION 1)
-C         IDENT(14)-NR OF DATA SUBSETS (BYTE 5-6, SECTION 3)
-C         IDENT(15)-OBSERVED FLAG      (BYTE 7, BIT 1, SECTION 3)
-C         IDENT(16)-COMPRESSION FLAG   (BYTE 7, BIT 2, SECTION 3)
-C     MSTACK   - WORKING DESCRIPTOR LIST AND SCALING FACTOR
-C     KDATA    - ARRAY CONTAINING DECODED REPORTS FROM BUFR MESSAGE.
-C                KDATA(REPORT NUMBER,PARAMETER NUMBER)
-C                (REPORT NUMBER LIMITED TO VALUE OF INPUT ARGUMENT
-C                 MAXR AND PARAMETER NUMBER LIMITED TO VALUE OF INPUT
-C                 ARGUMENT MAXD)
-C     KSET2    - INTERIM DATA ARRAY
-C     KPROFL   - INTERIM DESCRIPTOR ARRAY
-C     IPTR     - SEE W3FI67
-C
-C   OUTPUT FILES:
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  NAS
-C
-C$$$
+
       INTEGER        ISW
       INTEGER        IDENT(*),KDATA(500,1600)
       INTEGER        MSTACK(2,1600),IPTR(*)

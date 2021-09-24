@@ -1,42 +1,22 @@
 C> @file
+C> @brief Computes scaling constants used by grdprt().
+C> @author Ralph Jones @date 1991-10-26
 C
-C> SUBPROGRAM: W3FI70         COMPUTES SCALING CONSTANTS USED BY GRDPRT
-C>   AUTHOR: STACKPOLE,J.     ORG: W342       DATE: 93-10-16
-C>   AUTHOR: JONES,R.E.
+C> Computes the four scaling constants used by grdprt, w3fp03,
+C> or w3fp05 from the 28 byte (pds) product definition section of
+C> grib edition one.
 C>
-C> ABSTRACT: COMPUTES THE FOUR SCALING CONSTANTS USED BY GRDPRT, W3FP03,
-C>   OR W3FP05 FROM THE 28 BYTE (PDS) PRODUCT DEFINITION SECTION OF 
-C>   GRIB EDITION ONE.
+C> Program history log:
+C> - Ralph Jones 1991-10-26
+C> - Ralph Jones 1993-03-29 Add save statement
+C> - Ralph Jones 1993-08-08 Add 156 (cin), 158 (tke) to tables
+C> - Ralph Jones 1993-10-16 Changes for o.n. 388  ver. oct. 8,1993
 C>
-C> PROGRAM HISTORY LOG:
-C>   91-10-26  R.E.JONES
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   93-08-08  R.E.JONES   ADD 156 (CIN), 158 (TKE) TO TABLES
-C>   93-10-16  R.E.JONES   CHANGES FOR O.N. 388  VER. OCT. 8,1993
+C> @param[in] PDS 28 byte (pds) grib product definition section.
+C> @param[out] CNST 4 constant's used by grdprt(), w3fp05(), or w3fp03().
+C> @param[out] IER 0 = normal return | 1 = .
 C>
-C> USAGE:  CALL W3FI70(PDS,CNST,IER)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     PDS    ARG LIST  28 BYTE (PDS) GRIB PRODUCT DEFINITION SECTION
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     CNST   ARG LIST  4 CONSTANT'S USED BY GRDPRT,W3FP05, OR W3FP03
-C>     IER    ARG LIST  0 = NORMAL RETURN
-C>                      1 = 
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     W3FI69                                                  W3LIB
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: SiliconGraphics 3.5 FORTRAN 77
-C>   MACHINE:  SiliconGraphics IRIS-4D/25, 35, INDIGO, Indy
-C>
+C> @author Ralph Jones @date 1991-10-26
       SUBROUTINE W3FI70(PDS,CNST,IER)
 C
 C     SET DEFAULT VALUES FOR NMC FIELDS  GRID  PRINTING
@@ -46,7 +26,7 @@ C
       INTEGER        ID(25)
       INTEGER        Q
 C
-      CHARACTER * 1  PDS(28) 
+      CHARACTER * 1  PDS(28)
 C
       SAVE
 C
@@ -55,16 +35,16 @@ C
       CALL W3FI69(PDS,ID)
 C
       IER    = 0
-C     
+C
 C     INDICATOR OF PARAMETER AND UNITS
 C
       Q      = ID(8)
-C     
+C
 C     INDICATOR OF LEVEL OR LAYERS
 C
       ITYPES = ID(9)
       I9     = ID(9)
-C     
+C
 C     HEIGHTS, PRESSURE, ETC. OF THE LEVEL OR LAYER
 C
       IF ((I9.GE.1.AND.I9.LE.100).OR.I9.EQ.102.OR.
@@ -73,13 +53,13 @@ C
      &     I9.EQ.125.OR.I9.EQ.160.OR.I9.EQ.200.OR.
      &     I9.EQ.201) THEN
         ILVL = ID(11)
-      ELSE 
+      ELSE
         ILVL = ID(10)
       END IF
 
       IF (Q.EQ.1.OR.Q.EQ.2.OR.Q.EQ.26) THEN
 C
-C***  PRESSURE, PRESSURE REDUCED TO MSL, PRESSURE ANOMALY (Pa) 
+C***  PRESSURE, PRESSURE REDUCED TO MSL, PRESSURE ANOMALY (Pa)
 C
         CNST(1) =   0.0
         CNST(2) =   0.01
@@ -175,12 +155,12 @@ C
 C
       ELSE IF (Q.EQ.31) THEN
 C
-C***   WIND DIRECTION  (deg. true) 
+C***   WIND DIRECTION  (deg. true)
 C
         CNST(1) =  0.0
         CNST(2) =  1.0
         CNST(3) = 10.0
-        CNST(4) =  0.0 
+        CNST(4) =  0.0
 C
       ELSE IF (Q.EQ.32.OR.Q.EQ.33.OR.Q.EQ.34) THEN
 C
@@ -192,11 +172,11 @@ C
         CNST(3) = 10.0
         IF (ITYPES.EQ.1.AND.ILVL.EQ.0) CNST(3) = 3.0
         IF (ITYPES.EQ.107) CNST(3) = 3.0
-        CNST(4) =  0.0 
+        CNST(4) =  0.0
 C
       ELSE IF (Q.EQ.35.OR.Q.EQ.36) THEN
 C
-C***  STREAM FUNCTION, VELOCITY POTENTIAL   (m**2/s) 
+C***  STREAM FUNCTION, VELOCITY POTENTIAL   (m**2/s)
 C***  STREAM FUNCTION OR VELOCITY POTENTIAL (m**2/s) CONVERTED TO M.
 C***  CONVERT TO METERS.    (M*M/SEC  * FOG)
 C
@@ -294,7 +274,7 @@ C
         CNST(2) =  1.0
         CNST(3) = 20.0
         CNST(4) =  0.0
-C 
+C
       ELSE IF (Q.EQ.54.OR.Q.EQ.57.OR.Q.EQ.58) THEN
 C
 C***  PRECIPITABLE WATER (kg/m**2) OR .1 GRAM/CM*CM OR MILLIMETERS/CM*CM
@@ -359,10 +339,10 @@ C
 C
       ELSE IF (Q.EQ.67.OR.Q.EQ.68.OR.Q.EQ.69.OR.Q.EQ.70) THEN
 C
-C***  MIXING LAYER DEPTH          MIXHT (m) 
-C***  TRANSIENT THEMOCLINE DEPTH  TTHDP (m) 
-C***  MAIN THERMOCLINE DEPTH      MTHCD (m) 
-C***  MAIN THERMOCLINE ANOMALY    MTHCA (m) 
+C***  MIXING LAYER DEPTH          MIXHT (m)
+C***  TRANSIENT THEMOCLINE DEPTH  TTHDP (m)
+C***  MAIN THERMOCLINE DEPTH      MTHCD (m)
+C***  MAIN THERMOCLINE ANOMALY    MTHCA (m)
 C
         CNST(1) =  0.0
         CNST(2) = 39.37
@@ -406,7 +386,7 @@ C
 C*** CONVECTIVE SNOW   -C-SNO (kg/m**2)
 C
         CNST(1) =   0.0
-        CNST(2) =   1.0 
+        CNST(2) =   1.0
         CNST(3) =  10.0
         CNST(4) =   0.0
 C
@@ -415,7 +395,7 @@ C
 C*** LARGE SCALE SNOW  -LSSNO (kg/m**2)
 C
         CNST(1) =   0.0
-        CNST(2) =   0.1 
+        CNST(2) =   0.1
         CNST(3) = 500.0
         CNST(4) =   0.0
 C
@@ -443,7 +423,7 @@ C
 C***  DEVIATION OF SEA LEVEL FROM MEAN  (m)
 C***  SUFACE ROUGHNESS                  (m)
 C***  ICE THICKNESS                     (m)
-C***  ICE GROWTH                        (m)    
+C***  ICE GROWTH                        (m)
 C
         CNST(1) = 0.0
         CNST(2) = 1.0
@@ -555,7 +535,7 @@ C
       ELSE IF (Q.EQ.101.OR.Q.EQ.104.OR.Q.EQ.107.OR.Q.EQ.109) THEN
 C
 C***  DIRECTION OF WIND WAVES, SWELLS WAVES, PRIMARY WAVE, SECONDARY
-C***  WAVE (deg. true)  -------------------- 
+C***  WAVE (deg. true)  --------------------
 C
         CNST(1) =  0.0
         CNST(2) =  1.0
@@ -565,7 +545,7 @@ C
       ELSE IF (Q.EQ.103.OR.Q.EQ.106.OR.Q.EQ.108.OR.Q.EQ.110) THEN
 C
 C***  MEAN PERIOD OF WIND WAVES, SWELLS WAVES, PRIMARY WAVE, SECONDARY
-C***  WAVE (s)  -------------------- 
+C***  WAVE (s)  --------------------
 C
         CNST(1) =  0.0
         CNST(2) =  1.0
@@ -595,7 +575,7 @@ C
 C
       ELSE IF (Q.EQ.127) THEN
 C
-C     IMAGE DATA  -IMG-D  
+C     IMAGE DATA  -IMG-D
 C
         CNST(1) =  0.0
         CNST(2) =  1.0
@@ -634,8 +614,8 @@ C
 C
       ELSE IF (Q.EQ.131.OR.Q.EQ.132.OR.Q.EQ.133.OR.Q.EQ.134) THEN
 C
-C***  SURFACE LIFTED INDEX         ..(DEG K)    
-C***  BEST (4 LAYER) LIFTED INDEX  ..(DEG K)     
+C***  SURFACE LIFTED INDEX         ..(DEG K)
+C***  BEST (4 LAYER) LIFTED INDEX  ..(DEG K)
 C***  K INDEX                      ..(DEG K)   TO DEG C.
 C***  SWEAT INDEX                  ..(DEG K)   TO DEG C.
 C
@@ -839,14 +819,14 @@ C
 C
 C*** NONE OF THE ABOVE ....
 C
-      ELSE 
+      ELSE
 C
 C     SET DEFAULT VALUES
 C
         CNST(1) = 0.0
         CNST(2) = 1.0
         CNST(3) = 5.0
-        CNST(4) = 0.0 
+        CNST(4) = 0.0
         IER = 1
       END IF
 C
