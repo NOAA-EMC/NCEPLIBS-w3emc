@@ -1,45 +1,35 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI74      CONSTRUCT GRID DEFINITION SECTION (GDS)
-C>   PRGMMR: FARLEY           ORG: W/NMC42    DATE: 93-08-24
+C> @brief CONSTRUCT GRID DEFINITION SECTION (GDS)
+C> @author M. Farley @date 1992-07-07
+
+C> This subroutine constructs a grib grid definition section.
 C>
-C> ABSTRACT: THIS SUBROUTINE CONSTRUCTS A GRIB GRID DEFINITION
-C>   SECTION.
+C> Program history log:
+C> - M. Farley 1992-07-07
+C> - Ralph Jones 1992-10-16 Add code to lat/lon section to do
+C>                         gaussian grids.
+C> - Ralph Jones 1993-03-29 Add save statement
+C> - Ralph Jones 1993-08-24 Changes for grib grids 37-44
+C> - Ralph Jones 1993-09-29 Changes for gaussian grid for document
+C> change in w3fi71().
+C> - Ralph Jones 1994-02-15 Changes for eta model grids 90-93
+C> - Ralph Jones 1995-04-20 Change 200 and 201 to 201 and 202
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - M. Baldwin 1998-08-20 Add type 203
+C> - Boi Vuong 2007-03-20 Add type 204
+C> - George Gayno 2010-01-21 Add grid 205 - rotated lat/lon a,b,c,d staggers
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-07-07  M. FARLEY   ORIGINAL AUTHOR
-C>   92-10-16  R.E.JONES   ADD CODE TO LAT/LON SECTION TO DO
-C>                         GAUSSIAN GRIDS.
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   93-08-24  R.E.JONES   CHANGES FOR GRIB GRIDS 37-44
-C>   93-09-29  R.E.JONES   CHANGES FOR GAUSSIAN GRID FOR DOCUMENT
-C>                         CHANGE IN W3FI71.
-C>   94-02-15  R.E.JONES   CHANGES FOR ETA MODEL GRIDS 90-93
-C>   95-04-20  R.E.JONES   CHANGE 200 AND 201 TO 201 AND 202
-C>   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C>   98-08-20  BALDWIN     ADD TYPE 203
-C>   07-03-20  VUONG       ADD TYPE 204
-C>   10-01-21  GAYNO       ADD GRID 205 - ROTATED LAT/LON A,B,C,D STAGGERS
+C> @param[in] IGDS Integer array supplied by w3fi71()
+C> @param[in] ICOMP Table 7- resolution & component flag (bit 5)
+C> for gds(17) wind components
+C> @param[out] GDS Completed grib grid definition section
+C> @param[out] LENGDS Length of gds
+C> @param[out] NPTS Number of points in grid
+C> @param[out] IGERR 1, grid representation type not valid
 C>
+C> @note Subprogram can be called from a multiprocessing environment.
 C>
-C> USAGE:    CALL W3FI74 (IGDS, ICOMP, GDS, LENGDS, NPTS, IGERR)
-C>   INPUT ARGUMENT LIST:
-C>     IGDS        - INTEGER ARRAY SUPPLIED BY W3FI71
-C>     ICOMP       - TABLE 7- RESOLUTION & COMPONENT FLAG (BIT 5)
-C>                   FOR GDS(17) WIND COMPONENTS
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     GDS       - COMPLETED GRIB GRID DEFINITION SECTION
-C>     LENGDS    - LENGTH OF GDS
-C>     NPTS      - NUMBER OF POINTS IN GRID
-C>     IGERR     - 1, GRID REPRESENTATION TYPE NOT VALID
-C>
-C> REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN 77, IBM370 VS FORTRAN
-C>   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256, HDS
-C>
+C> @author M. Farley @date 1992-07-07
       SUBROUTINE W3FI74 (IGDS,ICOMP,GDS,LENGDS,NPTS,IGERR)
 C
       INTEGER       IGDS  (*)

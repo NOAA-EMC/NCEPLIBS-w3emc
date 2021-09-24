@@ -1,33 +1,25 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI76        CONVERT TO IBM370 FLOATING POINT
-C>   PRGMMR: REJONES          ORG: NMC421      DATE:92-11-16
+C> @brief Convert to ibm370 floating point
+C> @author John Hennessy @date 1985-09-15
+
+C> Converts floating point number from machine
+C> representation to grib representation (ibm370 32 bit f.p.).
 C>
-C> ABSTRACT: CONVERTS FLOATING POINT NUMBER FROM MACHINE
-C>   REPRESENTATION TO GRIB REPRESENTATION (IBM370 32 BIT F.P.).
+C> Program history log:
+C> - John Hennessy 1985-09-15
+C> - Ralph Jones 1992-09-23 Change name, add doc block
+C> - Ralph Jones 1993-10-27 Change to agree with hennessy changes
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - Boi Vuong 1998-03-10 Remove the cdir$ integer=64 directive
 C>
-C> PROGRAM HISTORY LOG:
-C>   85-09-15  JOHN HENNESSY  ECMWF
-C>   92-09-23  JONES R. E.    CHANGE NAME, ADD DOC BLOCK
-C>   93-10-27  JONES,R. E.    CHANGE TO AGREE WITH HENNESSY CHANGES
-C>   95-10-31  IREDELL        REMOVED SAVES AND PRINTS
-C>   98-03-10  B. VUONG       REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
+C> @param[in] PVAL Floating point number to be converted
+C> @param[in] KBITS Number of bits in computer word (32 or 64)
+C> @param[out] KEXP 8 Bit signed exponent
+C> @param[out] KMANT 24 Bit mantissa (fraction)
 C>
-C> USAGE:    CALL W3FI76 (FVAL, KEXP, KMANT, NBITS)
-C>   INPUT ARGUMENT LIST:
-C>     PVAL     - FLOATING POINT NUMBER TO BE CONVERTED
-C>     KBITS    - NUMBER OF BITS IN COMPUTER WORD (32 OR 64)
+C> @note Subprogram can be called from a multiprocessing environment.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     KEXP     -  8 BIT SIGNED EXPONENT
-C>     KMANT    - 24 BIT  MANTISSA  (FRACTION)
-C>
-C> REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM370 VS FORTRAN 77, CRAY CFT77 FORTRAN
-C>   MACHINE:  HDS 9000, CRAY Y-MP8/864< CRAY Y-MP EL2/256
-C>
+C> @author John Hennessy @date 1985-09-15
       SUBROUTINE W3FI76(PVAL,KEXP,KMANT,KBITS)
 C
 C********************************************************************

@@ -1,35 +1,24 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI73        CONSTRUCT GRIB BIT MAP SECTION (BMS)
-C>   PRGMMR: FARLEY           ORG: NMC421      DATE:92-11-16
+C> @brief Construct grib bit map section (BMS).
+C> @author M. Farley @date 1992-07-01
+
+C> This subroutine constructs a grib bit map section.
 C>
-C> ABSTRACT: THIS SUBROUTINE CONSTRUCTS A GRIB BIT MAP SECTION.
+C> Program history log:
+C> - M. Farley 1992-07-01
+C> - Bill Cavanaugh 1994-02-14 Recoded
+C> - Ebisuzaki 1998-06-30 Linux port
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-07-01  M. FARLEY      ORIGINAL AUTHOR
-C>   94-02-14  CAVANAUGH      RECODED
-C>   98-06-30  EBISUZAKI      LINUX PORT
+C> @param[in] IBFLAG
+C> - 0, if bit map supplied by user
+C> - #, Number of predefined center bit map
+C> @param[in] IBMAP Integer array containing user bit map
+C> @param[in] IBLEN Length of bit map
+C> @param[out] BMS Completed grib bit map section
+C> @param[out] LENBMS Length of bit map section
+C> @param[out] IER 0 normal exit, 8 = ibmap values are all zero
 C>
-C> USAGE:    CALL W3FI73 (IBFLAG, IBMAP, IBLEN, BMS, LENBMS, IER)
-C>   INPUT ARGUMENT LIST:
-C>     IBFLAG      - 0, IF BIT MAP SUPPLIED BY USER
-C>                 - #, NUMBER OF PREDEFINED CENTER BIT MAP
-C>     IBMAP       - INTEGER ARRAY CONTAINING USER BIT MAP
-C>     IBLEN       - LENGTH OF BIT MAP
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     BMS       - COMPLETED GRIB BIT MAP SECTION
-C>     LENBMS    - LENGTH OF BIT MAP SECTION
-C>     IER       - 0 NORMAL EXIT, 8 = IBMAP VALUES ARE ALL ZERO
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       W3LIB    - SBYTE
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM370 VS FORTRAN 77, CRAY CFT77 FORTRAN
-C>   MACHINE:  HDS, CRAY C916/256, CRAY J916/2048
-C>
+C> @author M. Farley @date 1992-07-01
       SUBROUTINE W3FI73 (IBFLAG,IBMAP,IBLEN,BMS,LENBMS,IER)
 C
       INTEGER       IBMAP(*)

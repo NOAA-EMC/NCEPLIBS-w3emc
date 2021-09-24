@@ -1,89 +1,89 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI75        GRIB PACK DATA AND FORM BDS OCTETS(1-11)
-C>   PRGMMR: FARLEY           ORG: NMC421      DATE:94-11-22
+C> @brief GRIB pack data and form bds octets(1-11)
+C> @author M. Farley @date 1992-07-10
+
+C> This routine packs a grib field and forms octets(1-11)
+C> of the binary data section (bds).
 C>
-C> ABSTRACT: THIS ROUTINE PACKS A GRIB FIELD AND FORMS OCTETS(1-11)
-C>   OF THE BINARY DATA SECTION (BDS).
+C> Program history log:
+C> - M. Farley 1992-07-10 Original author
+C> - Ralph Jones 1992-10-01 Correction for field of constant data
+C> - Ralph Jones 1992-10-16 Get rid of arrays fp and int
+C> - Bill Cavanaugh 1993-08-06 Added routines fi7501, fi7502, fi7503
+C> To allow second order packing in pds.
+C> - John Stackpole 1993-07-21 Assorted repairs to get 2nd diff pack in
+C> - Bill Cavanaugh 1993-10-28 Commented out nonoperational prints and
+C> Write statements
+C> - Bill Cavanaugh 1993-12-15 Corrected location of start of first order
+C> Values and start of second order values to
+C> Reflect a byte location in the bds instead
+C> Of an offset in subroutine fi7501().
+C> - Bill Cavanaugh 1994-01-27 Added igds as input argument to this routine
+C> And added pds and igds arrays to the call to
+C> W3fi82 to provide information needed for
+C> Boustrophedonic processing.
+C> - Bill Cavanaugh 1994-05-25 Subroutine fi7503 has been added to provide
+C> For row by row or column by column second
+C> Order packing.  this feature can be activated
+C> By setting ibdsfl(7) to zero.
+C> - Bill Cavanaugh 1994-07-08 Commented out print statements used for debug
+C> - M. Farley 1994-11-22 Enlarged work arrays to handle .5degree grids
+C> - Ralph Jones 1995-06-01 Correction for number of unused bits at end
+C> Of section 4, in bds byte 4, bits 5-8.
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - Stephen Gilbert 2001-06-06 Changed gbyte/sbyte calls to refer to
+C> Wesley ebisuzaki's endian independent
+C> versions gbytec/sbytec.
+C> Use f90 standard routine bit_size to get
+C> number of bits in an integer instead of w3fi01.
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-07-10  M. FARLEY   ORIGINAL AUTHOR
-C>   92-10-01  R.E.JONES   CORRECTION FOR FIELD OF CONSTANT DATA
-C>   92-10-16  R.E.JONES   GET RID OF ARRAYS FP AND INT
-C>   93-08-06  CAVANAUGH   ADDED ROUTINES FI7501, FI7502, FI7503
-C>                         TO ALLOW SECOND ORDER PACKING IN PDS.
-C>   93-07-21 STACKPOLE    ASSORTED REPAIRS TO GET 2ND DIFF PACK IN
-C>   93-10-28 CAVANAUGH    COMMENTED OUT NONOPERATIONAL PRINTS AND
-C>                         WRITE STATEMENTS
-C>   93-12-15  CAVANAUGH   CORRECTED LOCATION OF START OF FIRST ORDER
-C>                         VALUES AND START OF SECOND ORDER VALUES TO
-C>                         REFLECT A BYTE LOCATION IN THE BDS INSTEAD
-C>                         OF AN OFFSET IN SUBROUTINE FI7501.
-C>   94-01-27  CAVANAUGH   ADDED IGDS AS INPUT ARGUMENT TO THIS ROUTINE
-C>                         AND ADDED PDS AND IGDS ARRAYS TO THE CALL TO
-C>                         W3FI82 TO PROVIDE INFORMATION NEEDED FOR
-C>                         BOUSTROPHEDONIC PROCESSING.
-C>   94-05-25  CAVANAUGH   SUBROUTINE FI7503 HAS BEEN ADDED TO PROVIDE
-C>                         FOR ROW BY ROW OR COLUMN BY COLUMN SECOND
-C>                         ORDER PACKING.  THIS FEATURE CAN BE ACTIVATED
-C>                         BY SETTING IBDSFL(7) TO ZERO.
-C>   94-07-08  CAVANAUGH   COMMENTED OUT PRINT STATEMENTS USED FOR DEBUG
-C>   94-11-22  FARLEY      ENLARGED WORK ARRAYS TO HANDLE .5DEGREE GRIDS
-C>   95-06-01  R.E.JONES   CORRECTION FOR NUMBER OF UNUSED BITS AT END
-C>                         OF SECTION 4, IN BDS BYTE 4, BITS 5-8.
-C>   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C> 2001-06-06  GILBERT     CHanged gbyte/sbyte calls to refer to 
-C>                         Wesley Ebisuzaki's endian independent
-C>                         versions gbytec/sbytec.
-C>                         Use f90 standard routine bit_size to get
-C>                         number of bits in an integer instead of w3fi01.
+C> @param[in] IBITL
+C> - 0, computer computes packing length from power of 2 that best fits the data.
+C> - 8, 12, etc. computer rescales data to fit into set number of bits.
+C> @param[in] ITYPE
+C> - 0 = if input data is floating point (fld)
+C> - 1 = If input data is integer (ifld)
+C> @param[in] ITOSS
+C> - 0 = no bit map is included (don't toss data)
+C> - 1 = Toss null data according to ibmap
+C> @param[in] FLD Real array of data to be packed if itype=0
+C> @param[in] IFLD Integer array to be packed if itype=1
+C> @param[in] IBMAP Bit map supplied from user
+C> @param[in] IBDSFL Integer array containing table 11 flag info
+C> BDS octet 4:
+C> - (1)
+C>  - 0 = grid point data
+C>  - 1 = spherical harmonic coefficients
+C> - (2)
+C>  - 0 = simple packing
+C>  - 1 = second order packing
+C> - (3)
+C>  - 0 = original data were floating point values
+C>  - 1 = original data were integer values
+C> - (4)
+C>  - 0 = no additional flags at octet 14
+C>  - 1 = octet 14 contains flag bits 5-12
+C> - (5) 0 = reserved - always set to 0
+C> - (6)
+C>  - 0 = single datum at each grid point
+C>  - 1 = matrix of values at each grid point
+C> - (7)
+C>  - 0 = no secondary bit maps
+C>  - 1 = secondary bit maps present
+C> - (8)
+C>  - 0 = second order values have constant width
+C>  - 1 = second order values have different widths
+C> @param[in] NPTS Number of gridpoints in array to be packed
+C> @param[in] IGDS Array of gds information
+C> @param[out] BDS11 First 11 octets of bds
+C> @param[out] PFLD Packed grib field
+C> @param[out] LEN Length of pfld
+C> @param[out] LENBDS Length of bds
+C> @param[out] IBERR 1, error converting ieee f.p. number to ibm370 f.p.
+C> @param IPFLD
+C> @param PDS
 C>
-C> USAGE:    CALL W3FI75 (IBITL,ITYPE,ITOSS,FLD,IFLD,IBMAP,IBDSFL,
-C>    &              NPTS,BDS11,IPFLD,PFLD,LEN,LENBDS,IBERR,PDS,IGDS)
-C>   INPUT ARGUMENT LIST:
-C>     IBITL     - 0, COMPUTER COMPUTES PACKING LENGTH FROM POWER
-C>                    OF 2 THAT BEST FITS THE DATA.
-C>                 8, 12, ETC. COMPUTER RESCALES DATA TO FIT INTO
-C>                    SET NUMBER OF BITS.
-C>     ITYPE     - 0 = IF INPUT DATA IS FLOATING POINT (FLD)
-C>                 1 = IF INPUT DATA IS INTEGER (IFLD)
-C>     ITOSS     - 0 = NO BIT MAP IS INCLUDED (DON'T TOSS DATA)
-C>                 1 = TOSS NULL DATA ACCORDING TO IBMAP
-C>     FLD       - REAL ARRAY OF DATA TO BE PACKED IF ITYPE=0
-C>     IFLD      - INTEGER ARRAY TO BE PACKED IF ITYPE=1
-C>     IBMAP     - BIT MAP SUPPLIED FROM USER
-C>     IBDSFL    - INTEGER ARRAY CONTAINING TABLE 11 FLAG INFO
-C>                 BDS OCTET 4:
-C>                 (1) 0 = GRID POINT DATA
-C>                     1 = SPHERICAL HARMONIC COEFFICIENTS
-C>                 (2) 0 = SIMPLE PACKING
-C>                     1 = SECOND ORDER PACKING
-C>                 (3) 0 = ORIGINAL DATA WERE FLOATING POINT VALUES
-C>                     1 = ORIGINAL DATA WERE INTEGER VALUES
-C>                 (4) 0 = NO ADDITIONAL FLAGS AT OCTET 14
-C>                     1 = OCTET 14 CONTAINS FLAG BITS 5-12
-C>                 (5) 0 = RESERVED - ALWAYS SET TO 0
-C>                 (6) 0 = SINGLE DATUM AT EACH GRID POINT
-C>                     1 = MATRIX OF VALUES AT EACH GRID POINT
-C>                 (7) 0 = NO SECONDARY BIT MAPS
-C>                     1 = SECONDARY BIT MAPS PRESENT
-C>                 (8) 0 = SECOND ORDER VALUES HAVE CONSTANT WIDTH
-C>                     1 = SECOND ORDER VALUES HAVE DIFFERENT WIDTHS
-C>     NPTS      - NUMBER OF GRIDPOINTS IN ARRAY TO BE PACKED
-C>     IGDS      - ARRAY OF GDS INFORMATION
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     BDS11     - FIRST 11 OCTETS OF BDS
-C>     PFLD      - PACKED GRIB FIELD
-C>     LEN       - LENGTH OF PFLD
-C>     LENBDS    - LENGTH OF BDS
-C>     IBERR     - 1, ERROR CONVERTING IEEE F.P. NUMBER TO IBM370 F.P.
-C>
-C> REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C>   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
+C> @note Subprogram can be called from a multiprocessing environment.
 C>
       SUBROUTINE W3FI75 (IBITL,ITYPE,ITOSS,FLD,IFLD,IBMAP,IBDSFL,
      &  NPTS,BDS11,IPFLD,PFLD,LEN,LENBDS,IBERR,PDS,IGDS)
@@ -504,44 +504,37 @@ C                               BYTE  11
 C
       RETURN
       END
+C
+C> @brief BDS second order packing.
+C> @author Bill Cavanaugh @date 1993-08-06
+
+C> Perform secondary packing on grid point data, generating all BDS information.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-08-06
+C> - Bill Cavanaugh 1993-12-15 Corrected location of start of first order
+C> values and start of second order values to reflect a byte location in the
+C> BDS instead of an offset.
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C>
+C> @param[in] IWORK Integer source array
+C> @param[in] NPTS Number of points in iwork
+C> @param[in] IBDSFL Flags
+C> @param[out] IPFLD Contains bds from byte 12 on
+C> @param[out] BDS11 Contains first 11 bytes for bds
+C> @param[out] LEN Number of bytes from 12 on
+C> @param[out] LENBDS Total length of bds
+C> @param PDS
+C> @param REFNCE
+C> @param ISCAL2
+C> @param KWIDE
+C>
+C> @note Subprogram can be called from a multiprocessing environment.
+C>
+C> @author Bill Cavanaugh @date 1993-08-06
       SUBROUTINE FI7501 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
      *           LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7501      BDS SECOND ORDER PACKING
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-08-06
-C
-C ABSTRACT: PERFORM SECONDARY PACKING ON GRID POINT DATA,
-C   GENERATING ALL BDS INFORMATION.
-C
-C PROGRAM HISTORY LOG:
-C   93-08-06  CAVANAUGH
-C   93-12-15  CAVANAUGH   CORRECTED LOCATION OF START OF FIRST ORDER
-C                         VALUES AND START OF SECOND ORDER VALUES TO
-C                         REFLECT A BYTE LOCATION IN THE BDS INSTEAD
-C                         OF AN OFFSET.
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7501 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
-C    *           LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE)
-C   INPUT ARGUMENT LIST:
-C     IWORK    - INTEGER SOURCE ARRAY
-C     NPTS     - NUMBER OF POINTS IN IWORK
-C     IBDSFL   - FLAGS
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     IPFLD    - CONTAINS BDS FROM BYTE 12 ON
-C     BDS11    - CONTAINS FIRST 11 BYTES FOR BDS
-C     LEN      - NUMBER OF BYTES FROM 12 ON
-C     LENBDS   - TOTAL LENGTH OF BDS
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
+
       CHARACTER*1     BDS11(*),PDS(*)
 C
       REAL            REFNCE
@@ -841,35 +834,27 @@ C
 C
       RETURN
       END
+C
+C> @brief Second order same value collection.
+C> @author Bill Cavanaugh @date 1993-06-23
+
+C> Collect sequential same values for processing
+C> as second order value for grib messages.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-06-23
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C>
+C> @param[in] IWORK Array containing source data
+C> @param[in] ISTART Starting location for this test
+C> @param[in] NPTS Number of points in iwork
+C> @param[out] ISAME Number of sequential points having the same value
+C>
+C> @note Subprogram can be called from a multiprocessing environment.
+C>
+C> @author Bill Cavanaugh @date 1993-06-23
       SUBROUTINE FI7502 (IWORK,ISTART,NPTS,ISAME)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7502      SECOND ORDER SAME VALUE COLLECTION
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-06-23
-C
-C ABSTRACT: COLLECT SEQUENTIAL SAME VALUES FOR PROCESSING
-C   AS SECOND ORDER VALUE FOR GRIB MESSAGES.
-C
-C PROGRAM HISTORY LOG:
-C   93-06-23  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7502 (IWORK,ISTART,NPTS,ISAME)
-C   INPUT ARGUMENT LIST:
-C     IWORK    - ARRAY CONTAINING SOURCE DATA
-C     ISTART   - STARTING LOCATION FOR THIS TEST
-C     NPTS     - NUMBER OF POINTS IN IWORK
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     ISAME    - NUMBER OF SEQUENTIAL POINTS HAVING THE SAME VALUE
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
+
       INTEGER        IWORK(*)
       INTEGER        ISTART
       INTEGER        ISAME
@@ -885,40 +870,36 @@ C  -------------------------------------------------------------
   100 CONTINUE
       RETURN
       END
+C
+C> @brief Row by row, col by col packing.
+C> @author Bill Cavanaugh @date 1993-08-06
+
+C> Perform row by row or column by column packing
+C> generating all bds information.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-08-06
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C>
+C> @param[in] IWORK Integer source array
+C> @param[in] NPTS Number of points in iwork
+C> @param[in] IBDSFL Flags
+C> @param[out] IPFLD Contains bds from byte 12 on
+C> @param[out] BDS11 Contains first 11 bytes for bds
+C> @param[out] LEN Number of bytes from 12 on
+C> @param[out] LENBDS Total length of bds
+C> @param PDS
+C> @param REFNCE
+C> @param ISCAL2
+C> @param KWIDE
+C> @param IGDS
+C>
+C> @note Subprogram can be called from a multiprocessing environment.
+C>
+C> @author Bill Cavanaugh @date 1993-08-06
       SUBROUTINE FI7503 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
      *           LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE,IGDS)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7501      ROW BY ROW, COL BY COL PACKING
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 94-05-20
-C
-C ABSTRACT: PERFORM ROW BY ROW OR COLUMN BY COLUMN PACKING
-C   GENERATING ALL BDS INFORMATION.
-C
-C PROGRAM HISTORY LOG:
-C   93-08-06  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7503 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
-C    *           LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE,IGDS)
-C   INPUT ARGUMENT LIST:
-C     IWORK    - INTEGER SOURCE ARRAY
-C     NPTS     - NUMBER OF POINTS IN IWORK
-C     IBDSFL   - FLAGS
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     IPFLD    - CONTAINS BDS FROM BYTE 12 ON
-C     BDS11    - CONTAINS FIRST 11 BYTES FOR BDS
-C     LEN      - NUMBER OF BYTES FROM 12 ON
-C     LENBDS   - TOTAL LENGTH OF BDS
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
+
       CHARACTER*1     BDS11(*),PDS(*),IPFLD(*)
 C
       REAL            REFNCE
@@ -1207,33 +1188,24 @@ C     PRINT *,'IPFLD LISTING'
 C     CALL BINARY (IPFLD,KLEN)
       RETURN
       END
+C
+C> @brief Determine number of bits to contain value.
+C> @author Bill Cavanaugh @date 1993-06-23
+
+C> Calculate number of bits to contain value n, with a maximum of 32 bits.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-06-23
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C>
+C> @param[in] N Integer value
+C> @param[out] NBITS Number of bits to contain n
+C>
+C> @note Subprogram can be called from a multiprocessing environment.
+C>
+C> @author Bill Cavanaugh @date 1993-06-23
       SUBROUTINE FI7505 (N,NBITS)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7505      DETERMINE NUMBER OF BITS TO CONTAIN VALUE
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-06-23
-C
-C ABSTRACT: CALCULATE NUMBER OF BITS TO CONTAIN VALUE N, WITH A
-C            MAXIMUM OF 32 BITS.
-C
-C PROGRAM HISTORY LOG:
-C   93-06-23  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7505 (N,NBITS)
-C   INPUT ARGUMENT LIST:
-C     N        - INTEGER VALUE
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     NBITS    - NUMBER OF BITS TO CONTAIN N
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
+
       INTEGER        N,NBITS
       INTEGER        IBITS(31)
 C
@@ -1251,37 +1223,29 @@ C
  1000 CONTINUE
       RETURN
       END
+C
+C> @brief Select block of data for packing.
+C> @author Bill Cavanaugh @date 1994-01-21
+
+C> Select a block of data for packing
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1994-01-21
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C>
+C> - Return address if encounter set of same values
+C> @param[in] IWORK
+C> @param[in] ISTART
+C> @param[in] NPTS
+C> @param[out] MAX
+C> @param[out] MIN
+C> @param[out] INRNGE
+C>
+C> @note Subprogram can be called from a multiprocessing environment.
+C>
+C> @author Bill Cavanaugh @date 1994-01-21
       SUBROUTINE FI7513 (IWORK,ISTART,NPTS,MAX,MIN,INRNGE)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7513      SELECT BLOCK OF DATA FOR PACKING
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 94-01-21
-C
-C ABSTRACT: SELECT A BLOCK OF DATA FOR PACKING
-C
-C PROGRAM HISTORY LOG:
-C   94-01-21  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7513 (IWORK,ISTART,NPTS,MAX,MIN,INRNGE)
-C   INPUT ARGUMENT LIST:
-C     *        - RETURN ADDRESS IF ENCOUNTER SET OF SAME VALUES
-C     IWORK    -
-C     ISTART   -
-C     NPTS     -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     MAX      -
-C     MIN      -
-C     INRNGE   -
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
+
       INTEGER        IWORK(*),NPTS,ISTART,INRNGE,INRNGA,INRNGB
       INTEGER        MAX,MIN,MXVAL,MAXB,MINB,MXVALB
       INTEGER        IBITS(31)
@@ -1375,44 +1339,36 @@ C                           GET NEXT BLOCK A
  9000 CONTINUE
       RETURN
       END
+C
+C> @brief Scan number of points.
+C> @author Bill Cavanaugh @date 1994-01-21
+
+C> Scan forward from current position. collect points and
+C> determine maximum and minimum values and the number
+C> of points that are included. Forward search is terminated
+C> by encountering a set of identical values, by reaching
+C> the number of points selected or by reaching the end
+C> of data.
+C>
+C> Program history log:
+C> - Bill Cavavnaugh 1994-01-21
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C>
+C> - Return address if encounter set of same values
+C> @param[in] IWORK Data array
+C> @param[in] NPTS Number of points in data array
+C> @param[in] ISTART Starting location in data
+C> @param[out] INRNG Number of points selected
+C> @param[out] MAX Maximum value of points
+C> @param[out] MIN Minimum value of points
+C> @param[out] MXVAL Maximum value that can be contained in lwidth bits
+C> @param[out] LWIDTH Number of bits to contain max diff
+C>
+C> @note Subprogram can be called from a multiprocessing environment.
+C>
+C> @author Bill Cavanaugh @date 1994-01-21
       SUBROUTINE FI7516 (IWORK,NPTS,INRNG,ISTART,MAX,MIN,MXVAL,LWIDTH)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7516      SCAN NUMBER OF POINTS
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 94-01-21
-C
-C ABSTRACT: SCAN FORWARD FROM CURRENT POSITION. COLLECT POINTS AND
-C           DETERMINE MAXIMUM AND MINIMUM VALUES AND THE NUMBER
-C           OF POINTS THAT ARE INCLUDED. FORWARD SEARCH IS TERMINATED
-C           BY ENCOUNTERING A SET OF IDENTICAL VALUES, BY REACHING
-C           THE NUMBER OF POINTS SELECTED OR BY REACHING THE END
-C           OF DATA.
-C
-C PROGRAM HISTORY LOG:
-C   94-01-21  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7516 (IWORK,NPTS,INRNG,ISTART,MAX,MIN,MXVAL,LWIDTH)
-C   INPUT ARGUMENT LIST:
-C     *        - RETURN ADDRESS IF ENCOUNTER SET OF SAME VALUES
-C     IWORK    - DATA ARRAY
-C     NPTS     - NUMBER OF POINTS IN DATA ARRAY
-C     ISTART   - STARTING LOCATION IN DATA
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     INRNG    - NUMBER OF POINTS SELECTED
-C     MAX      - MAXIMUM VALUE OF POINTS
-C     MIN      - MINIMUM VALUE OF POINTS
-C     MXVAL    - MAXIMUM VALUE THAT CAN BE CONTAINED IN LWIDTH BITS
-C     LWIDTH   - NUMBER OF BITS TO CONTAIN MAX DIFF
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
+
       INTEGER        IWORK(*),NPTS,ISTART,INRNG,MAX,MIN,LWIDTH,MXVAL
       INTEGER        IBITS(31)
 C
@@ -1450,43 +1406,33 @@ C             PRINT *,'RETURNED',INRNG,' VALUES'
  9000 CONTINUE
       RETURN
       END
+C
+C> @brief Scan backward.
+C> @author Bill Cavanaugh @date 1994-01-21
+
+C> Scan backwards until a value exceeds range of group b this may shorten group a
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1994-01-21
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - Mark Iredell 1998-06-17 Removed alternate return
+C>
+C> @param[in] IWORK
+C> @param[in] ISTRTB
+C> @param[in] NPTS
+C> @param[in] INRNGA
+C> @param[out] IRET
+C> @param[out] MAXB
+C> @param[out] MINB
+C> @param MXVALB
+C> @param LWIDEB
+C>
+C> @note Subprogram can be called from a multiprocessing environment.
+C>
+C> @author Bill Cavanaugh @date 1994-01-21
       SUBROUTINE FI7517 (IRET,IWORK,NPTS,ISTRTB,INRNGA,
      *                           MAXB,MINB,MXVALB,LWIDEB)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7517      SCAN BACKWARD
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 94-01-21
-C
-C ABSTRACT: SCAN BACKWARDS UNTIL A VALUE EXCEEDS RANGE OF GROUP B
-C           THIS MAY SHORTEN GROUP A
-C
-C PROGRAM HISTORY LOG:
-C   94-01-21  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   98-06-17  IREDELL     REMOVED ALTERNATE RETURN
-C
-C USAGE:    CALL FI7517 (IRET,IWORK,NPTS,ISTRTB,INRNGA,
-C    *                           MAXB,MINB,MXVALB,LWIDEB)
-C   INPUT ARGUMENT LIST:
-C     IWORK    -
-C     ISTRTB   -
-C     NPTS     -
-C     INRNGA   -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     IRET     -
-C     JLAST    -
-C     MAXB     -
-C     MINB     -
-C     LWIDTH   - NUMBER OF BITS TO CONTAIN MAX DIFF
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
+
       INTEGER        IWORK(*),NPTS,ISTRTB,INRNGA
       INTEGER        MAXB,MINB,LWIDEB,MXVALB
       INTEGER        IBITS(31)
@@ -1533,44 +1479,37 @@ C
  9000 CONTINUE
       RETURN
       END
+C
+C> @brief Scan forward.
+C> @author Bill Cavanaugh @date 1994-01-21
+
+C> Scan forward from start of block b towards end of block b
+C> if next point under test forces a larger maxvala then
+C> terminate indicating last point tested for inclusion
+C> into block a.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1994-01-21
+C> - Mark Iredell 1995-10-31 Removed saves and prints
+C> - Mark Iredell 1998-06-17 Removed alternate return
+C>
+C> @param IWORK
+C> @param ISTRTA
+C> @param INRNGA
+C> @param INRNGB
+C> @param MAXA
+C> @param MINA
+C> @param LWIDEA
+C> @param MXVALA
+C> @param[in] NPTS
+C> @param[out] IRET
+C>
+C> @note Subprogram can be called from a multiprocessing environment.
+C>
+C> @author Bill Cavanaugh @date 1994-01-21
       SUBROUTINE FI7518 (IRET,IWORK,NPTS,ISTRTA,INRNGA,INRNGB,
      *                          MAXA,MINA,LWIDEA,MXVALA)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7518      SCAN FORWARD
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 94-01-21
-C
-C ABSTRACT: SCAN FORWARD FROM START OF BLOCK B TOWARDS END OF BLOCK B
-C           IF NEXT POINT UNDER TEST FORCES A LARGER MAXVALA THEN
-C           TERMINATE INDICATING LAST POINT TESTED FOR INCLUSION
-C           INTO BLOCK A.
-C
-C PROGRAM HISTORY LOG:
-C   94-01-21  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   98-06-17  IREDELL     REMOVED ALTERNATE RETURN
-C
-C USAGE:    CALL FI7518 (IRET,IWORK,NPTS,ISTRTA,INRNGA,INRNGB,
-C     *                          MAXA,MINA,LWIDEA,MXVALA)
-C   INPUT ARGUMENT LIST:
-C     IFLD     -
-C     JSTART   -
-C     NPTS     -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     IRET     -
-C     JLAST    -
-C     MAX      -
-C     MIN      -
-C     LWIDTH   - NUMBER OF BITS TO CONTAIN MAX DIFF
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
+
       INTEGER        IWORK(*),NPTS,ISTRTA,INRNGA
       INTEGER        MAXA,MINA,LWIDEA,MXVALA
       INTEGER        IBITS(31)
