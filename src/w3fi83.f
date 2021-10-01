@@ -1,41 +1,33 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI83        RESTORE DELTA PACKED DATA TO ORIGINAL
-C>   PRGMMR: CAVANAUGH        ORG: NMC421      DATE:93-08-18
+C> @brief Restore delta packed data to original.
+C> @author Bill Cavanaugh @date 1993-08-18
+
+C> Restore delta packed data to original values
+C> restore from boustrephedonic alignment.
 C>
-C> ABSTRACT: RESTORE DELTA PACKED DATA TO ORIGINAL VALUES
-C>           RESTORE FROM BOUSTREPHEDONIC ALIGNMENT
+C> Program history log:
+C> - Bill Cavanaugh 1993-07-14
+C> - John Satckpole 1993-07-22 Additions to fix scaling.
+C> - Bill Cavanaugh 1994-01-27 Added reversal of even numbered rows
+C> (boustrophedonic processing) to restore
+C> data to original sequence.
+C> - Bill Cavanaugh 1994-03-02 Corrected reversal of even numbered rows.
+C> - Mark Iredell 1995-10-31 Removed saves and prints.
 C>
-C> PROGRAM HISTORY LOG:
-C>   93-07-14  CAVANAUGH
-C>   93-07-22  STACKPOLE      ADDITIONS TO FIX SCALING
-C>   94-01-27  CAVANAUGH   ADDED REVERSAL OF EVEN NUMBERED ROWS
-C>                         (BOUSTROPHEDONIC PROCESSING) TO RESTORE
-C>                         DATA TO ORIGINAL SEQUENCE.
-C>   94-03-02  CAVANAUGH   CORRECTED REVERSAL OF EVEN NUMBERED ROWS
-C>   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
+C> @param[inout] DATA
+C> - [in] Second order differences.
+C> - [out] Expanded original data values.
+C> @param[in] NPTS Number of points in array.
+C> @param[in] FVAL1 Original first entry in array.
+C> @param[in] FDIFF1 Original first first-difference.
+C> @param[in] ISCAL2 Power-of-two exponent for unscaling.
+C> @param[in] ISC10 Power-of-ten exponent for unscaling.
+C> @param[in] KPDS Array of information for pds.
+C> @param[in] KGDS Array of information for gds.
 C>
-C> USAGE:    CALL W3FI83(DATA,NPTS,FVAL1,FDIFF1,ISCAL2,
-C>    *                                ISC10,KPDS,KGDS)
-C>   INPUT ARGUMENT LIST:
-C>     DATA     - SECOND ORDER DIFFERENCES
-C>     NPTS     - NUMBER OF POINTS IN ARRAY
-C>     FVAL1    - ORIGINAL FIRST ENTRY IN ARRAY
-C>     FDIFF1   - ORIGINAL FIRST FIRST-DIFFERENCE
-C>     ISCAL2   - POWER-OF-TWO EXPONENT FOR UNSCALING
-C>     ISC10    - POWER-OF-TEN EXPONENT FOR UNSCALING
-C>     KPDS     - ARRAY OF INFORMATION FOR PDS
-C>     KGDS     - ARRAY OF INFORMATION FOR GDS
+C> @note Subprogram can be called from a multiprocessing environment.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     DATA     - EXPANDED ORIGINAL DATA VALUES
-C>
-C> REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C>   MACHINE:  HDS, CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author Bill Cavanaugh @date 1993-08-18
       SUBROUTINE W3FI83 (DATA,NPTS,FVAL1,FDIFF1,ISCAL2,
      *                                ISC10,KPDS,KGDS)
 C

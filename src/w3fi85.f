@@ -1,275 +1,212 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FI85      GENERATE BUFR MESSAGE
-C>   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-12-03
+C> @brief Generate bufr message
+C> @author Bill Cavanaugh @date 1993-09-29
+
+C> Using information available in supplied arrays, generate
+C> a bufr message (wmo code fm94).  there may be  a section 2
+C> included in the bufr message if the user follows proper procedure.
+C> messages are constructed in accordance with bufr edition 2. entries
+C> for section 1 must be passed to this routine in the isect1 array.
+C> entries for section 3 must be passed to this routine in isect3.
 C>
-C> ABSTRACT: USING INFORMATION AVAILABLE IN SUPPLIED ARRAYS, GENERATE
-C>   A BUFR MESSAGE (WMO CODE FM94).  THERE MAY BE  A SECTION 2
-C>   INCLUDED IN THE BUFR MESSAGE IF THE USER FOLLOWS PROPER PROCEDURE.
-C>   MESSAGES ARE CONSTRUCTED IN ACCORDANCE WITH BUFR EDITION 2. ENTRIES
-C>   FOR SECTION 1 MUST BE PASSED TO THIS ROUTINE IN THE ISECT1 ARRAY.
-C>   ENTRIES FOR SECTION 3 MUST BE PASSED TO THIS ROUTINE IN ISECT3.
 C>
+C> In the event that the user requests a reduction of reports
+C> in a bufr message if a particular message becomes oversized, the
+C> possibility exists of the last block of data producing an oversized
+C> message. the user must verify that isect3(6) does in fact equal
+C> zero to assure that all of the data has been included as output.
 C>
-C>       IN THE EVENT THAT THE USER REQUESTS A REDUCTION OF REPORTS
-C>   IN A BUFR MESSAGE IF A PARTICULAR MESSAGE BECOMES OVERSIZED, THE
-C>   POSSIBILITY EXISTS OF THE LAST BLOCK OF DATA PRODUCING AN OVERSIZED
-C>   MESSAGE. THE USER MUST VERIFY THAT ISECT3(6) DOES IN FACT EQUAL
-C>   ZERO TO ASSURE THAT ALL OF THE DATA HAS BEEN INCLUDED AS OUTPUT.
+C> Program history log:
+C> - Bill Cavanaugh 1993-09-29
+C> - J. Hoppa 1994-03-22 Corrected an error when writing the
+C> descriptors into the bufr message
+C> - J. Hoppa 1994-03-31 Added the subset number to the parameter list
+C> of subroutine fi8501()
+C> - J. Hoppa 1994-04-15 Added kbufr to the parameter list of
+C> subroutine fi8502()
+C> - J. Hoppa 1994-04-20 Added the kdata parameter counter to the
+C> parameter list of subroutine fi8501()
+C> - J. Hoppa 1995-04-29 Changed nq and n to kary(2) changed jk to kary(11)
+C> added an assignment to kary(2) so have something to pass to subroutines
+C> deleted jk and ll from call to fi8501()
 C>
-C> PROGRAM HISTORY LOG:
-C>   93-09-29  CAVANAUGH
-C>   94-03-22  J. HOPPA  - CORRECTED AN ERROR WHEN WRITING THE
-C>                         DESCRIPTORS INTO THE BUFR MESSAGE
-C>   94-03-31  J. HOPPA  - ADDED THE SUBSET NUMBER TO THE PARAMETER LIST
-C>                         OF SUBROUTINE FI8501
-C>   94-04-15  J. HOPPA  - ADDED KBUFR TO THE PARAMETER LIST OF
-C>                         SUBROUTINE FI8502
-C>   94-04-20  J. HOPPA  - ADDED THE KDATA PARAMETER COUNTER TO THE
-C>                         PARAMETER LIST OF SUBROUTINE FI8501
-C>   95-04-29  J. HOPPA  - CHANGED NQ AND N TO KARY(2)
-C>                       - CHANGED JK TO KARY(11)
-C>                       - ADDED AN ASSIGNMENT TO KARY(2) SO HAVE
-C>                         SOMETHING TO PASS TO SUBROUTINES
-C>                       - DELETED JK AND LL FROM CALL TO FI8501
+C> @param[in] ISTEP Key for selection of processing step
+C> - 1  = Process integer/text array into kdata.
+C> - 2  = Process real/text array into kdata.
+C> - 3  = Construct bufr message.
+C> @param[in] IUNITB Unit number of device containing table b
+C> @param[in] IUNITD Unit number of device containing table d
+C> @param[in] IBFSIZ Size in bytes of bufr message array (kbufr)
+C> should be a multiple of word size.
+C> @param[in] ISECT1 Contains information to enter into section 1
+C> (1) Edition number
+C> (2) Bufr master table number
+C>         0 = meteorological
+C>         others not yet defined
+C> (3) Originating center - subcenter number
+C> (4) Originating center number
+C> (5) Update sequence number
+C> (6) Optional section flag should be set to zero unless user write
+C> additional code to enter local information into section 3
+C> (7) Bufr message type
+C> (8) Bufr message sub_type
+C> (9) Master table version number
+C> (10) Local table version number
+C> (11) Year of century - representative of data
+C> (12) Month - representative of data
+C> (13) Day - representative of data
+C> (14) Hour - representative of data
+C> (15) Minute - representative of data
+C> (16)-(20) Unused
+C> @param[in] ISECT3 Values to be inserted into section 3, and to control
+C> report reduction for oversized messages
+C> - (1) Number of subsets
+C> Defines the number of subsets being passed to the encoder routine for
+C> inclusion into a bufr message. If the user has specified the use of the
+C> subset/report reduction activation switch, then a part of those subsets may
+C> be used for the current message and the remainder retained for a subsequent
+C> message.
+C> - (2) Observed flag
+C>  - 0 = observed data
+C>  - 1 = other data
+C> - (3) Compressed flag
+C>  - 0 = noncompressed
+C>  - 1 = compressed
+C> - (4) Subset/report reduction activation switch used to control the number
+C> of reports entered into a bufr message when maximum message size is exceeded
+C>  - 0 = option not active
+C>  - 1 = option is active. unused subsets will be shifted to low order
+C> positions of entry array.
+C>  - 2 = option is active. unused subsets will remain in entry positions.
+C> @note If this flag is set to any other values, program will be terminated
+C> with an error condition.
+C> - (5) Number of reports to decrement by, if oversized message
+C> (minimum value = one). If zero is entered, it will
+C> be replaced by one.
+C> - (6) Number of unused reports returned to user
+C> - (7) Number of reports included in message
+C> - (8) Number of table b entries available to decoder
+C> - (9) Number of table d entries available to decoder
+C> - (10) Text input flag
+C>  - 0  = ASCII input
+C>  - 1  = EBCIDIC input
+C> @param[in] JIF JDESC input format flag
+C> - 0  = F X Y
+C> - 1  = Decimal format
+C> @param[in] JDESC List of descriptors to go into section 3
+C> Each descriptor = F * 16384 + X * 256 + Y
+C> They may or may not be an exact match of the working descriptor list in kdesc.
+C> This set of descriptors may contain sequence descriptors to provide additional
+C> compression within the bufr message. There may be as few as one sequence
+C> descriptor, or as many descriptors as there are in kdesc.
+C> @param[in] NEWNR NR of descriptors in JDESC
+C> @param[in] IDATA Integer array dimensioned by the number of descriptors to
+C> be used
+C> @param[in] RDATA Real array dimensioned by the number of descriptors to be
+C> used
+C> @param[in] ATEXT Array containing all text data associated with a specific
+C> report. All data identified as text data must be in ASCII.
+C> @param[in] KASSOC Integer array dimensioned by the number of descriptors
+C> to be used, containing the associated field values for any entry in the
+C> descriptor list.
+C> @param[in] KIF KDESC input format flag
+C> - 0  = F X Y
+C> - 1  = DECIMAL FORMAT
+C> @param[in] KDESC List of descriptors to go into section 3 fully expanded set of working
+C> descriptors. there should be an element descriptor for every data entry, but
+C> there should be no sequence descriptors.
+C> @param[in] NRDESC NR of descriptors in kdesc
+C> @param[in] ISEC2D Data or text to be entered into section 2
+C> @param[in] ISEC2B Number of bytes of data in isec2d
+C> @param[out] KDATA Source data array . a 2-dimension integer array where
+C> kdata(subset,param) subset = subset number param  = parameter number.
+C> @param[out] KARY Working array for message under construction
+C> - (1) unused
+C> - (2) parameter pointer
+C> - (3) message bit pointer
+C> - (4) delayed replication flag
+C>  - 0 = no delayed replication
+C>  - 1 = contains delayed replication
+C> - (5) bit pointer for start of section 4
+C> - (6) unused
+C> - (7) nr of bits for parameter/data packing
+C> - (8) total bits for ascii data
+C> - (9) scale change value
+C> - (10) indicator (used in w3fi85)
+C>  - 1 = numeric data
+C>  - 2 = text data
+C> - (11) pointer to current pos in kdesc
+C> - (12) unused
+C> - (13) unused
+C> - (14) unused
+C> - (15) data type
+C> - (16) unused
+C> - (17) unused
+C> - (18) words added for text or associated fields
+C> - (19) location for total byte count
+C> - (20) size of section 0
+C> - (21) size of section 1
+C> - (22) size of section 2
+C> - (23) size of section 3
+C> - (24) size of section 4
+C> - (25) size of section 5
+C> - (26) nr bits added by table c operator
+C> - (27) bit width of associated field
+C> - (28) jdesc input form flag
+C>  - 0 = Descriptor in f x y form
+C>   - F in JDESC(1,I)
+C>   - X in JDESC(2,I)
+C>   - Y in JDESC(3,I)
+C>  - 1 = DEscriptor in decimal form in jdesc(1,i)
+C> - (29) kdesc input form flag
+C>  - 0 = Descriptor in F X Y form
+C>   - F in KDESC(1,I)
+C>   - X in KDESC(2,I)
+C>   - Y in KDESC(3,I)
+C>  - 1 = Descriptor in decimal form in kdesc(1,i)
+C> - (30) bufr message total byte count
+C> @param[out] KBUFR Array to contain completed bufr message
+C> @param[out] IERRTN Error return flag
 C>
-C> USAGE: CALL W3FI85(ISTEP,IUNITB,IUNITD,IBFSIZ,ISECT1,ISECT3,
-C>    *    JIF,JDESC,NEWNR,IDATA,RDATA,ATEXT,KASSOC,
-C>    *    KIF,KDESC,NRDESC,ISEC2D,ISEC2B,
-C>    *    KDATA,KARY,KBUFR,IERRTN)
-C>   INPUT ARGUMENT LIST:
-C>     ISTEP    - KEY FOR SELECTION OF PROCESSING STEP
-C>            1  = PROCESS INTEGER/TEXT ARRAY INTO KDATA
-C>            2  = PROCESS REAL/TEXT ARRAY INTO KDATA
-C>            3  = CONSTRUCT BUFR MESSAGE
-C>     IUNITB   - UNIT NUMBER OF DEVICE CONTAINING TABLE B
-C>     IUNITD   - UNIT NUMBER OF DEVICE CONTAINING TABLE D
-C>     IBFSIZ   - SIZE IN BYTES OF BUFR MESSAGE ARRAY (KBUFR)
-C>                  SHOULD BE A MULTIPLE OF WORD SIZE.
-C>     ISECT1   - CONTAINS INFORMATION TO ENTER INTO SECTION 1
-C>          ( 1) EDITION NUMBER
-C>          ( 2) BUFR MASTER TABLE NUMBER
-C>                   0 = METEOROLOGICAL
-C>                   OTHERS NOT YET DEFINED
-C>          ( 3) ORIGINATING CENTER - SUBCENTER NUMBER
-C>          ( 4) ORIGINATING CENTER NUMBER
-C>          ( 5) UPDATE SEQUENCE NUMBER
-C>          ( 6) OPTIONAL SECTION FLAG
-C>                   SHOULD BE SET TO ZERO UNLESS USER
-C>                   WRITE ADDITIONAL CODE TO ENTER LOCAL
-C>                   INFORMATION INTO SECTION 3
-C>          ( 7) BUFR MESSAGE TYPE
-C>          ( 8) BUFR MESSAGE SUB_TYPE
-C>          ( 9) MASTER TABLE VERSION NUMBER
-C>          (10) LOCAL TABLE VERSION NUMBER
-C>          (11) YEAR OF CENTURY    - REPRESENTATIVE OF DATA
-C>          (12) MONTH              - REPRESENTATIVE OF DATA
-C>          (13) DAY                - REPRESENTATIVE OF DATA
-C>          (14) HOUR               - REPRESENTATIVE OF DATA
-C>          (15) MINUTE             - REPRESENTATIVE OF DATA
-C>          (16)-(20)  UNUSED
+C> IERRTN:
+C> - = 0 Normal return, bufr message resides in kbufr
+C>  - if isect3(4)= 0, all reports have been processed into a bufr message
+C>  - if isect3(4)= 1, a bufr message has been generated with all or part of
+C> the data passed to this routine. isect3(6) contains the number of reports
+C> that were not used but are being held for the next message.
+C> - = 1 bufr message construction was halted because contents exceeded maximum size
+C> (only when isect3(4) = 0)
+C> - = 2 bufr message construction was halted because of encounter with a
+C> descriptor not found in table b.
+C> - = 3 routine was called with no subsets
+C> - = 4 error occured while reading table b
+C> - = 5 an attempt was made to expand jdesc into kdesc, but a descriptor indicating
+C> delayed replication was encountered
+C> - = 6 error occured while reading table d
+C> - = 7 data value could not be contained in specified bit width
+C> - = 8 delayed replication not permitted in compressed data format
+C> - = 9 an operator descriptor 2 04 yyy opening an associated field (yyy not eq zero)
+C> was not followed by the defining descriptor 0 31 021 (7957 decimal).
+C> - = 10 delayed replication descriptor was not followed by descriptor for delayed
+C> replication factor.
+C>  - 0 31 001
+C>  - 0 31 002
+C>  - 0 31 011
+C>  - 0 31 012
+C> - = 11 encountered a reference value that forced a data element to become negative
+C> - = 12 no matching table d entry for sequence descriptor.
+C> - = 13 encountered a non-acceptable data entry flag. isect3(6) should be 0 or 1.
+C> - = 14 converting descriptors fxy->decimal, number to convert = 0
+C> - = 15 no descriptors specified for section 3
+C> - = 16 incomplete table b, number of descriptors in table b does not match number of
+C> descriptors needed to construct bufr message
+C> - = 20 incorrect entry of replication or sequence descriptor in list of reference
+C> value changes
+C> - = 21 incorrect operator descriptor in list of reference value changes
+C> - = 22 attempting to enter new reference value into table b, but descriptor
+C> does not exist in current modified table b
 C>
-C>     ISECT3   - VALUES TO BE INSERTED INTO SECTION 3, AND
-C>                TO CONTROL REPORT REDUCTION FOR OVERSIZED MESSAGES
-C>          (1)  NUMBER OF SUBSETS
-C>                   DEFINES THE NUMBER OF SUBSETS BEING PASSED TO THE
-C>                   ENCODER ROUTINE FOR INCLUSION INTO A BUFR MESSAGE.
-C>                   IF THE USER HAS SPECIFIED THE USE OF THE
-C>                   SUBSET/REPORT REDUCTION ACTIVATION SWITCH, THEN
-C>                   A PART OF THOSE SUBSETS MAY BE USED FOR THE CURRENT
-C>                   MESSAGE AND THE REMAINDER RETAINED FOR A
-C>                   SUBSEQUENT MESSAGE.
-C>          (2)  OBSERVED FLAG
-C>                   0 = OBSERVED DATA
-C>                   1 = OTHER DATA
-C>          (3)  COMPRESSED FLAG
-C>                   0 = NONCOMPRESSED
-C>                   1 = COMPRESSED
-C>          (4)  SUBSET/REPORT REDUCTION ACTIVATION SWITCH
-C>                   USED TO CONTROL THE NUMBER OF REPORTS ENTERED INTO
-C>                   A BUFR MESSAGE WHEN MAXIMUM MESSAGE SIZE IS EXCEEDED
-C>                   0 = OPTION NOT ACTIVE
-C>                   1 = OPTION IS ACTIVE. UNUSED SUBSETS WILL BE
-C>                       SHIFTED TO LOW ORDER POSITIONS OF ENTRY ARRAY.
-C>                   2 = OPTION IS ACTIVE. UNUSED SUBSETS WILL REMAIN
-C>                       IN ENTRY POSITIONS.
-C>
-C>                       NOTE:- IF THIS FLAG IS SET TO ANY OTHER
-C>                       VALUES, PROGRAM WILL BE TERMINATED WITH AN
-C>                       ERROR CONDITION.
-C>          (5)  NUMBER OF REPORTS TO DECREMENT BY, IF OVERSIZED MESSAGE
-C>                   (MINIMUM VALUE = ONE).  IF ZERO IS ENTERED, IT WILL
-C>                   BE REPLACED BY ONE.
-C>          (6) NUMBER OF UNUSED REPORTS RETURNED TO USER
-C>          (7) NUMBER OF REPORTS INCLUDED IN MESSAGE
-C>          (8) NUMBER OF TABLE B ENTRIES AVAILABLE TO DECODER
-C>          (9) NUMBER OF TABLE D ENTRIES AVAILABLE TO DECODER
-C>         (10) TEXT INPUT FLAG
-C>                   0  = ASCII INPUT
-C>                   1  = EBCIDIC INPUT
-C>
-C>     JIF      - JDESC INPUT FORMAT FLAG
-C>                      0  = F X Y
-C>                      1  = DECIMAL FORMAT
-C>     JDESC    - LIST OF DESCRIPTORS TO GO INTO SECTION 3
-C>                 EACH DESCRIPTOR = F * 16384 + X * 256 + Y
-C>                     THEY MAY OR MAY NOT BE AN EXACT MATCH OF THE
-C>                     WORKING DESCRIPTOR LIST IN KDESC.  THIS SET OF
-C>                     DESCRIPTORS MAY CONTAIN SEQUENCE DESCRIPTORS TO
-C>                     PROVIDE ADDITIONAL COMPRESSION WITHIN THE BUFR
-C>                     MESSAGE.  THERE MAY BE AS FEW AS ONE SEQUENCE
-C>                     DESCRIPTOR, OR AS MANY DESCRIPTORS AS THERE ARE
-C>                     IN KDESC.
-C>     NEWNR    - NR OF DESCRIPTORS IN JDESC
-C>     IDATA    - INTEGER ARRAY DIMENSIONED BY THE NUMBER OF
-C>                DESCRIPTORS TO BE USED
-C>     RDATA    - REAL ARRAY DIMENSIONED BY THE NUMBER OF
-C>                DESCRIPTORS TO BE USED
-C>     ATEXT    - ARRAY CONTAINING ALL TEXT DATA ASSOCIATED WITH A
-C>                SPECIFIC REPORT.  ALL DATA IDENTIFIED AS TEXT DATA MUST
-C>                BE IN ASCII.
-C>     KASSOC   - INTEGER ARRAY DIMENSIONED BY THE NUMBER OF DESCRIPTORS
-C>                TO BE USED, CONTAINING THE ASSOCIATED FIELD VALUES
-C>                FOR ANY ENTRY IN THE DESCRIPTOR LIST.
-C>     KIF      - KDESC INPUT FORMAT FLAG
-C>                      0  = F X Y
-C>                      1  = DECIMAL FORMAT
-C>     KDESC    - LIST OF DESCRIPTORS TO GO INTO SECTION 3
-C>                     FULLY EXPANDED SET OF WORKING DESCRIPTORS. THERE
-C>                     SHOULD BE AN ELEMENT DESCRIPTOR FOR EVERY DATA
-C>                     ENTRY, BUT THERE SHOULD BE
-C>                            NO SEQUENCE DESCRIPTORS
-C>     NRDESC   - NR OF DESCRIPTORS IN KDESC
-C>     ISEC2D - DATA OR TEXT TO BE ENTERED INTO SECTION 2
-C>     ISEC2B - NUMBER OF BYTES OF DATA IN ISEC2D
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     KDATA    - SOURCE DATA ARRAY . A 2-DIMENSION INTEGER ARRAY
-C>                      WHERE KDATA(SUBSET,PARAM)
-C>                             SUBSET = SUBSET NUMBER
-C>                             PARAM  = PARAMETER NUMBER
-C>     KARY     - WORKING ARRAY FOR MESSAGE UNDER CONSTRUCTION
-C>            (1) UNUSED
-C>            (2) PARAMETER POINTER
-C>            (3) MESSAGE BIT POINTER
-C>            (4) DELAYED REPLICATION FLAG
-C>                   0 = NO DELAYED REPLICATION
-C>                   1 = CONTAINS DELAYED REPLICATION
-C>            (5) BIT POINTER FOR START OF SECTION 4
-C>            (6) UNUSED
-C>            (7) NR OF BITS FOR PARAMETER/DATA PACKING
-C>            (8) TOTAL BITS FOR ASCII DATA
-C>            (9) SCALE CHANGE VALUE
-C>           (10) INDICATOR (USED IN W3FI85)
-C>                                1 = NUMERIC DATA
-C>                                2 = TEXT DATA
-C>           (11) POINTER TO CURRENT POS IN KDESC
-C>           (12) UNUSED
-C>           (13) UNUSED
-C>           (14) UNUSED
-C>           (15) DATA TYPE
-C>           (16) UNUSED
-C>           (17) UNUSED
-C>           (18) WORDS ADDED FOR TEXT OR ASSOCIATED FIELDS
-C>           (19) LOCATION FOR TOTAL BYTE COUNT
-C>           (20) SIZE OF SECTION 0
-C>           (21) SIZE OF SECTION 1
-C>           (22) SIZE OF SECTION 2
-C>           (23) SIZE OF SECTION 3
-C>           (24) SIZE OF SECTION 4
-C>           (25) SIZE OF SECTION 5
-C>           (26) NR BITS ADDED BY TABLE C OPERATOR
-C>           (27) BIT WIDTH OF ASSOCIATED FIELD
-C>           (28) JDESC INPUT FORM FLAG
-C>                      0 = DESCRIPTOR IN F X Y FORM
-C>                                  F IN JDESC(1,I)
-C>                                  X IN JDESC(2,I)
-C>                                  Y IN JDESC(3,I)
-C>                      1 = DESCRIPTOR IN DECIMAL FORM IN JDESC(1,I)
-C>           (29) KDESC INPUT FORM FLAG
-C>                      0 = DESCRIPTOR IN F X Y FORM
-C>                                  F IN KDESC(1,I)
-C>                                  X IN KDESC(2,I)
-C>                                  Y IN KDESC(3,I)
-C>                      1 = DESCRIPTOR IN DECIMAL FORM IN KDESC(1,I)
-C>           (30) BUFR MESSAGE TOTAL BYTE COUNT
-C>     KBUFR    - ARRAY TO CONTAIN COMPLETED BUFR MESSAGE
-C>     IERRTN   - ERROR RETURN FLAG
-C>     KSEQ     - WORKING ARRAY FOR TABLE D INITIAL SEARCH KEY
-C>     KNUM     - WORKING ARRAY FOR TABLE D NUMBER OF DESC'S IN SEQ
-C>     KLIST    - WORKING ARRAY FOR TABLE D SEQUENCES
-C>     ANAME    - TABLE B  DESCRIPTOR NAMES
-C>     AUNITS   - TABLE B  DESCRIPTOR UNITS
-C>     LDESC    - TABLE B  DECIMAL EQUIV OF F X Y VALUES
-C>     KSCALE   - TABLE B  STANDARD SCALE VALUES
-C>     KFRVAL   - TABLE B  REFERENCE VALUES
-C>     KRFVSW   - TABLE B  SWITCHES TO INDICATE IF HAVE NEW/OLD REF VAL
-C>     NEWRFV   - TABLE B  NEW REFERENCE VALUES
-C>     KWIDTH   - ARRAY OF BIT WIDTHS FOR EACH ENTRY IN TABLE B
-C>
-C> REMARKS:
-C>         IERRTN    = 0    NORMAL RETURN, BUFR MESSAGE RESIDES IN KBUFR
-C>                          IF ISECT3(4)= 0, ALL REPORTS HAVE BEEN
-C>                                           PROCESSED INTO A BUFR
-C>                                           MESSAGE
-C>                          IF ISECT3(4)= 1, A BUFR MESSAGE HAS BEEN
-C>                                          GENERATED WITH ALL OR PART OF
-C>                                          THE DATA PASSED TO THIS
-C>                                          ROUTINE. ISECT3(6) CONTAINS
-C>                                          THE NUMBER OF REPORTS THAT
-C>                                          WERE NOT USED BUT ARE BEING
-C>                                          HELD FOR THE NEXT MESSAGE.
-C>                   = 1    BUFR MESSAGE CONSTRUCTION WAS HALTED
-C>                          BECAUSE CONTENTS EXCEEDED MAXIMUM SIZE
-C>                          (ONLY WHEN ISECT3(4) = 0)
-C>                   = 2    BUFR MESSAGE CONSTRUCTION WAS HALTED
-C>                          BECAUSE OF ENCOUNTER WITH A DESCRIPTOR
-C>                          NOT FOUND IN TABLE B.
-C>                   = 3    ROUTINE WAS CALLED WITH NO SUBSETS
-C>                   = 4    ERROR OCCURED WHILE READING TABLE B
-C>                   = 5    AN ATTEMPT WAS MADE TO EXPAND JDESC
-C>                          INTO KDESC, BUT A DESCRIPTOR INDICATING
-C>                          DELAYED REPLICATION WAS ENCOUNTERED
-C>                   = 6    ERROR OCCURED WHILE READING TABLE D
-C>                   = 7    DATA VALUE COULD NOT BE CONTAINED
-C>                          IN SPECIFIED BIT WIDTH
-C>                   = 8    DELAYED REPLICATION NOT PERMITTED
-C>                          IN COMPRESSED DATA FORMAT
-C>                   = 9    AN OPERATOR DESCRIPTOR 2 04 YYY OPENING
-C>                          AN ASSOCIATED FIELD (YYY NOT EQ ZERO)
-C>                          WAS NOT FOLLOWED BY THE DEFINING DESCRIPTOR
-C>                          0 31 021 (7957 DECIMAL).
-C>                   = 10   DELAYED REPLICATION DESCRIPTOR WAS NOT
-C>                          FOLLOWED BY DESCRIPTOR FOR DELAYED
-C>                          REPLICATION FACTOR.
-C>                                0 31 001
-C>                                0 31 002
-C>                                0 31 011
-C>                                0 31 012
-C>                   = 11   ENCOUNTERED A REFERENCE VALUE THAT FORCED A
-C>                          DATA ELEMENT TO BECOME NEGATIVE
-C>                   = 12   NO MATCHING TABLE D ENTRY FOR SEQUENCE
-C>                          DESCRIPTOR.
-C>                   = 13   ENCOUNTERED A NON-ACCEPTABLE DATA ENTRY FLAG.
-C>                          ISECT3(6) SHOULD BE 0 OR 1.
-C>                   = 14   CONVERTING DESCRIPTORS FXY->DECIMAL,
-C>                          NUMBER TO CONVERT = 0
-C>                   = 15   NO DESCRIPTORS SPECIFIED FOR SECTION 3
-C>                   = 16   INCOMPLETE TABLE B, NUMBER OF DESCRIPTORS
-C>                          IN TABLE B DOES NOT MATCH NUMBER OF
-C>                          DESCRIPTORS NEEDED TO CONSTRUCT BUFR MESSAGE
-C>                   = 20   INCORRECT ENTRY OF REPLICATION OR SEQUENCE
-C>                          DESCRIPTOR IN LIST OF REFERENCE VALUE CHANGES
-C>                   = 21   INCORRECT OPERATOR DESCRIPTOR IN LIST OF
-C>                          REFERENCE VALUE CHANGES
-C>                   = 22   ATTEMPTING TO ENTER NEW REFERENCE VALUE INTO
-C>                          TABLE B, BUT DESCRIPTOR DOES NOT EXIST IN
-C>                          CURRENT MODIFIED TABLE B
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C>   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C>
+C> @author Bill Cavanaugh @date 1993-09-29
       SUBROUTINE W3FI85(ISTEP,IUNITB,IUNITD,IBFSIZ,ISECT1,ISECT3,
      *    JIF,JDESC,NEWNR,IDATA,RDATA,ATEXT,KASSOC,
      *    KIF,KDESC,NRDESC,ISEC2D,ISEC2B,
@@ -1003,63 +940,45 @@ C  =======================================
  9000 CONTINUE
       RETURN
       END
+C> @brief Perform replication of descriptors
+C> @author Bill Cavanaugh @date 1993-12-03
+
+C> Have encountered a replication descriptor. It may include
+C> delayed replication or not. That decision should have been
+C> made prior to calling this routine.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C> - J. Hoppa 1994-03-25 Added line to initialize nxtptr to correct
+C> an error in the standard replication.
+C> - J. Hoppa 1994-03-28 Corrected an error in the standard replication
+C> that was adding extra zeros to the bufr message after the replicated data.
+C> - J. Hoppa 1994-03-31 Added the subset number to the parameter list.
+C> corrected the equation for the number of replications with delayed replication.
+C> (istart and k don't exist)
+C> - J. Hoppa 1994-04-19 Switched the variables next and nxtprt
+C> - J. Hoppa 1994-04-20 Added the kdata parameter counter to the parameter
+C> list. In the assignment of nreps when have delayed replication, changed index
+C> in kdata from n to k.
+C> - J. Hoppa 1994-04-29 Removed n and k from the input list changed n to
+C> kary(11) and k to kary(2)
+C>
+C> @param[in] ISTEP
+C> @param[in] KCLASS
+C> @param[in] KSEG
+C> @param[in] IDATA
+C> @param[in] RDATA
+C> @param[in] KDATA
+C> @param[in] NSUB Current subset
+C> @param[inout] KDESC (modified [out]) List of descriptors
+C> @param[inout] NRDESC Number of (new [out]) descriptors in kdesc
+C> @param[out] IERRTN Error return value
+C> @param KARY
+C>
+C> @author Bill Cavanaugh @date 1993-12-03
       SUBROUTINE FI8501(KARY,ISTEP,KCLASS,KSEG,IDATA,RDATA,
      *                  KDATA,NSUB,KDESC,NRDESC,IERRTN)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8501      PERFORM REPLICATION OF DESCRIPTORS
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: HAVE ENCOUNTERED A REPLICATION DESCRIPTOR . IT MAY INCLUDE
-C           DELAYED REPLICATION OR NOT.  THAT DECISION SHOULD HAVE BEEN
-C           MADE PRIOR TO CALLING THIS ROUTINE.
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   94-03-25  HOPPA       ADDED LINE TO INITIALIZE NXTPTR TO CORRECT
-C                         AN ERROR IN THE STANDARD REPLICATION.
-C   94-03-28  HOPPA       CORRECTED AN ERROR IN THE STANDARD REPLICATION
-C                         THAT WAS ADDING EXTRA ZEROS TO THE BUFR
-C                         MESSAGE AFTER THE REPLICATED DATA.
-C   94-03-31  HOPPA       ADDED THE SUBSET NUMBER TO THE PARAMETER LIST.
-C                         CORRECTED THE EQUATION FOR THE NUMBER OF
-C                         REPLICATIONS WITH DELAYED REPLICATION.
-C                         (ISTART AND K DON'T EXIST)
-C   94-04-19  HOPPA       SWITCHED THE VARIABLES NEXT AND NXTPRT
-C   94-04-20  HOPPA       ADDED THE KDATA PARAMETER COUNTER TO THE
-C                         PARAMETER LIST.  IN THE ASSIGNMENT OF NREPS
-C                         WHEN HAVE DELAYED REPLICATION, CHANGED INDEX
-C                         IN KDATA FROM N TO K.
-C   94-04-29  HOPPA     - REMOVED N AND K FROM THE INPUT LIST
-C                       - CHANGED N TO KARY(11) AND K TO KARY(2)
-C
-C USAGE:    CALL FI8501(KARY,ISTEP,KCLASS,KSEG,IDATA,RDATA,
-C    *                  KDATA,N,NSUB,KDESC,NRDESC,IERRTN)
-C   INPUT ARGUMENT LIST:
-C     ISTEP    -
-C     KCLASS   -
-C     KKSEG    -
-C     IDATA    -
-C     RDATA    -
-C     KDATA    -
-C     N        - CURRENT POSITION IN DESCRIPTOR LIST
-C     NSUB     - CURRENT SUBSET
-C     KDESC    - LIST OF DESCRIPTORS
-C     NRDESC   - NUMBER OF DESCRIPTORS IN KDESC
-C
-C   OUTPUT ARGUMENT LIST:
-C     N        - CURRENT POSITION IN DESCRIPTOR LIST
-C     KDESC    - MODIFIED LIST OF DESCRIPTORS
-C     NRDESC   - NEW NUMBER OF DESCRIPTORS IN KDESC
-C     IERRTN   - ERROR RETURN VALUE
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C
       REAL         RDATA(*)
 C
@@ -1160,54 +1079,41 @@ C                               RESET NUMBER OF DESCRIPTORS IN KDESC
 C  ****************************************************************
       RETURN
       END
+C> @brief Process an operator descriptor.
+C> @author Bill Cavanaugh @date 193-12-03
+
+C> Have encountered an operator descriptor.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C> - J. Hoppa 1994-04-15 Added kbufr to input parameter list.
+C> added block of data to correctly use sbyte when writing a 205yyy descriptor to the
+C> bufr message. The previous way didn't work because kdata was getting incremeted
+C> by the ksub value, not the param value.
+C> - J. Hoppa 1994-04-29 Changed k to kary(2) removed a line that became obsolete with
+C> above change
+C> - J. Hoppa 1994-05-18 Added a kary(2) increment
+C>
+C> @param[in] KCLASS
+C> @param[in] KSEG
+C> @param[inout] KDESC
+C> @param[inout] NRDESC
+C> @param[in] I
+C> @param[in] ISTEP
+C> @param[inout] KARY
+C> @param[out] IERRTN Error return value
+C> @param KBUFR
+C> @param KDATA
+C> @param ISECT3
+C> @param KRFVSW
+C> @param NEWRFV
+C> @param LDESC
+C> @param INDEXB
+C>
+C> @author Bill Cavanaugh @date 193-12-03
       SUBROUTINE FI8502(*,KBUFR,KCLASS,KSEG,KDESC,NRDESC,I,ISTEP,
      *          KARY,KDATA,ISECT3,KRFVSW,NEWRFV,LDESC,IERRTN,INDEXB)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8502      PROCESS AN OPERATOR DESCRIPTOR
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: HAVE ENCOUNTERED AN OPERATOR DESCRIPTOR
-C
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   94-04-15  J. HOPPA  - ADDED KBUFR TO INPUT PARAMETER LIST.
-C                       - ADDED BLOCK OF DATA TO CORRECTLY USE SBYTE
-C                         WHEN WRITING A 205YYY DESCRIPTOR TO THE
-C                         BUFR MESSAGE.
-C                         THE PREVIOUS WAY DIDN'T WORK BECAUSE KDATA
-C                         WAS GETTING INCREMETED BY THE KSUB VALUE,
-C                         NOT THE PARAM VALUE.
-C   94-04-29  J. HOPPA  - CHANGED K TO KARY(2)
-C                       - REMOVED A LINE THAT BECAME OBSOLETE WITH
-C                         ABOVE CHANGE
-C   94-05-18  J. HOPPA  - ADDED A KARY(2) INCREMENT
-C
-C USAGE:    CALL FI8502(*,KCLASS,KSEG,KDESC,NRDESC,I,ISTEP,
-C    *          KARY,KDATA,ISECT3,KRFVSW,NEWRFV,LDESC,IERRTN,INDEXB)
-C   INPUT ARGUMENT LIST:
-C     KCLASS   -
-C     KSEG     -
-C     KDESC    -
-C     NRDESC   -
-C     I        -
-C     ISTEP    -
-C     KARY     -
-C
-C   OUTPUT ARGUMENT LIST:
-C     KDESC    -
-C     NRDESC   -
-C     KARY     -
-C     IERRTN   - ERROR RETURN VALUE
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C
       INTEGER      KCLASS,KSEG,ZEROES(255)
       INTEGER      KRFVSW(*),NEWRFV(*),LDESC(*)
@@ -1376,44 +1282,29 @@ C                  PROCESSING AT SAME LOCATION.
 C  ****************************************************************
       RETURN
       END
+C> @brief Expand sequence descriptor.
+C> @author Bill Cavanaugh @date 1993-12-03
+
+C> Have encountered a sequence descriptor. must perform proper replacment of
+C> descriptors in line.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C>
+C> @param[inout] I Current position in descriptor list
+C> @param[inout] KDESC List (modified [out]) of descriptors
+C> @param[inout] NRDESC Number (new [out]) of descriptors in kdesc
+C> @param[in] IUNITD
+C> @param[in] KSEQ
+C> @param[in] KNUM
+C> @param[in] KLIST
+C> @param[out] IERRTN Error return value
+C> @param ISECT3
+C>
+C> @author Bill Cavanaugh @date 1993-12-03
       SUBROUTINE FI8503(I,KDESC,NRDESC,
      *                     ISECT3,IUNITD,KSEQ,KNUM,KLIST,IERRTN)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8503      EXPAND SEQUENCE DESCRIPTOR
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: HAVE ENCOUNTERED A SEQUENCE DESCRIPTOR.  MUST PERFORM
-C           PROPER REPLACMENT OF DESCRIPTORS IN LINE.
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   YY-MM-DD  MODIFIER1   DESCRIPTION OF CHANGE
-C
-C USAGE:    CALL FI8503(I,KDESC,NRDESC,
-C    *                     ISECT3,IUNITD,KSEQ,KNUM,KLIST,IERRTN)
-C   INPUT ARGUMENT LIST:
-C     I        - CURRENT POSITION IN DESCRIPTOR LIST
-C     KDESC    - LIST OF DESCRIPTORS
-C     NRDESC   - NUMBER OF DESCRIPTORS IN KDESC
-C     IUNITD   -
-C     KSEQ     -
-C     KNUM     -
-C     KLIST    -
-C
-C   OUTPUT ARGUMENT LIST:
-C     I        - CURRENT POSITION IN DESCRIPTOR LIST
-C     KDESC    - MODIFIED LIST OF DESCRIPTORS
-C     NRDESC   - NEW NUMBER OF DESCRIPTORS IN KDESC
-C     IERRTN   - ERROR RETURN VALUE
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C
       INTEGER      I
       INTEGER      KDESC(3,*)
@@ -1484,36 +1375,22 @@ C     PRINT *,' NRDESC IS ',NRDESC
 C                           RESET CURRENT POSITION & RETURN
       RETURN
       END
+C> @brief Convert descriptors fxy to decimal
+C> @author Bill Cavanaugh @date 1993-12-03
+
+C> Construct decimal descriptor values from f x and y segments
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C>
+C> @param[in] MIF input flag
+C> @param[inout] MDESC list of descriptors in f x y (decimal [out]) form
+C> @param[in] NR number of descriptors in mdesc
+C> @param[out] IERRTN error return value
+C>
+C> @author Bill Cavanaugh @date 1993-12-03
       SUBROUTINE FI8505(MIF,MDESC,NR,IERRTN)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8505      CONVERT DESCRIPTORS FXY TO DECIMAL
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: CONSTRUCT DECIMAL DESCRIPTOR VALUES FROM F X AND Y SEGMENTS
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   YY-MM-DD  MODIFIER1   DESCRIPTION OF CHANGE
-C   YY-MM-DD  MODIFIER2   DESCRIPTION OF CHANGE
-C
-C USAGE:    CALL FI8505(MIF,MDESC,NR,IERRTN)
-C   INPUT ARGUMENT LIST:
-C     MIF      - INPUT FLAG
-C     MDESC    - LIST OF DESCRIPTORS IN F X Y FORM
-C     NR       - NUMBER OF DESCRIPTORS IN MDESC
-C
-C   OUTPUT ARGUMENT LIST:
-C     MDESC    - LIST OF DESCRIPTORS IN DECIMAL FORM
-C     IERRTN   - ERROR RETURN VALUE
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C
       INTEGER      MDESC(3,*), NR
 C
@@ -1533,83 +1410,67 @@ C     PRINT *,MDESC(2,I),MDESC(3,I),' BECOMES ',MDESC(1,I)
       MIF  = 1
       RETURN
       END
+C> @brief Process data in non-compressed format
+C> @author Bill Cavanaugh @date 1993-12-03
+
+C> Process data into non-compressed format for inclusion into
+C> section 4 of the bufr message
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C> - J. Hoppa 1994-03-24 Changed the inner loop from a do loop to a
+C> goto loop so nrdesc isn't a set value.
+C> corrected a value in the call to fi8503().
+C> - J. Hoppa 1994-03-31 Corrected an error in sending the subset
+C> number rather than the descriptor number
+C> to subroutine fi8501(). Added the subset number to the fi8501() parameter list.
+C> - J. Hoppa 1994-04015 Added line to keep the parameter pointer
+C> kary(2) up to date.  this variable is used
+C> in subroutine fi8502().
+C> added kbufr to the parameter list in the call
+C> to subroutine fi8502().
+C> corrected an infinite loop when have an
+C> operator descriptor that was caused by
+C> a correction made 94-03-24
+C> - J. Hoppa 1994-04-20 Added k to call to subroutine w3fi01
+C> - J. Hoppa 1994-04-29 Changed n to kary(11) and k to kary(2)
+C> removed k and n from the call to fi8501()
+C> - J. Hoppa 1994-05-03 Added an increment to kary(11) to prevent
+C> and infinite loop when have a missing value
+C> - J. Hoppa 1994-05-18 Changed so increments kary(2) after each
+C> call to sbyte and deleted
+C> kary(2) = kary(11) + kary(18)
+C>
+C> @param[in] ISTEP
+C> @param[in] ISECT3
+C> @param[in] KARY
+C> @param[in] JDESC
+C> @param[in] NEWNR
+C> @param[in] KDESC
+C> @param[in] NRDESC
+C> @param[in] LDESC
+C> @param[in] ANAME
+C> @param[in] AUNITS
+C> @param[in] KSCALE
+C> @param[in] KRFVAL
+C> @param[in] KWIDTH
+C> @param[in] KRFVSW
+C> @param[in] NEWRFV
+C> @param[in] KSEQ
+C> @param[in] KNUM
+C> @param[in] KLIST
+C> @param[out] KDATA
+C> @param[out] KBUFR
+C> @param[out] IERRTN
+C> @param IBFSIZ
+C> @param INDEXB
+C>
+C> @author Bill Cavanaugh @date 1993-12-03
       SUBROUTINE FI8506(ISTEP,ISECT3,KARY,JDESC,NEWNR,KDESC,NRDESC,
      *           LDESC,ANAME,AUNITS,KSCALE,KRFVAL,KWIDTH,KRFVSW,NEWRFV,
      *           KSEQ,KNUM,KLIST,IBFSIZ,
      *           KDATA,KBUFR,IERRTN,INDEXB)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8506      PROCESS DATA IN NON-COMPRESSED FORMAT
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: PROCESS DATA INTO NON-COMPRESSED FORMAT FOR INCLUSION INTO
-C           SECTION 4 OF THE BUFR MESSAGE
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   94-03-24  J. HOPPA   - CHANGED THE INNER LOOP FROM A DO LOOP TO A
-C                          GOTO LOOP SO NRDESC ISN'T A SET VALUE.
-C                        - CORRECTED A VALUE IN THE CALL TO FI8503.
-C   94-03-31  J. HOPPA   - CORRECTED AN ERROR IN SENDING THE SUBSET
-C                          NUMBER RATHER THAN THE DESCRIPTOR NUMBER
-C                          TO SUBROUTINE FI8501.
-C                        - ADDED THE SUBSET NUMBER TO THE FI8501
-C                          PARAMETER LIST.
-C   94-04015  J. HOPPA   - ADDED LINE TO KEEP THE PARAMETER POINTER
-C                          KARY(2) UP TO DATE.  THIS VARIABLE IS USED
-C                          IN SUBROUTINE FI8502.
-C                        - ADDED KBUFR TO THE PARAMETER LIST IN THE CALL
-C                          TO SUBROUTINE FI8502.
-C                        - CORRECTED AN INFINITE LOOP WHEN HAVE AN
-C                          OPERATOR DESCRIPTOR THAT WAS CAUSED BY
-C                          A CORRECTION MADE 94-03-24
-C   94-04-20  J. HOPPA   - ADDED K TO CALL TO SUBROUTINE W3FI01
-C   94-04-29  J. HOPPA   - CHANGED N TO KARY(11) AND K TO KARY(2)
-C                        - REMOVED K AND N FROM THE CALL TO FI8501
-C   94-05-03  J. HOPPA   - ADDED AN INCREMENT TO KARY(11) TO PREVENT
-C                          AND INFINITE LOOP WHEN HAVE A MISSING VALUE
-C   94-05-18  J. HOPPA   - CHANGED SO INCREMENTS KARY(2) AFTER EACH
-C                          CALL TO SBYTE AND DELETED
-C                          KARY(2) = KARY(11) + KARY(18)
-C
-C
-C USAGE     CALL FI8506(ISTEP,ISECT3,KARY,JDESC,NEWNR,KDESC,NRDESC,
-C    *           LDESC,ANAME,AUNITS,KSCALE,KRFVAL,KWIDTH,KRFVSW,NEWRFV,
-C    *           KSEQ,KNUM,KLIST,
-C    *           KDATA,KBUFR,IERRTN,INDEXB)
-C
-C   INPUT ARGUMENT LIST:
-C     ISTEP    -
-C     ISECT3   -
-C     KARY     -
-C     JDESC    -
-C     NEWNR    -
-C     KDESC    -
-C     NRDESC   -
-C     LDESC    -
-C     ANAME    -
-C     AUNITS   -
-C     KSCALE   -
-C     KRFVAL   -
-C     KWIDTH   -
-C     KRFVSW   -
-C     NEWRFV   -
-C     KSEQ     -
-C     KNUM     -
-C     KLIST    -
-C
-C   OUTPUT ARGUMENT LIST:
-C     KDATA    -
-C     KBUFR    -
-C     IERRTN   -
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C
 C  -------------------------------------------------------------
       INTEGER        ISTEP,INDEXB(*)
@@ -1844,68 +1705,51 @@ C                              RESET ALL REFERENCE VALUES TO ORIGINAL
  4500 CONTINUE
       RETURN
       END
+C> @brief Combine integer/text data
+C> @author Bill Cavanaugh @date 1993-12-03
+
+C> Construct integer subset from real and text data
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C> - J. Hoppa 1994-03-31 added ksub to fi8501() parameter list.
+C> - J. Hoppa 1994-04-18 added dummy variable idum to fi8502() parameter list.
+C> - J. Hoppa 1994-04-20 added dummy variable ll to fi8501() parameter list.
+C> - J. Hoppa 1994-04-29 changed i to kary(11) added a kary(2) assignment so have something
+C> to pass to subroutines ** test this ** removed i and ll from call to fi8501()
+C> - J. Hoppa 1994-05-13 added code to calculate kwords when kfunc=2
+C> - J. Hoppa 1994-05-18 deleted kary(2) assignment
+C>
+C> @param[in] ISTEP
+C> @param[in] IUNITB Unit number of device containing table b
+C> @param[in] IDATA Integer working array
+C> @param[in] KDESC Expanded descriptor set
+C> @param[in] NRDESC Number of descriptors in kdesc
+C> @param[in] ATEXT Text data for ccitt ia5 and text operator fields
+C> @param[in] KSUB Subset number
+C> @param[in] KARY Working array
+C> @param[in] ISECT3
+C> @param[out] KDATA Array containing integer subsets
+C> @param[out] LDESC List of table b descriptors (decimal)
+C> @param[out] ANAME List of descriptor names
+C> @param[out] AUNITS Units for each descriptor
+C> @param[out] KSCALE Base 10 scale factor for each descriptor
+C> @param[out] KRFVAL Reference value for each descriptor
+C> @param[out] KRFVSW
+C> @param[out] KWIDTH Standard bit width to contain each value for specific descriptor
+C> @param[out] KASSOC
+C> @param[out] IERRTN Error return flag
+C> @param IUNITD
+C> @param KSEQ
+C> @param KNUM
+C> @param KLIST
+C> @param INDEXB
+C>
+C> @author Bill Cavanaugh @date 1993-12-03
       SUBROUTINE FI8508(ISTEP,IUNITB,IDATA,KDESC,NRDESC,ATEXT,KSUB,KARY,
      *            KDATA,LDESC,ANAME,AUNITS,KSCALE,KRFVAL,KRFVSW,ISECT3,
      *            KWIDTH,KASSOC,IUNITD,KSEQ,KNUM,KLIST,IERRTN,INDEXB)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8508      COMBINE INTEGER/TEXT DATA
-C   PRGMMR: CAVANAUGH             W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: CONSTRUCT INTEGER SUBSET FROM REAL AND TEXT DATA
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   YY-MM-DD  MODIFIER1   DESCRIPTION OF CHANGE
-C   94-03-31  HOPPA       ADDED KSUB TO FI8501 PARAMETER LIST.
-C   94-04-18  HOPPA       ADDED DUMMY VARIABLE IDUM TO FI8502 PARAMETER
-C                         LIST.
-C   94-04-20  HOPPA       ADDED DUMMY VARIABLE LL TO FI8501 PARAMETER
-C                         LIST.
-C   94-04-29  HOPPA     - CHANGED I TO KARY(11)
-C                       - ADDED A KARY(2) ASSIGNMENT SO HAVE SOMETHING
-C                         TO PASS TO SUBROUTINES ** TEST THIS **
-C                       - REMOVED I AND LL FROM CALL TO FI8501
-C   94-05-13  HOPPA     - ADDED CODE TO CALCULATE KWORDS WHEN KFUNC=2
-C   94-05-18  HOPPA     - DELETED KARY(2) ASSIGNMENT
-C
-C
-C USAGE:    CALL FI8508(ISTEP,IUNITB,IDATA,KDESC,NRDESC,ATEXT,KSUB,KARY,
-C    *            KDATA,LDESC,ANAME,AUNITS,KSCALE,KRFVAL,KRFVSW,ISECT3,
-C    *            KWIDTH,KASSOC,IUNITD,KSEQ,KNUM,KLIST,IERRTN,INDEXB)
-C   INPUT ARGUMENT LIST:
-C     ISTEP    -
-C     IUNITB   - UNIT NUMBER OF DEVICE CONTAINING TABLE B
-C     IDATA    - INTEGER WORKING ARRAY
-C     KDESC    - EXPANDED DESCRIPTOR SET
-C     NRDESC   - NUMBER OF DESCRIPTORS IN KDESC
-C     ATEXT    - TEXT DATA FOR CCITT IA5 AND TEXT OPERATOR FIELDS
-C     KSUB     - SUBSET NUMBER
-C     KARY     - WORKING ARRAY
-C     ISECT3   -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KDATA    - ARRAY CONTAINING INTEGER SUBSETS
-C     LDESC    - LIST OF TABLE B DESCRIPTORS (DECIMAL)
-C     ANAME    - LIST OF DESCRIPTOR NAMES
-C     AUNITS   - UNITS FOR EACH DESCRIPTOR
-C     KSCALE   - BASE 10 SCALE FACTOR FOR EACH DESCRIPTOR
-C     KRFVAL   - REFERENCE VALUE FOR EACH DESCRIPTOR
-C     KRFVSW   -
-C     NEWRFV   -
-C     KWIDTH   - STANDARD BIT WIDTH TO CONTAIN EACH VALUE
-C                FOR SPECIFIC DESCRIPTOR
-C     KASSOC   -
-C     IERRTN   - ERROR RETURN FLAG
-C
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C                         TAKE EACH NON-TEXT ENTRY OF SECTION 2
 C                               ACCEPT IT
 C
@@ -2086,67 +1930,50 @@ C                                 MOVE TEXT CHARACTERS TO KDATA
  1500 CONTINUE
       RETURN
       END
+C> @brief Convert real/text input to integer
+C> @author Bill Cavanaugh @date 1993-12-03
+
+C> Construct integer subset from real and text data.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C> - J. Hoppa 1994-03-31 Added ksub to the fi8501 parameter list.
+C> - J. Hoppa 1994-04-18 Added dummy variable idum to fi8502 parameter list.
+C> - J. Hoppa 1994-04-20 Added dummy variable ll to fi8501 parameter list.
+C> - J. Hoppa 1994-04-29 Changed i to kary(11) added a kary(2) assignment so have something
+C> to pass to subroutines ** test this ** removed i and ll from call to fi8501
+C> - J. Hoppa 1994-05-18 Deleted kary(2) assignment
+C>
+C> @param[in] IUNITB unit number of device containing table b
+C> @param[in] RDATA real working array
+C> @param[in] KDESC expanded descriptor set
+C> @param[in] NRDESC number of descriptors in kdesc
+C> @param[in] ATEXT text data for ccitt ia5 and text operator fields
+C> @param[in] KSUB subset number
+C> @param[in] KARY working array
+C> @param[in] ISECT3
+C> @param[in] IUNITD
+C> @param[out] KDATA Array containing integer subsets
+C> @param[out] LDESC List of table b descriptors (decimal)
+C> @param[out] ANAME List of descriptor names
+C> @param[out] AUNITS Units for each descriptor
+C> @param[out] KSCALE Base 10 scale factor for each descriptor
+C> @param[out] KRFVAL Reference value for each descriptor
+C> @param[out] KRFVSW
+C> @param[out] KASSOC
+C> @param[out] KWIDTH Standard bit width to contain each value for specific descriptor
+C> @param[out] IERRTN Error return flag
+C> @param[out] KNUM
+C> @param[out] KLIST
+C> @param ISTEP
+C> @param KSEQ
+C> @param INDEXB
+C>
+C> @author Bill Cavanaugh @date 1993-12-03
       SUBROUTINE FI8509(ISTEP,IUNITB,RDATA,KDESC,NRDESC,ATEXT,KSUB,KARY,
      *            KDATA,LDESC,ANAME,AUNITS,KSCALE,KRFVAL,KRFVSW,ISECT3,
      *            KWIDTH,KASSOC,IUNITD,KSEQ,KNUM,KLIST,IERRTN,INDEXB)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8509      CONVERT REAL/TEXT INPUT TO INTEGER
-C   PRGMMR: CAVANAUGH             W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: CONSTRUCT INTEGER SUBSET FROM REAL AND TEXT DATA
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   94-03-31  HOPPA       ADDED KSUB TO THE FI8501 PARAMETER LIST.
-C   94-04-18  HOPPA       ADDED DUMMY VARIABLE IDUM TO FI8502 PARAMETER
-C                         LIST.
-C   94-04-20  HOPPA       ADDED DUMMY VARIABLE LL TO FI8501 PARAMETER
-C                         LIST.
-C   94-04-29  HOPPA     - CHANGED I TO KARY(11)
-C                       - ADDED A KARY(2) ASSIGNMENT SO HAVE SOMETHING
-C                         TO PASS TO SUBROUTINES ** TEST THIS **
-C                       - REMOVED I AND LL FROM CALL TO FI8501
-C   94-05-18  HOPPA     - DELETED KARY(2) ASSIGNMENT
-C
-C USAGE:    CALL FI8509(ISTEP,IUNITB,RDATA,KDESC,NRDESC,ATEXT,KSUB,KARY,
-C    *            KDATA,LDESC,ANAME,AUNITS,KSCALE,KRFVAL,KRFVSW,ISECT3,
-C    *            KWIDTH,KASSOC,IUNITD,KSEQ,KNUM,KLIST,IERRTN,INDEXB)
-C   INPUT ARGUMENT LIST:
-C     IUNITB   - UNIT NUMBER OF DEVICE CONTAINING TABLE B
-C     RDATA    - REAL WORKING ARRAY
-C     KDESC    - EXPANDED DESCRIPTOR SET
-C     NRDESC   - NUMBER OF DESCRIPTORS IN KDESC
-C     ATEXT    - TEXT DATA FOR CCITT IA5 AND TEXT OPERATOR FIELDS
-C     KSUB     - SUBSET NUMBER
-C     KARY     - WORKING ARRAY
-C     ISECT3   -
-C     IUNITD   -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KDATA    - ARRAY CONTAINING INTEGER SUBSETS
-C     LDESC    - LIST OF TABLE B DESCRIPTORS (DECIMAL)
-C     ANAME    - LIST OF DESCRIPTOR NAMES
-C     AUNITS   - UNITS FOR EACH DESCRIPTOR
-C     KSCALE   - BASE 10 SCALE FACTOR FOR EACH DESCRIPTOR
-C     KRFVAL   - REFERENCE VALUE FOR EACH DESCRIPTOR
-C     KRFVSW   -
-C     NEWRFV   -
-C     KASSOC   -
-C     KWIDTH   - STANDARD BIT WIDTH TO CONTAIN EACH VALUE
-C                FOR SPECIFIC DESCRIPTOR
-C     IERRTN   - ERROR RETURN FLAG
-C     KSEG     -
-C     KNUM     -
-C     KLIST    -
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C                         TAKE EACH NON-TEXT ENTRY OF SECTION 2
 C                               SCALE IT
 C                               ROUND IT
@@ -2352,49 +2179,30 @@ C     DO 2000 I = 1, KPOS
 C2000 CONTINUE
       RETURN
       END
+C> @brief Rebuild kdesc from jdesc
+C> @author Bill Cavanaugh @date 1993-12-03
+
+C> Construct working descriptor list from list of descriptors in section 3.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C>
+C> @param[in] ISECT3
+C> @param[in] KARY Utility - array see main routine
+C> @param[in] JIF Descriptor input form flag
+C> @param[in] JDESC List of descriptors for section 3
+C> @param[in] NEWNR Number of descriptors in jdesc
+C> @param[out] KIF Descriptor form
+C> @param[out] KDESC Working list of descriptors
+C> @param[out] NRDESC Number of descriptors in kdesc
+C> @param[out] IERRTN Error return
+C> - IERRTN = 0 Normal return
+C> - IERRTN = 5 Found delayed replication during expansion
+C>
+C> @author Bill Cavanaugh @date 1993-12-03
       SUBROUTINE FI8511(ISECT3,KARY,JIF,JDESC,NEWNR,
      *                        KIF,KDESC,NRDESC,IERRTN)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8511      REBUILD KDESC FROM JDESC
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: CONSTRUCT WORKING DESCRIPTOR LIST FROM LIST OF DESCRIPTORS
-C           IN SECTION 3.
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   YY-MM-DD  MODIFIER1   DESCRIPTION OF CHANGE
-C
-C USAGE:    CALL FI8511(ISECT3,KARY,JIF,JDESC,NEWNR,
-C    *                        KIF,KDESC,NRDESC,IERRTN)
-C   INPUT ARGUMENT LIST:
-C     IUNITD   - UNIT NUMBER OF TABLE D
-C     ISECT3   -
-C     KARY     - UTILITY - ARRAY SEE MAIN ROUTINE
-C     JIF      - DESCRIPTOR INPUT FORM FLAG
-C     JDESC    - LIST OF DESCRIPTORS FOR SECTION 3
-C     NEWNR    - NUMBER OF DESCRIPTORS IN JDESC
-C     KSEQ     - SEQUENCE DESCRIPTOR KEY
-C     KNUM     - NR OF DESCRIPTORS IN SEQUENCE
-C     KLIST    - LIST OF DESCRIPTORS IN SEQUENCE
-C
-C   OUTPUT ARGUMENT LIST:
-C     KIF      - DESCRIPTOR FORM
-C     KDESC    - WORKING LIST OF DESCRIPTORS
-C     NRDESC   - NUMBER OF DESCRIPTORS IN KDESC
-C     IERRTN   - ERROR RETURN
-C                 IERRTN = 0  NORMAL RETURN
-C                 IERRTN = 5  FOUND DELAYED REPLICATION DURING
-C                             EXPANSION
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C
       INTEGER      JDESC(3,*), NEWNR, KDESC(3,*), NRDESC
       INTEGER      KARY(*),IERRTN,KIF,JIF
@@ -2424,55 +2232,43 @@ C
  9000 CONTINUE
       RETURN
       END
+C> @brief Read in table B
+C> @author Bill Cavanaugh @date 1993-12-03
+
+C> Read in tailored set of table B descriptors.
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C> - J. Hoppa 1994-04-18 An error has been corrected to prevent later
+C> searching table b if there are only operator
+C> descriptors in the descriptor list.
+C> - J. Hoppa 1994-05-17 Changed the loop for expanding sequence
+C> descriptors from a do loop to a goto loop
+C>
+C> @param[in] IUNITB Unit where table b entries reside
+C> @param[in] KDESC Working descriptor list
+C> @param[in] NRDESC Number of descriptors in kdesc
+C> @param[in] IUNITD Unit where table d entries reside
+C> @param[out] KARY
+C> @param[out] IERRTN
+C> @param[out] LDESC Descriptors in table b (decimal values)
+C> @param[out] ANAME Array containing names of descriptors
+C> @param[out] AUNITS Array containing units of descriptors
+C> @param[out] KSCALE Scale values for each descriptor
+C> @param[out] KRFVAL Reference values for each descriptor
+C> @param[out] KWIDTH Bit width of each descriptor
+C> @param[out] KRFVSW New reference value switch
+C> @param[out] KSEQ Sequence descriptor
+C> @param[out] KNUM Number of descriptors in sequence
+C> @param[out] KLIST Sequence of descriptors
+C> @param ISECT3
+C> @param INDEXB
+C>
+C> @author Bill Cavanaugh @date 1993-12-03
       SUBROUTINE FI8512(IUNITB,ISECT3,KDESC,NRDESC,KARY,IERRTN,
      *               LDESC,ANAME,AUNITS,KSCALE,KRFVAL,KWIDTH,KRFVSW,
      *               IUNITD,KSEQ,KNUM,KLIST,INDEXB)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8512      READ IN TABLE B
-C   PRGMMR: CAVANAUGH       ORG: W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: READ IN TAILORED SET OF TABLE B DESCRIPTORS
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   YY-MM-DD  MODIFIER1   DESCRIPTION OF CHANGE
-C   94-04-18  HOPPA       AN ERROR HAS BEEN CORRECTED TO PREVENT LATER
-C                         SEARCHING TABLE B IF THERE ARE ONLY OPERATOR
-C                         DESCRIPTORS IN THE DESCRIPTOR LIST.
-C   94-05-17  HOPPA       CHANGED THE LOOP FOR EXPANDING SEQUENCE
-C                         DESCRIPTORS FROM A DO LOOP TO A GOTO LOOP
-C
-C USAGE:    CALL FI8512(IUNITB,ISECT3,KDESC,NRDESC,KARY,IERRTN,
-C    *               LDESC,ANAME,AUNITS,KSCALE,KRFVAL,KWIDTH,KRFVSW,
-C    *               IUNITD,KSEQ,KNUM,KLIST,INDEXB)
-C   INPUT ARGUMENT LIST:
-C     IUNITB   - UNIT WHERE TABLE B ENTRIES RESIDE
-C     KDESC    - WORKING DESCRIPTOR LIST
-C     NRDESC   - NUMBER OF DESCRIPTORS IN KDESC
-C     IUNITD   - UNIT WHERE TABLE D ENTRIES RESIDE
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KARY     -
-C     IERRTN   -
-C     LDESC    - DESCRIPTORS IN TABLE B (DECIMAL VALUES)
-C     ANAME    - ARRAY CONTAINING NAMES OF DESCRIPTORS
-C     AUNITS   - ARRAY CONTAINING UNITS OF DESCRIPTORS
-C     KSCALE   - SCALE VALUES FOR EACH DESCRIPTOR
-C     KRFVAL   - REFERENCE VALUES FOR EACH DESCRIPTOR
-C     WIDTH    - BIT WIDTH OF EACH DESCRIPTOR
-C     KRFVSW   - NEW REFERENCE VALUE SWITCH
-C     KSEQ     - SEQUENCE DESCRIPTOR
-C     KNUM     - NUMBER OF DESCRIPTORS IN SEQUENCE
-C     KLIST    - SEQUENCE OF DESCRIPTORS
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C
       INTEGER    KARY(*),LDESC(*),KSCALE(*),KRFVAL(*),KWIDTH(*)
       INTEGER    KDESC(3,*), NRDESC, IUNITB, IERRTN, KRFVSW(*)
@@ -2607,36 +2403,24 @@ C
  9000 CONTINUE
       RETURN
       END
+C> @brief Read in table D
+C> @author Bill Cavanaugh @date 1993-12-03
+
+C> Read in table D
+C>
+C> Program history log:
+C> - Bill Cavanaugh 1993-12-03
+C>
+C> @param[in] IUNITD Unit number of input device
+C> @param[out] KSEQ Key for sequence descriptors
+C> @param[out] KNUM Number if descriptors in list
+C> @param[out] KLIST Descriptors list
+C> @param[out] IERRTN Error return flag
+C> @param ISECT3
+C>
+C> @author Bill Cavanaugh @date 1993-12-03
       SUBROUTINE FI8513 (IUNITD,ISECT3,KSEQ,KNUM,KLIST,IERRTN)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI8513      READ IN TABLE D
-C   PRGMMR: CAVANAUGH             W/NMC42    DATE: 93-12-03
-C
-C ABSTRACT: READ IN TABLE D
-C
-C PROGRAM HISTORY LOG:
-C   93-12-03  CAVANAUGH
-C   YY-MM-DD  MODIFIER1   DESCRIPTION OF CHANGE
-C
-C USAGE:    CALL FI8513 (IUNITD,ISECT3,KSEQ,KNUM,KLIST,IERRTN)
-C   INPUT ARGUMENT LIST:
-C     IUNITD   - UNIT NUMBER OF INPUT DEVICE
-C     KARY     - WORK ARRAY
-C
-C   OUTPUT ARGUMENT LIST:
-C     KSEQ     - KEY FOR SEQUENCE DESCRIPTORS
-C     KNUM     - NUMBER IF DESCRIPTORS IN LIST
-C     KLIST    - DESCRIPTORS LIST
-C     IERRTN   - ERROR RETURN FLAG
-C
-C REMARKS:
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C
-C$$$
+
 C
       INTEGER      IUNITD, ISECT3(*)
       INTEGER      KSEQ(*),KNUM(*),KLIST(300,*)

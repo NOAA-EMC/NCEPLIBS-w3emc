@@ -1,40 +1,32 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FI82        CONVERT TO SECOND DIFF ARRAY
-C>   PRGMMR: CAVANAUGH        ORG: NMC421      DATE:93-08-18
+C> @brief Convert to second diff array
+C> @author Bill Cavanaugh @date 1993-07-14
+
+C> Accept an input array, convert to array of second
+C> differences.  return the original first value and the first
+C> first-difference as separate values. align data in
+C> boustrephedonic style, (alternate row reversal).
 C>
-C> ABSTRACT: ACCEPT AN INPUT ARRAY, CONVERT TO ARRAY OF SECOND
-C>   DIFFERENCES.  RETURN THE ORIGINAL FIRST VALUE AND THE FIRST
-C>   FIRST-DIFFERENCE AS SEPARATE VALUES. ALIGN DATA IN
-C>   BOUSTREPHEDONIC STYLE, (ALTERNATE ROW REVERSAL).
+C> Program history log:
+C> - Bill Cavanaugh 1993-07-14
+C> - Bill Cavanaugh 1994-01-27 Added reversal of even numbered rows
+C> (boustrophedonic processing)
+C> - Bill Cavanaugh 1994-03-02 Corrected improper ordering of even
+C> numbered rows
+C> - Ebisuzaki 1999-12-06 Linux port
 C>
-C> PROGRAM HISTORY LOG:
-C>   93-07-14  CAVANAUGH
-C>   94-01-27  CAVANAUGH   ADDED REVERSAL OF EVEN NUMBERED ROWS
-C>                         (BOUSTROPHEDONIC PROCESSING)
-C>   94-03-02  CAVANAUGH   CORRECTED IMPROPER ORDERING OF EVEN
-C>                         NUMBERED ROWS
-C>   99-12-06  EBISUZAKI   LINUX PORT
+C> @param[inout] IFLD
+C> - [in] Integer input array
+C> - [out] Second differenced field
+C> @param[in] NPTS Number of points in array
+C> @param[in] IGDS
+C> - (5) Number of rows in array
+C> - (4) Number of columns in array
+C> @param[in] PDS (8) Flag indicating presence of gds section
+C> @param[out] FVAL1 Floating point original first value
+C> @param[out] FDIFF1 Floating point first first-difference
 C>
-C> USAGE:    CALL W3FI82 (IFLD,FVAL1,FDIFF1,NPTS,PDS,IGDS)
-C>   INPUT ARGUMENT LIST:
-C>     IFLD     - INTEGER INPUT ARRAY
-C>     NPTS     - NUMBER OF POINTS IN ARRAY
-C>     IGDS(5)  - NUMBER OF ROWS IN ARRAY
-C>     IGDS(4)  - NUMBER OF COLUMNS IN ARRAY
-C>     PDS(8)   - FLAG INDICATING PRESENCE OF GDS SECTION
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     IFLD     - SECOND DIFFERENCED FIELD
-C>     FVAL1    - FLOATING POINT ORIGINAL FIRST VALUE
-C>     FDIFF1   -     "      "   FIRST FIRST-DIFFERENCE
-C>
-C> REMARKS: LIST CAVEATS, OTHER HELPFUL HINTS OR INFORMATION
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM370 VS FORTRAN 77, CRAY CFT77 FORTRAN
-C>   MACHINE:  HDS, CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author Bill Cavanaugh @date 1993-07-14
       SUBROUTINE W3FI82 (IFLD,FVAL1,FDIFF1,NPTS,PDS,IGDS)
 C
       REAL        FVAL1,FDIFF1
