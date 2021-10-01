@@ -1,35 +1,25 @@
 C> @file
-C SUBR: W3FM08   - NINE POINT SMOOTHER/DESMOOTHER
-C>   AUTHOR: HOWCROFT, J.       ORG: W342          DATE: 71-02-01
+C> @brief Nine point smoother/desmoother.
+C> @author J. Howcroft @date 1971-02-01
+
+C> Nine point smoother/desmoother. Smoother pass uses an
+C> equivalent linear smoother with stencil (.25 .5 .25) and the
+C> desmoother uses stencil (-.25 1.5 -.25). Two grid interval waves
+C> are annihilated, four grid interval waves have a .75 response.
 C>
-C> ABSTRACT: NINE POINT SMOOTHER/DESMOOTHER. SMOOTHER PASS USES AN
-C>   EQUIVALENT LINEAR SMOOTHER WITH STENCIL (.25 .5 .25) AND THE
-C>   DESMOOTHER USES STENCIL (-.25 1.5 -.25). TWO GRID INTERVAL WAVES
-C>   ARE ANNIHILATED, FOUR GRID INTERVAL WAVES HAVE A .75 RESPONSE.
+C> Program history log:
+C> - J. Howcroft 1971-02-01
+C> - Ralph Jones 1984-07-01 Change to ibm vs fortran.
+C> - Ralph Jones 1994-07-27 Change to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   71-02-01 J.HOWCROFT
-C>   84-07-01  R.E.JONES   CHANGE TO IBM VS FORTRAN
-C>   94-07-27  R.E.JONES   CHANGE TO CRAY CFT77 FORTRAN
+C> @param[inout] A
+C> - [in] Real size (li,lj) array to hold field to be smoothed.
+C> - [out] Array holding smoothed field.
+C> @param[in] Z - Real size (li,lj) work area.
+C> @param[in] LI - Integer number of columns.
+C> @param[in] LJ - Integer number of rows.
 C>
-C> USAGE: CALL W3FM08 (A,Z,LI,LJ)
-C>
-C>   INPUT:
-C>     ' A' - REAL   SIZE (LI,LJ) ARRAY TO HOLD FIELD TO BE SMOOTHED
-C>     ' Z' - REAL   SIZE (LI,LJ) WORK AREA
-C>     'LI' - INTEGER   NUMBER OF COLUMNS
-C>     'LJ' - INTEGER   NUMBER OF ROWS
-C>   OUTPUT:
-C>     ' A' - ARRAY HOLDING SMOOTHED FIELD
-C>
-C>   EXIT STATES: NONE
-C>
-C>   EXTERNAL REFERENCES: NONE
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, Y-MP8/864, Y-MP EL92/256
-C>
+C> @author J. Howcroft @date 1971-02-01
       SUBROUTINE W3FM08 (A,Z,LI,LJ)
 C
       REAL     A(LI,LJ)
