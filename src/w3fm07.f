@@ -1,38 +1,25 @@
 C> @file
-C
-C> SUBR: W3FM07   - NINE-POINT SMOOTHER FOR RECTANGULAR GRIDS
-C>   AUTHOR: CHASE, P.          ORG: W345          DATE:    APR 75
+C> @brief Nine-point smoother for rectangular grids.
+C> @author P. Chase @date 1975-04-01
+
+C> Smooths data on a rectangular grid using a nine-point
+C> smoothing operator.
 C>
-C> ABSTRACT: SMOOTHS DATA ON A RECTANGULAR GRID USING A NINE-POINT
-C>   SMOOTHING OPERATOR.
+C> Program history log:
+C> P. Chase 1975-04-01
+C> Ralph Jones 1984-07-01 Change to ibm vs fortran
+C> Ralph Jones 1991-04-24 Change to cray cft77 fortran
 C>
-C> PROGRAM HISTORY LOG:
-C>   75-04-01  P.CHASE
-C>   84-07-01  R.E.JONES   CHANGE TO IBM VS FORTRAN
-C>   91-04-24  R.E.JONES   CHANGE TO CRAY CFT77 FORTRAN
+C> @param[in] FIN - Real size(ncol*nrow) array of data to be smoothed
+C> @param[in] CWORK - Real size(2*ncol*(nrow+2)) work array
+C> @param[in] GAMMA - Complex smoothing parameter. The imaginary part must
+C> be positive.
+C> @param[in] NCOL - Integer number of columns in the grid
+C> @param[in] NROW - Integer number of rows in the grid
+C> @param[out] FOUT - Real size(ncol*nrow) array of smoothed data. May
+C> be the same array as 'fin' or overlap it in any fashion.
 C>
-C> USAGE: CALL W3FM07 (FIN, FOUT, CWORK, GAMMA, NCOL, NROW)
-C>
-C>   INPUT:
-C>     '   FIN' - REAL   SIZE(NCOL*NROW) ARRAY OF DATA TO BE SMOOTHED
-C>     ' CWORK' - REAL   SIZE(2*NCOL*(NROW+2)) WORK ARRAY
-C>     ' GAMMA' - COMPLEX SMOOTHING PARAMETER. THE IMAGINARY PART MUST
-C>                BE POSITIVE.
-C>     '  NCOL' - INTEGER   NUMBER OF COLUMNS IN THE GRID
-C>     '  NROW' - INTEGER   NUMBER OF ROWS IN THE GRID
-C>   OUTPUT:
-C>     '  FOUT' - REAL   SIZE(NCOL*NROW) ARRAY OF SMOOTHED DATA. MAY
-C>                BE THE SAME ARRAY AS 'FIN' OR OVERLAP IT IN ANY
-C>                FASHION.
-C>
-C>   EXIT STATES: NONE
-C>
-C>   EXTERNAL REFERENCES: NONE
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author P. Chase @date 1975-04-01
       SUBROUTINE W3FM07(FIN,FOUT,CWORK,GAMMA,NCOL,NROW)
 C
       REAL    FIN(NCOL,NROW)

@@ -1,52 +1,27 @@
 C> @file
-C
-C> SUBPROGRAM: W3FP06         NMC TITLE SUBROUTINE
-C>   AUTHOR: JONES,R.E.       ORG: W342       DATE: 86-12-03
+C> @brief NMC title subroutine.
+C> @author Ralph Jones @date 1988-11-28
+
+C> Provides a title for data fields formulated according to
+C> nmc o.n. 84. the extracted information is converted into up to
+C> 81 words and stored at a user provided location.
 C>
-C> ABSTRACT: PROVIDES A TITLE FOR DATA FIELDS FORMULATED ACCORDING TO
-C>   NMC O.N. 84. THE EXTRACTED INFORMATION IS CONVERTED INTO UP TO
-C>   81 WORDS AND STORED AT A USER PROVIDED LOCATION.
+C> Program history log:
+C> - Ralph Jones 1988-11-28
+C> - Ralph Jones 1990-02-12 Convert to cray cft77 fortran
+C> - Ralph Jones 1991-04-26 Add q type 23, 136, 137, 71, 159, 75, 118,
+C> 119, 24 to tables, changes for big records.
+C> - Ralph Jones 1993-02-23 Add q type 157 & 158 (core & tke) to tables
 C>
-C> PROGRAM HISTORY LOG:
-C>   88-11-28  R.E.JONES
-C>   90-02-12  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
-C>   91-04-26  R.E.JONES   ADD Q TYPE 23, 136, 137, 71, 159, 75, 118,
-C>                         119, 24 TO TABLES, CHANGES FOR BIG RECORDS.
-C>   93-02-23  R.E.JONES   ADD Q TYPE 157 & 158 (CORE & TKE) TO TABLES
+C> @param[in] N Integer number of lines of output desired
+C> - = 1  First 88 char. the abbreviated title (line 1 starts at arg2(1))
+C> - = 2  First 216 char. decimal values of the parameters
+C> - = 3  All 324 char., hexidecimal dump of the 12 word field label (line 3 char. 221)
+C> @param ID, KTITLE
 C>
-C> USAGE: CALL W3FP06 (ARG1, ARG2, N)
+C> @note See NMC O.N. 84 for data field abbreviations.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     ARG1   ARG LIST  12 WORD FIELD LABEL DESCRIBING THE DATA (6
-C>                      INTEGER WORDS) OFFICE NOTE 84
-C>     N      ARG LIST  INTEGER NUMBER OF LINES OF OUTPUT DESIRED
-C>                      = 1  FIRST 88 CHAR. THE ABBREVIATED TITLE
-C>                           (LINE 1 STARTS AT ARG2(1))
-C>                      = 2  FIRST 216 CHAR. DECIMAL VALUES OF THE
-C>                           PARAMETERS
-C>                      = 3  ALL 324 CHAR., HEXIDECIMAL DUMP OF THE 12
-C>                           WORD FIELD LABEL (LINE 3 CHAR. 221
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     ARG2   ARG LIST  CHARACTER*324 SIZE ARRAY TO CONTAIN
-C>                      THE TITLE IN ACSII
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     LINE01 LINE02 LINE03 VALUE1                             UNIQUE
-C>     INTERNAL (WRITE) AND SHIFT                              SYSTEM
-C>
-C>   REMARKS: SEE NMC O.N. 84 FOR DATA FIELD ABBREVIATIONS
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM XL FORTRAN
-C>   MACHINE:  IBM SP
-C>
+C> @author Ralph Jones @date 1988-11-28
       SUBROUTINE W3FP06(ID,KTITLE,N)
 C
       INTEGER(8)         ID(6)
@@ -76,44 +51,23 @@ C
         CALL LINE03(ID,KTITLE)
         RETURN
       END
+C> @brief Creates the first line of title.
+C> @author Ralph Jones @date 1988-09-02
+
+C> Creates the fist line of the title from the id words.
+C> call by w3fp06() to make 1st line of title. Words 1 to 22.
+C>
+C> Program history log:
+C> - Ralph Jones 1988-09-02
+C> - Ralph Jones 1993-02-23 Add q type 157 & 158 (core & tke) to tables.
+C>
+C> @param[in] ID Id words (6 integer words) office note 84.
+C> @param[in] MASK Mask for unpacking id words (8 integer words).
+C> @param[out] KTITLE Character *324 array
+C>
+C> @author Ralph Jones @date 1988-09-02
        SUBROUTINE LINE01(ID,MASK,KTITLE)
-C$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-C
-C SUBPROGRAM: LINE01         CREATES THE FIRST LINE OF TITLE
-C   AUTHOR: JONES,R.E.       ORG: W342       DATE: 86-12-03
-C
-C ABSTRACT: CREATES THE FIST LINE OF THE TITLE FROM THE ID WORDS.
-C   CALL BY W3FP06 TO MAKE 1ST LINE OF TITLE. WORDS 1 TO 22.
-C
-C PROGRAM HISTORY LOG:
-C   88-09-02  R.E.JONES
-C   93-02-23  R.E.JONES   ADD Q TYPE 157 & 158 (CORE & TKE) TO TABLES
-C
-C USAGE:  CALL LINE01(ID,MASK,KTITLE)
-C
-C   INPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     ID     ARG LIST  ID WORDS (6 INTEGER WORDS) OFFICE NOTE 84
-C     MASK   ARG LIST  MASK FOR UNPACKING ID WORDS (8 INTEGER WORDS)
-C
-C   OUTPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     KTITLE ARG LIST  CHARACTER *324 ARRAY
-C            TAPE6     ERROR MESSAGES
-C
-C   SUBPROGRAMS CALLED:
-C     NAMES                                                   LIBRARY
-C     ------------------------------------------------------- --------
-C     AND SHIFT                                               SYSLIB
-C     VALUE1 CLIMO SETCL                                      UNIQUE
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM XL FORTRAN
-C   MACHINE:  IBM SP
-C
-C$$$
+
 C
 C     CREATES THE FIRST 22 WORDS OF TITLER
 C
@@ -773,43 +727,23 @@ C
         WRITE (KTITLE(1:88),230) Q
       RETURN
       END
+C> @brief Creates value1 of surface from ids.
+C> @author Ralph Jones @date 1988-11-28
+
+C> Creates the numerical value for the surface
+C> to be built into the first line of the title.
+C>
+C> Program history log:
+C> - Ralph Jones 1988-11-28
+C> - Ralph Jones 1989-11-01 Convert to cray cft77 fortran.
+C>
+C> @param[in] S Integer number of surface.
+C> @param[in] C,E  Numerical value of the surface (SURFACE = S * 10 ** E).
+C> @param[out] NUM 7 character value of the surface for the title.
+C>
+C> @author Ralph Jones @date 1988-11-28
        SUBROUTINE VALUE1(S,C,E,NUM)
-C$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-C
-C SUBPROGRAM: VALUE1        CREATES VALUE1 OF SURFACE FROM IDS
-C   AUTHOR: JONES,R.E.       ORG: W342       DATE: 86-12-03
-C
-C ABSTRACT: CREATES THE NUMERICAL VALUE FOR THE SURFACE
-C   TO BE BUILT INTO THE FIRST LINE OF THE TITLE.
-C
-C PROGRAM HISTORY LOG:
-C   88-11-28  R.E.JONES
-C   89-11-01  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
-C
-C USAGE:  CALL VALUE1(S,C,E,NUM)
-C
-C   INPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     S      ARG LIST  INTEGER NUMBER OF SURFACE
-C     C,E              NUMERICAL VALUE OF THE SURFACE
-C                      SURFACE = S * 10 ** E
-C
-C   OUTPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     NUM    ARG LIST  7 CHARACTER VALUE OF THE SURFACE FOR THE TITLE
-C
-C   SUBPROGRAMS CALLED:
-C     NAMES                                                   LIBRARY
-C     ------------------------------------------------------- --------
-C     INTERNAL (WRITE)                                        SYSLIB
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
+
 C
       INTEGER        C
       INTEGER        E
@@ -854,44 +788,24 @@ C
 C
         RETURN
       END
+C> @brief Creates the second line of title.
+C> @author Ralph Jones @date 1988-11-28
+
+C> Creates the second line of the title from the id words.
+C> called by w3fp06. words 23 to 54.
+C>
+C> Program history log:
+C> - Ralph Jones 1988-11-28
+C> - Ralph Jones 1989-11-01 Convert to cray cft77 fortran.
+C> - Ralph Jones 1991-03-01 Changes for big records.
+C>
+C> @param[in] ID Id words (6 integer words) office note 84
+C> @param[in] MASK Mask for unpacking id words (8 words)
+C> @param[out] KTITLE Title character*324
+C>
+C> @author Ralph Jones @date 1988-11-28
        SUBROUTINE LINE02(ID,MASK,KTITLE)
-C$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-C
-C SUBPROGRAM: LINE02         CREATES THE SECOND LINE OF TITLE
-C   AUTHOR: JONES,R.E.       ORG: W342       DATE: 86-12-03
-C
-C ABSTRACT: CREATES THE SECOND LINE OF THE TITLE FROM THE ID WORDS.
-C   CALLED BY W3FP06. WORDS 23 TO 54.
-C
-C PROGRAM HISTORY LOG:
-C   88-11-28  R.E.JONES
-C   89-11-01  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
-C   91-03-01  R.E.JONES   CHANGES FOR BIG RECORDS
-C
-C USAGE:  CALL LINE02(ID,MASK,KTITLE)
-C
-C   INPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     ID     ARG LIST  ID WORDS (6 INTEGER WORDS) OFFICE NOTE 84
-C     MASK   ARG LIST  MASK FOR UNPACKING ID WORDS (8 WORDS)
-C
-C   OUTPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     KTITLE ARG LIST  TITLE CHARACTER*324
-C
-C   SUBPROGRAMS CALLED:
-C     NAMES                                                   LIBRARY
-C     ------------------------------------------------------- --------
-C     INTERNAL (WRITE) SHIFT  AND                             SYSLIB
-C     q9ie32                                                  W3LIB
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM XL FORTRAN
-C   MACHINE:  IBM SP
-C
-C$$$
+
 C
       INTEGER(8)          ID(6)
       INTEGER(8)          IKEEP(17)
@@ -964,42 +878,22 @@ C
       WRITE (KTITLE(89:216),100) (IKEEP(I),I=1,15) , A , IKEEP(17)
       RETURN
       END
+C> @brief Creates the third line of title.
+C> @author Ralph Jones @date 1988-11-28
+
+C> Creates the third line of the title from the id words.
+C> called by w3fp06 to create words 55 to 81 of the title.
+C>
+C> Program history log:
+C> - Ralph Jones 1988-11-28
+C> - Ralph Jones 1990-02-03 Convert to cray cft77 fortran.
+C>
+C> @param[in] ID ID words (6 integer) office note 84.
+C> @param[out] KTITLE Character*324 array.
+C>
+C> @author Ralph Jones @date 1988-11-28
        SUBROUTINE LINE03(ID,KTITLE)
-C$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-C
-C SUBPROGRAM: LINE03         CREATES THE THIRD LINE OF TITLE
-C   AUTHOR: JONES,R.E        ORG: W342       DATE: 86-12-03
-C
-C ABSTRACT: CREATES THE THIRD LINE OF THE TITLE FROM THE ID WORDS.
-C   CALLED BY W3FP06 TO CREATE WORDS 55 TO 81 OF THE TITLE.
-C
-C PROGRAM HISTORY LOG:
-C   88-11-28  R.E.JONES
-C   90-02-03  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
-C
-C USAGE:  CALL LINE03(ID,KTITLE)
-C
-C   INPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     ID     ARG LIST  ID WORDS (6 INTEGER)  OFFICE NOTE 84
-C
-C   OUTPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     KTITLE ARG LIST  CHARACTER*324 ARRAY
-C
-C   SUBPROGRAMS CALLED:
-C     NAMES                                                   LIBRARY
-C     ------------------------------------------------------- --------
-C     INTERNAL (WRITE)                                        SYSLIB
-C
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
+
 C
       INTEGER(8)         ID(6)
       INTEGER(8)      MASK32
@@ -1021,42 +915,31 @@ C
       WRITE (KTITLE(217:324),100) (ID84(I),I=1,12)
       RETURN
       END
+C> @brief Sets time-averaged titles.
+C> @author Ralph Jones @date 1988-11-28
+
+C> Fills in the first thirteen characters in the title
+C> to make the title a time-averaged title.
+C>
+C> Program history log:
+C> - Ralph Jones 1988-11-28
+C> - Ralph Jones 1989-11-01 Convert to cray cft77 fortran.
+C>
+C> @param[in] CF1 Forecast period length.
+C> @param[in] CF2 Length of the average.
+C> @param[inout] UNIT
+C> - [in] Originally set to ' hrs'.
+C> - [out] Set to ' dys' if necessary.
+C> @param[inout] FOR
+C> - [in] Originally set to ' for '.
+C> - [out] Set to ' ctr '.
+C> @param[inout] AFTBEF
+C> - [in] Originally set to ' after '.
+C> - [out] Set to ' befor ' if necessary.
+C>
+C> @author Ralph Jones @date 1988-11-28
        SUBROUTINE CLIMO(CF1,CF2,UNIT,FOR,AFTBEF)
-C$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-C
-C SUBPROGRAM: CLIMO          SETS TIME-AVERAGED TITLES
-C   AUTHOR: JONES,R.E.       ORG: W342       DATE: 86-12-03
-C
-C  ABSTRACT: FILLS IN THE FIRST THIRTEEN CHARACTERS IN THE TITLE
-C      TO MAKE THE TITLE A TIME-AVERAGED TITLE.
-C
-C PROGRAM HISTORY LOG:
-C   88-11-28  R.E.JONES
-C   89-11-01  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
-C
-C  USAGE:  CALL CLIMO(CF1,CF2,UNIT,FOR)
-C
-C   INPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     CF1    ARG LIST  FORECAST PERIOD LENGTH
-C     CF2    ARG LIST  LENGTH OF THE AVERAGE
-C     UNIT   ARG LIST  ORIGINALLY SET TO ' HRS'
-C     FOR    ARG LIST  ORIGINALLY SET TO ' FOR '
-C     AFTBEF ARG LIST  ORIGINALLY SET TO ' AFTER '
-C
-C   OUTPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     UNIT   ARG LIST  SET TO ' DYS' IF NECESSARY
-C     FOR    ARG LIST  SET TO ' CTR '
-C     AFTBEF ARG LIST  SET TO ' BEFOR ' IF NECESSARY
-C
-C  ATTRIBUTES:
-C    LANGUAGE: CRAY CFT77 FORTRAN
-C    MACHINE:  CRAY Y-MP8/832
-C
-C$$$
+
 C
         REAL         CF1
         REAL         CF2
@@ -1109,38 +992,25 @@ C
  100   CONTINUE
        RETURN
        END
+C> @brief Encodes time-averaged title
+C> @author Ralph Jones @date 1988-11-28
+
+C> Encodes the first thirteen characters in the title
+C> to make the title a time-averaged title.
+C>
+C> Program history log:
+C> - Ralph Jones 1988-11-28
+C> - Ralph Jones 1989-11-01 Convert to cray cft77 fortran.
+C>
+C> @param[in] CF2 Length of the forecast period
+C> @param[in] UNIT Units for cf2
+C> @param[inout] KTITLE
+C> - [in] Title to be modified
+C> - [out] Title with the time-averaged included
+C>
+C> @author Ralph Jones @date 1988-11-28
        SUBROUTINE SETCL(CF2,UNIT,KTITLE)
-C$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-C
-C SUBPROGRAM: SETCL          ENCODES TIME-AVERAGED TITLE
-C   AUTHOR: JONES,R.E.       ORG: W342       DATE: 86-12-03
-C
-C  ABSTRACT: ENCODES THE FIRST THIRTEEN CHARACTERS IN THE TITLE
-C      TO MAKE THE TITLE A TIME-AVERAGED TITLE.
-C
-C PROGRAM HISTORY LOG:
-C   88-11-28  R.E.JONES
-C   89-11-01  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
-C
-C USAGE:  CALL CLIMO(F2,UNIT,KTITLE)
-C
-C   INPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     CF2    ARG LIST  LENGTH OF THE FORECAST PERIOD
-C     UNIT   ARG LIST  UNITS FOR CF2
-C     KTITLE ARG LIST  TITLE TO BE MODIFIED
-C
-C   OUTPUT VARIABLES:
-C     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C     ------ --------- -----------------------------------------------
-C     KTITLE ARG LIST  TITLE WITH THE TIME-AVERAGED INCLUDED
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
+
 C
         CHARACTER*324 KTITLE
         CHARACTER*13  BLANK

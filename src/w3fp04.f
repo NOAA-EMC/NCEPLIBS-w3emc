@@ -1,74 +1,54 @@
 C> @file
-C
-C> SUBPROGRAM: W3FP04      PRINT ARRAY OF DATA POINTS AT LAT/LON POINTS
-C>   AUTHOR: HORODECK, J.     ORG: W324       DATE: 85-07-31
-C>
-C> ABSTRACT: GIVEN AN ARRAY OF METEOROLOGICAL DATA AND CORRESPONDING
-C>   LATITUDE/LONGITUDE POSITION FOR EACH DATA POINT, THESE DATA
-C>   VALUES ARE PRINTED AT THEIR APPROXIMATE LATITUDE/LONGITUDE
-C>   POSITIONS ON A POLAR STEREOGRAPHIC PROJECTION.
+C> @brief Print array of data points at lat/lon points.
+C> @author J. Horodeck @date 1980-01-15
+
+C> Given an array of meteorological data and corresponding
+C> latitude/longitude position for each data point, these data
+C> values are printed at their approximate latitude/longitude
+C> positions on a polar stereographic projection.
 C>
 C> PROGRAM HISTORY LOG:
-C>   80-01-15  J. HORODECK
-C>   85-07-31  R.E.JONES   CHANGE TO CDC FORTRAN 200
-C>   90-08-15  R.E.JONES   CHANGE TO CRAY CFT77 FORTRAN
+C> - J. Horodeck 1980-01-15
+C> - Ralph Jones 1985-07-31 Change to cdc fortran 200
+C> - Ralph Jones 1990-08-15 Change to cray cft77 fortran
 C>
-C> USAGE: CALL W3FP04(IFLD,ALAT,ALON,TITLE,IDIM,CMIL,CMIR,CMJB,CMJT,
-C>                    INUM,XFAC,IERR)
+C> @param[in] IFLD Real or integer fullword array of data points.
+C> @param[in] ALAT Real array of latitude positions (>0 for nh,
+C> <0 for sh) for the data to be plotted.
+C> @param[in] ALON Real array of longitudes (west of greenwich)
+C> @param[in] TITLE Integer size 10 alphanumeric array of
+C> characters for title to be written on printout.
+C> @param[in] IDIM Integer number of data values to plot (size of
+C> arrays ifld, alat and alon).
+C> @param[in] CMIL Real left side of grid - minimum coarse mesh
+C> i coordinate (minimum value of 1.0).
+C> @param[in] CMIR Real right side of grid - maximum coarse mesh
+C> i coordinate (maximum value of 65.0).
+C> @param[in] CMJB Real bottom of grid - minimum coarse mesh
+C> j coordinate (minimum value of 1.0).
+C> @param[in] CMJT Real top of grid - maximum coarse mesh j
+C> coordinate (maximum value of 65.0).
+C> @param[in] INUM Integer three digit number for the following:
+C> - Hundreds digit = type of data
+C>  - 1 = Fixed point
+C>  - 2 = Floating point
+C>  - 3 = Alphanumeric
+C> - Tens digit = hemispheric reference
+C>  - 0 = Northern hemisphere
+C>  - 1 = Southern hemisphere
+C> - Units digit = number of characters to plot
+C> - Minimum = 1 character
+C> - Maximum = 4 characters
+C> @param[in] XFAC Real map scale factor (desired map scale = xfac
+C> * 1:30,000,000 (standard nmc 65x65 grid scale))
+C> @param[out] IERR Integer return code.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     IFLD   ARG LIST  REAL OR INTEGER FULLWORD ARRAY OF DATA POINTS
-C>     ALAT   ARG LIST  REAL ARRAY OF LATITUDE POSITIONS (>0 FOR NH,
-C>                      <0 FOR SH) FOR THE DATA TO BE PLOTTED
-C>     ALON   ARG LIST  REAL ARRAY OF LONGITUDES (WEST OF GREENWICH)
-C>     TITLE  ARG LIST  INTEGER SIZE 10 ALPHANUMERIC ARRAY OF
-C>                      CHARACTERS FOR TITLE TO BE WRITTEN ON PRINTOUT
-C>     IDIM   ARG LIST  INTEGER NUMBER OF DATA VALUES TO PLOT (SIZE OF
-C>                      ARRAYS IFLD, ALAT AND ALON)
-C>     CMIL   ARG LIST  REAL LEFT SIDE OF GRID - MINIMUM COARSE MESH
-C>                      I COORDINATE (MINIMUM VALUE OF 1.0)
-C>     CMIR   ARG LIST  REAL RIGHT SIDE OF GRID - MAXIMUM COARSE MESH
-C>                      I COORDINATE (MAXIMUM VALUE OF 65.0)
-C>     CMJB   ARG LIST  REAL BOTTOM OF GRID - MINIMUM COARSE MESH
-C>                      J COORDINATE (MINIMUM VALUE OF 1.0)
-C>     CMJT   ARG LIST  REAL TOP OF GRID - MAXIMUM COARSE MESH J
-C>                      COORDINATE (MAXIMUM VALUE OF 65.0)
-C>     INUM   ARG LIST  INTEGER THREE DIGIT NUMBER FOR THE FOLLOWING:
-C>                      HUNDREDS DIGIT = TYPE OF DATA
-C>                        1 = FIXED POINT
-C>                        2 = FLOATING POINT
-C>                        3 = ALPHANUMERIC
-C>                      TENS DIGIT = HEMISPHERIC REFERENCE
-C>                        0 = NORTHERN HEMISPHERE
-C>                        1 = SOUTHERN HEMISPHERE
-C>                      UNITS DIGIT = NUMBER OF CHARACTERS TO PLOT
-C>                      MINIMUM = 1 CHARACTER
-C>                      MAXIMUM = 4 CHARACTERS
-C>     XFAC   ARG LIST  REAL MAP SCALE FACTOR (DESIRED MAP SCALE = XFAC
-C>                      * 1:30,000,000 (STANDARD NMC 65X65 GRID SCALE))
+C> @note Because this code could produce considerable output
+C> the subset of the nmc 65x65 grid which can be printed is a
+C> function of the map scale factor, e.g. for xfac=5 the maximum
+C> range of i and j is 27.0, for xfac=2 the range is 64.0.
 C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>            TAPE6     PRINTED MAP WHEN EXECUTION IS SUCCESSFUL
-C>     IERR   ARG LIST  INTEGER RETURN CODE
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     W3FB04 W3FB05 W3AI15                                    W3LIB
-C>
-C>   RESTRICTIONS: BECAUSE THIS CODE COULD PRODUCE CONSIDERABLE OUTPUT
-C>     THE SUBSET OF THE NMC 65X65 GRID WHICH CAN BE PRINTED IS A
-C>     FUNCTION OF THE MAP SCALE FACTOR, E.G. FOR XFAC=5 THE MAXIMUM
-C>     RANGE OF I AND J IS 27.0, FOR XFAC=2 THE RANGE IS 64.0.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author J. Horodeck @date 1980-01-15
       SUBROUTINE W3FP04(IFLD,ALAT,ALON,TITLE,IDIM,CMIL,CMIR,
      &                   CMJB,CMJT,INUM,XFAC,IERR)
 C

@@ -1,58 +1,39 @@
 C> @file
-C
-C> SUBPROGRAM: W3FP05         PRINTER CONTOUR SUBROUTINE
-C>   AUTHOR: R.E.JONES        ORG: W342       DATE: 85-07-31
+C> @brief Printer contour subroutine.
+C> @author Ralph Jones @date 1989-10-13
+
+C> Prints a two-dimensional grid of any shape, with
+C> contouring, if desired. grid values are scaled according to
+C> to constants specified by the programer, rounded, and printed
+C> as 4,3, or 2 digit integers with sign, the sign marking the
+C> grid position of the printed number. if contouring is requested,
+C> bessel's interpolation formula is used to optain the contour lines.
+C> contours are indicated by alphabetic characters ranging from a to
+C> h or numeric characters from 0 to 9. contour origin and interval
+C> are specified by the programmer in terms of printed values.
 C>
-C> ABSTRACT:  PRINTS A TWO-DIMENSIONAL GRID OF ANY SHAPE, WITH
-C>   CONTOURING, IF DESIRED. GRID VALUES ARE SCALED ACCORDING TO
-C>   TO CONSTANTS SPECIFIED BY THE PROGRAMER, ROUNDED, AND PRINTED
-C>   AS 4,3, OR 2 DIGIT INTEGERS WITH SIGN, THE SIGN MARKING THE
-C>   GRID POSITION OF THE PRINTED NUMBER. IF CONTOURING IS REQUESTED,
-C>   BESSEL'S INTERPOLATION FORMULA IS USED TO OPTAIN THE CONTOUR LINES.
-C>   CONTOURS ARE INDICATED BY ALPHABETIC CHARACTERS RANGING FROM A TO
-C>   H OR NUMERIC CHARACTERS FROM 0 TO 9. CONTOUR ORIGIN AND INTERVAL
-C>   ARE SPECIFIED BY THE PROGRAMMER IN TERMS OF PRINTED VALUES.
+C> Program history log:
+C> - Ralph Jones 1989-10-13
+C> - Ralph Jones 1992-05-02 Add save
 C>
-C> PROGRAM HISTORY LOG:
-C>   89-10-13  R.E.JONES
-C>   92-05-02  R.E.JONES   ADD SAVE
+C> @param[in] RDATA  Real array of grid data to be printed.
+C> @param[in] KTBL Integer array with shape of array.
+C> @param[in] CNST Real array of four elements, used in
+C> scaling for printing and contouring.
+C> @param[in] TITLE  Is a array of 132 characters or less of
+C> hollerith data, 1st char. must be blank.
+C> printed at bottom of the map.
+C> @param[in] KRECT 1 if grid is rectangular, 0 otherwise.
+C> @param[in] KCONTR 1 for contouring , 0 otherwise.
+C> @param[in] LINEV 0 is for 6 lines per vertical inch,
+C> non-zero 8 lines per vertical inch.
+C> @param[in] IWIDTH Number of characters in print line,
+C> 132 is standard printer.
 C>
-C> USAGE: CALL W3FP05 (RDATA,KTBL,CNST,TITLE,KRECT,KCONTR,LINEV,IWIDTH)
+C> @note Normal subroutine return, unless number of rows is greater than 200,
+C> prints error message and exits.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     RDATA  ARG LIST  REAL ARRAY OF GRID DATA TO BE PRINTED.
-C>     KTBL   ARG LIST  INTEGER ARRAY WITH SHAPE OF ARRAY.
-C>     CNST   ARG LIST  REAL ARRAY OF FOUR ELEMENTS, USED IN
-C>                      SCALING FOR PRINTING AND CONTOURING.
-C>     TITLE  ARG LIST  IS A ARRAY OF 132 CHARACTERS OR LESS OF
-C>                      HOLLERITH DATA, 1ST CHAR. MUST BE BLANK.
-C>                      PRINTED AT BOTTOM OF THE MAP.
-C>     KRECT  ARG LIST  1 IF GRID IS RECTANGULAR, 0 OTHERWISE.
-C>     KCONTR ARG LIST  1 FOR CONTOURING , 0 OTHERWISE.
-C>     LINEV  ARG LIST  0 IS FOR 6 LINES PER VERTICAL INCH,
-C>                      NON-ZERO 8 LINES PER VERTICAL INCH.
-C>     IWIDTH ARG LIST  NUMBER OF CHARACTERS IN PRINT LINE,
-C>                      132 IS STANDARD PRINTER.
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>            TAPE6     MAPS ON STANDARD FORTRAN PRINT FILE
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     ABS IABS MIN MOD                                       SYSTEM
-C>
-C>   REMARKS: NORMAL SUBROUTINE RETURN, UNLESS NUMBER OF ROWS
-C>            IS GREATER THAN 200, PRINTS ERROR MESSAGE AND EXITS.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CTF77 FORTRAN
-C>   MACHINE:  CRAY Y-MP/832
-C>
+C> @author Ralph Jones @date 1989-10-13
       SUBROUTINE W3FP05(RDATA,KTBL,CNST,TITLE,KRECT,KCONTR,LINEV,IWIDTH)
 C
        REAL            CNST(4)
