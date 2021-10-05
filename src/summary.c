@@ -254,7 +254,7 @@ void cputim (usr, sys)
                        int tms_cutime;
                        int tms_cstime; } tms;
 
-      tms Time_buffer;
+      struct tms Time_buffer;
       int ret;
 
       ret = times (&Time_buffer);
