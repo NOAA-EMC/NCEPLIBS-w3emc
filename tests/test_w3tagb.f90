@@ -3,6 +3,8 @@ program test_w3tagb
   character(len=:), allocatable :: prog, org
   integer :: year, julian_day, hundreths_of_julian_day
 
+  print *, "Testing w3tagb..."
+  
   prog = "test_w3tagb"
   org = "emc"
   year = 2021
@@ -11,5 +13,5 @@ program test_w3tagb
 
   ! prints information
   call w3tagb(prog, year, julian_day, hundreths_of_julian_day, org)
-  print *, "SUCCESS"
+  print *, "test_w3tagb success"
 end program test_w3tagb
