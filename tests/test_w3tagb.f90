@@ -13,5 +13,5 @@ program test_w3tagb
 
   ! prints information
   call w3tagb(prog, year, julian_day, hundreths_of_julian_day, org)
-  print *, "test_w3tagb success"
+  print *, "SUCCESS"
 end program test_w3tagb
