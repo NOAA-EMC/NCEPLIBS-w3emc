@@ -210,5 +210,6 @@ set(fortran_src
     ${CMAKE_CURRENT_SOURCE_DIR}/w3ymdh4.f
     ${CMAKE_CURRENT_SOURCE_DIR}/xmovex.f
     ${CMAKE_CURRENT_SOURCE_DIR}/xstore.f
+    ${CMAKE_CURRENT_SOURCE_DIR}/w3tagb.f
     )
 
