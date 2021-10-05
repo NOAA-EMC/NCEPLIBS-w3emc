@@ -17,13 +17,15 @@ endif()
 if(${CMAKE_Fortran_COMPILER_ID} MATCHES "^(GNU)$" AND ${CMAKE_Fortran_COMPILER_VERSION} VERSION_GREATER_EQUAL 10)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -w -fallow-argument-mismatch -fallow-invalid-boz")
 endif()
- 
+
+add_library(c_obj_lib OBJECT ${c_src})
+
 set(kinds "4" "8" "d")
 foreach(kind ${kinds})
   set(lib_name ${PROJECT_NAME}_${kind})
   set(module_dir "${CMAKE_CURRENT_BINARY_DIR}/include_${kind}")
 
-  add_library(${lib_name} STATIC ${fortran_src})
+  add_library(${lib_name} STATIC ${fortran_src} $<TARGET_OBJECTS:c_obj_lib>)
   add_library(${PROJECT_NAME}::${lib_name} ALIAS ${lib_name})
 
   set_target_properties(${lib_name} PROPERTIES COMPILE_FLAGS
