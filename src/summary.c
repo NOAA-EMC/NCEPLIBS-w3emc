@@ -445,13 +445,7 @@ void print_timing (string, time)
 
 }
 
-#ifdef _AIX
-void summary( returnVal  )
-int * returnVal;
-#endif
-#if defined(LINUX) || defined(APPLE)
 void summary_ (int *returnVal)
-#endif
 {
 
   double temp, temp1;
@@ -472,12 +466,7 @@ void summary_ (int *returnVal)
   return;
 }
 
-#ifdef _AIX
-void start()
-#endif
-#if defined(LINUX) || defined(APPLE)
 void start_ ()
-#endif
 {
   int stateid;
   int  Argc;

@@ -7,7 +7,6 @@ set(fortran_src
     ${CMAKE_CURRENT_SOURCE_DIR}/mova2i.f
     ${CMAKE_CURRENT_SOURCE_DIR}/orders.f
     ${CMAKE_CURRENT_SOURCE_DIR}/putgbens.f
-    ${CMAKE_CURRENT_SOURCE_DIR}/start.F
     ${CMAKE_CURRENT_SOURCE_DIR}/w3ai40.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3ai41.f
     ${CMAKE_CURRENT_SOURCE_DIR}/w3ctzdat.f
@@ -213,3 +212,6 @@ set(fortran_src
     ${CMAKE_CURRENT_SOURCE_DIR}/w3tagb.f
     )
 
+set(c_src
+  ${CMAKE_CURRENT_SOURCE_DIR}/summary.c
+  )
