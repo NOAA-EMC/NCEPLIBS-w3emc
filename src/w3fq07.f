@@ -1,119 +1,82 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FQ07        SENDS FAX,VARIAN,AFOS,AWIPS, MAPS & BULLS
-C>   PRGMMR: HENRICHSEN       ORG: W/NP12        DATE: 97-01-09
-C>
-C> ABSTRACT: SETS UP THE ARGUEMENTS FOR SUB DBN_ALERT
-C>   WHICH POSTS TRANSMISSION AVAILABILITY TO VARIOUS STATFILES.
-C>   THE INPUT KEY WORDS FOR W3FQ07 MAY BE READ IN VIA THE PARM FIELD
-C>   OR FROM A DATA CARD SEE REMARKS FOR EXAMPLES.
-C>
-C>
-C> PROGRAM HISTORY LOG:
-C>   97-01-09  ORGIONAL AUTHOR HENRICHSEN 
-C>
-C> USAGE:    CALL W3FQ07(LPARM, NUMBYT, OUTFIL, CARDFIL, KRTN)
-C>   INPUT ARGUMENT LIST:
-C>     LPARM    - CHARACTER*1 100 BYTE ARRAY CONTAINING ASCII
-C>                FLAGS AND KEY WORDS.
-C>     NUMBYT   - INTEGER NUMBER OF BYTES OF ASCII DATA IN LPARM.
-C>     OUTFIL   - INTEGER UNIT NUMBER OF FILE TO POST TO THE 
-C>                TELECOMMUNICATIONS GATEWAY COMPUTER SYSTEM.
-C>     CARDFIL  - INTEGER UNIT NUMBER OF FILE TO READ TO GET DATA
-C>                CONTROL CARD IN LUE OF PARM. THIS IS ONLY NECESSARY
-C>                WHEN PARM(5:5) = 'A'.
-C>   OUTPUT ARGUMENT LIST:
-C>     KRTN     - SEE RETURN CONDITIONS.
-C>
-C>   RETURN CONDITIONS:
-C>       KRTN = 0 GOOD RETURN, FILE POSTED FOR TRANSMISSION
-C>       KRTN = 1 GOOD RETURN, FILE NOT POSTED FOR TRANSMISSION
-C>                TEST FLAG WAS ON IE K=TEST OR THERE WAS AN "N"
-C>                THE 1ST BYTE OF THE INPUT DATA CARD.
-C>       KRTN = 2 BAD  RETURN, POSTING NOT ATTEMPTED, THE "K" KEY
-C>                WAS MISSING.
-C>       KRTN = 3 BAD  RETURN, POSTING NOT ATTEMPTED, PARM LESS THAN
-C>                THAN 6 BYTES.
-C>       KRTN = 4 BAD  RETURN, CARD READER EMPTY.
-C>       KRTN = 5 BAD  RETURN, ERROR RETURN FROM SUB DBN_ALERT.
-C>
-C>   INPUT FILES:
-C>     FTNNF001 - FILE THAT CONTAINS THE DATA TO SEND.
-C>                WHERE 'NN' CAN BE ANY NUMBER FROM 01 TO 99
-C>                EXCEPT 5 OR 6.  THIS FILE MUST BE ASSIGNED WITH U:NN.
-C>     FTXXF001 - INPUT CARDS, ONLY NECESSARY IF LPARM(3-6) ='CARD'.
-C>                A SAMPLE DATA CARD IS:
-C>                M=FT24F001,K=AFOS
-C>                (ALL ON ONE CARD STARTING IN COL 1).
-C>                IF COL 1 = 'N' THEN THE DATA SET IS NOT POSTED
-C>                TO THE MONITIOR,IE., W3FQ07 WILL RETURN TO CALLING
-C>                PROGRAM WITH OUT SENDING THE PRODUCT.
-C>                     (XX HAS DEFAULT OF 05. HOWEVER THIS NUMBER CAN
-C>                BE ANY UNIT NUMBER YOU WISH.
-C>
-C>   OUTPUT FILES:
-C>     FT06F001 - PRINT FILE.
-C>
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       COMMON   - CONSOL  DBN_ALERT
+C> @brief Sends fax,varian,afos,awips, maps & bulls
+C> @author Peter Henrichsen @date 1997-01-09
 
+C> Sets up the arguments for sub dbn_alert which posts transmission
+C> availability to various statfiles. The input key words for w3fq07() may be
+C> read in via the parm field or from a data card see remarks for examples.
 C>
-C> REMARKS: THE KEY WORDS THAT ARE PASSED TO SUB IN LPARM MAY
-C>   BE IN ANY ORDER IN THE LPARM ARRAY OR DATA CARD.
-C>   THERE IS ONE KEY WORD THAT IS MANDATORY.
-C>   THEY ARE:
-C>   K=KKKKKKK
+C> Program History Log:
+C> Date | Programmer | Comments
+C> -----|------------|---------
+C> 1997-01-09 | Peter Henrichsen | Initial
 C>
+C> @param[in] LPARM Character*1 100 byte array containing ascii
+C> flags and key words.
+C> @param[in] NUMBYT Integer number of bytes of ascii data in lparm.
+C> @param[in] OUTFIL Integer unit number of file to post to the
+C> telecommunications gateway computer system.
+C> @param[in] CARDFIL Integer unit number of file to read to get data
+C> control card in lue of parm. this is only necessary
+C> when parm(5:5) = 'a'.
+C> @param[out] KRTN See return conditions.
+C> Return conditions:
+C> KRTN = 0 good return, file posted for transmission
+C> KRTN = 1 good return, file not posted for transmission test flag was on ie
+C> k=test or there was an "n" the 1st byte of the input data card.
+C> KRTN = 2 bad  return, posting not attempted, the "k" key was missing.
+C> KRTN = 3 bad  return, posting not attempted, parm less than than 6 bytes.
+C> KRTN = 4 bad  return, card reader empty.
+C> KRTN = 5 bad  return, error return from sub dbn_alert.
 C>
-C>   WHERE KKKKKKKK IS UP TO A 24 BYTE ASCII KEYWORD LEFT-JUSTIFIED 
-C>   WHICH IDENTIFIES WHAT DBNET IS TO DO WITH THE INPUT DATA FILE.
-C>   
-C>   'KKKKKKKK' IS GENERALLY A KEYWORD SUCH AS:
-C>     'FAXX', 'TRAN','AFOS','AWIP' BUT MAY BE:
-C>    ANY ONE OF THESE type-keys.
+C> FTNNF001 - File that contains the data to send. where 'nn' can be any
+C> number from 01 to 99 except 5 or 6. This file must be assigned with u:nn.
 C>
-C>  type-keys         FUNCTIONS
+C> FTXXF001 - Input cards, only necessary if lparm(3-6) ='card'. a sample data
+C> card is: m=ft24f001,k=afos (all on one card starting in col 1).
+C> If col 1 = 'n' then the data set is not posted to the monitior,ie., w3fq07()
+C> will return to calling program with out sending the product.
+C> (xx has default of 05. however this number can be any unit number you wish.
 C>
-C>  AFOS,             Posts AFOS utf map file to CRAY OSO'S statusfile.
-C>  AWIP,             Posts AWIPS map file to CRAY OSO'S statusfile. 
-C>  FAXX,             Posts nmc6bit map file to CRAY OSO'S statusfile.
-C>  GRIB,             Posts wmo grib file to CRAY OSO'S statusfile.
-C>  TRAN,             Posts wmo bulletin file to CRAY OSO'S statusfile.
-C>  XTRN,             Posts xtrn file to CRAY OSO'S statusfile. 
-C>  IG_DATA_ipsa1,     Sends data file to the intergraph ipsa1.
-C>  IG_DATA_ipsa2,     Sends data file to the intergraph ipsa2.
-C>  IG_DATA_lzr_srv1,  Sends data file to the intergraph lzr_srv1.
-C>  IG_PLTF_ipsa1,     Sends AFOS plot file to the intergraph ipsa1.
-C>  IG_PLTF_ipsa2,     Sends AFOS plot file to the intergraph ipsa2.
-C>  IG_PLTF_lzr_srv1,  Sends AFOS plot file to the intergraph lzr_srv1.
-C>  IG_6BIT_lzr_srv1,  Sends nmc6bit file to the intergraph lzr_srv1.
-C>  TPC_6BIT_nhc-hp13, Sends nmc6bit file to nhc-hp13 at TPC. 
-C>  OSO_IG_6BIT_lzr_srv1,  Posts nmc6bit file to CRAY OSO'S 
-C>                         statusfile and then Sends nmc6bit file
-C> 	                  to the intergraph lzr_srv1.
-C>  OSO_TPC_6BIT_nhc-hp13, Posts nmc6bit file to CRAY OSO'S 
-C>                         statusfile and then Sends nmc6bit file
-C> 	                  to nhc-hp13 at TPC.	
+C> @note The key words that are passed to sub in lparm may be in any order in
+C> the lparm array or data card. there is one key word that is mandatory. they are:
+C> K=KKKKKKK Where KKKKKKKK is up to a 24 byte ascii keyword left-justified
+C> which identifies what dbnet is to do with the input data file.
 C>
-C>   WHERE OUTFIL IS THE FILE NUMBER CONTAING THE DATA.
-C>    A SAMPLE:
-C>    M=PETERS,K=FAXX WHERE A ',' OR A ' ' TERMINATES THE KEY WORD.
-C>    WHERE A COMMA OR BLANK TERMINATES THE KEY WORD.
+C> 'KKKKKKKK' Is generally a keyword such as: 'FAXX', 'TRAN','AFOS','AWIP'
+C> but may be: any one of these type-keys.
 C>
-C>    THE M= IS AN OPTIONAL KEY WORD. THE 'M' KEY WORD IS THE MODEL NAME
-C>    IF IF MISSING THE "MISSING" IS USED OTHER WISE IT MAY BY ANY
-C>    24 BYTE ASCII STRING.
-C>    A SAMPLE:
-C>    M=AVN,K=AFOS,
-C>    WHERE A COMMA OR BLANK TERMINATES THE KEY WORD.
+C> Type-keys | Functions
+C> ----------|----------
+C> AFOS              | Posts AFOS utf map file to CRAY OSO'S statusfile.
+C> AWIP              | Posts AWIPS map file to CRAY OSO'S statusfile.
+C> FAXX              | Posts nmc6bit map file to CRAY OSO'S statusfile.
+C> GRIB              | Posts wmo grib file to CRAY OSO'S statusfile.
+C> TRAN              | Posts wmo bulletin file to CRAY OSO'S statusfile.
+C> XTRN              | Posts xtrn file to CRAY OSO'S statusfile.
+C> IG_DATA_ipsa1     | Sends data file to the intergraph ipsa1.
+C> IG_DATA_ipsa2     | Sends data file to the intergraph ipsa2.
+C> IG_DATA_lzr_srv1  | Sends data file to the intergraph lzr_srv1.
+C> IG_PLTF_ipsa1     | Sends AFOS plot file to the intergraph ipsa1.
+C> IG_PLTF_ipsa2     | Sends AFOS plot file to the intergraph ipsa2.
+C> IG_PLTF_lzr_srv1  | Sends AFOS plot file to the intergraph lzr_srv1.
+C> IG_6BIT_lzr_srv1  | Sends nmc6bit file to the intergraph lzr_srv1.
+C> TPC_6BIT_nhc-hp13 | Sends nmc6bit file to nhc-hp13 at TPC.
+C> OSO_IG_6BIT_lzr_srv1 | Posts nmc6bit file to CRAY OSO'S  statusfile and then Sends nmc6bit file to the intergraph lzr_srv1.
+C> OSO_TPC_6BIT_nhc-hp13 | Posts nmc6bit file to CRAY OSO'S statusfile and then Sends nmc6bit file to nhc-hp13 at TPC.
 C>
+C> Where outfil is the file number containg the data.
 C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY FORTRAN 77 .
-C>   MACHINE:  CRAY
+C> A sample: M=PETERS,K=FAXX where A ',' or A ' ' Terminates the key word.
+C> Where a comma or blank terminates the key word.
 C>
+C> The M= is an optional key word. the 'M' key word is the model name
+C> if missing the "missing" is used other wise it may by any
+C> 24 byte ASCII string.
+C>
+C> A sample: M=AVN,K=AFOS, where a comma or blank terminates the key word.
+C>
+C> @author Peter Henrichsen @date 1997-01-09
       SUBROUTINE W3FQ07(LPARM,NUMBYT,OUTFIL,CARDFIL,KRTN)
 C
 C
@@ -135,7 +98,7 @@ C
      1   /'** FILE NOT POSTED FOR TRANSMISSION AVAILABILITY **:'/
 C         '1234567890123456789012345678901234567890123456789012'/
 C
- 
+
       CHARACTER*52 MESAG1
       DATA         MESAG1
      1 /'FILE NOT POSTED FOR TRANSMISSION, FOUND BYPASS FLAG:'/
@@ -166,13 +129,13 @@ C
       DATA          JOBNAM/'UNKOWN                  '/
 C
       CHARACTER*12 CTEXT
-      CHARACTER*4 CPLMIZ 
+      CHARACTER*4 CPLMIZ
       DATA        CPLMIZ  /'L999'/
 C
       CHARACTER*04 LTRS
       DATA         LTRS   /'K=M='/
 C
-      CHARACTER*24  BLANK 
+      CHARACTER*24  BLANK
       DATA        BLANK       /'                        '/
 
       CHARACTER*24 IFAXX
@@ -185,7 +148,7 @@ C
       DATA         AWIP        /'AWIP'/
       CHARACTER*4  IFAX
       DATA         IFAX        /'FAX '/
-      
+
 C
       CHARACTER*1  IQUOT
 C
@@ -197,7 +160,7 @@ C
 
       LOGICAL*1  BYPASS
       LOGICAL*1  GOTFLN
-      LOGICAL*1  GOTKEY 
+      LOGICAL*1  GOTKEY
       LOGICAL*1  GOTMOD
       LOGICAL*1  GOTJOB
       LOGICAL*1  LCARDS
@@ -215,7 +178,7 @@ C . . . CHECK TO SEE IF BYTE COUNT LESS THAN 6 IF SO PRODUCT NOT SENT.
 C
       IF(NUMBYT.LT.6) THEN
 C
-C . . . BYTE COUNT LESS THAN 6.  
+C . . . BYTE COUNT LESS THAN 6.
 C
              KRTN = 3
              WRITE(6,FMT='('' W3FQ07: '',A)') NOTSNT(1:52)
@@ -234,7 +197,7 @@ C
       GOTMOD = .FALSE.
       GOTJOB = .FALSE.
       GOTFLN = .FALSE.
-      
+
           IF(LPARM(5:5).EQ.'A') LCARDS = .TRUE.
 C
 C . . . . FILL KEYS WITH BLANKS.
@@ -259,7 +222,7 @@ C
      1           I4)') CARDFIL
               READ(CARDFIL,FMT='(80A1)',END=940)
      1         (LPARM(I:I),I=1,NUMBYT)
-C   
+C
            WRITE(6,FMT='('' W3FQ07: PARM='',
      1           A)')LPARM(1:NUMBYT)
 C
@@ -329,7 +292,7 @@ C       IF(KPRINT) THEN
      2             LPARM(KSTART:LLOC),KSTART
 C       ENDIF
                      IF(LK.EQ.1) THEN
-              
+
                        KEYWRD = LPARM(KSTART:LLOC)
                        NK = LLOC - KSTART+1
                        GOTKEY = .TRUE.
@@ -388,7 +351,7 @@ C
                  NK = 4
                 ENDIF
                 IF(KEYWRD(1:NK).EQ.'TEST')THEN
-                 BYPASS = .TRUE. 
+                 BYPASS = .TRUE.
               WRITE(6,FMT='('' W3FQ07: BYPASS FLAG ON, '',
      1                      ''SKIP POSTING FILE.'',/)')
                  GO TO 900
@@ -397,7 +360,7 @@ C
 C             MUST NOW I MUST GET THE JOB NAME AND UNIT NAME FOR
 C             CALL TO DBN_ALERT.
 C
-C . . .       READ IN JOBNAME 
+C . . .       READ IN JOBNAME
               JCHARS = GETENV('QSUB_REQNAME',BUFFER)
               NJ = 0
                 IF(BUFFER(1:8).EQ.'        ')THEN
@@ -420,7 +383,7 @@ C
 C . . .       READ IN FILE NAME
 C
                  KRTN = 0
-                 
+
                  CALL ASNQUNIT(OUTFIL,STRING,ISTAT)
               WRITE(6,FMT='('' W3FQ07:OUTFIL NAME= '',
      1         A,'' ISTAT='',I4)')STRING(1:80),ISTAT
@@ -445,7 +408,7 @@ C
                 OUTXT(1:NF) = STRING(ISTRT:IEND)
                  WRITE(6,FMT='('' W3FQ07: OUTXT= '',
      1          A,'' NF='',I3)')OUTXT(1:NF),NF
-C                
+C
                WRITE(6,FMT='('' W3FQ07: CALLING DBN_ALERT WITH'',
      1         '' :'',A,'' NK='',I2,'' '',A,'' NM='',I2,'' '',
      2         A,'' NJ='',I2,'' '',A,'' NF='',I3)')KEYWRD(1:NK),
@@ -477,7 +440,7 @@ C
                    WRITE(6,FMT='('' W3FQ07: '',
      1             A)')MESAG5(1:42)
                  CALL CONSOL(NOTSNT)
-                 CALL CONSOL(MESAG5)                
+                 CALL CONSOL(MESAG5)
                 ENDIF
 C
  900    CONTINUE

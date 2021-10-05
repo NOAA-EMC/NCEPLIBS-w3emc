@@ -1,64 +1,46 @@
 C> @file
-C
-C> SUBROUTINE:  W3FP10          PRINTER CONTOUR SUBROUTINE
-C>   PRGMMR: JONES            ORG: NMC421      DATE:89-09-13
+C> @brief Printer contour subroutine.
+C> @author Ralph Jones @date 1989-09-08
+
+C> Prints a two-dimensional grid of any shape, with
+C> contouring, if desired. Grid values are scaled according to
+C> to constants specified by the programer, rounded, and printed
+C> as 4,3, or 2 digit integers with sign, the sign marking the
+C> grid position of the printed number. If contouring is requested,
+C> bessel's interpolation formula is used to optain the contour lines.
+C> Contours are indicated by alphabetic characters ranging from a to
+C> h or numeric characters from 0 to 9. Contour origin and interval
+C> are specified by the programmer in terms of printed values.
 C>
-C> ABSTRACT:  PRINTS A TWO-DIMENSIONAL GRID OF ANY SHAPE, WITH
-C>   CONTOURING, IF DESIRED. GRID VALUES ARE SCALED ACCORDING TO
-C>   TO CONSTANTS SPECIFIED BY THE PROGRAMER, ROUNDED, AND PRINTED
-C>   AS 4,3, OR 2 DIGIT INTEGERS WITH SIGN, THE SIGN MARKING THE
-C>   GRID POSITION OF THE PRINTED NUMBER. IF CONTOURING IS REQUESTED,
-C>   BESSEL'S INTERPOLATION FORMULA IS USED TO OPTAIN THE CONTOUR LINES.
-C>   CONTOURS ARE INDICATED BY ALPHABETIC CHARACTERS RANGING FROM A TO
-C>   H OR NUMERIC CHARACTERS FROM 0 TO 9. CONTOUR ORIGIN AND INTERVAL
-C>   ARE SPECIFIED BY THE PROGRAMMER IN TERMS OF PRINTED VALUES.
+C> ### Program History Log
+C> Date | Programmer | Comments
+C> -----|------------|---------
+C> 1989-09-08 | Ralph Jones | Initial
+C> 1992-05-02 | Ralph Jones | Convert to cray cft77 fortran, add save.
 C>
-C> PROGRAM HISTORY LOG:
-C>   89-09-08  R.E.JONES
-C>   92-05-02  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN, ADD SAVE.
+C> @param[in] RDATA Real array of grid data to be printed.
+C> @param[in] KTBL Integer array with shape of array.
+C> @param[in] CNST Real array of four elements, used in
+C> scaling for printing and contouring.
+C> @param[in] TITLE Is a array of 132 characters or less of
+C> hollerith data, 1st char. must be blank.
+C> printed at bottom of the map.
+C> @param[in] KRECT 1 if grid is rectangular, 0 otherwise.
+C> @param[in] KCONTR 1 for contouring , 0 otherwise.
+C> @param[in] LINEV 0 is for 6 lines per vertical inch,
+C> non-zero 8 lines per vertical inch.
+C> @param[in] IWIDTH Number of characters in print line,
+C> 132 is standard printer.
 C>
-C> USAGE: CALL W3FP10 (RDATA,KTBL,CNST,TITLE,KRECT,KCONTR,LINEV,IWIDTH)
-C>   INPUT ARGUMENTS:  RDATA  = REAL ARRAY OF GRID DATA TO BE PRINTED.
-C>                     KTBL   = INTEGER ARRAY WITH SHAPE OF ARRAY.
-C>                     CNST   = REAL ARRAY OF FOUR ELEMENTS, USED IN
-C>                              SCALING FOR PRINTING AND CONTOURING.
-C>                     TITLE  = IS A ARRAY OF 132 CHARACTERS OR LESS OF
-C>                              HOLLERITH DATA, 1ST CHAR. MUST BE BLANK.
-C>                              PRINTED AT BOTTOM OF THE MAP.
-C>                     KRECT  = 1 IF GRID IS RECTANGULAR, 0 OTHERWISE.
-C>                     KCONTR = 1 FOR CONTOURING , 0 OTHERWISE.
-C>                     LINEV  = 0 IS FOR 6 LINES PER VERTICAL INCH,
-C>                              NON-ZERO 8 LINES PER VERTICAL INCH.
-C>                     IWIDTH = NUMBER OF CHARACTERS IN PRINT LINE,
-C>                              132 IS STANDARD PRINTER.
+C> Return conditions: Normal subroutine return, unless number of rows is
+C> greater than 200, prints error message and exits.
 C>
-C>   INPUT FILES:  NONE
+C> @note Special version of w3fp05(), 1st point is upper left hand
+C> corner. Written on request of peter chase because some
+C> grib fields can start with the upper left hand corner
+C> as the 1st point of a grid.
 C>
-C>
-C>   OUTPUT ARGUMENTS:  NONE
-C>
-C>   OUTPUT FILES: STANDARD FORTRAN PRINT FILE
-C>
-C>
-C>   RETURN CONDITIONS: NORMAL SUBROUTINE RETURN, UNLESS NUMBER
-C>                      OF ROWS IS GREATER THAN 200, PRINTS ERROR
-C>                      MESSAGE AND EXITS.
-C>
-C>   SUBPROGRAMS CALLED:
-C>     UNIQUE :  NONE
-C>
-C>     LIBRARY:  MIN , FORTRAN FUNCTION , RETURNS SMALLER VALUE
-C>               IABS , MOD
-C>
-C> REMARKS: SPECIAL VERSION OF W3FP05, 1ST POINT IS UPPER LEFT HAND
-C>          CORNER. WRITTEN ON REQUEST OF PETER CHASE BECAUSE SOME
-C>          GRIB FIELDS CAN START WITH THE UPPER LEFT HAND CORNER
-C>          AS THE 1ST POINT OF A GRID.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Ralph Jones @date 1989-09-08
       SUBROUTINE W3FP10(RDATA,KTBL,CNST,TITLE,KRECT,KCONTR,
      & LINEV,IWIDTH)
 C
@@ -113,7 +95,9 @@ C      ... SET TO A VALUE A LITTLE LESS THAN THE LARGEST POSITIVE
 C      ... FLOATING  POINT NUMBER FOR THE COMPUTER.
 C
        SAVE
-C
+C> The value CRMX is machine dependent, it should be
+C> set to a value a little less than the largest positive
+C> floating point number for the computer.
        DATA  CRMX  /10.E70/
        DATA  KALFA /'A',' ','B',' ','C',' ','D',' ','E',' ','F',
      &              ' ','G',' ','H',' '/
@@ -124,10 +108,8 @@ C
        DATA  KHPLUS/'+'/
        DATA  KHRSTR/'1'/
        DATA  KHTBL /'0','1','2','3','4','5','6','7','8','9'/
-C
-C     ... LIMNRW IS LIMIT ON NUMBER OF ROWS ALLOWED
-C     ...   AND IS DIMENSION OF KRLOC ...
-C
+
+C> LIMNRW is limit on number of rows allowed and is dimension of KRLOC
        DATA  LIMNRW/200/
        DATA  KNUMB /'0',' ','1',' ','2',' ','3',' ','4',' ',
      &              '5',' ','6',' ','7',' ','8',' ','9',' '/

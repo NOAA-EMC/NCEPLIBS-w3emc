@@ -1,58 +1,42 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FP12        CREATES THE PRODUCT DEFINITION SECTION
-C>   PRGMMR: MCCLEES          ORG: NMC421      DATE:92-01-14
+C> @brief Creates the product definition section
+C> @author A.J. McClees @date 1991-07-30
+
+C> Formats the product definition section according to the
+C> specifications set by WMO. Using o.n. 84 id's (1st 8 words)
+C> as the input data. New subroutine corresponds to the revision
+C> #1 of the WMO GRIB standards made march 15, 1991.
 C>
-C> ABSTRACT: FORMATS THE PRODUCT DEFINITION SECTION ACCORDING TO THE
-C>   SPECIFICATIONS SET BY WMO. USING  O.N. 84 ID'S  (1ST 8 WORDS)
-C>   AS THE INPUT DATA.  NEW SUBROUTINE CORRESPONDS TO THE REVISION
-C>   #1 OF THE WMO GRIB STANDARDS MADE MARCH 15, 1991.
+C> Program History Log:
+C> Date | Programmer | Comments
+C> -----|------------|---------
+C> 1991-07-30 | A.J. McClees | New subroutine which formats the pds section from the o.n. 84 id's from the GRIB edition 1 dated march 15, 1991.
+C> 1992-01-06 | A.J. McClees | Delete paramater 202 (accumulated evap) and make parameter 57 (evaporation) the equivalent of o.n.84 117.
+C> 1992-11-02 | Ralph Jones | Correction at same level as w3fp12() in v77w3lib on hds
+C> 1993-03-29 | Ralph Jones | Add save statement
+C> 1993-04-16 | Ralph Jones | Add 176, 177 lat, lon to tables
+C> 1993-08-03 | Ralph Jones | Add 156 (cin), 204 (dswrf), 205 (dlwrf) 211 (uswrf), 212 (ulwrf)  to tables
+C> 1995-02-07 | Ralph Jones | Change pds byte 4, version number to 2.
+C> 1995-07-14 | Ralph Jones | Correction for sfc lft x
+C> 1998-03-10 | Boi Vuong | Remove the cdir$ integer=64 directive
+C> 1998-12-21 | Stephen Gilbert | Replaced Function ICHAR with mova2i().
+C> 1999-02-15 | B. Facey | Replace w3fs04 with w3movdat().
+C> 1999-03-15 | Stephen Gilbert | Specified 8-byte integer array explicitly for ID8
+C> 1999-03-22 | B. Facey | Remove the date recalculation for mean charts.  this includes the previous change to w3movdat.
 C>
-C> PROGRAM HISTORY LOG:
-C>   91-07-30  MCCLEES,A.J. NEW SUBROUTINE WHICH FORMATS THE PDS
-C>                          SECTION FROM THE O.N. 84 ID'S FROM THE GRIB
-C>                          EDITION  1 DATED MARCH 15, 1991.
+C> @param[in] ID8 First 8 id workds (o.n.84) integer*4
+C> @param[in] ICENT Century, 2 digits, for 1991 it is 20.
+C> @param[in] IFLAG Indication of inclusion or omission of grid definition and/or bit map code character*1
+C> @param[in] ISCALE 10 scaler integer*4
+C> @param[out] IDPDS GRIB product definition section  character*1 (28)
+C> @param[out] IER
+C> = 0 completed smoothly
+C> = 1 Indicator parameter N.A. to GRIB
+C> = 2 Level indicator N.A. to GRIB
+C> = 3 Time range N.A. to GRIB notation
+C> = 4 Layers or levels N.A. to GRIB
 C>
-C>   92-01-06  MCCLEES,A.J. DELETE PARAMATER 202 (ACCUMULATED EVAP)
-C>                          AND MAKE PARAMETER 57 (EVAPORATION) THE
-C>                          EQUIVALENT OF O.N.84 117.
-C>   92-11-02  R.E.JONES    CORRECTION AT SAME LEVEL AS W3FP12 IN
-C>                          V77W3LIB ON HDS  92-09-30
-C>   93-03-29  R.E.JONES    ADD SAVE STATEMENT
-C>   93-04-16  R.E.JONES    ADD 176, 177 LAT, LON TO TABLES
-C>   93-08-03  R.E.JONES    ADD 156 (CIN), 204 (DSWRF), 205 (DLWRF)
-C>                          211 (USWRF), 212 (ULWRF)  TO TABLES
-C>   95-02-07  R.E.JONES    CHANGE PDS BYTE 4, VERSION NUMBER TO 2.
-C>   95-07-14  R.E.JONES    CORRECTION FOR SFC LFT X
-C>   98-03-10  B. VUONG     REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
-C>   98-12-21  Gilbert    Replaced Function ICHAR with mova2i.
-C>   99-02-15  B. FACEY     REPLACE W3FS04 WITH W3MOVDAT.
-C> 1999-03-15  Gilbert     Specified 8-byte integer array explicitly for ID8
-C>   99-03-22  B. FACEY     REMOVE THE DATE RECALCULATION FOR MEAN
-C>                          CHARTS.  THIS INCLUDES THE PREVIOUS
-C>                          CHANGE TO W3MOVDAT.
-C>
-C> USAGE:    CALL W3FP12  (ID8, IFLAG, IDPDS, ICENT, ISCALE, IER)
-C>   INPUT ARGUMENT LIST:
-C>     ID8      - FIRST 8 ID WORKDS (O.N.84) INTEGER*4
-C>     ICENT    - CENTURY, 2 DIGITS, FOR 1991 IT IS 20.
-C>     IFLAG    - INDICATION OF INCLUSION OR OMISSION OF GRID DEFINITION
-C>                AND/OR BIT MAP CODE        CHARACTER*1
-C>     ISCALE   - 10 SCALER INTEGER*4
-C>
-C>   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C>     IDPDS    - GRIB PRODUCT DEFINITION SECTION  CHARACTER*1 (28)
-C>     IER      = 0 COMPLETED SMOOTHLY
-C>              = 1 INDICATOR PARAMETER N.A. TO GRIB
-C>              = 2 LEVEL INDICATOR N.A. TO GRIB
-C>              = 3 TIME RANGE N.A. TO GRIB NOTATION
-C>              = 4 LAYERS OR LEVELS N.A. TO GRIB
-C>   OUTPUT FILES:
-C>     FT06F001 - SELF-EXPLANATORY ERROR MESSAGES
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 90
-C>
+C> @author A.J. McClees @date 1991-07-30
       SUBROUTINE W3FP12(ID8, IFLAG, IDPDS, ICENT, ISCALE, IER)
 C
         INTEGER     E1
@@ -87,7 +71,7 @@ C
         EQUIVALENCE (L,IPDS1(1))
         EQUIVALENCE (NBYTES,IHOLD(1))
         EQUIVALENCE (JDATE,KDATE(1))
-        REAL  RINC(5) 
+        REAL  RINC(5)
         INTEGER  NDATE(8), MDATE(8)
 C
         DATA  LL    /   8,   8,   9, 255, 255, 255,   1,   6, 255, 255,
@@ -103,8 +87,8 @@ C
      &                255, 400, 389, 385, 388, 391, 386, 390, 402, 401,
      &                404, 403, 204, 255, 255, 255, 255, 255, 255, 255,
      &                255, 255, 195, 194, 255, 255, 255, 255, 255, 255,
-     &                255, 255, 112, 116, 114, 255, 103,  52, 255, 255, 
-     &                255, 255, 119, 157, 158, 159, 255, 176, 177, 392, 
+     &                255, 255, 112, 116, 114, 255, 103,  52, 255, 255,
+     &                255, 255, 119, 157, 158, 159, 255, 176, 177, 392,
      &                192, 190, 199, 216, 189, 193, 191, 210, 198, 255,
      &                255,   1, 255/
         DATA  HH    /   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,
@@ -396,7 +380,7 @@ C
            IDPDS(11) = CHAR(JJJ)
            KKK       = ((C2 * 10. ** E2) * .1) + .5
            IDPDS(12) = CHAR(KKK)
-           IF (IDPDS(9) .EQ. CHAR(131)) IDPDS(12) = CHAR(100) 
+           IF (IDPDS(9) .EQ. CHAR(131)) IDPDS(12) = CHAR(100)
 C
          ELSE IF (S1 .EQ. 1) THEN
            IDPDS(10) = CHAR(104)
