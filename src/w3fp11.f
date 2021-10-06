@@ -1,103 +1,79 @@
 C> @file
-C> @brief ONE-LINE GRIB TITLER FROM PDS SECTION
-C      
-C> ONE-LINE GRIB TITLER FROM PDS SECTION
-C> @author MCCLEES @date 88-02-02
+C> @brief One-line GRIB titler from pds section.
+C> @author Ralph Jones @date 1991-06-19
+
+C> Converts GRIB formatted product definition section version
+C> 1 to a one line readable title. GRIB section 0 is also tested to
+C> verify that GRIB data is being deciphered.
 C>
-C> CONVERTS GRIB FORMATTED PRODUCT DEFINITION SECTION VERSION 
-C> 1 TO A ONE LINE READABLE TITLE.  GRIB SECTION 0 IS ALSO TESTED TO
-C> VERIFY THAT GRIB DATA IS BEING DECIPHERED.
+C> ### Program History Log:
+C> Date | Programmer | Comments
+C> -----|------------|---------
+C> 1991-06-19 | Ralph Jones |  Initial
+C> 1992-05-29 | Ralph Jones |  Add water temp to tables
+C> 1993-01-19 | Ralph Jones |  Add montgomary stream function to tables. add code for surface value 113. add condensation pressure to tables
+C> 1993-02-19 | Ralph Jones |  Add cape and tke (157 & 158) to tables
+C> 1993-02-24 | Ralph Jones |  Add GRIB type pmsle (130) to tables
+C> 1993-03-26 | Ralph Jones |  Add GRIB type sglyr (175) to tables
+C> 1993-03-27 | Ralph Jones |  Changes for revised o.n.388 mar. 3,1993
+C> 1993-03-29 | Ralph Jones |  Add save statement
+C> 1993-04-16 | Ralph Jones |  Add GRIB type lat, lon (176,177) to tables
+C> 1993-04-25 | Ralph Jones |  Add GRIB type 204, 205, 211, 212, 218
+C> 1993-05-18 | Ralph Jones |  Add test for model 70
+C> 1993-06-26 | Ralph Jones |  Add GRIB type 128, 129, take out test for MODEL 86.
+C> 1993-08-07 | Ralph Jones |  Add GRIB type 156 (cin), 150 (cbmzw), 151 (cbtzw), 152 (cbtmw) to tables.
+C> 1993-10-14 | Ralph Jones |  Change for o.n. 388 rev. oct. 8,1993
+C> 1993-10-29 | Ralph Jones |  Change for 'l cdc' 'm cdc' 'h cdc'
+C> 1993-10-14 | Ralph Jones |  Change for o.n. 388 rev. nov. 19,1993
+C> 1994-02-05 | Ralph Jones |  Change for o.n. 388 rev. dec. 14,1993. add model number 86 and 87.
+C> 1994-03-24 | Ralph Jones |  Add GRIB type 24 (toto3), 206 (uvpi)
+C> 1994-06-04 | Ralph Jones |  Change uvpi to uvi
+C> 1994-06-16 | Ralph Jones |  Add GRIB type 144,145,146,147,148,149 soilw,pevpr,cwork,u-gwd,v-gwd,pv to tables.
+C> 1994-06-22 | Ralph Jones |  Add ncar (60) to centers
+C> 1994-07-25 | Ralph Jones |  Correction for 71, 72, 213 (t cdc), (cdcon), (cdlyr)
+C> 1994-10-27 | Ralph Jones |  Add GRIB type 191 (prob), 192 (probn), add test for model 90, 91, 92, 93, add sub center 2.
+C> 1995-02-09 | Ralph Jones |  Correction for century for fnoc
+C> 1995-04-11 | Ralph Jones |  Correction for lmh and lmv
+C> 1995-06-20 | Ralph Jones |  Add GRIB type 189 (vstm), 190 (hlcy), 193 (pop), 194 (cpofp), 195 (cpozp), 196 (ustm), 197 (vstm) to tables.
+C> 1995-08-07 | Ralph Jones |  Add GRIB type 153 (clwmr), 154 (o3mr), 221 (hpbl), 237 (o3tot).
+C> 1995-09-07 | Ralph Jones |  Take out GRIB type 24 (toto3), change to GRIB type 10 (tozne). add level 117, potential vortiticity (pv) level, add eta
+C>      ^     |     ^      |  Level 119, add 120 layer betwwen two eta levels. change name of level 107 to (sigl), change name of level 108 to (sigy).
+C> 1995-09-26 | Ralph Jones |  Add level 204 (htfl) highest tropsphere freezing level.
+C> 1995-10-19 | Ralph Jones |  Change some of the level abreviations.
+C> 1995-12-13 | Ralph Jones |  Add 8 sub-centers to tables
+C> 1996-03-04 | Ralph Jones |  Changes for o.n. 388 jan 2, 1996
+C> 1996-03-22 | Ralph Jones |  Change scusf to csusf
+C> 1996-10-01 | Mark Iredell |  Recognize forecast time units 1 to 12 and correct for year 2000
+C> 1996-10-31 | Ralph Jones |  Change array and table for ics1 to 10.
+C> 1996-10-01 | Mark Iredell |  Allow parameter table version up to 127
+C> 1998-05-26 | Stephen Gilbert |  Added 17 new parameters ( GRIB table 2 ). added 6 new special levels for clouds. added subcenter 11 (tdl) under center 7 (ncep)
+C> 1998-12-21 | Stephen Gilbert |  Replaced function ichar with mova2i.
+C> 1901-01-05 | Boi Vuong |  Add level 247 (ehlt) equilibrium level
+C> 1902-05-01 | Boi Vuong |  Changes for o.n. 388   mar 21, 2002
+C> 1902-03-25 | Boi Vuong |  Add GRIB table version 129 and 130
+C> 1903-07-02 | Stephen Gilbert |  Added 5 new params to table version 129
+C> 1904-14-04 | Boi Vuong |  Add GRIB table version 131 and added 12 new parameter to table version 129
+C> 1904-08-09 | Boi Vuong |  Add parameter (thflx) to table version 129
+C> 1905-02-08 | Cooke |  Corrected entry for freezing rain, crfzr to cfrzr in the hhnam1 array
+C> 1906-08-11 | Boi Vuong |  Add levels (235,236,237,238,240,245) and added new parameters to table version 129 and added
+C>    ^       |     ^      |  One parameter 154 to table version 130 and added table version 128
+C> 1907-04-05 | Boi Vuong |  Add parameters to table version 128, 129 and 130
+C> 1907-05-15 | Boi Vuong |  Added time range indicator 51 and new table 140
 C>
-C> PROGRAM HISTORY LOG:
-C> -  91-06-19  R.E.JONES
-C> -  92-05-29  R.E.JONES   ADD WATER TEMP TO TABLES  
-C> -  93-01-19  R.E.JONES   ADD MONTGOMARY STREAM FUNCTION TO TABLES 
-C>                         ADD CODE FOR SURFACE VALUE 113.
-C>                         ADD CONDENSATION PRESSURE TO TABLES
-C> -  93-02-19  R.E.JONES   ADD CAPE AND TKE (157 & 158) TO TABLES
-C> -  93-02-24  R.E.JONES   ADD GRIB TYPE PMSLE (130) TO TABLES
-C> -  93-03-26  R.E.JONES   ADD GRIB TYPE SGLYR (175) TO TABLES
-C> -  93-03-27  R.E.JONES   CHANGES FOR REVISED O.N.388 MAR. 3,1993
-C> -  93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C> -  93-04-16  R.E.JONES   ADD GRIB TYPE LAT, LON (176,177) TO TABLES
-C> -  93-04-25  R.E.JONES   ADD GRIB TYPE 204, 205, 211, 212, 218
-C> -  93-05-18  R.E.JONES   ADD TEST FOR MODEL 70
-C> -  93-06-26  R.E.JONES   ADD GRIB TYPE 128, 129, TAKE OUT TEST FOR
-C>                         MODEL 86.
-C> -  93-08-07  R.E.JONES   ADD GRIB TYPE 156 (CIN), 150 (CBMZW),
-C>                         151 (CBTZW), 152 (CBTMW) TO TABLES.
-C> -  93-10-14  R.E.JONES   CHANGE FOR O.N. 388 REV. OCT. 8,1993
-C> -  93-10-29  R.E.JONES   CHANGE FOR 'L CDC' 'M CDC' 'H CDC'
-C> -  93-10-14  R.E.JONES   CHANGE FOR O.N. 388 REV. NOV. 19,1993
-C> -  94-02-05  R.E.JONES   CHANGE FOR O.N. 388 REV. DEC. 14,1993
-C>                         ADD MODEL NUMBER 86 AND 87.
-C> -  94-03-24  R.E.JONES   ADD GRIB TYPE 24 (TOTO3), 206 (UVPI)
-C> -  94-06-04  R.E.JONES   CHANGE UVPI TO UVI
-C> -  94-06-16  R.E.JONES   ADD GRIB TYPE 144,145,146,147,148,149
-C>                         SOILW,PEVPR,CWORK,U-GWD,V-GWD,PV TO TABLES.
-C> -  94-06-22  R.E.JONES   ADD NCAR (60) TO CENTERS
-C> -  94-07-25  R.E.JONES   CORRECTION FOR 71, 72, 213 (T CDC), (CDCON),
-C>                         (CDLYR)
-C> -  94-10-27  R.E.JONES   ADD GRIB TYPE 191 (PROB), 192 (PROBN), ADD
-C>                         TEST FOR MODEL 90, 91, 92, 93, ADD SUB
-C>                         CENTER 2.
-C> -  95-02-09  R.E.JONES   CORRECTION FOR CENTURY FOR FNOC
-C> -  95-04-11  R.E.JONES   CORRECTION FOR LMH AND LMV
-C> -  95-06-20  R.E.JONES   ADD GRIB TYPE 189 (VSTM), 190 (HLCY), 193
-C>                         (POP), 194 (CPOFP), 195 (CPOZP), 196
-C>                         (USTM), 197 (VSTM) TO TABLES.
-C> -  95-08-07  R.E.JONES   ADD GRIB TYPE 153 (CLWMR), 154 (O3MR), 221
-C>                         (HPBL), 237 (O3TOT). 
-C> -  95-09-07  R.E.JONES   TAKE OUT GRIB TYPE 24 (TOTO3), CHANGE TO
-C>                         GRIB TYPE 10 (TOZNE). ADD LEVEL 117,
-C>                         POTENTIAL VORTITICITY (pv) LEVEL, ADD ETA
-C>                         LEVEL 119, ADD 120 LAYER BETWWEN TWO ETA
-C>                         LEVELS. CHANGE NAME OF LEVEL 107 TO (SIGL),
-C>                         CHANGE NAME OF LEVEL 108 TO (SIGY).
-C> -  95-09-26  R.E.JONES   ADD LEVEL 204 (HTFL) HIGHEST TROPSPHERE
-C>                         FREEZING LEVEL.
-C> -  95-10-19  R.E.JONES   CHANGE SOME OF THE LEVEL ABREVIATIONS. 
-C> -  95-12-13  R.E.JONES   ADD 8 SUB-CENTERS TO TABLES
-C> -  96-03-04  R.E.JONES   CHANGES FOR O.N. 388 JAN 2, 1996
-C> -  96-03-22  R.E.JONES   CHANGE SCUSF TO CSUSF
-C> -  96-10-01  IREDELL     RECOGNIZE FORECAST TIME UNITS 1 TO 12
-C>                         AND CORRECT FOR YEAR 2000
-C> -  96-10-31  R.E.JONES   CHANGE ARRAY AND TABLE FOR ICS1 TO 10.
-C> -  96-10-01  IREDELL     ALLOW PARAMETER TABLE VERSION UP TO 127
-C> -  98-05-26  Gilbert     ADDED 17 NEW PARAMETERS ( GRIB TABLE 2 )
-C>                         ADDED 6 NEW SPECIAL LEVELS FOR CLOUDS
-C>                         ADDED SUBCENTER 11 (TDL) UNDER CENTER 7 (NCEP)
-C> -  98-12-21  Gilbert     REPLACED FUNCTION ICHAR WITH MOVA2I.
-C> -  01-01-05  VUONG       ADD LEVEL 247 (EHLT) EQUILIBRIUM LEVEL
-C> -  02-05-01  VUONG       CHANGES FOR O.N. 388   MAR 21, 2002
-C> -  02-03-25  VUONG       ADD GRIB TABLE VERSION 129 AND 130
-C> -  03-07-02  Gilbert     Added 5 new params to Table version 129
-C> -  04-14-04  VUONG       ADD GRIB TABLE VERSION 131 AND ADDED 12
-C>                         NEW PARAMETER TO TABLE VERSION 129
-C> -  04-08-09  VUONG       ADD PARAMETER (THFLX) TO TABLE VERSION 129
-C> -  05-02-08  COOKE       CORRECTED ENTRY FOR FREEZING RAIN, CRFZR TO
-C>                         CFRZR IN THE HHNAM1 ARRAY
-C> -  06-08-11  VUONG       ADD LEVELS (235,236,237,238,240,245) AND ADDED
-C>                         NEW PARAMETERS TO TABLE VERSION 129 AND ADDED 
-C>                         ONE PARAMETER 154 TO TABLE VERSION 130 AND
-C>                         ADDED TABLE VERSION 128
-C> -  07-04-05  VUONG       ADD PARAMETERS TO TABLE VERSION 128, 129 AND 130
-C> -  07-05-15  VUONG       ADDED TIME RANGE INDICATOR 51 AND NEW TABLE 140
-C>
-C> @param[in] IPDS0 GRIB SECTION 0 READ AS CHARACTER*8
-C> @param[in] IPDS GRIB PDS SECTION READ AS CHARACTER*28
-C> @param[out] TITL CHARACTER*86 OUTPUT PRINT LINE
+C> @param[in] IPDS0 GRIB section 0 read as character*8
+C> @param[in] IPDS GRIB pds section read as character*28
+C> @param[out] TITL Character*86 output print line
 C> @param[out] IERR
-C> - 0    - COMPLETED SATISFACTORILY
-C> - 1 - GRIB SECTION 0, CAN NOT FIND 'GRIB'
-C> - 2 - GRIB IS NOT VERSION 1
-C> - 3 - LENGTH OF PDS SECTION IS LESS THAN 28
-C> - 4 - COULD NOT MATCH TYPE INDICATOR
-C> - 5 - COULD NOT MATCH TYPE LEVEL
-C> - 6 - COULD NOT INTERPRET ORIGINATOR OF CODE
-C> - 7 - COULD NOT INTERPRET SUB CENTER 7 ORIGINATOR OF CODE
-C> - 8 - COULD NOT INTERPRET SUB CENTER 9 ORIGINATOR OF CODE
-C> - 9 - PARAMETER TABLE VERSION NOT 1 OR 2
+C> 0 - Completed satisfactorily
+C> 1 - GRIB section 0, can not find 'GRIB'
+C> 2 - GRIB is not version 1
+C> 3 - Length of pds section is less than 28
+C> 4 - Could not match type indicator
+C> 5 - Could not match type level
+C> 6 - Could not interpret originator of code
+C> 7 - Could not interpret sub center 7 originator of code
+C> 8 - Could not interpret sub center 9 originator of code
+C> 9 - Parameter table version not 1 or 2
 C>
       SUBROUTINE W3FP11 (IPDS0, IPDS, TITL, IERR)
         INTEGER         CENTER(17)
@@ -129,7 +105,7 @@ C
         CHARACTER * 6   HHNAM140(112)
         CHARACTER * 6   HHNAM131(241)
         CHARACTER * 4   HHHNAM(73)
-        CHARACTER * (*) IPDS 
+        CHARACTER * (*) IPDS
         CHARACTER * 8   IPDS0
         CHARACTER * 28  IDPDS
         CHARACTER * 4   GRIB
@@ -150,7 +126,7 @@ C
 C
         SAVE
 C
-        DATA  CENTER/  7,   8,   9,  34,  52,  54,  57, 
+        DATA  CENTER/  7,   8,   9,  34,  52,  54,  57,
      &                58,  59,  60,  61,  62,  74,  85,
      &                97,  98,  99/
 C
@@ -220,7 +196,7 @@ C
      &                 4, 118, 119, 120, 170, 171, 178,
      &               179, 185, 186, 187, 198, 199, 200,
      &               224, 225, 230, 180, 202, 210, 240/
-       DATA  HHNAM1/ 
+       DATA  HHNAM1/
      &' PRES ',' PRMSL',' PTEND',' ICAHT',' GP   ',' HGT  ',' DIST ',
      &' HSTDV',' TOZNE',' TMP  ',' VTMP ',' POT  ',' EPOT ',' T MAX',
      &' T MIN',' DPT  ',' DEPR ',' LAPR ',' VIS  ',' RDSP1',' RDSP2',
@@ -236,7 +212,7 @@ C
      &' SOILM',' VEG  ',' SALTY',' DEN  ',' WATR ',' ICE C',' ICETK',
      &' DICED',' SICED',' U ICE',' V ICE',' ICE G',' ICE D',' SNO M',
      &' HTSGW',' WVDIR',' WVHGT',' WVPER',' SWDIR',' SWELL',' SWPER'/
-        DATA  HHNAM2/     
+        DATA  HHNAM2/
      &' DIRPW',' PERPW',' DIRSW',' PERSW',' NSWRS',' NLWRS',' NSWRT',
      &' NLWRT',' LWAVR',' SWAVR',' G RAD',' LHTFL',' SHTFL',' BLYDP',
      &' U FLX',' V FLX',' WMIXE',' IMG D',' MSLSA',' MSLMA',' MSLET',
@@ -252,7 +228,7 @@ C
      &' SFEXC',' MIXLY',' USWRF',' ULWRF',' CDLYR',' CPRAT',' TTDIA',
      &' TTRAD',' TTPHY',' PREIX',' TSD1D',' NLGSP',' HPBL ',' 5WAVH',
      &' CNWAT',' BMIXL',' AMIXL',' PEVAP',' SNOHF',' MFLUX',' DTRF '/
-        DATA  HHNAM3/     
+        DATA  HHNAM3/
      &' UTRF ',' BGRUN',' SSRUN',' O3TOT',' SNOWC',' SNO T',' LRGHR',
      &' CNVHR',' CNVMR',' SHAHR',' SHAMR',' VDFHR',' VDFUA',' VDFVA',
      &' VDFMR',' SWHR ',' LWHR ',' CD   ',' FRICV',' RI   ',' MISS ',
@@ -418,7 +394,7 @@ C
      &               106, 107, 108, 109, 110, 111, 112,
      &               113, 114, 115, 116, 117, 118, 119,
      &               120, 121, 122, 123, 124, 125, 126,
-     &               127, 128, 130, 131, 132, 134, 135, 
+     &               127, 128, 130, 131, 132, 134, 135,
      &               136, 139, 140, 141, 142, 143, 144,
      &               145, 146, 147, 148, 149, 150, 151,
      &               152, 153, 155, 156, 157, 158, 159,
@@ -476,7 +452,7 @@ C      ONE LINE CHANGE FOR HDS (IBM370) (ASCII NAME GRIB IN HEX)
 C
 C      DATA  GRIB  /Z47524942/
 C
-C      ONE LINE CHANGE FOR CRAY AND WORKSTATIONS 
+C      ONE LINE CHANGE FOR CRAY AND WORKSTATIONS
 C
        DATA  GRIB  /'GRIB'/
 C
@@ -502,9 +478,9 @@ C
      & '   HYDRO. PRED. CENTER  ','   OCEAN PRED. CENTER   ',
      & '   CLIMATE PRED. CENTER ','   AVIATION WEATHER CEN.',
      & '   STORM PRED. CENTER   ','   TROPICAL PRED. CENTER',
-     & '   NWS TECH. DEV. LAB.  ','   NESDIS OFF. RES. APP.', 
-     & '   FAA                  ','   NWS MET. DEV. LAB.   ', 
-     & '   NARR  PROJECT        ','   SPACE ENV. CENTER    '/ 
+     & '   NWS TECH. DEV. LAB.  ','   NESDIS OFF. RES. APP.',
+     & '   FAA                  ','   NWS MET. DEV. LAB.   ',
+     & '   NARR  PROJECT        ','   SPACE ENV. CENTER    '/
        DATA  KNAM3 /
      & '   ABRFC  TULSA, OK     ','   AKRFC  ANCHORAGE, AK ',
      & '   CBRFC  SALT LAKE, UT ','   CNRFC  SACRAMENTO, CA',
@@ -556,7 +532,7 @@ C
            IERR = 1
            RETURN
          ENDIF
-C      
+C
 C       TEST SECTION 0 FOR GRIB VERSION 1
 C
         IF (MOVA2I(IPDS0(8:8)).NE.1) THEN
@@ -564,10 +540,10 @@ C
           RETURN
         END IF
 C
-C       TEST THE LENGTH OF THE PDS (SECTION 1)  
+C       TEST THE LENGTH OF THE PDS (SECTION 1)
 C
         LENPDS  = MOVA2I(IPDS(1:1)) * 65536 + MOVA2I(IPDS(2:2)) * 256 +
-     &            MOVA2I(IPDS(3:3))   
+     &            MOVA2I(IPDS(3:3))
         IF (LENPDS.GE.28) THEN
           IDPDS(1:28) = IPDS(1:28)
         ELSE
@@ -582,7 +558,7 @@ C
         IF (IVER.GT.131) THEN
           IERR = 9
           RETURN
-        END IF    
+        END IF
 C
 C           4.0  FIND THE INDICATOR AND TYPE LEVELS
 C
@@ -676,7 +652,7 @@ C
              WRITE (TITL(9:15),FMT='(F6.4)') ALEVEL
            ELSE IF (ISS.EQ.5) THEN
 C             DO NOTHING
-           ELSE 
+           ELSE
              WRITE (TITL(11:15),FMT='(I4)') LEVEL
            END IF
          ELSE IF (ISS.EQ.1.OR.ISS.EQ.6.OR.ISS.EQ.7.OR.ISS.EQ.8.OR.
@@ -710,7 +686,7 @@ C
        IMON  = MOVA2I (IDPDS(14:14))
        IYR   = MOVA2I (IDPDS(13:13))
        ICEN  = MOVA2I (IDPDS(25:25))
-C  
+C
 C      SUBTRACT 1 FROM CENTURY TO MAKE 4 DIGIT YEAR
 C
        ICEN = ICEN - 1
@@ -748,7 +724,7 @@ C
          TITL(6:7)  = TIMUN1(FCSTIM)
          TITL(8:12) = ' ACUM'
 C
-C      AVERAGE 
+C      AVERAGE
 C
        ELSE IF (TIMERG.EQ.3) THEN
          WRITE (UNIT=TITL(29:32),FMT='(I3)') P2
@@ -785,14 +761,14 @@ C
      &        MODEL.EQ.105.OR.MODEL.EQ.110.OR.MODEL.EQ.150.OR.
      &        MODEL.EQ.151) THEN
               TITL(29:42) = ' 00-HR FCST  '
-          ENDIF    
+          ENDIF
        ENDIF
 C
 C      TEST FOR 00-HR FCST (INITIALIZED ANALYSIS)
 C
        IF (TIMERG.EQ.1.AND.P1.EQ.0) THEN
           TITL(29:42) = ' 00-HR FCST  '
-       ENDIF  
+       ENDIF
 C
 C$            3.0 FIND WHO GENERATED THE CODE
 C$                CHECK FOR SUB-CENTERS
@@ -802,7 +778,7 @@ C
 C
 C      TEST FOR SUB-CENTERS WHEN CENTER IS 7
 C
-  
+
        IF (ISUBC.NE.0.AND.IGENC.EQ.7) THEN
          DO J = 1,ICS1
            IF (ISUBC .EQ. SCNTR1(J)) THEN
@@ -824,9 +800,9 @@ C
          END DO
          IERR = 8
        END IF
-C 
+C
 C      TEST TO SEE IF CENTER IN TABLES
-C       
+C
        DO I = 1,IC
          IF (IGENC .EQ. CENTER(I)) THEN
            TITL(63:86) = KNAM1(I)

@@ -1,57 +1,47 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FP13        CONVERT GRIB PDS EDITION 1 TO O.N. 84 ID
-C>   PRGMMR: MCCLEES          ORG: NMC421      DATE:91-10-07
+C> @brief Convert GRIB PDS edition 1 to O.N. 84 ID.
+C> @author A.J. McClees @date 1991-10-07
+
+C> Converts GRIB version 1 formatted product definition
+C> section to an office note 84 id label. Formats all that is appli-
+C> cable in the first 8 words of O.N. 84. (caution ****see remarks)
 C>
-C> ABSTRACT: CONVERTS GRIB VERSION 1 FORMATTED PRODUCT DEFINITION
-C>   SECTION TO AN OFFICE NOTE 84 ID LABEL.  FORMATS ALL THAT IS APPLI-
-C>   CABLE IN THE FIRST 8 WORDS OF O.N. 84.  (CAUTION ****SEE REMARKS)
+C> ### Program History Log:
+C> Date | Programmer | Comments
+C> -----|------------|---------
+C> 1991-10-07 | A.J. McClees | Initial
+C> 1992-01-06 | Ralph Jones | Convert to silicongraphics 3.3 fortran 77
+C> 1993-03-29 | Ralph Jones | Add save statement
+C> 1994-04-17 | Ralph Jones | Complete rewrite to use sbyte, make code portable, upgrade to on388
+C> 1994-05-05 | Ralph Jones | Correction in two tables
+C> 1996-08-02 | Ralph Jones | Error using T marker
+C> 1996-09-03 | Ralph Jones | Add mercator grids 8 and 53 to tables
+C> 1999-02-15 | B. Facey | Replace w3fs04 with w3movdat().
+C> 2002-10-15 | Boi Vuong | Replaced function ichar with mova2i()
 C>
-C> PROGRAM HISTORY LOG:
-C>   91-10-07  ORIGINAL AUTHOR MCCLEES, A. J.
-C>   92-01-06  R.E.JONES   CONVERT TO SiliconGraphics 3.3 FORTRAN 77
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   94-04-17  R.E.JONES   COMPLETE REWRITE TO USE SBYTE, MAKE CODE
-C>                         PORTABLE, UPGRADE TO ON388, MAR 24,1994
-C>   94-05-05  R.E.JONES   CORRECTION IN TWO TABLES
-C>   96-08-02  R.E.JONES   ERROR USING T MARKER
-C>   96-09-03  R.E.JONES   ADD MERCATOR GRIDS 8 AND 53 TO TABLES
-C>   99-02-15  B. FACEY    REPLACE W3FS04 WITH W3MOVDAT.
-C>   02-10-15  VUONG       REPLACED FUNCTION ICHAR WITH MOVA2I
+C> @param[in] GRIB GRIB section 0 read as character*8
+C> @param[in] PDS GRIB PDS section 1 read as character*1 PDS(*)
+C> @param[out] ID8 12 Integer*4 formatted O.N. 84 ID. 6 integer 64 bit words on cray
+C> @param[out] IERR
+C> 0 - Completed satisfactorily
+C> 1 - Grib block 0 not correct
+C> 2 - Length of pds not correct
+C> 3 - Could not match type indicator
+C> 4 - Grid type not in tables
+C> 5 - Could not match type level
+C> 6 - Could not interpret originator of code
 C>
-C> USAGE:    CALL W3FP13  (GRIB, PDS,  ID8, IERR )
-C>   INPUT ARGUMENT LIST:
-C>     GRIB     - GRIB SECTION 0 READ AS CHARACTER*8
-C>     PDS      - GRIB PDS SECTION 1 READ AS CHARACTER*1 PDS(*)
+C> @note Some of the id's will not be exact to the o.n. 84
+C> for locating field on the dataset. These differences
+C> are mainly due to truncation errors with layers.
+C> For example: .18019 sig .47191 sig r h for 36.o hrs
+C> will convert to: .18000 sig .47000 sig r h for 36.0 hrs
+C> !!!!!!!the above id's now forced to be exact!!!!!!!!!
+C> If j the word count is greater then 32743, j is stored
+C> in the 12th id word. Bits 16-31 of the 8th id word are
+C> set to zero.
 C>
-C>   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C>     ID8      - 12 INTEGER*4 FORMATTED O.N. 84 ID.
-C>                 6 INTEGER 64 BIT WORDS ON CRAY
-C>     IERR   0 - COMPLETED SATISFACTORILY
-C>            1 - GRIB BLOCK 0 NOT CORRECT
-C>            2 - LENGTH OF PDS NOT CORRECT
-C>            3 - COULD NOT MATCH TYPE INDICATOR
-C>            4 - GRID TYPE NOT IN TABLES
-C>            5 - COULD NOT MATCH TYPE LEVEL
-C>            6 - COULD NOT INTERPRET ORIGINATOR OF CODE
-C>    SUBPROGRAMS CALLED:
-C>       SPECIAL:  INDEX,  MOVA2I,  CHAR,  IOR,  IAND, ISHFT
-C>
-C>       LIBRARY:
-C>       W3LIB:    W3MOVDAT, W3FI69, W3FI01
-C>
-C>   REMARKS:  SOME OF THE ID'S WILL NOT BE EXACT TO THE O.N. 84
-C>             FOR LOCATING FIELD ON THE DATASET.  THESE DIFFERENCES
-C>             ARE MAINLY DUE TO TRUNCATION ERRORS WITH LAYERS.
-C>             FOR EXAMPLE: .18019 SIG .47191 SIG R H FOR 36.O HRS
-C>             WILL CONVERT TO: .18000 SIG .47000 SIG R H FOR 36.0 HRS
-C>             !!!!!!!THE ABOVE ID'S NOW FORCED TO BE EXACT!!!!!!!!!
-C>             IF J THE WORD COUNT IS GREATER THEN 32743, J IS STORED
-C>             IN THE 12TH ID WORD. BITS 16-31 OF THE 8TH ID WORD ARE
-C>             SET TO ZERO.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: FORTRAN 90
+C> @author A.J. McClees @date 1991-10-07
       SUBROUTINE W3FP13 (GRIB, PDS, ID8, IERR )
 C
         INTEGER       HH       (255)
@@ -61,9 +51,9 @@ C
         INTEGER       LL1      (127)
         INTEGER       LL2      (128)
         INTEGER       ICXG2    (9)
-        INTEGER       ICXGB2   (9) 
-        INTEGER       ICXG1    (7) 
-        INTEGER       ICXGB1   (7)      
+        INTEGER       ICXGB2   (9)
+        INTEGER       ICXG1    (7)
+        INTEGER       ICXGB1   (7)
 C
         INTEGER       C1
         INTEGER       C2
@@ -88,7 +78,7 @@ C       INTEGER       S2
 C
         CHARACTER * 8  GRIB
         CHARACTER * 8  IGRIB
-        REAL RINC(5) 
+        REAL RINC(5)
         INTEGER  NDATE(8), MDATE(8)
         CHARACTER * 1  IWORK   ( 8)
         CHARACTER * 1  JWORK   ( 8)
@@ -111,13 +101,13 @@ C
      &                 51,  52,  53,  54,  55,  56,  57,  58,  59,  60,
      &                 61,  62,  63,  64,  65,  66,  67,  68,  69,  70,
      &                 71,  72,  73,  74,  75,  76,  77,  78,  79,  80,
-     &                 81,  82,  83,  84,  85,  86,  87,  88,  89,  90, 
+     &                 81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
      &                 91,  92,  93,  94,  95,  96,  97,  98,  99, 100,
      &                101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
      &                111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
      &                121, 122, 123, 124, 125, 126, 127/
-        DATA  HH2   / 128, 129, 130,  
-     &                131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 
+        DATA  HH2   / 128, 129, 130,
+     &                131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
      &                141, 142, 143, 144, 145, 146, 147, 148, 149, 150,
      &                151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
      &                161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
@@ -135,7 +125,7 @@ C
 C
 C   ########### NUMBERS FORCED AFTER CONVERTING FROM GRIB LAYER.
 C                   ICXG2     1.0000,  .98230,  .96470,
-C                             .85000,  .84368,  .47191, 
+C                             .85000,  .84368,  .47191,
 C                             .18017,  .81573,  .25011
 C   #################
 C
@@ -195,7 +185,7 @@ C
      &                255,   1, 255, 255, 255, 255, 255, 255, 255, 255,
      &                255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
      &                255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-     &                255, 160, 255, 255, 255/      
+     &                255, 160, 255, 255, 255/
 C
         DATA  NPTS  /  1679, 259920,  3021,  2385,  5104, 4225,
      &                 4225,   5365,  5365,  8326,  8326,
@@ -239,15 +229,15 @@ C     CONVERT PDS INTO 25 INTEGER NUMBERS
 C
       CALL W3FI69(PDS,ID)
 C
-C     ID(1)  = NUMBER OF BYTES IN PDS 
-C     ID(2)  = PARAMETER TABLE VERSION NUMBER     
-C     ID(3)  = IDENTIFICATION OF ORIGINATING CENTER 
+C     ID(1)  = NUMBER OF BYTES IN PDS
+C     ID(2)  = PARAMETER TABLE VERSION NUMBER
+C     ID(3)  = IDENTIFICATION OF ORIGINATING CENTER
 C     ID(4)  = MODEL IDENTIFICATION (ALLOCATED BY ORIGINATING CENTER)
 C     ID(5)  = GRID IDENTIFICATION
 C     ID(6)  = 0 IF NO GDS SECTION, 1 IF GDS SECTION IS INCLUDED
 C     ID(7)  = 0 IF NO BMS SECTION, 1 IF BMS SECTION IS INCLUDED
-C     ID(8)  = INDICATOR OF PARAMETER AND UNITS 
-C     ID(9)  = INDICATOR OF TYPE OF LEVEL OR LAYER 
+C     ID(8)  = INDICATOR OF PARAMETER AND UNITS
+C     ID(9)  = INDICATOR OF TYPE OF LEVEL OR LAYER
 C     ID(10) = LEVEL 1
 C     ID(11) = LEVEL 2
 C     ID(12) = YEAR OF CENTURY
@@ -269,17 +259,17 @@ C     THE 1ST 8 32 BIT WORDS WITH THE OFFICE NOTE 84 ID'S ARE
 C     IN 27 PARTS, SBYTE IS USED WITH BIT COUNTS TO MAKE THIS
 C     DATA. THIS MAKE IT WORD SIZE INDEPENDENT, AND MAKES THIS
 C     SUBROUTINE PORTABLE. TABLE WITH STARTING BITS IS NEXT.
-C     THE STARTING BIT AND NO. OF BITS IS USED AS THE 3RD AND 
+C     THE STARTING BIT AND NO. OF BITS IS USED AS THE 3RD AND
 C     4TH PARAMETER FOR SBYTE. READ GBYTES DOCUMENT FROM NCAR
 C     FOR INFORMATION ABOUT SBYTE. SEE PAGE 38, FIGURE 1, IN
 C     OFFICE NOTE 84.
 C
 C     NO.    NAME  STARTING BIT  NO. OF BITS
 C   -----------------------------------------
-C      1       Q         0           12     
-C      2      S1        12           12     
-C      3      F1        24            8     
-C      4       T        32            4     
+C      1       Q         0           12
+C      2      S1        12           12
+C      3      F1        24            8
+C      4       T        32            4
 C      5      C1        36           20
 C      6      E1        56            8
 C      7       M        64            4
@@ -302,8 +292,8 @@ C     23      DD       208            8
 C     24      II       216            8
 C     25       R       224            8
 C     26       G       232            8
-C     27       J       240           16  
-C OR  27       J       352           32  J > 32743 
+C     27       J       240           16
+C OR  27       J       352           32  J > 32743
 C----------------------------------------------
 C
 C$      1.0 INITIALIZATION - NO. OF ENTRIES IN INDCATOR PARM.
@@ -366,14 +356,14 @@ C
                CALL SBYTE(ID8,IGRDPT,240,16)
              ELSE
                CALL SBYTE(ID8,IGRDPT,352,32)
-             END IF          
+             END IF
              GO TO 350
            END IF
          END DO
            IERR = 4
            PRINT *,'IERR = ',IERR,',GRID TYPE = ',ID(5)
            RETURN
-C           
+C
  350   CONTINUE
 C
 C      COMPUTE R MARKER FROM MODEL NUMBERS FOR U.S. CENTER
@@ -381,41 +371,41 @@ C
 C     (ERL) run
          IF (ID(3).EQ.7) THEN
            IF (ID(4).EQ.19.OR.ID(4).EQ.53.OR.ID(4).EQ.83.OR.
-     &         ID(4).EQ.84.OR.ID(4).EQ.85) THEN 
-                  CALL SBYTE(ID8,0,224,8) 
-C     (NMC) run       
-           ELSE IF (ID(4).EQ.25) THEN 
-                    CALL SBYTE(ID8,1,224,8)   
-C     (RGL) run       
-           ELSE IF (ID(4).EQ.39.OR.ID(4).EQ.64) THEN 
-                    CALL SBYTE(ID8,2,224,8)   
-C     (AVN) run     
+     &         ID(4).EQ.84.OR.ID(4).EQ.85) THEN
+                  CALL SBYTE(ID8,0,224,8)
+C     (NMC) run
+           ELSE IF (ID(4).EQ.25) THEN
+                    CALL SBYTE(ID8,1,224,8)
+C     (RGL) run
+           ELSE IF (ID(4).EQ.39.OR.ID(4).EQ.64) THEN
+                    CALL SBYTE(ID8,2,224,8)
+C     (AVN) run
            ELSE IF (ID(4).EQ.10.OR.ID(4).EQ.42.OR.
-     &              ID(4).EQ.68.OR.ID(4).EQ.73.OR. 
-     &              ID(4).EQ.74.OR.ID(4).EQ.75.OR. 
-     &              ID(4).EQ.77.OR.ID(4).EQ.81.OR. 
-     &              ID(4).EQ.88) THEN 
-                    CALL SBYTE(ID8,3,224,8) 
-C     (MRF) run       
+     &              ID(4).EQ.68.OR.ID(4).EQ.73.OR.
+     &              ID(4).EQ.74.OR.ID(4).EQ.75.OR.
+     &              ID(4).EQ.77.OR.ID(4).EQ.81.OR.
+     &              ID(4).EQ.88) THEN
+                    CALL SBYTE(ID8,3,224,8)
+C     (MRF) run
            ELSE IF (ID(4).EQ.69.OR.ID(4).EQ.76.OR.
      &              ID(4).EQ.78.OR.ID(4).EQ.79.OR.
-     &              ID(4).EQ.80.oR.ID(4).EQ.87) THEN 
-                    CALL SBYTE(ID8,4,224,8) 
-C     (FNL) run       
+     &              ID(4).EQ.80.oR.ID(4).EQ.87) THEN
+                    CALL SBYTE(ID8,4,224,8)
+C     (FNL) run
            ELSE IF (ID(4).EQ.43.OR.ID(4).EQ.44.OR.
      &              ID(4).EQ.82) THEN
-                    CALL SBYTE(ID8,5,224,8) 
-C     (HCN) run       
-           ELSE IF ( ID(4).EQ.70) THEN 
+                    CALL SBYTE(ID8,5,224,8)
+C     (HCN) run
+           ELSE IF ( ID(4).EQ.70) THEN
                     CALL SBYTE(ID8,6,224,8)
 C     (RUC) run
-           ELSE IF ( ID(4).EQ.86) THEN 
+           ELSE IF ( ID(4).EQ.86) THEN
                     CALL SBYTE(ID8,7,224,8)
 C     Not applicable, set to 255
            ELSE
              CALL SBYTE(ID8,255,224,8)
            END IF
-         END IF                     
+         END IF
 C
 C$            4.0 FORM TYPE DATA PARAMETER
 C
@@ -455,7 +445,7 @@ C
          M     = 0
          S1    = 8
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
          LEVEL = ID(11)
          IF (LEVEL .GE. 1 .AND. LEVEL .LE. 9) THEN
            E1  = 4
@@ -469,13 +459,13 @@ C
          C1    = LEVEL * 10 ** E1
          CALL SBYTE(ID8,C1,36,20)
          E1    = IOR(E1,MSK2)
-         CALL SBYTE(ID8,E1,56,8)     
+         CALL SBYTE(ID8,E1,56,8)
 C
        ELSE IF (ID(9) .EQ. 103) THEN
          M     = 0
          S1    = 1
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
          LEVEL = ID(11)
          IF (LEVEL .GE. 1 .AND. LEVEL .LE. 9) THEN
            E1  = 4
@@ -489,13 +479,13 @@ C
          C1    = LEVEL * 10 ** E1
          CALL SBYTE(ID8,C1,36,20)
          E1    = IOR(E1,MSK2)
-         CALL SBYTE(ID8,E1,56,8)     
+         CALL SBYTE(ID8,E1,56,8)
 C
        ELSE IF (ID(9) .EQ. 105) THEN
          M     = 0
          S1    = 6
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
          LEVEL = ID(11)
          IF (LEVEL .GE. 1 .AND. LEVEL .LE. 9) THEN
            E1  = 4
@@ -509,13 +499,13 @@ C
          C1    = LEVEL * 10 ** E1
          CALL SBYTE(ID8,C1,36,20)
          E1    = IOR(E1,MSK2)
-         CALL SBYTE(ID8,E1,56,8)     
+         CALL SBYTE(ID8,E1,56,8)
 C
        ELSE IF (ID(9) .EQ. 111) THEN
          M     = 0
          S1    = 7
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
          LEVEL = ID(11)
          IF (LEVEL .GE. 1 .AND. LEVEL .LE. 9) THEN
            E1  = 4
@@ -527,20 +517,20 @@ C
            E1  = 1
          END IF
          C1    = LEVEL * 10 ** E1
-         CALL SBYTE(ID8,C1,36,20)        
+         CALL SBYTE(ID8,C1,36,20)
 C  XXXXXXX SCALE FROM CENTIMETERS TO METERS. XXXXXXXXXX
          E1    = IOR(E1,MSK2)
          E1    = E1 + 2
          IF (C1 .EQ. 0) THEN
            E1 = 0
          END IF
-         CALL SBYTE(ID8,E1,56,8)     
-C    
+         CALL SBYTE(ID8,E1,56,8)
+C
        ELSE IF (ID(9) .EQ. 107) THEN
          M     = 0
          S1    = 148
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
          LEVEL = ID(11)
          IF (LEVEL .GE. 1 .AND. LEVEL .LE. 9) THEN
            E1  = 4
@@ -559,20 +549,20 @@ C
              C1 = ICXG1(ISI)
            END IF
          END DO
-         CALL SBYTE(ID8,C1,36,20)        
+         CALL SBYTE(ID8,C1,36,20)
 C***********SCALING OF .0001 TAKEN INTO ACCOUNT
          E1 = E1 + 4
          E1 = IOR(E1,MSK2)
          IF (C1 .EQ. 0) THEN
            E1 = 0
          END IF
-         CALL SBYTE(ID8,E1,56,8)      
+         CALL SBYTE(ID8,E1,56,8)
 C
        ELSE IF (ID(9) .EQ. 4) THEN
          M     = 0
          S1    = 16
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
 C        LEVEL = ID(11)
 C******* CONSTANT VALUE OF 273.16 WILL HAVE TO BE INSERTED
 C        LEVEL = IAND (IPDS(3),MSK1)
@@ -587,40 +577,40 @@ C          E1 = 1
 C        END IF
            E1 = 2
            C1 = (273.16 * 10 ** E1) + .5
-           CALL SBYTE(ID8,C1,36,20)        
+           CALL SBYTE(ID8,C1,36,20)
            E1 = IOR(E1,MSK2)
-           CALL SBYTE(ID8,E1,56,8)      
-C*************SPECIAL CASES *********************      
+           CALL SBYTE(ID8,E1,56,8)
+C*************SPECIAL CASES *********************
        ELSE IF (ID(9) .EQ. 102) THEN
          M     = 0
          S1    = 128
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,0,64,32)     
+         CALL SBYTE(ID8,0,64,32)
 C
        ELSE IF (ID(9) .EQ. 1) THEN
          M     = 0
          S1    = 129
 C*****   S1    = 133   ALSO POSSIBILITY
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,0,64,32)     
+         CALL SBYTE(ID8,0,64,32)
 C
        ELSE IF (ID(9) .EQ. 7) THEN
          M     = 0
          S1    = 130
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,0,64,32)     
+         CALL SBYTE(ID8,0,64,32)
 C
        ELSE IF (ID(9) .EQ. 6) THEN
          M     = 0
          S1    = 131
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,0,64,32)     
+         CALL SBYTE(ID8,0,64,32)
 C
        ELSE IF (ID(9) .EQ. 101) THEN
          M     = 2
          S1    = 8
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
          CALL SBYTE(ID8,S1,76,12)
          LEVEL = ID(10)
          LEVEL = (LEVEL * .1) * 10 ** 2
@@ -636,7 +626,7 @@ C
          C1    = LEVEL * 10 ** E1
          CALL SBYTE(ID8,C1,36,20)
          E1    = IOR(E1,MSK2)
-         CALL SBYTE(ID8,E1,56,8)     
+         CALL SBYTE(ID8,E1,56,8)
          LEVEL2 = ID(11)
          LEVEL2 = (LEVEL2 * .1) * 10 ** 2
          IF (LEVEL2 .GE. 1 .AND. LEVEL2 .LE. 9) THEN
@@ -652,13 +642,13 @@ C
          CALL SBYTE(ID8,C2,100,20)
          IF (C2 .EQ. 0) E2 = 0
          E2   = IOR(E2,MSK2)
-         CALL SBYTE(ID8,E2,120,8)     
+         CALL SBYTE(ID8,E2,120,8)
 C
        ELSE IF (ID(9) .EQ. 104) THEN
          M     = 2
          S1    = 1
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
          CALL SBYTE(ID8,S1,76,12)
          LEVEL = ID(10)
          LEVEL = (LEVEL * .1) * 10 ** 2
@@ -674,7 +664,7 @@ C
          C1     = LEVEL * 10 ** E1
          CALL SBYTE(ID8,C1,36,20)
          E1     = IOR(E1,MSK2)
-         CALL SBYTE(ID8,E1,56,8)     
+         CALL SBYTE(ID8,E1,56,8)
          LEVEL2 = ID(11)
          LEVEL2 = (LEVEL2 * .1) * 10 ** 2
          IF (LEVEL2 .GE. 1 .AND. LEVEL2 .LE. 9) THEN
@@ -689,13 +679,13 @@ C
          C2     = LEVEL2 * 10 ** E2
          CALL SBYTE(ID8,C2,100,20)
          E2     = IOR(E2,MSK2)
-         CALL SBYTE(ID8,E2,120,8)     
+         CALL SBYTE(ID8,E2,120,8)
 C
        ELSE IF (ID(9) .EQ. 106) THEN
          M     = 2
          S1    = 6
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
          CALL SBYTE(ID8,S1,76,12)
          LEVEL = ID(10)
          LEVEL = (LEVEL * .1) * 10**2
@@ -711,7 +701,7 @@ C
          C1    = LEVEL * 10 ** E1
          CALL SBYTE(ID8,C1,36,20)
          E1    = IOR(E1,MSK2)
-         CALL SBYTE(ID8,E1,56,8)     
+         CALL SBYTE(ID8,E1,56,8)
          LEVEL2 = ID(10)
          LEVEL2 = (LEVEL2 * .1) * 10 ** 2
          IF (LEVEL2 .GE. 1 .AND. LEVEL2 .LE. 9) THEN
@@ -726,7 +716,7 @@ C
          C2     = LEVEL2 * 10 ** E2
          CALL SBYTE(ID8,C2,100,20)
          E2     = IOR(E2,MSK2)
-         CALL SBYTE(ID8,E2,120,8)     
+         CALL SBYTE(ID8,E2,120,8)
 C
        ELSE IF (ID(9) .EQ. 108) THEN
          M     = 2
@@ -734,7 +724,7 @@ C
 C****    S1    = 144  ALSO POSSIBILITY
 C****    S1    = 145  ALSO POSSIBILITY
          CALL SBYTE(ID8,S1,12,12)
-         CALL SBYTE(ID8,M,64,4)     
+         CALL SBYTE(ID8,M,64,4)
          CALL SBYTE(ID8,S1,76,12)
          LEVEL = ID(10)
          LEVEL = LEVEL
@@ -756,14 +746,14 @@ C****    S1    = 145  ALSO POSSIBILITY
          CALL SBYTE(ID8,C1,36,20)
          IF (C1 .EQ. 0) THEN
            E1 = 0
-           CALL SBYTE(ID8,E1,56,8)     
+           CALL SBYTE(ID8,E1,56,8)
            GO TO 700
          END IF
 C*****TAKE SCALING INTO ACCOUNT .01
          E1  =  E1 + 2
          E1  =  IOR(E1,MSK2)
          CALL SBYTE(ID8,E1,56,8)
-C     
+C
  700     CONTINUE
          LEVEL2 = ID(11)
          LEVEL2 = LEVEL2
@@ -784,11 +774,11 @@ C
          END DO
          CALL SBYTE(ID8,C2,100,20)
          E2     = IOR(E2,MSK2)
-         CALL SBYTE(ID8,E2,120,8)     
+         CALL SBYTE(ID8,E2,120,8)
 C*******TAKE SCALING INTO ACCOUNT .01
          E2     = E2 + 2
          E2     = IOR(E2,MSK2)
-         CALL SBYTE(ID8,E2,120,8)     
+         CALL SBYTE(ID8,E2,120,8)
 C
        END IF
 C              5.1  FORCAST TIMES ,PLUS THE T MARKER AND CM FIELD
@@ -838,7 +828,7 @@ C
          RINC(2) = 36.0
          IYR=MOVA2I(PDS(13))
          PRINT *, 'IYR = ', IYR
-         IF(IYR.LT.20)THEN  
+         IF(IYR.LT.20)THEN
            MDATE(1)=2000+IYR
          ELSE
            MDATE(1)=1900+IYR
@@ -846,8 +836,8 @@ C
          MDATE(2) = MOVA2I(PDS(14))
          MDATE(3) = MOVA2I(PDS(15))
          MDATE(5) = MOVA2I(PDS(16))
-C        PRINT *, 'OLD DATE = ', MDATE(1), MDATE(2), MDATE(3), MDATE(5) 
-C        PRINT *, 'CHANGE DATE BY - ',  RINC(2) 
+C        PRINT *, 'OLD DATE = ', MDATE(1), MDATE(2), MDATE(3), MDATE(5)
+C        PRINT *, 'CHANGE DATE BY - ',  RINC(2)
          CALL W3MOVDAT(RINC,MDATE,NDATE)
 C        PRINT *, 'NEW DATE = ', NDATE(1), NDATE(2), NDATE(3), NDATE(5)
 C        CALL W3FS04 (IDATE,JDATE,3,IERR)
@@ -878,7 +868,7 @@ C        NAVG = MOVA2I(PDS(23))
          RINC(2) = -36.0
          IYR=MOVA2I(PDS(13))
          PRINT *, 'IYR = ', IYR
-         IF(IYR.LT.20)THEN  
+         IF(IYR.LT.20)THEN
            MDATE(1)=2000+IYR
          ELSE
            MDATE(1)=1900+IYR
@@ -886,8 +876,8 @@ C        NAVG = MOVA2I(PDS(23))
          MDATE(2) = MOVA2I(PDS(14))
          MDATE(3) = MOVA2I(PDS(15))
          MDATE(5) = MOVA2I(PDS(16))
-C        PRINT *, 'OLD DATE = ', MDATE(1), MDATE(2), MDATE(3), MDATE(5) 
-C        PRINT *, 'CHANGE DATE BY - ',  RINC(2) 
+C        PRINT *, 'OLD DATE = ', MDATE(1), MDATE(2), MDATE(3), MDATE(5)
+C        PRINT *, 'CHANGE DATE BY - ',  RINC(2)
          CALL W3MOVDAT(RINC,MDATE,NDATE)
 C        PRINT *, 'NEW DATE = ', NDATE(1), NDATE(2), NDATE(3), NDATE(5)
 C        CALL W3FS04 (IDATE,JDATE,-3,IERR)
@@ -910,9 +900,9 @@ C
  710   CONTINUE
 C
 C        TEST FOR 64 BIT COMPUTER (CRAY)
-C 
+C
          IF (LW.EQ.8) IDATE = ISHFT(IDATE,-32)
-         CALL SBYTE(ID8,IDATE,192,32)     
+         CALL SBYTE(ID8,IDATE,192,32)
 C
        IERR = 0
        RETURN
