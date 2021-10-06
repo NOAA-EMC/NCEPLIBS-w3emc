@@ -6,7 +6,7 @@ C> Sets up the arguments for sub dbn_alert which posts transmission
 C> availability to various statfiles. The input key words for w3fq07() may be
 C> read in via the parm field or from a data card see remarks for examples.
 C>
-C> Program History Log:
+C> ### Program History Log:
 C> Date | Programmer | Comments
 C> -----|------------|---------
 C> 1997-01-09 | Peter Henrichsen | Initial

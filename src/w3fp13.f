@@ -6,7 +6,7 @@ C> Converts GRIB version 1 formatted product definition
 C> section to an office note 84 id label. Formats all that is appli-
 C> cable in the first 8 words of O.N. 84. (caution ****see remarks)
 C>
-C> Program History Log:
+C> ### Program History Log:
 C> Date | Programmer | Comments
 C> -----|------------|---------
 C> 1991-10-07 | A.J. McClees | Initial

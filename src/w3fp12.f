@@ -7,7 +7,7 @@ C> specifications set by WMO. Using o.n. 84 id's (1st 8 words)
 C> as the input data. New subroutine corresponds to the revision
 C> #1 of the WMO GRIB standards made march 15, 1991.
 C>
-C> Program History Log:
+C> ### Program History Log:
 C> Date | Programmer | Comments
 C> -----|------------|---------
 C> 1991-07-30 | A.J. McClees | New subroutine which formats the pds section from the o.n. 84 id's from the GRIB edition 1 dated march 15, 1991.

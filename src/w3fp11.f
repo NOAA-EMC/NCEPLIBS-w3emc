@@ -6,7 +6,7 @@ C> Converts GRIB formatted product definition section version
 C> 1 to a one line readable title. GRIB section 0 is also tested to
 C> verify that GRIB data is being deciphered.
 C>
-C> Program History Log:
+C> ### Program History Log:
 C> Date | Programmer | Comments
 C> -----|------------|---------
 C> 1991-06-19 | Ralph Jones |  Initial
