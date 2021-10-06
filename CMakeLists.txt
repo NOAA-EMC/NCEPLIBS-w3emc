@@ -9,7 +9,7 @@ file(STRINGS "VERSION" pVersion)
 project(
   w3emc
   VERSION ${pVersion}
-  LANGUAGES Fortran)
+  LANGUAGES C Fortran)
 
 # Handle user options.
 option(ENABLE_DOCS "Enable generation of doxygen-based documentation." OFF)
