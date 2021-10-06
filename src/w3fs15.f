@@ -1,66 +1,48 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:   W3FS15       UPDATING OFFICE NOTE 85 DATE/TIME WORD
-C>   PRGMMR: REJONES          ORG: NMC421     DATE: 89-08-23
+C> @brief Updating office note 85 date/time word.
+C> @author Ralph Jones @date 1987-02-09
+
+C> Updates or backdates a fullword date/time word (o.n. 84) by a specified
+C> number of hours.
 C>
-C> ABSTRACT: UPDATES OR BACKDATES A FULLWORD DATE/TIME WORD (O.N. 84)
-C>   BY A SPECIFIED NUMBER OF HOURS.
+C> ### Program History Log:
+C> Date | Programmer | Comments
+C> -----|------------|---------
+C> Unknown | Robert Allard | Initial.
+C> 1987-02-19 | Ralph Jones | Clean up code
+C> 1987-02-19 | Ralph Jones | Change to microsoft fortran 4.10
+C> 1989-05-12 | Ralph Jones | Correct order of bytes in date word for pc
+C> 1989-08-04 | Ralph Jones | Clean up code, get rid of assign, correction for memory set to indefinite.
+C> 1989-10-25 | Ralph Jones | Change to cray cft77 fortran
+C> 1995-11-15 | Ralph Jones | Add save statement
+C> 2002-10-15 | Boi Vuong | Replaced function ichar with mova2i
 C>
-C> PROGRAM HISTORY LOG:
-C>   ??-??-??  R.ALLARD
-C>   87-02-19  R.E.JONES  CLEAN UP CODE
-C>   87-02-19  R.E.JONES  CHANGE TO MICROSOFT FORTRAN 4.10
-C>   89-05-12  R.E.JONES  CORRECT ORDER OF BYTES IN DATE WORD FOR PC
-C>   89-08-04  R.E.JONES  CLEAN UP CODE, GET RID OF ASSIGN, CORRECTION
-C>                        FOR MEMORY SET TO INDEFINITE.
-C>   89-10-25  R.E.JONES  CHANGE TO CRAY CFT77 FORTRAN
-C>   95-11-15  R.E.JONES  ADD SAVE STATEMENT
-C>   02-10-15  VUONG       REPLACED FUNCTION ICHAR WITH MOVA2I
+C> @param[in] IDATE Packed binary date/time as follows:
+C> Byte | Variable | Range
+C> -----|----------|------
+C> Byte 1 | is year of century | 00-99
+C> Byte 2 | is month           | 01-12
+C> Byte 3 | is day of month    | 01-31
+C> Byte 4 | is hour            | 00-23
+C> Subroutine takes advantage of fortran address passing, IDATE and NDATE may
+C> be a character*1 array of four, the left 32 bits of 64 bit integer word.
+C> An office note 85 label can be stored in 4 integer words. If integer the
+C> 2nd word is used. Output is stored in left 32 bits. for a office note 84
+C> label the 7th word is in the 4th cray 64 bit integer, the left 32 bits.
+C> @param[in] JTAU Number of hours to update (if positive) or backdate (if negative)
+C> @param[out] NDATE New date/time word returned in the same format as 'IDATE'.
+C> 'NDATE' and 'IDATE' may be the same variable.
 C>
-C> USAGE:    CALL W3FS15 (IDATE, JTAU, NDATE)
-C>   INPUT ARGUMENT LIST:
-C>     IDATE    - PACKED BINARY DATE/TIME AS FOLLOWS:
-C>                BYTE 1  IS YEAR OF CENTURY  00-99
-C>                BYTE 2  IS MONTH            01-12
-C>                BYTE 3  IS DAY OF MONTH     01-31
-C>                BYTE 4  IS HOUR             00-23
-C>                SUBROUTINE TAKES ADVANTAGE OF FORTRAN ADDRESS
-C>                PASSING, IDATE AND NDATE MAY BE
-C>                A CHARACTER*1 ARRAY OF FOUR, THE LEFT 32
-C>                BITS OF 64 BIT INTEGER WORD. AN OFFICE NOTE 85
-C>                LABEL CAN BE STORED IN
-C>                4 INTEGER WORDS.
-C>                IF INTEGER THE 2ND WORD IS USED. OUTPUT
-C>                IS STORED IN LEFT 32 BITS. FOR A OFFICE NOTE 84
-C>                LABEL THE 7TH WORD IS IN THE 4TH CRAY 64 BIT
-C>                INTEGER, THE LEFT 32 BITS.
-C>     JTAU     - INTEGER  NUMBER OF HOURS TO UPDATE (IF POSITIVE)
-C>                OR BACKDATE (IF NEGATIVE)
+C> @note This routine is valid only for the 20th century.
 C>
-C>   OUTPUT ARGUMENT LIST:
-C>     NDATE    - NEW DATE/TIME WORD RETURNED IN THE
-C>                SAME FORMAT AS 'IDATE'. 'NDATE' AND 'IDATE' MAY
-C>                BE THE SAME VARIABLE.
+C> @note The format of the date/time word is the same as the seventh word of
+C> the packed data field label (see o.n. 84) and the third word of a binary
+C> data set label (see o.n. 85).
 C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       W3LIB    - NONE
+C> Exit states: An error found by out of range tests on the given date/time
+C> information will be indicated by returning a binary zero word in 'NDATE'.
 C>
-C>   RESTRICTIONS: THIS ROUTINE IS VALID ONLY FOR THE 20TH CENTURY.
-C>
-C>   NOTES: THE FORMAT OF THE DATE/TIME WORD IS THE SAME AS THE
-C>     SEVENTH WORD OF THE PACKED DATA FIELD LABEL (SEE O.N. 84) AND
-C>     THE THIRD WORD OF A BINARY DATA SET LABEL (SEE O.N. 85).
-C>
-C>   EXIT STATES:
-C>     AN ERROR FOUND BY OUT OF RANGE TESTS ON THE GIVEN DATE/TIME
-C>     INFORMATION WILL BE INDICATED BY RETURNING A BINARY ZERO WORD
-C>     IN 'NDATE'.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Ralph Jones @date 1987-02-09
       SUBROUTINE W3FS15(IDATE,JTAU,NDATE)
 C
       INTEGER     ITABYR(13)
