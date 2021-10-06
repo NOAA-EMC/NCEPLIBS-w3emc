@@ -27,7 +27,11 @@ var NAVTREE =
   [ "NCEPLIBS-w3emc", "index.html", [
     [ "Modules", "namespaces.html", [
       [ "NCEPLIBS-w3emc", "index.html#autotoc_md0", null ],
-      [ "Modules List", "namespaces.html", "namespaces_dup" ]
+      [ "Modules List", "namespaces.html", "namespaces_dup" ],
+      [ "Module Members", "namespacemembers.html", [
+        [ "All", "namespacemembers.html", null ],
+        [ "Functions/Subroutines", "namespacemembers_func.html", null ]
+      ] ]
     ] ],
     [ "Data Types List", "annotated.html", [
       [ "Data Types List", "annotated.html", "annotated_dup" ]
@@ -35,8 +39,8 @@ var NAVTREE =
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ],
       [ "Globals", "globals.html", [
-        [ "All", "globals.html", null ],
-        [ "Functions/Subroutines", "globals_func.html", null ]
+        [ "All", "globals.html", "globals_dup" ],
+        [ "Functions/Subroutines", "globals_func.html", "globals_func" ]
       ] ]
     ] ]
   ] ]
@@ -44,10 +48,9 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"",
-"putgben_8f.html",
-"w3fi67_8f.html#ad13befc6a11f1be63345c169e4e2c21a",
-"w3ft40_8f.html"
+"aea_8f.html",
+"w3ai00_8f.html#aa9b74cf19854cae0066bd5d905a65873",
+"w3fi78_8f.html#a9c08a6a24a9527776d2b533108dbf261"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
