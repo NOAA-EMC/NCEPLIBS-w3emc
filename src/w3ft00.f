@@ -1,65 +1,41 @@
 C> @file
-C
-C> SUBPROGRAM: W3FT00         DATA FIELD TRANFORMATION SUBROUTINE
-C>   AUTHOR: MCDONELL, J.     ORG: W345        DATE: SEPTEMBER, 1974
-C>           HOWCROFT, J.
-C>   UPDATE: JONES,R.E.       ORG: W342        DATE: 27 JUN 84
+C> @brief Data field tranformation subroutine.
+C> @author J. McDonell @date 1974-09-01
+
+C> Transforms data contained in a grid array by translation, rotation about a
+C> common point and dilatation to a new grid array.
 C>
-C> ABSTRACT: TRANSFORMS DATA CONTAINED IN A GRID ARRAY BY TRANSLATION,
-C>   ROTATION ABOUT A COMMON POINT AND DILATATION TO A NEW GRID ARRAY.
+C> ### Program History Log:
+C> Date | Programmer | Comments
+C> -----|------------|---------
+C> 1974-09-01 | J. McDonell | Initial.
+C> 1984-06-27 | Ralph Jones | Change to ibm vs fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   74-09-01  J.MCDONELL
-C>   84-06-27  R.E.JONES   CHANGE TO IBM VS FORTRAN
+C> @param[in] IA (Integer) i-dimension of the input array fa
+C> @param[in] JA (Integer) j-dimension of the input array fa
+C> @param[in] IB (Integer) i-dimension of the output array fb
+C> @param[in] JB (Integer) j-dimension of the output array fb
+C> @param[in] SC (Real) Scale change (dilation) expressed as a ratio of the
+C> transformed to the origional field.
+C> @param[in] ARG (Real) Degree measure of the angle required to rotate the
+C> j-row of the origional grid into coincidence with the new grid. (+ counter-
+C> clockwise, - clockwise)
+C> @param[in] LIN (Integer) Interpolation method switch
+C> - .eq. 1 bilinear interpolation
+C> - .ne. 1 biquadratic interpolation
+C> @param FLD
+C> @param B
+C> @param CIP
+C> @param CJP
+C> @param FIPB
+C> @param FJPB
 C>
-C> USAGE:  CALL W3FT00 (FA,FB,IA,JA,IB,JB,AIP,AJP,BIP,BJP,SC,ARG,LIN)
+C> @remark In general 'fa' and 'fb' cannot be equivalenced although there are
+C> situations in which it would be safe to do so. care should be taken that
+C> all of the new grid points lie within the origional grid, no error checks
+C> are made.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     FA     ARG LIST  REAL  ORIGIONAL FIELD DIMENSIONED (IA,IJ)
-C>     IA     ARG LIST  INTEGER  I-DIMENSION OF THE INPUT ARRAY FA
-C>     JA     ARG LIST  INTEGER  J-DIMENSION OF THE INPUT ARRAY FA
-C>     IB     ARG LIST  INTEGER  I-DIMENSION OF THE OUTPUT ARRAY FB
-C>     JB     ARG LIST  INTEGER  J-DIMENSION OF THE OUTPUT ARRAY FB
-C>     AIP    ARG LIST  REAL   COMMON POINT I-COORDINATE OF THE ORIGIONAL
-C>                      FIELD ASSUMING A RIGHT HAND CARTESIAN COORDINATE
-C>                      SYSTEM. THE POINT NEED NOT BE IN EITHER GRID AND
-C>                      CAN HAVE FRACTIONAL INDICES).
-C>     AJP    ARG LIST  REAL  COMMON POINT J-COORDINATE AS AIP ABOVE
-C>     BIP    ARG LIST  REAL  COMMON POINT I-COORDINATE FOR TRANSFORMED
-C>                      GRID
-C>     BJP    ARG LIST  REAL  COMMON POINT J-COORDINATE FOR TRANSFORMED
-C>                      GRID
-C>     SC     ARG LIST  REAL  SCALE CHANGE (DILATION) EXPRESSED AS
-C>                      A RATIO OF THE TRANSFORMED TO THE ORIGIONAL FIELD
-C>     ARG    ARG LIST  REAL  DEGREE MEASURE OF THE ANGLE REQUIRED TO
-C>                      ROTATE THE J-ROW OF THE ORIGIONAL GRID INTO
-C>                      COINCIDENCE WITH THE NEW GRID. (+ COUNTER-
-C>                      CLOCKWISE, - CLOCKWISE)
-C>     LIN    ARG LIST  INTEGER  INTERPOLATION METHOD SWITCH
-C>                      .EQ. 1 BILINEAR INTERPOLATION
-C>                      .NE. 1 BIQUADRATIC INTERPOLATION
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     FB     ARG LIST  REAL  TRANSFORMED FIELD DIMENSIONED (IB,JB)
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     SIN    COS                                              SYSTEM
-C>
-C>   REMARKS: IN GENERAL 'FA' AND 'FB' CANNOT BE EQUIVALENCED
-C>     ALTHOUGH THERE ARE SITUATIONS IN WHICH IT WOULD BE SAFE TO DO
-C>     SO. CARE SHOULD BE TAKEN THAT ALL OF THE NEW GRID POINTS LIE
-C>     WITHIN THE ORIGIONAL GRID, NO ERROR CHECKS ARE MADE.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author J. McDonell @date 1974-09-01
       SUBROUTINE W3FT00(FLD,B,IA,JA,IB,JB,CIP,CJP,FIPB,FJPB,SC,ARG,LIN)
 C
       REAL  B(IB,JB)

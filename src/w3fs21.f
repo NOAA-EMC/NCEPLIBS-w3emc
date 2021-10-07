@@ -1,38 +1,23 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:   W3FS21       NUMBER OF MINUTES SINCE JAN 1, 1978
-C>   PRGMMR: REJONES          ORG: NMC421     DATE: 89-07-17
+C> @brief Number of minutes since jan 1, 1978
+C> @author A. Desmarais @date 1984-06-21
+
+C> Calculates the number of minutes since 0000, 1 January 1978.
 C>
-C> ABSTRACT: CALCULATES THE NUMBER OF MINUTES SINCE 0000,
-C>   1 JANUARY 1978.
+C> ### Program History Log:
+C> Date | Programmer | Comments
+C> -----|------------|---------
+C> 1984-06-21 | A. Desmarais | Initial.
+C> 1989-07-14 | Ralph Jones | Convert to cyber 205 fortran 200, change logic so it will work in 21 century.
+C> 1989-11-02 | Ralph Jones | Convert to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   84-06-21  A. DESMARAIS
-C>   89-07-14  R.E.JONES    CONVERT TO CYBER 205 FORTRAN 200,
-C>                          CHANGE LOGIC SO IT WILL WORK IN
-C>                          21 CENTURY.
-C>   89-11-02  R.E.JONES    CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] IDATE (INTEGER Size 5) Array containing year of century, month,
+C> day, hour and minute. IDATE(1) may be a two digit year or 4. If 2 digits
+c> and GE than 78 1900 is added to it. If LT 78 then 2000 is added to it. If 4
+C> digits the subroutine will work correctly to the year 3300 A.D.
+C> @param[out] NMIN (INTEGER) Number of minutes since 1 January 1978.
 C>
-C> USAGE:    CALL W3FS21 (IDATE, NMIN)
-C>   INPUT ARGUMENT LIST:
-C>     IDATE    - INTEGER  SIZE 5 ARRAY CONTAINING YEAR OF CENTURY,
-C>                MONTH, DAY, HOUR AND MINUTE.  IDATE(1) MAY BE
-C>                A TWO DIGIT YEAR OR 4. IF 2 DIGITS AND GE THAN 78
-C>                1900 IS ADDED TO IT. IF LT 78 THEN 2000 IS ADDED
-C>                TO IT. IF 4 DIGITS THE SUBROUTINE WILL WORK
-C>                CORRECTLY TO THE YEAR 3300 A.D.
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     NMIN     - INTEGER NUMBER OF MINUTES SINCE 1 JANUARY 1978
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       W3LIB    - IW3JDN
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author A. Desmarais @date 1984-06-21
       SUBROUTINE W3FS21(IDATE, NMIN)
 C
       INTEGER  IDATE(5)

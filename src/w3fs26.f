@@ -1,72 +1,57 @@
 C> @file
-C
-C> SUBPROGRAM: W3FS26         YEAR, MONTH, DAY FROM JULIAN DAY NUMBER
-C>   AUTHOR: JONES,R.E.       ORG: W342       DATE: 87-03-29
+C> @brief Year, month, day from julian day number
+C> @author Ralph Jones @date 1987-03-29
+
+C> Computes year (4 digits), month, day, day of week, day of year from julian
+C> day number. this subroutine will work from 1583 a.d. to 3300 a.d.
 C>
-C> ABSTRACT: COMPUTES YEAR (4 DIGITS), MONTH, DAY, DAY OF WEEK, DAY
-C>   OF YEAR FROM JULIAN DAY NUMBER. THIS SUBROUTINE WILL WORK
-C>   FROM 1583 A.D. TO 3300 A.D.
+C> ### Program History Log:
+C> Date | Programmer | Comments
+C> -----|------------|---------
+C> 1987-03-29 | Ralph Jones |
+C> 1989-10-25 | Ralph Jones | Convert to cray cft77 fortran
 C>
-C> PROGRAM HISTORY LOG:
-C>   87-03-29  R.E.JONES
-C>   89-10-25  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
+C> @param[in] JLDAYN (INT) Julian day number
+C> @param[out] IYEAR (INT) Year (4 digits)
+C> @param[out] MONTH (INT) Month
+C> @param[out] IDAY (INT) Day
+C> @param[out] IDAYWK (INT) Day of week (1 is sunday, 7 is sat)
+C> @param[out] IDAYYR (INT) Day of year (1 to 366)
 C>
-C> USAGE:  CALL W3FS26(JLDAYN,IYEAR,MONTH,IDAY,IDAYWK,IDAYYR)
+C> @note A julian day number can be computed by using one of the following
+C> statement functions. A day of week can be computed from the julian day
+C> number. A day of year can be computed from a julian day number and year.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     JLDAYN ARG LIST  INTEGER   JULIAN DAY NUMBER
+C> JDN(IYEAR,MONTH,IDAY) = IDAY - 32075
+C> + 1461 * (IYEAR + 4800 + (MONTH - 14) / 12) / 4
+C> + 367 * (MONTH - 2 - (MONTH -14) / 12 * 12) / 12
+C> - 3 * ((IYEAR + 4900 + (MONTH - 14) / 12) / 100) / 4
 C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     IYEAR  ARG LIST  INTEGER   YEAR  (4 DIGITS)
-C>     MONTH  ARG LIST  INTEGER   MONTH
-C>     IDAY   ARG LIST  INTEGER   DAY
-C>     IDAYWK ARG LIST  INTEGER   DAY OF WEEK (1 IS SUNDAY, 7 IS SAT)
-C>     IDAYYR ARG LIST  INTEGER   DAY OF YEAR (1 TO 366)
+C> IYR (4 DIGITS) , IDYR(1-366) Day of year
 C>
-C>   REMARKS: A JULIAN DAY NUMBER CAN BE COMPUTED BY USING ONE OF THE
-C>     FOLLOWING STATEMENT FUNCTIONS. A DAY OF WEEK CAN BE COMPUTED
-C>     FROM THE JULIAN DAY NUMBER. A DAY OF YEAR CAN BE COMPUTED FROM
-C>     A JULIAN DAY NUMBER AND YEAR.
+C> JULIAN(IYR,IDYR) = -31739 + 1461 * (IYR + 4799) / 4
+C>                    -3 * ((IYR + 4899) / 100) / 4 + IDYR
 C>
-C>      IYEAR (4 DIGITS)
+C> Day of week from julian day number, 1 is sunday, 7 is saturday.
 C>
-C>      JDN(IYEAR,MONTH,IDAY) = IDAY - 32075
-C>    &            + 1461 * (IYEAR + 4800 + (MONTH - 14) / 12) / 4
-C>    &            + 367 * (MONTH - 2 - (MONTH -14) / 12 * 12) / 12
-C>    &            - 3 * ((IYEAR + 4900 + (MONTH - 14) / 12) / 100) / 4
+C> JDAYWK(JLDAYN) = MOD((JLDAYN + 1),7) + 1
 C>
-C>      IYR (4 DIGITS) , IDYR(1-366) DAY OF YEAR
+C> Day of year from julian day number and 4 digit year.
 C>
-C>      JULIAN(IYR,IDYR) = -31739 + 1461 * (IYR + 4799) / 4
-C>    &                    -3 * ((IYR + 4899) / 100) / 4 + IDYR
+C> JDAYYR(JLDAYN,IYEAR) = JLDAYN -
+C>   (-31739+1461*(IYEAR+4799)/4-3*((IYEAR+4899)/100)/4)
 C>
-C>      DAY OF WEEK FROM JULIAN DAY NUMBER, 1 IS SUNDAY, 7 IS SATURDAY.
+C> The first function was in a letter to the editor communications
+C> of the acm volume 11 / number 10 / october, 1968. the 2nd
+C> function was derived from the first. This subroutine was also
+C> included in the same letter. Julian day number 1 is
+C> jan 1,4713 b.c. a julian day number can be used to replace a
+C> day of century, this will take care of the date problem in
+C> the year 2000, or reduce program changes to one line change
+C> of 1900 to 2000. Julian day numbers can be used for finding
+C> record numbers in an archive or day of week, or day of year.
 C>
-C>      JDAYWK(JLDAYN) = MOD((JLDAYN + 1),7) + 1
-C>
-C>      DAY OF YEAR FROM JULIAN DAY NUMBER AND 4 DIGIT YEAR.
-C>
-C>      JDAYYR(JLDAYN,IYEAR) = JLDAYN -
-C>     &  (-31739+1461*(IYEAR+4799)/4-3*((IYEAR+4899)/100)/4)
-C>
-C>      THE FIRST FUNCTION WAS IN A LETTER TO THE EDITOR COMMUNICATIONS
-C>      OF THE ACM  VOLUME 11 / NUMBER 10 / OCTOBER, 1968. THE 2ND
-C>      FUNCTION WAS DERIVED FROM THE FIRST. THIS SUBROUTINE WAS ALSO
-C>      INCLUDED IN THE SAME LETTER. JULIAN DAY NUMBER 1 IS
-C>      JAN 1,4713 B.C. A JULIAN DAY NUMBER CAN BE USED TO REPLACE A
-C>      DAY OF CENTURY, THIS WILL TAKE CARE OF THE DATE PROBLEM IN
-C>      THE YEAR 2000, OR REDUCE PROGRAM CHANGES TO ONE LINE CHANGE
-C>      OF 1900 TO 2000. JULIAN DAY NUMBERS CAN BE USED FOR FINDING
-C>      RECORD NUMBERS IN AN ARCHIVE OR DAY OF WEEK, OR DAY OF YEAR.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author Ralph Jones @date 1987-03-29
       SUBROUTINE W3FS26(JLDAYN,IYEAR,MONTH,IDAY,IDAYWK,IDAYYR)
 C
        L      = JLDAYN + 68569
