@@ -1,48 +1,35 @@
 C> @file
-C
-C> SUBPROGRAM: W3FT03         A POINT INTERPOLATER
-C>   AUTHOR: HOWCROFT, J.     ORG: W342       DATE: 79-02-15
+C> @brief A point interpolater.
+C> @author James Howcroft @date 1979-02-15
+
+C> Do either bilinear or biquadratic interpolation for a
+C> point within a two-dimensional data array.
 C>
-C> ABSTRACT: DO EITHER BILINEAR OR BIQUADRATIC INTERPOLATION FOR A
-C>   POINT WITHIN A TWO-DIMENSIONAL DATA ARRAY.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1979-02-15 | James Howcroft | Initial.
+C> 1989-01-25 | Ralph Jones | Change to microsoft fortran 4.10.
+C> 1990-06-12 | Ralph Jones | Change to sun fortran 1.3.
+C> 1991-03-30 | Ralph Jones | Convert to silicongraphics fortran.
+C> 1993-03-29 | Ralph Jones | Add save statement.
+C> 1996-07-01 | Ralph Jones | Compile on cray.
 C>
-C> PROGRAM HISTORY LOG:
-C>   79-02-15  J.HOWCROFT
-C>   89-01-25  R.E.JONES  CHANGE TO MICROSOFT FORTRAN 4.10
-C>   90-06-12  R.E.JONES  CHANGE TO SUN FORTRAN 1.3
-C>   91-03-30  R.E.JONES  CONVERT TO SiliconGraphics FORTRAN
-C>   93-03-29  R.E.JONES  ADD SAVE STATEMENT
-C>   96-07-01  R.E.JONES  COMPILE ON CRAY
+C> @param[in] FL Real*4 two-dimensional cartesian array of data.
+C> @param[in] MAXI Integer*4 i-dimension of fl.
+C> @param[in] MAXJ Integer*4 j-dimension of fl.
+C> @param[in] STI Real*4 i-coordinate to which a value is to be
+C> interpolated.
+C> @param[in] STJ Real*4 j-coordinate to which a value is to be
+C> interpolated.
+C> @param ITYPE
+C> @param[out] HI Real*4 interpolated output value.
 C>
-C> USAGE:  CALL W3FT03(FL,HI,STI,STJ,MAXI,MAXJ,KQUAD)
+C> @remark No error checks are made. it is left for the user to
+C> determine that the point for which interpolation is desired
+C> lies within the grid.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     FL     ARG LIST  REAL*4 TWO-DIMENSIONAL CARTESIAN ARRAY OF DATA
-C>     MAXI   ARG LIST  INTEGER*4 I-DIMENSION OF FL
-C>     MAXJ   ARG LIST  INTEGER*4 J-DIMENSION OF FL
-C>     STI    ARG LIST  REAL*4 I-COORDINATE TO WHICH A VALUE IS TO BE
-C>                      INTERPOLATED
-C>     STJ    ARG LIST  REAL*4 J-COORDINATE TO WHICH A VALUE IS TO BE
-C>                      INTERPOLATED
-C>     KQUAD  ARG LIST  INTEGER*4 INTERPOLATION METHOD:
-C>                      IF = 2, BIQUADRATIC INTERPOLATION IS DONE,
-C>                      IF = ANY OTHER VALUE, DO BILINEAR.
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     HI     ARG LIST  REAL*4 INTERPOLATED OUTPUT VALUE
-C>
-C>   REMARKS: NO ERROR CHECKS ARE MADE. IT IS LEFT FOR THE USER TO
-C>     DETERMINE THAT THE POINT FOR WHICH INTERPOLATION IS DESIRED
-C>     LIES WITHIN THE GRID.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, CRAY J916/2048
-C>
+C> @author James Howcroft @date 1979-02-15
       SUBROUTINE W3FT03(FL,HI,STI,STJ,MAXI,MAXJ,ITYPE)
 C
        REAL            FL(MAXI,MAXJ)
