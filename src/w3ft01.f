@@ -1,49 +1,37 @@
 C> @file
-C
-C> SUBPROGRAM: W3FT01         INTERPOLATE VALUES IN A DATA FIELD
-C>   AUTHOR: MCDONELL, J.     ORG: W345       DATE: 84-06-27
-C>   UPDATE: JONES,R.E.       ORG: W342       DATE: 87-03-19
+C> @brief Interpolate values in a data field.
+C> @author James McDonell @date 1984-06-27
+
+C> For a given grid coordinate in a data array, estimates
+C> a data value for that point using either a linear or quadratic
+C> interpolation method.
 C>
-C> ABSTRACT: FOR A GIVEN GRID COORDINATE IN A DATA ARRAY, ESTIMATES
-C>   A DATA VALUE FOR THAT POINT USING EITHER A LINEAR OR QUADRATIC
-C>   INTERPOLATION METHOD.
+C> ### Program History Log:
+C> Date | Programmer | Commment
+C> -----|------------|---------
+C> 1984-06-27 | James McDonell | Initial
+C> 1989-11-01 | Ralph Jones | Change to cray cft77 fortran
 C>
-C> PROGRAM HISTORY LOG:
-C>   84-06-27  J.MCDONELL
-C>   89-11-01  R.E.JONES   CHANGE TO CRAY CFT77 FORTRAN
+C> @param[in] STI Real*4 i grid coordinate of the point for which
+C> an interpolated value is desired.
+C> @param[in] STJ Real*4 j grid coordinate of the point for which
+C> an interpolated value is desired.
+C> @param[in] FLD Real*4 size(ii,jj) data field.
+C> @param[in] II Integer*4 number of columns in 'fld'.
+C> @param[in] JJ Integer*4 number of rows in 'fld'.
+C> @param[in] NCYCLK Integer*4 code to specify if grid is cyclic or
+C> not:
+C> - = 0 Non-cyclic in ii, non-cyclic in jj
+C> - = 1 Cyclic in ii, non-cyclic in jj
+C> - = 2 Cyclic in jj, non-cyclic in ii
+C> - = 3 Cyclic in ii, cyclic in jj
+C> @param[in] LIN Integer*4 code specifying interpolation method:
+C> - = 1 Linear interpolation
+C> - .NE.1 Quadratic interpolation
+C> @param[out] HI Real*4 data field value at (sti,stj) obtained
+C> by interpolation.
 C>
-C> USAGE:  CALL W3FT01 (STI, STJ, FLD, HI, II, JJ, NCYCLK, LIN)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     STI    ARG LIST  REAL*4 I GRID COORDINATE OF THE POINT FOR WHICH
-C>                      AN INTERPOLATED VALUE IS DESIRED
-C>     STJ    ARG LIST  REAL*4 J GRID COORDINATE OF THE POINT FOR WHICH
-C>                      AN INTERPOLATED VALUE IS DESIRED
-C>     FLD    ARG LIST  REAL*4 SIZE(II,JJ) DATA FIELD
-C>     II     ARG LIST  INTEGER*4 NUMBER OF COLUMNS IN 'FLD'
-C>     JJ     ARG LIST  INTEGER*4 NUMBER OF ROWS IN 'FLD'
-C>     NCYCLK ARG LIST  INTEGER*4 CODE TO SPECIFY IF GRID IS CYCLIC OR
-C>                      NOT:
-C>                       = 0 NON-CYCLIC IN II, NON-CYCLIC IN JJ
-C>                       = 1 CYCLIC IN II, NON-CYCLIC IN JJ
-C>                       = 2 CYCLIC IN JJ, NON-CYCLIC IN II
-C>                       = 3 CYCLIC IN II, CYCLIC IN JJ
-C>     LIN    ARG LIST  INTEGER*4 CODE SPECIFYING INTERPOLATION METHOD:
-C>                       = 1 LINEAR INTERPOLATION
-C>                      .NE.1  QUADRATIC INTERPOLATION
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     HI     ARG LIST  REAL*4 DATA FIELD VALUE AT (STI,STJ) OBTAINED
-C>                      BY INTERPOLATION.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author James McDonell @date 1984-06-27
       SUBROUTINE W3FT01(STI,STJ,FLD,HI,II,JJ,NCYCLK,LIN)
 C
       REAL    ERAS(4)

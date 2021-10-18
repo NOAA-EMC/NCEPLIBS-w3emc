@@ -1,54 +1,35 @@
 C> @file
-C
-C> SUBROUTINE: W3FT05V   CONVERT (145,37) GRID TO (65,65) N. HEMI. GRID
-C>   AUTHOR:  JONES,R.E.        ORG:  W342         DATE: 85-04-10
+C> @brief Convert (145,37) grid to (65,65) n. hemi. grid
+C> @author Ralph Jones @date 1985-04-10
+
+C> Convert a northern hemisphere 2.5 degree lat.,lon. 145 by
+C> 37 grid to a polar stereographic 65 by 65 grid. The polar
+C> stereographic map projection is true at 60 deg. n. , The mesh
+C> length is 381 km. and the oriention is 80 deg. w.
 C>
-C> ABSTRACT:  CONVERT A NORTHERN HEMISPHERE 2.5 DEGREE LAT.,LON. 145 BY
-C>   37 GRID TO A POLAR STEREOGRAPHIC 65 BY 65 GRID. THE POLAR
-C>   STEREOGRAPHIC MAP PROJECTION IS TRUE AT 60 DEG. N. , THE MESH
-C>   LENGTH IS 381 KM. AND THE ORIENTION IS 80 DEG. W.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1985-04-10 | Ralph Jones | Vectorized version of w3ft05().
+C> 1989-10-21 | Ralph Jones | Changes to increase speed.
+C> 1991-07-25 | Ralph Jones | Change  to cray cft77 fortran.
 C>
-C> PROGRAM HISTORY LOG:
-C>   85-04-10  R.E.JONES   VECTORIZED VERSION OF W3FT05
-C>   89-10-21  R.E.JONES   CHANGES TO INCREASE SPEED
-C>   91-07-25  R.E.JONES   CHANGE  TO CRAY CFT77 FORTRAN
+C> @param[in] ALOLA 145*37 gid 2.5 lat,lon grid n. hemisphere
+C> 5365 point grid is o.n. 84 type 29 or 1d hex
+C> interp - 1 linear interpolation , ne.1 biquadratic
+C> @param[out] APOLA 65*65 grid of northern hemisphere
+C> 4225 point grid is o.n.84 type 27 or 1b hex.
+C> @param INTERP
+C> @remark
+C> - 1. W1 and w2 are used to store sets of constants which are
+C> reusable for repeated calls to the subroutine.
+C> - 2. Wind components are not rotated to the 65*65 grid orientation
+C> after interpolation. you may use w3fc08 to do this.
+C> - 3. The grid points values on the equator have been extrapolated
+C> outward to all the grid points outside the equator on the 65*65
+C> grid (about 1100 points).
 C>
-C> USAGE:  CALL W3FT05V(ALOLA,APOLA,INTERP)
-C>
-C>   INPUT ARGUMENTS:  ALOLA  - 145*37 GID 2.5 LAT,LON GRID N. HEMISPHERE
-C>                     5365 POINT GRID IS O.N. 84 TYPE 29 OR 1D HEX
-C>                     INTERP - 1 LINEAR INTERPOLATION , NE.1 BIQUADRATIC
-C>
-C>   INPUT FILES:  NONE
-C>
-C>   OUTPUT ARGUMENTS: APOLA - 65*65 GRID OF NORTHERN HEMISPHERE.
-C>                             4225 POINT GRID IS O.N.84 TYPE 27 OR 1B HEX
-C>
-C>   OUTPUT FILES: ERROR MESSAGE TO FORTRAN OUTPUT FILE
-C>
-C>   WARNINGS:
-C>
-C>   1. W1 AND W2 ARE USED TO STORE SETS OF CONSTANTS WHICH ARE
-C>   REUSABLE FOR REPEATED CALLS TO THE SUBROUTINE.
-C>
-C>   2. WIND COMPONENTS ARE NOT ROTATED TO THE 65*65 GRID ORIENTATION
-C>   AFTER INTERPOLATION. YOU MAY USE W3FC08 TO DO THIS.
-C>
-C>   3. THE GRID POINTS VALUES ON THE EQUATOR HAVE BEEN EXTRAPOLATED
-C>   OUTWARD TO ALL THE GRID POINTS OUTSIDE THE EQUATOR ON THE 65*65
-C>   GRID (ABOUT 1100 POINTS).
-C>
-C>   RETURN CONDITIONS: NORMAL SUBROUTINE EXIT
-C>
-C>   SUBPROGRAMS CALLED:
-C>     UNIQUE :  NONE
-C>
-C>     LIBRARY:  ASIN , ATAN2
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author Ralph Jones @date 1985-04-10
       SUBROUTINE W3FT05V(ALOLA,APOLA,INTERP)
 C
        REAL        R2(4225),      WLON(4225)

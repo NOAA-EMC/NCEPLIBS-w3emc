@@ -1,44 +1,26 @@
 C> @file
-C
-C> SUBPROGRAM:  W3FT02      INTERPOLATE PRECIPITATION TO SPECIFIC POINT
-C>   PRGMMR: HIRANO           ORG: NMC24       DATE:96-06-23
+C> @brief Interpolate precipitation to specific point.
+C> @author Robert Hirano @date 1979-08-05
+
+C> Interpolate, using a fancy non-linear method,
+C> gridded quantitative precipitation forecasts to a specific
+C> interior point. One point (e.g. an observation station)
+C> per call to w3ft02().
 C>
-C> ABSTRACT: INTERPOLATE, USING A FANCY NON-LINEAR METHOD,
-C>   GRIDDED QUANTITATIVE PRECIPITATION FORECASTS TO A SPECIFIC
-C>   INTERIOR POINT.  ONE POINT (E.G. AN OBSERVATION STATION)
-C>   PER CALL TO W3FT02.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1979-08-05 | Robert Hirano | Initial.
+C> 1996-06-23 | Farley | Converted to cray fortran 77
 C>
-C> PROGRAM HISTORY LOG:
-C>   79-08-05  R.HIRANO
-C>   96-06-23  farley         converted to cray fortran 77
+C> @param[in] RAIN Real*4 grid field of (forecast) precipitation.
+C> @param[in] IMAX Integer*4 i-dimension of rain field.
+C> @param[in] JMAX Integer *4 j-dimension of rain field.
+C> @param[in] PI Real*4 i-coordinate of interpolation point.
+C> @param[in] PJ Real*4 j-coordinate of interpolation point.
+C> @param[out] AMOUNT Real*4 amount of precip interpolated to pi,pj.
 C>
-C> USAGE:  CALL W3FT02(RAIN, IMAX, JMAX, PI, PJ, AMOUNT)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     RAIN   ARG LIST  REAL*4   GRID FIELD OF (FORECAST) PRECIPITATION
-C>     IMAX   ARG LIST  INTEGER*4   I-DIMENSION OF RAIN FIELD
-C>     JMAX   ARG LIST  INTEGER *4  J-DIMENSION OF RAIN FIELD
-C>     PI     ARG LIST  REAL*4   I-COORDINATE OF INTERPOLATION POINT
-C>     PJ     ARG LIST  REAL*4   J-COORDINATE OF INTERPOLATION POINT
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     AMOUNT ARG LIST  REAL*4   AMOUNT OF PRECIP INTERPOLATED TO PI,PJ
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     AMAX1                                                   SYSTEM
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: IBM VS FORTRAN
-C>   MACHINE:  NAS-9050, 9070
-C>
-C>   NO WRITEUP AVAILABLE. SEE PROGRAMMER FOR ADDITIONAL INFORMATION.
-C>
+C> @author Robert Hirano @date 1979-08-05
       SUBROUTINE W3FT02 (RAIN, IMAX, JMAX, PI, PJ, AMOUNT)
 C
 C        INTERPOLATE PRECIPITATION FROM RAIN FIELD
