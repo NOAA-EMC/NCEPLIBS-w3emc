@@ -24,6 +24,14 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel)$")
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+find_package(bacio 2.4.0 REQUIRED)
+
+if(bacio_VERSION GREATER_EQUAL 2.5.0)
+  set(bacio_name bacio)
+else()
+  set(bacio_name bacio_4)
+endif()
+
 # Compile the source code in the src directory.
 add_subdirectory(src)
 
