@@ -1,63 +1,42 @@
 C> @file
-C
-C> SUBPROGRAM: W3FT06         CONVERT (145,37) TO (65,65) S. HEMI. GRID
-C>   AUTHOR: JONES,R.E.       ORG: W342       DATE: 84-06-18
+C> @brief Convert (145,37) to (65,65) s. hemi. grid.
+C> @author Ralph Jones @date 1984-06-18
+
+C> Convert a southern hemisphere 2.5 degree lat.,lon. 145 by
+C> 37 grid to a polar stereographic 65 by 65 grid. The polar
+C> stereographic map projection is true at 60 deg. s.; The mesh
+C> length is 381 km. and the oriention is 260 deg. w.(100e).
 C>
-C> ABSTRACT:  CONVERT A SOUTHERN HEMISPHERE 2.5 DEGREE LAT.,LON. 145 BY
-C>   37 GRID TO A POLAR STEREOGRAPHIC 65 BY 65 GRID. THE POLAR
-C>   STEREOGRAPHIC MAP PROJECTION IS TRUE AT 60 DEG. S. , THE MESH
-C>   LENGTH IS 381 KM. AND THE ORIENTION IS 260 DEG. W.(100E)  .
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1984-06-18 | Ralph Jones | Initial.
+C> 1991-07-30 | Ralph Jones | Convert to cray cft77 fortran.
+C> 1992-05-02 | Ralph Jones | Add save.
 C>
-C> PROGRAM HISTORY LOG:
-C>   84-06-18  R.E.JONES
-C>   91-07-30  R.E.JONES   CONVERT TO CRAY CFT77 FORTRAN
-C>   92-05-02  R.E.JONES   ADD SAVE
+C> @param[in] ALOLA 145*37 deg 2.5 lat,lon grid s. hemi.
+C> 5365 point grid is type 30 or 1e hex o.n. 84.
+C> @param[in] LINEAR 1 linear interpolation , ne.1 biquadratic.
+C> @param[out] APOLA 65*65 grid of southern hemi.
+C> 4225 point grid is type 28 or 1c hex o.n. 84.
+C> @param[out] W1 65*65 scratch field.
+C> @param[out] W2 65*65 scratch field. FT06F001 Error message
 C>
-C> USAGE:  CALL W3FT06(ALOLA,APOLA,W1,W2,LINEAR)
+C> @remark
+C> - 1. W1 and w2 are used to store sets of constants which are
+C> reusable for repeated calls to the subroutine. If they are
+C> over written by the user, a warning message will be printed
+C> and w1 and w2 will be recomputed.
+C> - 2. Wind components are not rotated to the 65*65 grid orientation
+C> after interpolation. You may use w3fc10() to do this.
+C> - 3. The grid points values on the equator have been extrapolated
+C> outward to all the grid points outside the equator on the 65*65
+C> grid (about 1100 points).
+C> - 4. You should use the cray vectorized verion w3ft06v() on the cray
+C> it has 3 parameters in the call, runs about times faster, uses
+C> more memory.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     ALOLA  ARG LIST  145*37 DEG 2.5 LAT,LON GRID S. HEMI.
-C>                      5365 POINT GRID IS TYPE 30 OR 1E HEX O.N. 84
-C>     LINEAR ARG LIST  1 LINEAR INTERPOLATION , NE.1 BIQUADRATIC
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     APOLA  ARG LIST  65*65 GRID OF SOUTHERN HEMI.
-C>                      4225 POINT GRID IS TYPE 28 OR 1C HEX O.N. 84
-C>     W1     ARG LIST  65*65 SCRATCH FIELD
-C>     W2     ARG LIST  65*65 SCRATCH FIELD
-C>            FT06F001  ERROR MESSAGE
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     ASIN   ATAN2                                            SYSTEM
-C>
-C>   REMARKS:
-C>
-C>   1. W1 AND W2 ARE USED TO STORE SETS OF CONSTANTS WHICH ARE
-C>   REUSABLE FOR REPEATED CALLS TO THE SUBROUTINE. IF THEY ARE
-C>   OVER WRITTEN BY THE USER, A WARNING MESSAGE WILL BE PRINTED
-C>   AND W1 AND W2 WILL BE RECOMPUTED.
-C>
-C>   2. WIND COMPONENTS ARE NOT ROTATED TO THE 65*65 GRID ORIENTATION
-C>   AFTER INTERPOLATION. YOU MAY USE W3FC10 TO DO THIS.
-C>
-C>   3. THE GRID POINTS VALUES ON THE EQUATOR HAVE BEEN EXTRAPOLATED
-C>   OUTWARD TO ALL THE GRID POINTS OUTSIDE THE EQUATOR ON THE 65*65
-C>   GRID (ABOUT 1100 POINTS).
-C>
-C>   4. YOU SHOULD USE THE CRAY VECTORIZED VERION W3FT06V ON THE CRAY
-C>   IT HAS 3 PARAMETERS IN THE CALL, RUNS ABOUT TIMES FASTER, USES
-C>   MORE MEMORY.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author Ralph Jones @date 1984-06-18
       SUBROUTINE W3FT06(ALOLA,APOLA,W1,W2,LINEAR)
 C
        REAL            ALOLA(145,37)

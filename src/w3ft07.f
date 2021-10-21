@@ -1,75 +1,66 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3FT07        TRANSFORM GRIDPOINT FLD BY INTERPOLATION
-C>   PRGMMR: LIN              ORG: NMC412      DATE:93-03-24
+C> @brief Transform gridpoint fld by interpolation.
+C> @author McDonell & Howcroft @date 1974-09-01
+
+C> Transforms data contained in a given grid array
+C> by translation, rotation about a common point and dilatation
+C> in order to create a new grid array according to specs.
 C>
-C> ABSTRACT: TRANSFORMS DATA CONTAINED IN A GIVEN GRID ARRAY
-C>   BY TRANSLATION, ROTATION ABOUT A COMMON POINT AND DILATATION
-C>   IN ORDER TO CREATE A NEW GRID ARRAY ACCORDING TO SPECS.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1974-09-01 | J. McDonell, J.Howcroft | Initial.
+C> 1984-06-27 | Ralph Jones | Change to ibm vs fortran
+C> 1989-01-24 | Ralph Jones | Change to microsoft fortran 4.10
+C> 1989-03-31 | Ralph Jones | Change to vax-11 fortran
+C> 1993-03-16 | D. Shimomura | Renamed from w3ft00() to w3ft07()
+C> in order to make minor mods while doing f77. Changes to call sequence;
+C> changes to vrbl names; added comments.
 C>
-C> PROGRAM HISTORY LOG:
-C>   74-09-01  ORIGINAL AUTHOR(S): J. MCDONELL, J.HOWCROFT
-C>   84-06-27  R.E.JONES   CHANGE TO IBM VS FORTRAN
-C>   89-01-24  R.E.JONES   CHANGE TO MICROSOFT FORTRAN 4.10
-C>   89-03-31  R.E.JONES   CHANGE TO VAX-11 FORTRAN
-C>   93-03-16  D. SHIMOMURA -- RENAMED FROM W3FT00() TO W3FT07()
-C>                IN ORDER TO MAKE MINOR MODS WHILE DOING F77.
-C>                CHANGES TO CALL SEQUENCE; CHANGES TO VRBL NAMES;
-C>                ADDED COMMENTS.
+C> @param[in] FLDA Real*4 original source grid-point data field
+C> @param[in] IA (Input for FLDA)
+C> @param[in] JA (Input for FLDA)
+C> @param[in] FLDB Real*4 original source grid-point data field
+C> @param[in] IB (Input for FLDB)
+C> @param[in] JB (Input for FLDB)
+C> @param[in] AIPOLE Real*4 common point i-coordinates of the
+C> original field, assuming a right-hand cartesian
+C> coordinate system. the point need not be inside the bounds of either grid
+C> @param[in] AJPOLE Real*4 common point j-coordinates of the
+C> original field, assuming a right-hand cartesian
+C> coordinate system. the point need not be inside the bounds of either grid
+C> and can have fractional values. Common point about which to rotate the gridpoints.
+C> @param[in] BIPOLE - Real*4 common point i-coordinates for
+C> transformed destination grid
+C> @param[in] BJPOLE - Real*4 common point j-coordinates for
+C> transformed destination grid
+C> @param[in] DSCALE - Real*4 scale-change (dilation) expressed as
+C> a ratio of the transformed field to the original field
+C> dscale = grdlenkm(destination) / grdlenkm(source)
+C> @param[in] ANGLE  - Real*4 degree measure of the angle required to
+C> rotate the j-row of the original grid into
+C> coincidence with the new grid. (+ counter-
+C> clockwise, - clockwise)
+C> angle = vertlonw(source) - vertlonw(destination)
 C>
-C>                   ...  1    2  3   4      5      6      7      8
-C> USAGE:    CALL W3FT07(FLDA,IA,JA,AIPOLE,AJPOLE,BIPOLE,BJPOLE,DSCALE,
-C>                       ANGLE,LINEAR,LDEFQQ,DEFALT,FLDB,IB,JB)
-C>                        9      10     11     12    13  14 15
-C>   INPUT ARGUMENT LIST:
-C>     FLDA(IA,JA)   - REAL*4 ORIGINAL SOURCE GRID-POINT DATA FIELD
-C>     AIPOLE,AJPOLE - REAL*4 COMMON POINT I- AND J-COORDINATES OF THE
-C>                     ORIGINAL FIELD, ASSUMING A RIGHT-HAND CARTESIAN
-C>                     COORDINATE SYSTEM. THE POINT NEED NOT BE INSIDE
-C>                     THE BOUNDS OF EITHER GRID
-C>                     AND CAN HAVE FRACTIONAL VALUES.
-C>                     COMMON POINT ABOUT WHICH TO ROTATE THE GRIDPOINTS
-C>     BIPOLE,BJPOLE - REAL*4 COMMON POINT I- AND J-COORDINATES FOR
-C>                     TRANSFORMED DESTINATION GRID
-C>     DSCALE - REAL*4 SCALE-CHANGE (DILATION) EXPRESSED AS
-C>                     A RATIO OF THE TRANSFORMED FIELD TO THE ORIGINAL
-C>                     FIELD
-C>                     DSCALE = GRDLENKM(DESTINATION) / GRDLENKM(SOURCE)
+C> @param[in] LINEAR - Logical*4 interpolation-method selection switch:
+C> - .TRUE. Bi-linear interpolation.
+C> - .FALSE. Bi-quadratic interpolation.
+C> @param[in] LDEFQQ - Logical*4 default-value switch:
+C> if .true. then
+C>   use default-value for destination point
+C>   out-of-bounds of given grid;
+C> else
+C>   extrapolate coarsely from nearby bndry point
+C> @param[in] DEFALT - Real*4  the default-value to use if ldefqq = .true.
 C>
-C>     ANGLE  - REAL*4 DEGREE MEASURE OF THE ANGLE REQUIRED TO
-C>                     ROTATE THE J-ROW OF THE ORIGINAL GRID INTO
-C>                     COINCIDENCE WITH THE NEW GRID. (+ COUNTER-
-C>                     CLOCKWISE, - CLOCKWISE)
-C>                     ANGLE = VERTLONW(SOURCE) - VERTLONW(DESTINATION)
+C> @remark List caveats, other helpful hints or information
+C> in general 'FLDA' and 'FLDB' cannot be equivalenced
+C> although there are situations in which it would be safe to do
+C> so. Care should be taken that all of the new grid points lie
+C> within the original grid, no error checks are made.
 C>
-C>     LINEAR - LOGICAL*4 INTERPOLATION-METHOD SELECTION SWITCH:
-C>                      .TRUE.   BI-LINEAR INTERPOLATION
-C>                      .FALSE.  BI-QUADRATIC INTERPOLATION
-C>
-C>     LDEFQQ - LOGICAL*4 DEFAULT-VALUE SWITCH:
-C>                      IF .TRUE. THEN
-C>                        USE DEFAULT-VALUE FOR DESTINATION POINT
-C>                        OUT-OF-BOUNDS OF GIVEN GRID;
-C>                      ELSE
-C>                        EXTRAPOLATE COARSELY FROM NEARBY BNDRY POINT
-C>
-C>     DEFALT - REAL*4  THE DEFAULT-VALUE TO USE IF LDEFQQ = .TRUE.
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     FLDB(IB,JB) - REAL*4 RESULTING TRANSFORMED DESTINATION FIELD
-C>
-C>
-C> REMARKS: LIST CAVEATS, OTHER HELPFUL HINTS OR INFORMATION
-C>     IN GENERAL 'FLDA' AND 'FLDB' CANNOT BE EQUIVALENCED
-C>     ALTHOUGH THERE ARE SITUATIONS IN WHICH IT WOULD BE SAFE TO DO
-C>     SO. CARE SHOULD BE TAKEN THAT ALL OF THE NEW GRID POINTS LIE
-C>     WITHIN THE ORIGINAL GRID, NO ERROR CHECKS ARE MADE.
-C>
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN 77
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author McDonell & Howcroft @date 1974-09-01
       SUBROUTINE W3FT07(FLDA,IA,JA,AIPOLE,AJPOLE,BIPOLE,BJPOLE,
      A                   DSCALE,ANGLE,LINEAR,LDEFQQ,DEFALT,FLDB,IB,JB)
 C
