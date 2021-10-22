@@ -26,7 +26,7 @@ jobs:
       run: |
         cd bacio
         mkdir build && cd build
-        cmake .. -DCMAkE_INSTALL_PREFIX=~/bacio
+        cmake .. -DCMAKE_INSTALL_PREFIX=~/bacio
         make -j2
         make install
 
