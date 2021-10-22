@@ -13,7 +13,7 @@ jobs:
     - name: checkout-bacio
       uses: actions/checkout@v2
       with:
-        repository: NOAA-EMC/bacio
+        repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
         ref: v2.5.0
     
