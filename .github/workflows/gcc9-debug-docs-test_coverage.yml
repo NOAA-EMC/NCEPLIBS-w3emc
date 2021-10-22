@@ -26,7 +26,7 @@ jobs:
       run: |
         cd bacio
         mkdir build && cd build
-        cmake ..
+        cmake .. -DCMAkE_INSTALL_PREFIX=~/bacio
         make -j2
         make install
 
@@ -40,7 +40,7 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake .. -DCMAKE_PREFIX_PATH="~/" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0"
+        cmake .. -DCMAKE_PREFIX_PATH="~/;~/bacio" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0"
         make -j2
 
     - name: build-docs
