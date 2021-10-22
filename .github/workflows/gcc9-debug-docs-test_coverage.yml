@@ -14,7 +14,22 @@ jobs:
       run: |
         sudo apt-get install doxygen
         python3 -m pip install gcovr
-        
+
+    - name: checkout-bacio
+      uses: actions/checkout@v2
+      with:
+        repository: NOAA-EMC/NCEPLIBS-bacio
+        path: bacio
+        ref: v2.5.0
+    
+    - name: build-bacio
+      run: |
+        cd bacio
+        mkdir build && cd build
+        cmake .. -DCMAKE_INSTALL_PREFIX=~/bacio
+        make -j2
+        make install
+
     - name: checkout-w3emc
       uses: actions/checkout@v2
       with: 
@@ -25,7 +40,7 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake .. -DCMAKE_PREFIX_PATH="~/" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0"
+        cmake .. -DCMAKE_PREFIX_PATH="~/;~/bacio" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0"
         make -j2
 
     - name: build-docs
