@@ -10,6 +10,21 @@ jobs:
 
     steps:
     
+    - name: checkout-bacio
+      uses: actions/checkout@v2
+      with:
+        repository: NOAA-EMC/bacio
+        path: bacio
+        ref: v2.5.0
+    
+    - name: build-bacio
+      run: |
+        cd bacio
+        mkdir build & cd build
+        cmake ..
+        make -j2
+        make install
+        
     - name: checkout-w3emc
       uses: actions/checkout@v2
       with: 
