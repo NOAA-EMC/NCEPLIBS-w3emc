@@ -38,6 +38,8 @@ foreach(kind ${kinds})
     $<INSTALL_INTERFACE:include_${kind}>)
   list(APPEND LIB_TARGETS ${lib_name})
 
+  target_link_libraries(${lib_name} PUBLIC bacio::${bacio_name})
+
   install(DIRECTORY ${module_dir} DESTINATION ${CMAKE_INSTALL_PREFIX})
 endforeach()
 
