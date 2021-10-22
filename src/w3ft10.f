@@ -1,60 +1,40 @@
 C> @file
-C
-C> SUBPROGRAM: W3FT10         COMPUTES 2.5 X 2.5 S. HEMI. GRID-SCALER
-C>   AUTHOR: JONES,R.E.       ORG: W323       DATE: 84-06-28
+C> @brief Computes 2.5 x 2.5 s. hemi. grid-scaler.
+C> @author Joe Sela @date 1980-10-21
+
+C> Computes 2.5 x 2.5 s. hemi. grid of 145 x 37 points
+C> from spectral coefficients in a rhomboidal 30 resolution
+C> representing a scaler field.
 C>
-C> ABSTRACT: COMPUTES 2.5 X 2.5 S. HEMI. GRID OF 145 X 37 POINTS
-C>   FROM SPECTRAL COEFFICIENTS IN A RHOMBOIDAL 30 RESOLUTION
-C>   REPRESENTING A SCALER FIELD.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1980-10-21 | Joe Sela | Initial.
+C> 1984-06-28 | Ralph Jones | Change to ibm vs fortran.
+C> 1989-01-25 | Ralph Jones | Change to microsoft fortran 4.10.
+C> 1990-06-12 | Ralph Jones | Change to sun fortran 1.3.
+C> 1991-03-30 | Ralph Jones | Convert to silicongraphics fortran.
+C> 1993-03-29 | Ralph Jones | Add save statement.
+C> 1993-07-22 | Ralph Jones | Change double precision to real for cray.
 C>
-C> PROGRAM HISTORY LOG:
-C>   80-10-21  JOE SELA
-C>   84-06-28  R.E.JONES   CHANGE TO IBM VS FORTRAN
-C>   89-01-25  R.E.JONES   CHANGE TO MICROSOFT FORTRAN 4.10
-C>   90-06-12  R.E.JONES   CHANGE TO SUN FORTRAN 1.3
-C>   91-03-30  R.E.JONES   CONVERT TO SiliconGraphics FORTRAN
-C>   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C>   93-07-22  R.E.JONES   CHANGE DOUBLE PRECISION TO REAL FOR CRAY
+C> @param[in] FLN 961 complex coeff.
+C> @param[in] PLN 992 real space for legendre polynomials.
+C> @param[in] EPS 992 real space for coeffs. used in computing pln.
+C> @param[in] FL 31 complex space for fourier coeff.
+C> @param[in] WORK 144 real work space for subr. w3ft12()
+C> @param[in] TRIGS 216 precomputed trig funcs. used in w3ft12(), computed by w3fa13()
+C> @param[out] GN (145,37) grid values. 5365 point grid is type 30 or 1e o.n. 84
 C>
-C> USAGE:  CALL W3FT10(FLN,GN,PLN,EPS,FL,WORK,TRIGS)
+C> @note This subroutine was optimized to run in a small amount of
+C> memory, it is not optimized for speed, 70 percent of the time is
+C> used by subroutine w3fa12() computing the legendre polynomials. Since
+C> the legendre polynomials are constant they need to be computed
+C> only once in a program. By moving w3fa12() to the main program and
+C> computing pln as a (32,31,37) array and changing this subroutine
+C> to use pln as a three dimension array you can cut the running time
+C> 70 percent.
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     FLN    ARG LIST  961 COMPLEX COEFF.
-C>     PLN    ARG LIST  992 REAL SPACE FOR LEGENDRE POLYNOMIALS.
-C>     EPS    ARG LIST  992 REAL SPACE FOR
-C>                      COEFFS. USED IN COMPUTING PLN.
-C>     FL     ARG LIST  31 COMPLEX SPACE FOR FOURIER COEFF.
-C>     WORK   ARG LIST  144 REAL WORK SPACE FOR SUBR. W3FT12
-C>     TRIGS  ARG LIST  216 PRECOMPUTED TRIG FUNCS. USED
-C>                      IN W3FT12, COMPUTED BY W3FA13
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     GN     ARG LIST  (145,37) GRID VALUES.
-C>                      5365 POINT GRID IS TYPE 30 OR 1E O.N. 84
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     AIMAG  CMPLX  REAL                                      SYSTEM
-C>     W3FA12 W3FT12                                           W3LIB
-C>
-C> WARNING: THIS SUBROUTINE WAS OPTIMIZED TO RUN IN A SMALL AMOUNT OF
-C>   MEMORY, IT IS NOT OPTIMIZED FOR SPEED, 70 PERCENT OF THE TIME IS
-C>   USED BY SUBROUTINE W3FA12 COMPUTING THE LEGENDRE POLYNOMIALS. SINCE
-C>   THE LEGENDRE POLYNOMIALS ARE CONSTANT THEY NEED TO BE COMPUTED
-C>   ONLY ONCE IN A PROGRAM. BY MOVING W3FA12 TO THE MAIN PROGRAM AND
-C>   COMPUTING PLN AS A (32,31,37) ARRAY AND CHANGING THIS SUBROUTINE
-C>   TO USE PLN AS A THREE DIMENSION ARRAY YOU CAN CUT THE RUNNING TIME
-C>   70 PERCENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864, CRAY Y-MP EL2/128
-C>
+C> @author Joe Sela @date 1980-10-21
       SUBROUTINE W3FT10(FLN,GN,PLN,EPS,FL,WORK,TRIGS)
 C
        COMPLEX          FL( 31 )

@@ -1,49 +1,30 @@
 C> @file
-C
-C> SUBROUTINE: W3FT17           CONVERT (95,91) GRID TO (3447) GRID
-C>   AUTHOR:  JONES,R.E.        ORG:  W342         DATE: 94-05-03
+C> @brief Convert (95,91) grid to (3447) grid
+C> @author Ralph Jones @date 1994-05-03
+
+C> Convert a southern hemisphere 1.0 degree lat.,lon. 95 by
+C> 91 grid to a wafs 1.25 degree thinned 3447 point grid.
 C>
-C> ABSTRACT:  CONVERT A SOUTHERN HEMISPHERE 1.0 DEGREE LAT.,LON. 95 BY
-C>   91 GRID TO A WAFS 1.25 DEGREE THINNED 3447 POINT GRID.  
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1994-05-03 | Ralph Jones | Initial.
 C>
-C> PROGRAM HISTORY LOG:
-C>   94-05-03  R.E.JONES  
+C> @param[in] ALOLA 95 * 91 grid 1.0 deg. lat,lon grid southern hemisphere 8645 point grid.
+C> @param[in] INTERP 1 linear interpolation , ne.1 biquadratic
+C> @param[out] BTHIN  3447 point thinned grid of s. hemispere 3447 grid is for grib grids 41-44.
 C>
-C> USAGE:  CALL W3FT17(ALOLA,BTHIN,INTERP)
+C> @note
+C> - w1 and w2 are used to store sets of constants which are
+C> reusable for repeated calls to the subroutine. 10 other arrays
+C> are saved and reused on the next call.
 C>
-C>   INPUT ARGUMENTS:  ALOLA  - 95 * 91 GRID 1.0 DEG. LAT,LON GRID
-C>                              SOUTHERN HEMISPHERE 8645 POINT GRID. 
-C>                     INTERP - 1 LINEAR INTERPOLATION , NE.1 BIQUADRATIC
-C>
-C>   INPUT FILES:  NONE
-C>
-C>   OUTPUT ARGUMENTS: BTHIN  - 3447 POINT THINNED GRID OF S. HEMISPERE
-C>                              3447 GRID IS FOR GRIB GRIDS 41-44.
-C>
-C>   OUTPUT FILES: ERROR MESSAGE TO FORTRAN OUTPUT FILE
-C>
-C>   WARNINGS:
-C>
-C>   1. W1 AND W2 ARE USED TO STORE SETS OF CONSTANTS WHICH ARE
-C>   REUSABLE FOR REPEATED CALLS TO THE SUBROUTINE. 10 OTHER ARRAYS
-C>   ARE SAVED AND REUSED ON THE NEXT CALL.
-C>
-C>   RETURN CONDITIONS: NORMAL SUBROUTINE EXIT
-C>
-C>   SUBPROGRAMS CALLED:
-C>     UNIQUE :  NONE
-C>
-C>     LIBRARY: 
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, cRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author Ralph Jones @date 1994-05-03
       SUBROUTINE W3FT17(ALOLA,BTHIN,INTERP)
 C
        PARAMETER   (NPTS=3447)
 C
-       REAL        SEP(73)  
+       REAL        SEP(73)
        REAL        ALOLA(95,91),  BTHIN(NPTS), ERAS(NPTS,4)
        REAL        W1(NPTS),      W2(NPTS)
        REAL        XDELI(NPTS),   XDELJ(NPTS)
