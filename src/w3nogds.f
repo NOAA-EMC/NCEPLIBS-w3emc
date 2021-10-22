@@ -1,152 +1,121 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:  W3NOGDS        MAKE A COMPLETE GRIB MESSAGE
-C>   PRGMMR: FARLEY           ORG: NMC421      DATE:94-11-22
+C> @brief Make a complete grib message
+C> @author Farley @date 1997-02-24
+
+C> Makes a complete grib message from a user supplied
+C> array of floating point or integer data. The user has the
+C> option of supplying the pds or an integer array that will be
+C> used to create a pds (with w3fi68()). The user must also
+C> supply other necessary info; see usage section below.
 C>
-C> ABSTRACT: MAKES A COMPLETE GRIB MESSAGE FROM A USER SUPPLIED
-C>   ARRAY OF FLOATING POINT OR INTEGER DATA.  THE USER HAS THE
-C>   OPTION OF SUPPLYING THE PDS OR AN INTEGER ARRAY THAT WILL BE
-C>   USED TO CREATE A PDS (WITH W3FI68).  THE USER MUST ALSO
-C>   SUPPLY OTHER NECESSARY INFO; SEE USAGE SECTION BELOW.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1997-02-24 | M. Farley | Modified w3fi72() - this routine allows for no gds (errors in w3fi71 for grib grids 21-26, 61-64 forced the need for this routine).
+C> 1998-06-24 | Stephen Gilbert | Added number of gridpoint values for grids 61-64, needed when igflag=2 ( no gds ).
+C> 1998-12-21 | Stephen Gilbert | Replaced function ichar with mova2i.
 C>
-C> PROGRAM HISTORY LOG:
-C>   97-02-24  M. FARLEY    MODIFIED W3FI72 - this routine allows for
-C>                          NO GDS (errors in W3FI71 for GRIB grids
-C>                          21-26, 61-64 forced the need for this routine).
-C>   98-06-24  Gilbert      Added number of gridpoint values for grids
-C>                          61-64, needed when igflag=2 ( no gds ).
-C>   98-12-21  Gilbert    Replaced Function ICHAR with mova2i.
+C> @param[in] ITYPE 0 = Floating point data supplied in array 'fld'
+C> 1 = Data supplied in array 'ifld'
+C> @param[in] FLD Array of data (at proper gridpoints) to be
+C> converted to grib format if itype=0.
+C> see remarks #1 & 2.
+C> @param[in] IFLD Array of data (at proper gridpoints) to be
+C> converted to grib format if itype=1.
+C> see remarks #1 & 2.
+C> @param[in] IBITL 0 = Computer computes length for packing data from
+C> power of 2 (number of bits) best fit of data
+C> using 'variable' bit packer w3fi58.
+C> 8, 12, etc. computer rescales data to fit into that
+C> 'fixed' number of bits using w3fi59.
+C> see remarks #3.
+C> @param[in] IPFLAG 0 = Make pds from user supplied array (id)
+C> 1 = user supplying pds
+C> note: if pds is greater than 30, use iplfag=1.
+C> the user could call w3fi68 before he calls
+C> w3nogds. this would make the first 30 bytes of
+C> the pds, user then would make bytes after 30.
+C> @param[in] ID Array of  values that w3fi68 will use
+C> to make an edition 1 pds if ipflag=0.  (see the
+C> docblock for w3fi68 for layout of array)
+C> @param[in] PDS Array of values (valid pds supplied
+C> by user) if ipflag=1. length may exceed 28 bytes
+C> (contents of bytes beyond 28 are passed
+C> through unchanged).
+C> @param[in] IGFLAG 0 = Make gds based on 'igrid' value.
+C> 1 = make gds from user supplied info in 'igds' and 'igrid' value. see remarks #4.
+C> 2 = no gds will be included...for international grids
+C> *** this is an exception to remarks #4!!!!
+C> @param[in] IGRID # = Grid identification (table b)
+C> 255 = if user defined grid; igds must be supplied and igflag must =1.
+C> @param[in] IGDS Array containing user gds info (same
+C> format as supplied by w3fi71 - see dockblock for
+C> layout) if igflag=1.
+C> @param[in] ICOMP Resolution and component flag for bit 5 of gds(17)
+C> 0 = earth oriented winds
+C> 1 = grid oriented winds
+C> @param[in] IBFLAG 0 = Make bit map from user supplied data
+C> - # = bit map predefined by center see remarks #5.
+C> @param[in] IBMAP Array containing bit map
+C> @param[in] IBLEN Length of bit map will be used to verify length
+C> of field (error if it doesn't match).
+C> @param[in] IBDSFL Array containing table 11 flag info
+C> bds octet 4:
+C> (1) 0 = grid point data
+C> 1 = spherical harmonic coefficients
+C> (2) 0 = simple packing
+C> 1 = second order packing
+C> (3) ... same value as 'itype'
+C> 0 = original data were floating point values
+C> 1 = original data were integer values
+C> (4) 0 = no additional flags at octet 14
+C> 1 = octet 14 contains flag bits 5-12
+C> (5) 0 = reserved - always set to 0
+C> byte 6 option 1 not available (as of 5-16-93)
+C> (6) 0 = single datum at each grid point
+C> 1 = matrix of values at each grid point
+C> byte 7 option 0 with second order packing n/a (as of 5-16-93)
+C> (7) 0 = no secondary bit maps
+C> 1 = secondary bit maps present
+C> (8) 0 = second order values have constant width
+C> 1 = second order values have different widths
+C> @param[out] NPTS Number of gridpoints in array fld or ifld
+C> @param[out] KBUF Entire grib message ('grib' to '7777')
+C> equivalence to integer array to make sure it
+C> is on word bounary.
+C> @param[out] ITOT Total length of grib message in bytes
+C> @param[out] JERR =:
+C> - 0, Completed making grib field without error
+C> - 1, Ipflag not 0 or 1
+C> - 2, Igflag not 0 or 1 or 2
+C> - 3, Error converting ieee f.p. number to ibm370 f.p.
+C> - 4, W3fi71 error/igrid not defined
+C> - 5, W3fk74 error/grid representation type not valid
+C> - 6, Grid too large for packer dimension arrays
+C> see automation division for revision!
+C> - 7, Length of bit map not equal to size of fld/ifld
+C> - 8, W3fi73 error, all values in ibmap are zero
 C>
-C> USAGE:  CALL W3NOGDS(ITYPE,FLD,IFLD,IBITL,
-C>        &            IPFLAG,ID,PDS,
-C>        &            IGFLAG,IGRID,IGDS,ICOMP,
-C>        &            IBFLAG,IBMAP,IBLEN,IBDSFL,
-C>        &            IBDSFL,
-C>        &            NPTS,KBUF,ITOT,JERR)
-C>
-C>   INPUT ARGUMENT LIST:
-C>     ITYPE    - 0 = FLOATING POINT DATA SUPPLIED IN ARRAY 'FLD'
-C>                1 = INTEGER DATA SUPPLIED IN ARRAY 'IFLD'
-C>     FLD      - REAL ARRAY OF DATA (AT PROPER GRIDPOINTS) TO BE
-C>                CONVERTED TO GRIB FORMAT IF ITYPE=0.
-C>                SEE REMARKS #1 & 2.
-C>     IFLD     - INTEGER ARRAY OF DATA (AT PROPER GRIDPOINTS) TO BE
-C>                CONVERTED TO GRIB FORMAT IF ITYPE=1.
-C>                SEE REMARKS #1 & 2.
-C>     IBITL    - 0 = COMPUTER COMPUTES LENGTH FOR PACKING DATA FROM
-C>                    POWER OF 2 (NUMBER OF BITS) BEST FIT OF DATA
-C>                    USING 'VARIABLE' BIT PACKER W3FI58.
-C>                8, 12, ETC. COMPUTER RESCALES DATA TO FIT INTO THAT
-C>                    'FIXED' NUMBER OF BITS USING W3FI59.
-C>                SEE REMARKS #3.
-C>
-C>     IPFLAG   - 0 = MAKE PDS FROM USER SUPPLIED ARRAY (ID)
-C>                1 = USER SUPPLYING PDS
-C>                NOTE: IF PDS IS GREATER THAN 30, USE IPLFAG=1.
-C>                THE USER COULD CALL W3FI68 BEFORE HE CALLS
-C>                W3NOGDS. THIS WOULD MAKE THE FIRST 30 BYTES OF
-C>                THE PDS, USER THEN WOULD MAKE BYTES AFTER 30.
-C>     ID       - INTEGER ARRAY OF  VALUES THAT W3FI68 WILL USE
-C>                TO MAKE AN EDITION 1 PDS IF IPFLAG=0.  (SEE THE
-C>                DOCBLOCK FOR W3FI68 FOR LAYOUT OF ARRAY)
-C>     PDS      - CHARACTER ARRAY OF VALUES (VALID PDS SUPPLIED
-C>                BY USER) IF IPFLAG=1. LENGTH MAY EXCEED 28 BYTES
-C>                (CONTENTS OF BYTES BEYOND 28 ARE PASSED
-C>                THROUGH UNCHANGED).
-C>
-C>     IGFLAG   - 0 = MAKE GDS BASED ON 'IGRID' VALUE.
-C>                1 = MAKE GDS FROM USER SUPPLIED INFO IN 'IGDS'
-C>                    AND 'IGRID' VALUE.
-C>                SEE REMARKS #4.
-C>                2 = NO GDS WILL BE INCLUDED...for international grids
-C>                *** THIS IS AN EXCEPTION TO REMARKS #4!!!!
-C>     IGRID    - #   = GRID IDENTIFICATION (TABLE B)
-C>                255 = IF USER DEFINED GRID; IGDS MUST BE SUPPLIED
-C>                      AND IGFLAG MUST =1.
-C>     IGDS     - INTEGER ARRAY CONTAINING USER GDS INFO (SAME
-C>                FORMAT AS SUPPLIED BY W3FI71 - SEE DOCKBLOCK FOR
-C>                LAYOUT) IF IGFLAG=1.
-C>     ICOMP    - RESOLUTION AND COMPONENT FLAG FOR BIT 5 OF GDS(17)
-C>                0 = EARTH ORIENTED WINDS
-C>                1 = GRID ORIENTED WINDS
-C>
-C>     IBFLAG   - 0 = MAKE BIT MAP FROM USER SUPPLIED DATA
-C>                # = BIT MAP PREDEFINED BY CENTER
-C>                SEE REMARKS #5.
-C>     IBMAP    - INTEGER ARRAY CONTAINING BIT MAP
-C>     IBLEN    - LENGTH OF BIT MAP WILL BE USED TO VERIFY LENGTH
-C>                OF FIELD (ERROR IF IT DOESN'T MATCH).
-C>
-C>     IBDSFL   - INTEGER ARRAY CONTAINING TABLE 11 FLAG INFO
-C>                BDS OCTET 4:
-C>                (1) 0 = GRID POINT DATA
-C>                    1 = SPHERICAL HARMONIC COEFFICIENTS
-C>                (2) 0 = SIMPLE PACKING
-C>                    1 = SECOND ORDER PACKING
-C>                (3) ... SAME VALUE AS 'ITYPE'
-C>                    0 = ORIGINAL DATA WERE FLOATING POINT VALUES
-C>                    1 = ORIGINAL DATA WERE INTEGER VALUES
-C>                (4) 0 = NO ADDITIONAL FLAGS AT OCTET 14
-C>                    1 = OCTET 14 CONTAINS FLAG BITS 5-12
-C>                (5) 0 = RESERVED - ALWAYS SET TO 0
-C>         BYTE 6 OPTION 1 NOT AVAILABLE (AS OF 5-16-93)
-C>                (6) 0 = SINGLE DATUM AT EACH GRID POINT
-C>                    1 = MATRIX OF VALUES AT EACH GRID POINT
-C>         BYTE 7 OPTION 0 WITH SECOND ORDER PACKING N/A (AS OF 5-16-93)
-C>                (7) 0 = NO SECONDARY BIT MAPS
-C>                    1 = SECONDARY BIT MAPS PRESENT
-C>                (8) 0 = SECOND ORDER VALUES HAVE CONSTANT WIDTH
-C>                    1 = SECOND ORDER VALUES HAVE DIFFERENT WIDTHS
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     NPTS     - NUMBER OF GRIDPOINTS IN ARRAY FLD OR IFLD
-C>     KBUF     - ENTIRE GRIB MESSAGE ('GRIB' TO '7777')
-C>                EQUIVALENCE TO INTEGER ARRAY TO MAKE SURE IT
-C>                IS ON WORD BOUNARY.
-C>     ITOT     - TOTAL LENGTH OF GRIB MESSAGE IN BYTES
-C>     JERR     - = 0, COMPLETED MAKING GRIB FIELD WITHOUT ERROR
-C>                  1, IPFLAG NOT 0 OR 1
-C>                  2, IGFLAG NOT 0 OR 1 OR 2
-C>                  3, ERROR CONVERTING IEEE F.P. NUMBER TO IBM370 F.P.
-C>                  4, W3FI71 ERROR/IGRID NOT DEFINED
-C>                  5, W3FK74 ERROR/GRID REPRESENTATION TYPE NOT VALID
-C>                  6, GRID TOO LARGE FOR PACKER DIMENSION ARRAYS
-C>                     SEE AUTOMATION DIVISION FOR REVISION!
-C>                  7, LENGTH OF BIT MAP NOT EQUAL TO SIZE OF FLD/IFLD
-C>                  8, W3FI73 ERROR, ALL VALUES IN IBMAP ARE ZERO
-C>
-C>   OUTPUT FILES:
-C>     FT06F001 - STANDARD FORTRAN OUTPUT PRINT FILE
-C>
-C>   SUBPROGRAMS CALLED:
-C>     LIBRARY:
-C>       W3LIB    - W3FI58, W3FI59, W3FI68, W3FI71, W3FI73, W3FI74
-C>                  W3FI75, W3FI76, W3FI01
-C>
-C> REMARKS:
-C>   1)  IF BIT MAP TO BE INCLUDED IN MESSAGE, NULL DATA SHOULD
-C>       BE INCLUDED IN FLD OR IFLD.  THIS ROUTINE WILL TAKE CARE
-C>       OF 'DISCARDING' ANY NULL DATA BASED ON THE BIT MAP.
-C>   2)  UNITS MUST BE THOSE IN GRIB DOCUMENTATION:  NMC O.N. 388
-C>       OR WMO PUBLICATION 306.
-C>   3)  IN EITHER CASE, INPUT NUMBERS WILL BE MULTIPLIED BY
-C>       '10 TO THE NTH' POWER FOUND IN ID(25) OR PDS(27-28),
-C>       THE D-SCALING FACTOR, PRIOR TO BINARY PACKING.
-C>   4)  ALL NMC PRODUCED GRIB FIELDS WILL HAVE A GRID DEFINITION
-C>       SECTION INCLUDED IN THE GRIB MESSAGE.  ID(6) WILL BE
-C>       SET TO '1'.
-C>       - GDS WILL BE BUILT BASED ON GRID NUMBER (IGRID), UNLESS
-C>         IGFLAG=1 (USER SUPPLYING IGDS).  USER MUST STILL SUPPLY
-C>         IGRID EVEN IF IGDS PROVIDED.
-C>   5)  IF BIT MAP USED THEN ID(7) OR PDS(8) MUST INDICATE THE
-C>       PRESENCE OF A BIT MAP.
-C>   6)  ARRAY KBUF SHOULD BE EQUIVALENCED TO AN INTEGER VALUE OR
-C>       ARRAY TO MAKE SURE IT IS ON A WORD BOUNDARY.
-C>   7)  SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/256, Y-MP8/864, Y-MP EL92/256, J916/2048
+C> @remark
+C> - 1 If bit map to be included in message, null data should
+C> be included in fld or ifld.  this routine will take care
+C> of 'discarding' any null data based on the bit map.
+C> - 2 Units must be those in grib documentation:  nmc o.n. 388
+C> or wmo publication 306.
+C> - 3 In either case, input numbers will be multiplied by
+C> '10 to the nth' power found in id(25) or pds(27-28),
+C> the d-scaling factor, prior to binary packing.
+C> - 4 All nmc produced grib fields will have a grid definition
+C> section included in the grib message.  id(6) will be
+C> set to '1'.
+C> - gds will be built based on grid number (igrid), unless
+C> igflag=1 (user supplying igds).  user must still supply
+C> igrid even if igds provided.
+C> - 5 If bit map used then id(7) or pds(8) must indicate the
+C> presence of a bit map.
+C> - 6 Array kbuf should be equivalenced to an integer value or
+C> array to make sure it is on a word boundary.
+C> - 7 Subprogram can be called from a multiprocessing environment.
 C>
       SUBROUTINE W3NOGDS(ITYPE,FLD,IFLD,IBITL,
      &                  IPFLAG,ID,PDS,
@@ -277,7 +246,7 @@ C    &            ' DIMENSIONS'
 	  npts=1297
 	else if ((igrid.ge.61).and.(igrid.le.64)) then
 	  npts=4096
-	end if 
+	end if
       ELSE
 C       PRINT *,' W3NOGDS ERROR, IGFLAG IS NOT 0-2 IGFLAG = ',IGFLAG
         GO TO 900

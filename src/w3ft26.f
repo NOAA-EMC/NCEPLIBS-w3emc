@@ -1,39 +1,28 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:   W3FT26       CREATES WAFS 1.25X1.25 THINNED GRIDS
-C>   PRGMMR: FARLEY           ORG: W/NMC42    DATE: 93-04-28
+C> @brief Creates wafs 1.25x1.25 thinned grids.
+C> @author Farley @date 1993-04-28
+
+C> Converts a 360x181 1-degree grid into a nh or sh
+C> 360x91 1-degree grid. This nh/sh grid is flipped for grib
+C> purposes and then converted to the desired 1.25 degree
+C> wafs (quadrant) thinned grid.
 C>
-C> ABSTRACT: CONVERTS A 360X181 1-DEGREE GRID INTO A NH OR SH
-C>   360X91 1-DEGREE GRID.  THIS NH/SH GRID IS FLIPPED FOR GRIB
-C>   PURPOSES AND THEN CONVERTED TO THE DESIRED 1.25 DEGREE
-C>   WAFS (QUADRANT) THINNED GRID.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1993-04-28 | FARLEY | Original author.
+C> 1994-04-01 | Ralph Jones | Corrections for 1 deg. displacement of grids and
+C> error in flipping of southern hemisphere.
+C> 1994-05-05 | Ralph Jones | Replace subr. w3ft01() with w3ft16() and w3ft17().
+C> 1994-06-04 | Ralph Jones | Change subroutine name from wfstrp to w3ft26().
 C>
-C> PROGRAM HISTORY LOG:
-C>   93-04-28  FARLEY      ORIGINAL AUTHOR
-C>   94-04-01  R.E.JONES   CORRECTIONS FOR 1 DEG. DISPLACEMENT
-C>                         OF GRIDS AND ERROR IN FLIPPING OF
-C>                         SOUTHERN HEMISPHERE.
-C>   94-05-05  R.E.JONES   REPLACE SUBR. W3FT01 WITH W3FT16 AND W3FT17.
-C>   94-06-04  R.E.JONES   CHANGE SUBROUTINE NAME FROM WFSTRP TO W3FT26
+C> @param[in] MAPNUM Number of grid, 37 to 44.
+C> @param[in] FLD Northern or southern hem. spectral field.
+C> @param[in] HI Interpolated wafs field (3447 points)
+C> @param[in] IGPTS Number of points in interpolated field
+C> @param[in] NSTOP 24, when mapnum .ne. 37 thru 44
 C>
-C> USAGE:  CALL W3FT26 (MAPNUM,FLD,HI,IGPTS,NSTOP)
-C>   INPUT ARGUMENT LIST:
-C>     MAPNUM   -  NUMBER OF GRID, 37 TO 44
-C>     FLD      -  NORTHERN OR SOUTHERN HEM. SPECTRAL FIELD
-C>
-C>   OUTPUT ARGUMENT LIST:
-C>     HI       - INTERPOLATED WAFS FIELD (3447 POINTS)
-C>     IGPTS    - NUMBER OF POINTS IN INTERPOLATED FIELD
-C>     NSTOP    - 24, WHEN MAPNUM .NE. 37 THRU 44
-C>
-C>   SUBPROGRAMS CALLED:       
-C>     LIBRARY:                                                      
-C>       W3LIB    - W3FT16, W3FT17                                   
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author Farley @date 1993-04-28
       SUBROUTINE W3FT26 (MAPNUM,FLD,HI,IGPTS,NSTOP)
 C
       REAL    FLD   (360,181)
@@ -117,11 +106,11 @@ C
 C
       IF (MAPNUM .EQ. 37  .OR.  MAPNUM .EQ. 38  .OR.
      &    MAPNUM .EQ. 39  .OR.  MAPNUM .EQ. 40) THEN
-        CALL W3FT16(QUAD,HI,INTERP)    
+        CALL W3FT16(QUAD,HI,INTERP)
       ELSE
-        CALL W3FT17(QUAD,HI,INTERP) 
+        CALL W3FT17(QUAD,HI,INTERP)
       ENDIF
-C   
+C
       IGPTS = 3447
 C
       RETURN

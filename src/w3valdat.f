@@ -1,35 +1,20 @@
-!-----------------------------------------------------------------------
+!> @file
+!> @brief Determine the validity of a date and time
+!> @author Mark Iredell @date 1998-01-05
+
+!> This logical function returns true if the input is a valid NCEP absolute date and time.
+!>
+!> ### Program History Log:
+!> Date | Programmer | Comment
+!> -----|------------|--------
+!> 1998-01-05 | Mark Iredell | Initial.
+!>
+!> @param[in] IDAT NCEP absolute date and time (year, month, day, time zone,
+!> hour, minute, second, millisecond)
+!> @return W3VALDAT True if idat is a valid NCEP date and time
+!>
+!> @author Mark Iredell @date 1998-01-05
       logical function w3valdat(idat)
-!$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-!
-! SUBPROGRAM: W3VALDAT       DETERMINE THE VALIDITY OF A DATE AND TIME
-!   AUTHOR: MARK IREDELL     ORG: WP23       DATE: 98-01-05
-!
-! ABSTRACT: THIS LOGICAL FUNCTION RETURNS TRUE IF THE INPUT IS A VALID
-!   NCEP ABSOLUTE DATE AND TIME.
-!
-! PROGRAM HISTORY LOG:
-!   98-01-05  MARK IREDELL
-!
-! USAGE:  ...=W3VALDAT(IDAT)
-!
-!   INPUT VARIABLES:
-!     IDAT       INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!                (YEAR, MONTH, DAY, TIME ZONE,
-!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!
-!   OUTPUT VARIABLES:
-!     W3VALDAT   LOGICAL TRUE IF IDAT IS A VALID NCEP DATE AND TIME
-!
-! SUBPROGRAMS CALLED:
-!     IW3JDN         COMPUTE JULIAN DAY NUMBER     
-!     W3FS26         YEAR, MONTH, DAY FROM JULIAN DAY NUMBER
-!     W3REDDAT       REDUCE A TIME INTERVAL TO A CANONICAL FORM
-!
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
-!
-!$$$
       integer idat(8)
       real rinc1(5),rinc2(5)
       integer jdat(8)

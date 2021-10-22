@@ -1,56 +1,40 @@
 C> @file
-C
-C> SUBPROGRAM: W3FT41         COMPUTES 2.5X2.5 S. HEMI. GRID VECTOR
-C>   AUTHOR: R.E.JONES        ORG: W323       DATE: 80-11-20
+C> @brief Computes 2.5x2.5 s. hemi. grid vector.
+C> @author Ralph Jones @date 1992-07-23
+
+C> Computes 2.5 x 2.5 s. hemi. grid of 145 x 37 points
+C> from spectral coefficients in a rhomboidal 30 resolution
+C> representing a vector field.
 C>
-C> ABSTRACT: COMPUTES 2.5 X 2.5 S. HEMI. GRID OF 145 X 37 POINTS
-C>   FROM SPECTRAL COEFFICIENTS IN A RHOMBOIDAL 30 RESOLUTION
-C>   REPRESENTING A VECTOR FIELD.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1993-07-23 | Ralph Jones | New version of w3ft11(), takes out w3fa12()
+C> makes pln 3 dimensions, pln is computed one time in main program, trades memory
+C> for more speed. w3fa12() used 70% of cpu time.
 C>
-C> PROGRAM HISTORY LOG:
-C>   93-07-23  R.E.JONES   NEW VERSION OF W3FT11, TAKES OUT W3FA12
-C>                         MAKES PLN 3 DIMENSIONS, PLN IS COMPUTED
-C>                         ONE TIME IN MAIN PROGRAM, TRADES MEMORY
-C>                         FOR MORE SPEED. W3FA12 USED 70% OF CPU TIME.
+C> @param[in] VLN 992 complex coeff.
+C> @param[in] PLN (32,31,37) real space with legendre polynomials
+C> computed by w3fa12().
+C> @param[in] FL 31 complex space for fourier coeff.
+C> @param[in] WORK 144 real work space for subr. w3ft12()
+C> @param[in] TRIGS 216 precomputed trig funcs. used
+C> in w3ft12(), computed by w3fa13()
+C> @param[in] RCOS 37 reciprocal cosine latitudes of
+C> 2.5 x 2.5 grid must be computed before
+C> first call to w3ft11 using subr. w3fa13().
+C> @param[out] GN (145,37) grid values. 5365 point grid is type 30 or 1e hex o.n. 84
 C>
-C> USAGE:  CALL W3FT41(VLN,GN,PLN,FL,WORK,TRIGS,RCOS)
-C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     VLN    ARG LIST  992 COMPLEX COEFF.
-C>     PLN    ARG LIST  (32,31,37) REAL SPACE WITH LEGENDRE POLYNOMIALS
-C>                      COMPUTED BY W3FA12.
-C>     FL     ARG LIST  31 COMPLEX SPACE FOR FOURIER COEFF.
-C>     WORK   ARG LIST  144 REAL WORK SPACE FOR SUBR. W3FT12
-C>     TRIGS  ARG LIST  216 PRECOMPUTED TRIG FUNCS. USED
-C>                      IN W3FT12, COMPUTED BY W3FA13
-C>     RCOS   ARG LIST  37 RECIPROCAL COSINE LATITUDES OF
-C>                      2.5 X 2.5 GRID MUST BE COMPUTED BEFORE
-C>                      FIRST CALL TO W3FT11 USING SUBR. W3FA13.
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     GN     ARG LIST  (145,37) GRID VALUES.
-C>                      5365 POINT GRID IS TYPE 30 OR 1E HEX O.N. 84
-C>
-C>   SUBPROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     AIMAG  CMPLX  REAL                                      SYSTEM
-C>     W3FT12                                                  W3LIB
-C>
-C> WARNING: W3FT11 WAS OPTIMIZED TO RUN IN A SMALL AMOUNT OF
-C>   MEMORY, IT WAS NOT OPTIMIZED FOR SPEED, 70 PERCENT OF THE TIME WAS
-C>   USED BY SUBROUTINE W3FA12 COMPUTING THE LEGENDRE POLYNOMIALS. SINCE
-C>   THE LEGENDRE POLYNOMIALS ARE CONSTANT THEY NEED TO BE COMPUTED
-C>   ONLY ONCE IN A PROGRAM. BY MOVING W3FA12 TO THE MAIN PROGRAM AND
-C>   COMPUTING PLN AS A (32,31,37) ARRAY AND CHANGING THIS SUBROUTINE
-C>   TO USE PLN AS A THREE DIMENSION ARRAY THE RUNNING TIME WAS CUT
-C>   70 PERCENT. ADD FOLLOWING CODE TO MAIN PROGRAM TO COMPUTE EPS, PLN,
-C>   TRIGS, AND RCOS ONE TIME IN PROGRAM.
-C>     
+C> @note w3ft11() was optimized to run in a small amount of
+C> memory, it was not optimized for speed, 70 percent of the time was
+C> used by subroutine w3fa12() computing the legendre polynomials. Since
+C> the legendre polynomials are constant they need to be computed
+C> only once in a program. By moving w3fa12() to the main program and
+C> computing pln as a (32,31,37) array and changing this subroutine
+C> to use pln as a three dimension array the running time was cut
+C> 70 percent. Add following code to main program to compute eps, pln,
+C> trigs, and rcos one time in program.
+C> @code
 C>       DOUBLE PRECISION EPS(992)
 C>       DOUBLE PRECISION COLRA
 C>
@@ -67,11 +51,9 @@ C>       DO LAT = 1,37
 C>         COLRA = (LAT - 1) * DRAD
 C>         CALL W3FA12 (PLN(1,1,LAT), COLRA, 30, EPS)
 C>       END DO
+C> @endcode
 C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN  
-C>   MACHINE:  CRAY Y-MP8/864, CRAY Y-MP EL2/128
-C>
+C> @author Ralph Jones @date 1992-07-23
       SUBROUTINE W3FT41(VLN,GN,PLN,FL,WORK,TRIGS,RCOS)
 C
        COMPLEX          FL( 31 )

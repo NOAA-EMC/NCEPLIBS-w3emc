@@ -1,40 +1,25 @@
-!-----------------------------------------------------------------------
+!> @file
+!> @brief Return the utc date and time
+!> @author Mark Iredell @date 1998-01-05
+
+!> This subprogram returns the utc (greenwich) date and time in the NCEP
+!> absolute date and time data structure.
+!>
+!> ### Program History Log:
+!> Date | Programmer | Comment
+!> -----|------------|--------
+!> 1998-01-05 | Mark Iredell | Initial.
+!> 1999-04-28 | Stephen Gilbert | Added a patch to check for the proper UTC
+!> offset. Needed until the IBM bug in date_and_time is fixed. The patch can
+!> then be removed. See comments in the section blocked with "&&&&&&&&&&&".
+!> 1999-08-12 | Stephen Gilbert | Changed so that czone variable is saved and
+!> the system call is only done for first invocation of this routine.
+!>
+!> @param[in] IDAT NCEP absolute date and time (year, month, day, time zone,
+!> hour, minute, second, millisecond)
+!>
+!> @author Mark Iredell @date 1998-01-05
       subroutine w3utcdat(idat)
-!$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-!
-! SUBPROGRAM: W3UTCDAT       RETURN THE UTC DATE AND TIME
-!   AUTHOR: MARK IREDELL     ORG: WP23       DATE: 98-01-05
-!
-! ABSTRACT: THIS SUBPROGRAM RETURNS THE UTC (GREENWICH) DATE AND TIME
-!   IN THE NCEP ABSOLUTE DATE AND TIME DATA STRUCTURE.
-!
-! PROGRAM HISTORY LOG:
-!   98-01-05  MARK IREDELL
-! 1999-04-28  Gilbert         - added a patch to check for the proper
-!                               UTC offset.  Needed until the IBM bug
-!                               in date_and_time is fixed.  The patch
-!                               can then be removed.  See comments in
-!                               the section blocked with "&&&&&&&&&&&".
-! 1999-08-12  Gilbert         - Changed so that czone variable is saved
-!                               and the system call is only done for
-!                               first invocation of this routine.
-!
-! USAGE:  CALL W3UTCDAT(IDAT)
-!
-!   OUTPUT VARIABLES:
-!     IDAT       INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!                (YEAR, MONTH, DAY, TIME ZONE,
-!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!
-! SUBPROGRAMS CALLED:
-!     DATE_AND_TIME  FORTRAN 90 SYSTEM DATE INTRINSIC
-!     IW3JDN         COMPUTE JULIAN DAY NUMBER     
-!     W3FS26         YEAR, MONTH, DAY FROM JULIAN DAY NUMBER
-!
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
-!
-!$$$
       integer idat(8)
       character cdate*8,ctime*10,czone*5
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

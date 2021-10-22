@@ -1,63 +1,50 @@
 C> @file
-C
-C> SUBPROGRAM:  W3FT32        GENERAL INTERPOLATOR BETWEEN NMC FLDS
-C>   PRGMMR: KEYSER           ORG: NMC22       DATE:93-02-17
+C> @brief General interpolator between nmc flds.
+C> @author John Stackpole @date 1974-06-15
+
+C> Interpolate scalar quantity from any given nmc
+C> field (in office note 84) to any other field. Can do bilinearly
+C> or biquadratically. Will not rotate wind components.
+C> Input and output fields are real*4 unpacked
 C>
-C> ABSTRACT:  INTERPOLATE SCALAR QUANTITY FROM ANY GIVEN NMC
-C>   FIELD (IN OFFICE NOTE 84) TO ANY OTHER FIELD. CAN DO BILINEARLY
-C>   OR BIQUADRATICALLY.  WILL NOT ROTATE WIND COMPONENTS.
-C>   INPUT AND OUTPUT FIELDS ARE REAL*4 UNPACKED
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1974-06-15 | John Stackpole |
+C> 1987-07-15 | Bill Cavanaugh | Add grid type 100, 101 to tables.
+C> 1990-08-08 | John. Stackpole | Correct rotation error wrt 100, 101
+C> 1990-08-31 | Ralph Jones | Change name from polate to w3ft32
+C> 1993-01-26 | Dennis Keyser | Added grid types 87, 105, 106, 107 to
+C> tables (as both input and output).
 C>
-C> PROGRAM HISTORY LOG:
-C>   74-06-15  JOHN STACKPOLE
-C>   87-07-15  B. CAVANAUGH     ADD GRID TYPE 100, 101 TO TABLES.
-C>   90-08-08  J. STACKPOLE     CORRECT ROTATION ERROR WRT 100, 101
-C>   90-08-31  R.E. JONES       CHANGE NAME FROM POLATE TO W3FT32
-C>   93-01-26  D. A. KEYSER     ADDED GRID TYPES 87, 105, 106, 107 TO
-C>                              TABLES (AS BOTH INPUT AND OUTPUT).
+C> @param[in] FIELD REAL*4 Two dimensional array.
+C> @param[in] MAPIN INTEGER*4 Nmc map number (k) for given input field.
+C> @param[in] MAPOUT INTEGER*4 Nmc map number (k) for wanted output field.
+C> @param[in] INTERP INTEGER*4 Set interpolation method:
+C> - eq 1 - linear
+C> - ne 1 - biquadratic
+C> @param[out] DATA REAL*4 Array to hold output map (unpacked).
+C> @param[out] IER INTEGER*4 Completion condition flag
 C>
-C> USAGE:  CALL W3FT32(FIELD, MAPIN, DATA, MAPOUT, INTERP, IER)
-C>   INPUT ARGUMENTS:
-C>       FIELD  - REAL*4    - TWO DIMENSIONAL ARRAY.
-C>       MAPIN  - INTEGER*4 - NMC MAP NUMBER (K) FOR GIVEN INPUT FIELD.
-C>       MAPOUT - INTEGER*4 - NMC MAP NUMBER (K) FOR WANTED OUTPUT FIELD.
-C>       INTERP - INTEGER*4 - SET INTERPOLATION METHOD:
-C>                  EQ 1 - LINEAR
-C>                  NE 1 - BIQUADRATIC
-C>   INPUT FILES:  NONE
+C> Return conditions:
+C> - IER:
+C>  - 0 No difficulties
+C>  - 1 Mapin not recognized
+C>  - 2 Mapout not recognized
+C>  - 3 Particular pola mapout not recognized
+C>  - 4 Particular lola mapout not recognized
+C>  - 5 Particular lola mapin not recognized
+C>  - 6 Particular pola mapout not recognized
+C>  - 7 Particular lola mapin not recognized
+C>  - 8 Particular lola mapout not recognized
+C> these flags are set at various test locations
+C> please refer to the code listing for details
 C>
-C>   OUTPUT ARGUMENTS:
-C>        DATA - REAL*4 - ARRAY TO HOLD OUTPUT MAP (UNPACKED).
-C>         IER - INTEGER*4 - COMPLETION CONDITION FLAG
+C> @note See comment cards following for more detail
+C> including recipes for adding more input and
+C> output maps as the need arises.
 C>
-C>   OUTPUT FILES: NONE
-C>
-C>
-C>   RETURN CONDITIONS:
-C>     IER = 0  -  NO DIFFICULTIES
-C>           1  -  MAPIN NOT RECOGNIZED
-C>           2  -  MAPOUT NOT RECOGNIZED
-C>           3  -  PARTICULAR POLA MAPOUT NOT RECOGNIZED
-C>           4  -  PARTICULAR LOLA MAPOUT NOT RECOGNIZED
-C>           5  -  PARTICULAR LOLA MAPIN NOT RECOGNIZED
-C>           6  -  PARTICULAR POLA MAPOUT NOT RECOGNIZED
-C>           7  -  PARTICULAR LOLA MAPIN NOT RECOGNIZED
-C>           8  -  PARTICULAR LOLA MAPOUT NOT RECOGNIZED
-C>           THESE FLAGS ARE SET AT VARIOUS TEST LOCATIONS
-C>           PLEASE REFER TO THE CODE LISTING FOR DETAILS
-C>
-C>   SUBPROGRAMS CALLED:
-C>     UNIQUE :  NONE
-C>
-C>     LIBRARY:  W3FB01, W3FB02, W3FB03, W3FB04, W3FT00, W3FT01
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864
-C>
-C>   INFORMATION:  SEE COMMENT CARDS FOLLOWING FOR MORE DETAIL
-C>                 INCLUDING RECIPES FOR ADDING MORE INPUT AND
-C>                 OUTPUT MAPS AS THE NEED ARISES.
+C> @author John Stackpole @date 1974-06-15
       SUBROUTINE W3FT32(FIELD, MAPIN, DATA, MAPOUT, INTERP, IER)
 C
 C     INTERPOLATE INFORMATION FROM FIELD (MAP TYPE K = MAPIN)

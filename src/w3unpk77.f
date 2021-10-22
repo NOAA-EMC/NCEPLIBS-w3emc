@@ -1,388 +1,347 @@
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:  W3UNPK77      DECODES SINGLE REPORT FROM BUFR MESSAGES
-C   PRGMMR: KEYSER           ORG: NP22        DATE: 2002-03-05
-C
-C ABSTRACT: THIS SUBROUTINE DECODES A SINGLE REPORT FROM BUFR MESSAGES
-C   IN A JBUFR-TYPE DATA FILE.  CURRENTLY WIND PROFILER, NEXRAD (VAD)
-C   WIND AND GOES SOUNDING/RADIANCE DATA TYPES ARE VALID.  REPORT IS
-C   RETURNED IN QUASI-OFFICE NOTE 29 UNPACKED FORMAT (SEE REMARKS 4.).  
-C
-C PROGRAM HISTORY LOG:
-C 1996-12-16  KEYSER -- ORIGINAL AUTHOR (BASED ON W3LIB ROUTINE W3FI77)
-C 1997-06-02  KEYSER -- ADDED NEXRAD (VAD) WIND DATA TYPE
-C 1997-06-16  KEYSER -- ADDED GOES SOUNDING/RADIANCE DATA TYPE
-C 1997-09-18  KEYSER -- ADDED INSTRUMENT DATA USED IN PROCESSING,
-C                       SOLAR ZENITH ANGLE, AND SATELLITE ZENITH ANGLE
-C                       TO LIST OF PARAMETERS RETURNED FROM GOES
-C                       SOUNDING/RADIANCE DATA TYPE
-C 1998-07-09  KEYSER -- MODIFIED WIND PROFILER CAT. 11 (HEIGHT, HORIZ.
-C                       SIGNIFICANCE, VERT. SIGNIFICANCE) TO ACCOUNT
-C                       FOR UPDATES TO BUFRTABLE MNEMONICS IN /dcom;
-C                       CHANGED CHAR. 6 OF GOES STNID TO BE UNIQUE FOR
-C                       TWO DIFFERENT EVEN OR ODD SATELLITE ID'S
-C                       (EVERY OTHER EVEN OR ODD SAT. ID NOW GETS SAME
-C                       CHAR. 6 TAG)
-C 1998-08-19  KEYSER -- SUBROUTINE NOW Y2K AND FORTRAN 90 COMPLIANT
-C 1999-03-16  KEYSER -- INCORPORATED BOB KISTLER'S CHANGES NEEDED
-C                       TO PORT THE CODE TO THE IBM SP
-C 1999-05-17  KEYSER -- MADE CHANGES NECESSARY TO PORT THIS ROUTINE TO
-C                       THE IBM SP
-C 1999-09-26  KEYSER -- CHANGES TO MAKE CODE MORE PORTABLE
-C 2002-03-05  KEYSER -- ACCOUNTS FOR CHANGES IN INPUT PROFLR (WIND
-C                       PROFILER) BUFR DUMP FILE AFTER 3/2002: CAT. 10
-C                       SURFACE DATA NOW ALL MISSING (MNEMONICS "PMSL",
-C                       "WDIR1","WSPD1", "TMDB", "REHU", "REQV" NO
-C                       LONGER AVAILABLE); CAT. 11 MNEMONICS "ACAVH",
-C                       "ACAVV", "SPP0", AND "NPHL" NO LONGER
-C                       AVAILABLE; HEADER MNEMONIC "NPSM" IS NO LONGER
-C                       AVAILABLE, HEADER MNEMONIC "TPSE" REPLACES
-C                       "TPMI" (AVG. TIME IN MINUTES STILL OUTPUT);
-C                       NUMBER OF UPPER-AIR LEVELS INCR. FROM 43 TO UP
-C                       TO 64 (SIZE OF OUTPUT "RDATA" ARRAY INCR. FROM
-C                       600 TO 1200 TO ACCOUNT FOR THIS) (WILL STILL
-C                       WORK PROPERLY FOR INPUT PROFLR DUMP FILES PRIOR
-C                       TO 3/2002)
-C
-C
-C USAGE:    CALL W3UNPK77(IDATE,IHE,IHL,LUNIT,RDATA,IRET)
-C   INPUT ARGUMENT LIST:
-C     IDATE    - 4-WORD ARRAY HOLDING "CENTRAL" DATE TO PROCESS
-C              - (YYYY, MM, DD, HH)
-C     IHE      - NUMBER OF WHOLE HOURS RELATIVE TO "IDATE" FOR DATE OF
-C              - EARLIEST BUFR MESSAGE THAT IS TO BE DECODED; EARLIEST
-C              - DATE IS "IDATE" + "IHE" HOURS (IF "IHE" IS POSITIVE,
-C              - LATEST MESSAGE DATE IS AFTER "IDATE"; IF "IHE" IS
-C              - NEGATIVE LATEST MESSAGE DATE IS PRIOR TO "IDATE")
-C              - EXAMPLE: IF IHE=1, THEN EARLIEST DATE IS 1-HR AFTER
-C              - IDATE; IF IHE=-3, THEN EARLIEST DATE IS 3-HR PRIOR
-C              - TO IDATE
-C     IHL      - NUMBER OF WHOLE HOURS RELATIVE TO "IDATE" FOR DATE OF
-C              - LATEST BUFR MESSAGE THAT IS TO BE DECODED; LATEST
-C              - DATE IS "IDATE" + ("IHL" HOURS PLUS 59 MIN) IF "IHL"
-C              - IS POSITIVE (LATEST MESSAGE DATE IS AFTER "IDATE"),
-C              - AND "IDATE" + ("IHL"+1 HOURS MINUS 1 MIN) IF "IHL"
-C              - IS NEGATIVE (LATEST MESSAGE DATE IS PRIOR TO "IDATE")
-C              - EXAMPLE: IF IHL=3, THEN LATEST DATE IS 3-HR 59-MIN
-C              - AFTER IDATE; IF IHL=-2, THEN LATEST DATE IS 1-HR 1-MIN
-C              - PRIOR TO IDATE
-C     LUNIT    - FORTRAN UNIT NUMBER FOR INPUT DATA FILE
-C     IRET     - CONTROLS DEGREE OF UNIT 6 PRINTOUT (.GE. 0 -LIMITED
-C              - PRINTOUT; = -1 SOME ADDITIONAL DIAGNOSTIC PRINTOUT;
-C              = .LT. -1 -EXTENSIVE PRINTOUT) (SEE REMARKS 3.)
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     RDATA    - SINGLE REPORT RETURNED AN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT (SEE REMARKS 4.) (MINIMUM SIZE IS
-C              - 1200 WORDS)
-C     IRET     - RETURN CODE AS FOLLOWS:
-C       IRET = 0 ---> REPORT SUCCESSFULLY RETURNED
-C       IRET > 0 ---> NO REPORT RETURNED DUE TO:
-C            = 1 ---> ALL REPORTS READ IN, END
-C            = 2 ---> LAT AND/OR LON DATA MISSING
-C            = 3 ---> RESERVED
-C            = 4 ---> SOME/ALL DATE INFORMATION MISSING
-C            = 5 ---> NO DATA LEVELS PROCESSED (ALL LEVELS ARE MISSING)
-C            = 6 ---> NUMBER OF LEVELS IN REPORT HEADER IS NOT 1
-C            = 7 ---> NUMBER OF LEVELS IN ANOTHER SINGLE LEVEL SEQUENCE
-C                     IS NOT 1
-C
-C   INPUT FILES:
-C     UNIT AA  - (WHERE AA IS LUNIT ABOVE) FILE HOLDING THE DATA
-C              - IN THE FORM OF BUFR MESSAGES
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C   SUBPROGRAMS CALLED:
-C     UNIQUE        - UNPK7701 UNPK7702 UNPK7703 UNPK7704 UNPK7705
-C                   - UNPK7706 UNPK7707 UNPK7708 UNPK7709
-C     LIBRARY:
-C       W3LIB       - W3FI04   W3MOVDAT W3DIFDAT ERREXIT
-C       BUFRLIB     - DATELEN  DUMPBF   OPENBF   READMG   UFBCNT
-C                   - READSB   UFBINT   CLOSBF
-C
-C REMARKS: 1) A CONDITION CODE (STOP) OF 15 WILL OCCUR IF THE INPUT
-C     DATES FOR START AND/OR STOP TIME ARE SPECIFIED INCORRECTLY.
-C          2) A CONDITION CODE (STOP) OF 22 WILL OCCUR IF THE
-C     CHARACTERS ON THIS MACHINE ARE NEITHER ASCII NOR EBCDIC.
-C          3) THE INPUT ARGUMENT "IRET" SHOULD BE SET PRIOR TO EACH
-C     CALL TO THIS SUBROUTINE.
-C
-C   ***************************************************************
-C          4)
-C    BELOW IS THE FORMAT OF AN UNPACKED REPORT IN OUTPUT ARRAY RDATA
-C     (EACH WORD REPRESENTS A FULL-WORD ACCORDING TO THE MACHINE)
-C   N O T E :  THIS IS THE SAME FORMAT AS FOR W3LIB ROUTINE W3FI77
-C              EXCEPT WHERE NOTED
-C   ***************************************************************
-C
-CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-C                FORMAT FOR WIND PROFILER REPORTS
-CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-C                           HEADER
-C   WORD   CONTENT                   UNIT                 FORMAT
-C   ----   ----------------------    -------------------  ---------
-C     1    LATITUDE                  0.01 DEGREES         REAL
-C     2    LONGITUDE                 0.01 DEGREES WEST    REAL
-C     3    TIME SIGNIFICANCE (BUFR CODE TABLE "0 08 021") INTEGER
-C     4    OBSERVATION TIME          0.01 HOURS (UTC)     REAL
-cvvvvvdak port
-C     5    YEAR/MONTH                4-CHAR. 'YYMM'       CHARACTER
-caaaaadak port
-C                                    LEFT-JUSTIFIED
-C     6    DAY/HOUR                  4-CHARACTERS 'DDHH'  CHARACTER
-C     7    STATION ELEVATION         METERS               REAL
-C     8    SUBMODE/EDITION NO.       (SM X 10) + ED. NO.  INTEGER
-C                                    (ED. NO.=2, CONSTANT; SEE &,~)
-C     9    REPORT TYPE               71 (CONSTANT)        INTEGER
-C    10    AVERAGING TIME            MINUTES              INTEGER
-C                                 (NEGATIVE MEANS PRIOR TO OBS. TIME)
-C    11    STN. ID. (FIRST 4 CHAR.)  4-CHARACTERS         CHARACTER
-C                                    LEFT-JUSTIFIED
-C    12    STN. ID. (LAST  2 CHAR.)  2-CHARACTERS         CHARACTER
-C                                    LEFT-JUSTIFIED
-C
-C 13-34    ZEROED OUT - NOT USED                          INTEGER
-C    35    CATEGORY 10, NO. LEVELS   COUNT                INTEGER
-C    36    CATEGORY 10, DATA INDEX   COUNT                INTEGER
-C    37    CATEGORY 11, NO. LEVELS   COUNT                INTEGER
-C    38    CATEGORY 11, DATA INDEX   COUNT                INTEGER
-C 39-42    ZEROED OUT - NOT USED                          INTEGER
-C
-C 43-END   UNPACKED DATA GROUPS      (FOLLOWS)            REAL
-C
-C   CATEGORY 10 - WIND PROFILER SFC DATA (EACH LEVEL, SEE WORD 35 ABOVE)
-C     WORD   PARAMETER            UNITS               FORMAT
-C     ----   ---------            -----------------   -------------
-C(SEE @)1    SEA-LEVEL PRESSURE   0.1 MILLIBARS       REAL
-C(SEE *)2    STATION PRESSURE     0.1 MILLIBARS       REAL
-C(SEE @)3    HORIZ. WIND DIR.     DEGREES             REAL
-C(SEE @)4    HORIZ. WIND SPEED    0.1 M/S             REAL
-C(SEE @)5    AIR TEMPERATURE      0.1 DEGREES K       REAL
-C(SEE @)6    RELATIVE HUMIDITY    PERCENT             REAL
-C(SEE @)7    RAINFALL RATE        0.0000001 M/S       REAL
-C
-C   CATEGORY 11 - WIND PROFILER UPPER-AIR DATA (FIRST LEVEL IS SURFACE)
-C                 (EACH LEVEL, SEE WORD 37 ABOVE)
-C     WORD   PARAMETER            UNITS               FORMAT
-C     ----   ---------            -----------------   -------------
-C       1    HEIGHT ABOVE SEA-LVL METERS              REAL
-C       2    HORIZ. WIND DIR.     DEGREES             REAL
-C       3    HORIZ. WIND SPEED    0.1 M/S             REAL
-C       4    QUALITY CODE         (SEE %)             INTEGER
-C       5    VERT. WIND COMP. (W) 0.01 M/S            REAL
-C(SEE @)6    HORIZ. CONSENSUS NO. (SEE $)             INTEGER
-C(SEE @)7    VERT.  CONSENSUS NO. (SEE $)             INTEGER
-C(SEE @)8    SPECTRAL PEAK POWER  DB                  REAL
-C       9    HORIZ. WIND SPEED    0.1 M/S             REAL
-C            STANDARD DEVIATION   0.1 M/S             REAL
-C      10    VERT. WIND COMPONENT 0.1 M/S             REAL
-C            STANDARD DEVIATION   0.1 M/S             REAL
-C(SEE @)11   MODE                 (SEE #)             INTEGER
-C
-C  *-  ALWAYS MISSING
-C  &-  THIS IS A CHANGE FROM FORMAT IN W3LIB ROUTINE W3FI77
-C  %-  0 - MEDIAN AND SHEAR CHECKS BOTH PASSED
-C      2 - MEDIAN AND SHEAR CHECK RESULTS INCONCLUSIVE
-C      4 - MEDIAN CHECK PASSED; SHEAR CHECK FAILED
-C      8 - MEDIAN CHECK FAILED; SHEAR CHECK PASSED
-C     12 - MEDIAN AND SHEAR CHECKS BOTH FAILED
-C  $-  NO. OF INDIVIDUAL 6-MINUTE AVERAGE MEASUREMENTS THAT WERE
-C      INCLUDED IN FINAL ESTIMATE OF AVERAGED WIND (RANGE: 0, 2-10)
-C      (BASED ON A ONE-HOUR AVERAGE)
-C  #-  1 - DATA FROM LOW MODE
-C      2 - DATA FROM HIGH MODE
-C      3 - MISSING
-C  @-  THIS PARAMETER IS NO LONGER AVAILABLE AFTER 3/2002 AND IS SET
-C      TO MISSING (99999 FOR INTEGER OR 99999. FOR REAL)
-C  ~-  SUBMODE IS NO LONGER AVAILABLE AFTER 3/2002 AND IS SET TO 3
-C      (ITS MISSING VALUE)
-C
-CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-C               FORMAT FOR GOES SOUNDING/RADIANCE REPORTS
-CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-C                           HEADER
-C   WORD   CONTENT                   UNIT                 FORMAT
-C   ----   ----------------------    -------------------  ---------
-C     1    LATITUDE                  0.01 DEGREES         REAL
-C     2    LONGITUDE                 0.01 DEGREES WEST    REAL
-C     3    FIELD OF VIEW NUMBER      NUMERIC              INTEGER
-C     4    OBSERVATION TIME          0.01 HOURS (UTC)     REAL
-cvvvvvdak port
-C     5    YEAR/MONTH                4-CHAR. 'YYMM'       CHARACTER
-caaaaadak port
-C                                    LEFT-JUSTIFIED
-C     6    DAY/HOUR                  4-CHARACTERS 'DDHH'  CHARACTER
-C     7    STATION ELEVATION         METERS               REAL
-C     8    PROCESS. TECHNIQUE        (=21-CLEAR;          INTEGER
-C     8    PROCESS. TECHNIQUE       =23-CLOUD-CORRECTED)
-C     9    REPORT TYPE               61 (CONSTANT)        INTEGER
-C    10    QUALITY FLAG      (BUFR CODE TABLE "0 33 002") INTEGER
-C    11    STN. ID. (FIRST 4 CHAR.)  4-CHARACTERS         CHARACTER
-C                                    LEFT-JUSTIFIED
-C    12    STN. ID. (LAST  2 CHAR.)  2-CHARACTERS         CHARACTER
-C                                    LEFT-JUSTIFIED (SEE %)
-C
-C 13-26    ZEROED OUT - NOT USED
-C    27    CATEGORY 08, NO. LEVELS   COUNT                INTEGER
-C    28    CATEGORY 08, DATA INDEX   COUNT                INTEGER
-C 29-38    ZEROED OUT - NOT USED
-C    39    CATEGORY 12, NO. LEVELS   COUNT                INTEGER
-C    40    CATEGORY 12, DATA INDEX   COUNT                INTEGER
-C    41    CATEGORY 13, NO. LEVELS   COUNT                INTEGER
-C    42    CATEGORY 13, DATA INDEX   COUNT                INTEGER
-C
-C 43-END   UNPACKED DATA GROUPS      (FOLLOWS)            REAL
-C
-C   CATEGORY 12 - SATELLITE SOUNDING LEVEL DATA (FIRST LEVEL IS SURFACE;
-C                 EACH LEVEL, SEE 39 ABOVE)
-C     WORD   PARAMETER            UNITS               FORMAT
-C     ----   ---------            -----------------   -------------
-C       1    PRESSURE             0.1 MILLIBARS       REAL
-C       2    GEOPOTENTIAL         METERS              REAL
-C       3    TEMPERATURE          0.1 DEGREES C       REAL
-C       4    DEWPOINT TEMPERATURE 0.1 DEGREES C       REAL
-C       5    NOT USED             SET TO MISSING      REAL
-C       6    NOT USED             SET TO MISSING      REAL
-C       7    QUALITY MARKERS      4-CHARACTERS        CHARACTER
-C                                 LEFT-JUSTIFIED (SEE &)
-C
-C   CATEGORY 13 - SATELLITE RADIANCE "LEVEL" DATA (EACH "LEVEL", SEE
-C                 41 ABOVE)
-C     WORD   PARAMETER            UNITS               FORMAT
-C     ----   ---------            -----------------   -------------
-C       1    CHANNEL NUMBER       NUMERIC             INTEGER
-C       2    BRIGHTNESS TEMP.     0.01 DEG. KELVIN    REAL
-C       3    QUALITY MARKERS      4-CHARACTERS        CHARACTER
-C                                 LEFT-JUSTIFIED (SEE &&)
-C
-C   CATEGORY 08 - ADDITIONAL (MISCELLANEOUS) DATA (EACH LEVEL, SEE @
-C                 BELOW)
-C     WORD   PARAMETER            UNITS               FORMAT
-C     ----   ---------            -----------------   -------------
-C       1    VARIABLE             SEE @ BELOW         REAL
-C       2    CODE FIGURE          SEE @ BELOW         REAL
-C       3    MARKERS              2-CHARACTERS        CHARACTER
-C                                 LEFT-JUSTIFIED (SEE #)
-C
-C  %-  SIXTH CHARACTER OF STATION ID IS A TAGGED AS FOLLOWS:
-C          "I" - GOES-EVEN-1 (252, 256, ...) SAT. , CLEAR COLUMN  RETR.
-C          "J" - GOES-EVEN-1 (252, 256, ...) SAT. , CLD-CORRECTED RETR.
+C> @file
+C> @brief Decodes single report from bufr messages
+C> @author Dennis Keyser @date 2002-03-05
 
-C          "L" - GOES-ODD-1  (253, 257, ...) SAT. , CLEAR COLUMN  RETR.
-C          "M" - GOES-ODD-1  (253, 257, ...) SAT. , CLD-CORRECTED RETR.
+C> This subroutine decodes a single report from bufr messages
+C> in a jbufr-type data file. Currently wind profiler, nexrad (vad)
+C> wind and goes sounding/radiance data types are valid. Report is
+C> returned in quasi-office note 29 unpacked format (see remarks 4.).
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1996-12-16 | Dennis Keyser | Original author (based on w3lib routine w3fi77)
+C> 1997-06-02 | Dennis Keyser | Added nexrad (vad) wind data type
+C> 1997-06-16 | Dennis Keyser | Added goes sounding/radiance data type
+C> 1997-09-18 | Dennis Keyser | Added instrument data used in processing,
+C> solar zenith angle, and satellite zenith angle
+C> to list of parameters returned from goes
+C> sounding/radiance data type
+C> 1998-07-09 | Dennis Keyser | Modified wind profiler cat. 11 (height, horiz.
+C> significance, vert. significance) to account
+C> for updates to bufrtable mnemonics in /dcom;
+C> changed char. 6 of goes stnid to be unique for
+C> two different even or odd satellite id's
+C> (every other even or odd sat. id now gets same
+C> char. 6 tag)
+C> 1998-08-19 | Dennis Keyser | Subroutine now y2k and fortran 90 compliant
+C> 1999-03-16 | Dennis Keyser | Incorporated bob kistler's changes needed
+C> to port the code to the ibm sp
+C> 1999-05-17 | Dennis Keyser | Made changes necessary to port this routine to
+C> the ibm sp
+C> 1999-09-26 | Dennis Keyser | Changes to make code more portable
+C> 2002-03-05 | Dennis Keyser | Accounts for changes in input proflr (wind
+C> profiler) bufr dump file after 3/2002: cat. 10
+C> surface data now all missing (mnemonics "pmsl",
+C> "wdir1","wspd1", "tmdb", "rehu", "reqv" no
+C> longer available); cat. 11 mnemonics "acavh",
+C> "acavv", "spp0", and "nphl" no longer
+C> available; header mnemonic "npsm" is no longer
+C> available, header mnemonic "tpse" replaces
+C> "tpmi" (avg. time in minutes still output);
+C> number of upper-air levels incr. from 43 to up
+C> to 64 (size of output "rdata" array incr. from
+C> 600 to 1200 to account for this) (will still
+C> work properly for input proflr dump files prior
+C> to 3/2002)
+C>
+C> @param[in] IDATE 4-word array holding "central" date to process (yyyy, mm, dd, hh)
+C> @param[in] IHE Number of whole hours relative to "idate" for date of
+C> earliest bufr message that is to be decoded; earliest date is "idate" +
+C> "ihe" hours (if "ihe" is positive, latest message date is after "idate";
+C> if "ihe" is negative latest message date is prior to "idate") example:
+C> if ihe=1, then earliest date is 1-hr after idate; if ihe=-3, then earliest
+C> date is 3-hr prior to idate
+C> @param[in] IHL Number of whole hours relative to "idate" for date of
+C> latest bufr message that is to be decoded; latest date is "idate" + ("ihl"
+C> hours plus 59 min) if "ihl" is positive (latest message date is after
+C> "idate"), and "idate" + ("ihl"+1 hours minus 1 min) if "ihl" is negative
+C> (latest message date is prior to "idate") example: if ihl=3, then latest
+C> date is 3-hr 59-min after idate; if ihl=-2, then latest date is 1-hr 1-min
+C> prior to idate
+C> @param[in] LUNIT Fortran unit number for input data file
+C> @param[out] RDATA Single report returned an a quasi-office note 29 unpacked
+C> format (see remarks 4.) (minimum size is 1200 words)
+C> @param[inout] IRET [in] Controls degree of unit 6 printout (.ge. 0 -limited
+C> printout; = -1 some additional diagnostic printout; = .lt. -1 -extensive
+C> printout) (see remarks 3.)
+C> [out] Return code as follows:
+C> - IRET = 0 ---> Report successfully returned
+C> - IRET > 0 ---> No report returned due to:
+C>  - = 1 ---> All reports read in, end
+C>  - = 2 ---> Lat and/or lon data missing
+C>  - = 3 ---> Reserved
+C>  - = 4 ---> Some/all date information missing
+C>  - = 5 ---> No data levels processed (all levels are missing)
+C>  - = 6 ---> Number of levels in report header is not 1
+C>  - = 7 ---> Number of levels in another single level sequence is not 1
+C>
+C> @remark
+C> - 1 A condition code (stop) of 15 will occur if the input
+C> dates for start and/or stop time are specified incorrectly.
+C> - 2 A condition code (stop) of 22 will occur if the
+C> characters on this machine are neither ascii nor ebcdic.
+C> - 3 The input argument "iret" should be set prior to each
+C> call to this subroutine.
+C>
+C>   ***************************************************************
+C>          4)
+C>    BELOW IS THE FORMAT OF AN UNPACKED REPORT IN OUTPUT ARRAY RDATA
+C>     (EACH WORD REPRESENTS A FULL-WORD ACCORDING TO THE MACHINE)
+C>   N O T E :  THIS IS THE SAME FORMAT AS FOR W3LIB ROUTINE W3FI77
+C>              EXCEPT WHERE NOTED
+C>   ***************************************************************
+C>
+C> #### FORMAT FOR WIND PROFILER REPORTS
+C>   WORD |  CONTENT               |  UNIT               | FORMAT
+C>   ---- |  --------------------- | ------------------- | ---------
+C>     1  |  LATITUDE                 |  0.01 DEGREES        | REAL
+C>     2  |  LONGITUDE                |  0.01 DEGREES WEST   | REAL
+C>     3  |  TIME SIGNIFICANCE | (BUFR CODE TABLE "0 08 021")  | INTEGER
+C>     4  |  OBSERVATION TIME         |  0.01 HOURS (UTC)    | REAL
+C>     5  |  YEAR/MONTH               |  4-CHAR. 'YYMM'  LEFT-JUSTIFIED | CHARACTER
+C>     6  |  DAY/HOUR                 |  4-CHARACTERS 'DDHH' | CHARACTER
+C>     7  |  STATION ELEVATION        |  METERS              | REAL
+C>     8  |  SUBMODE/EDITION NO.      |  (SM X 10) + ED. NO. (ED. NO.=2, CONSTANT; SEE &,~) | INTEGER
+C>     9  |  REPORT TYPE              |  71 (CONSTANT)       | INTEGER
+C>    10  |  AVERAGING TIME           |  MINUTES (NEGATIVE MEANS PRIOR TO OBS. TIME) | INTEGER
+C>    11  |  STN. ID. (FIRST 4 CHAR.) |  4-CHARACTERS LEFT-JUSTIFIED| CHARACTER
+C>    12  |  STN. ID. (LAST  2 CHAR.) |  2-CHARACTERS LEFT-JUSTIFIED| CHARACTER
+C> 13-34  |  ZEROED OUT - NOT USED    |                      | INTEGER
+C>    35  |  CATEGORY 10, NO. LEVELS  |  COUNT               | INTEGER
+C>    36  |  CATEGORY 10, DATA INDEX  |  COUNT               | INTEGER
+C>    37  |  CATEGORY 11, NO. LEVELS  |  COUNT               | INTEGER
+C>    38  |  CATEGORY 11, DATA INDEX  |  COUNT               | INTEGER
+C> 39-42  |  ZEROED OUT - NOT USED    |                      | INTEGER
+C> 43-END  | UNPACKED DATA GROUPS     | (FOLLOWS)            | REAL
+C>
+C> #### CATEGORY 10 - WIND PROFILER SFC DATA (EACH LEVEL, SEE WORD 35 ABOVE)
+C>     WORD  | PARAMETER          |  UNITS             |  FORMAT
+C>     ----  | ---------          |  ----------------- |  -------------
+C>(SEE @)1   | SEA-LEVEL PRESSURE |  0.1 MILLIBARS     |  REAL
+C>(SEE *)2   | STATION PRESSURE   |  0.1 MILLIBARS     |  REAL
+C>(SEE @)3   | HORIZ. WIND DIR.   |  DEGREES           |  REAL
+C>(SEE @)4   | HORIZ. WIND SPEED  |  0.1 M/S           |  REAL
+C>(SEE @)5   | AIR TEMPERATURE    |  0.1 DEGREES K     |  REAL
+C>(SEE @)6   | RELATIVE HUMIDITY  |  PERCENT           |  REAL
+C>(SEE @)7   | RAINFALL RATE      |  0.0000001 M/S     |  REAL
+C>
+C> #### CATEGORY 11 - WIND PROFILER UPPER-AIR DATA (FIRST LEVEL IS SURFACE) (EACH LEVEL, SEE WORD 37 ABOVE)
+C>     WORD  | PARAMETER            | UNITS               | FORMAT
+C>     ----  | ---------            | -----------------   | -------------
+C>       1   | HEIGHT ABOVE SEA-LVL | METERS              | REAL
+C>       2   | HORIZ. WIND DIR.     | DEGREES             | REAL
+C>       3   | HORIZ. WIND SPEED    | 0.1 M/S             | REAL
+C>       4   | QUALITY CODE         | (SEE %)             | INTEGER
+C>       5   | VERT. WIND COMP. (W) | 0.01 M/S            | REAL
+C>(SEE @)6   | HORIZ. CONSENSUS NO. | (SEE $)             | INTEGER
+C>(SEE @)7   | VERT.  CONSENSUS NO. | (SEE $)             | INTEGER
+C>(SEE @)8   | SPECTRAL PEAK POWER  | DB                  | REAL
+C>       9   | HORIZ. WIND SPEED    | 0.1 M/S             | REAL
+C>           | STANDARD DEVIATION   | 0.1 M/S             | REAL
+C>      10   | VERT. WIND COMPONENT | 0.1 M/S             | REAL
+C>           | STANDARD DEVIATION   | 0.1 M/S             | REAL
+C>(SEE @)11  | MODE                 | (SEE #)             | INTEGER
+C>
+C> ##### SEE:
+C> - *-  ALWAYS MISSING
+C> - &-  THIS IS A CHANGE FROM FORMAT IN W3LIB ROUTINE W3FI77
+C> - %-  0 - MEDIAN AND SHEAR CHECKS BOTH PASSED
+C>  - 2 - MEDIAN AND SHEAR CHECK RESULTS INCONCLUSIVE
+C>  - 4 - MEDIAN CHECK PASSED; SHEAR CHECK FAILED
+C>  - 8 - MEDIAN CHECK FAILED; SHEAR CHECK PASSED
+C>  - 12 - MEDIAN AND SHEAR CHECKS BOTH FAILED
+C> - $-  NO. OF INDIVIDUAL 6-MINUTE AVERAGE MEASUREMENTS THAT WERE
+C>      INCLUDED IN FINAL ESTIMATE OF AVERAGED WIND (RANGE: 0, 2-10)
+C>      (BASED ON A ONE-HOUR AVERAGE)
+C> - #-  1 - DATA FROM LOW MODE
+C>      2 - DATA FROM HIGH MODE
+C>      3 - MISSING
+C> - @-  THIS PARAMETER IS NO LONGER AVAILABLE AFTER 3/2002 AND IS SET
+C>      TO MISSING (99999 FOR INTEGER OR 99999. FOR REAL)
+C> - ~-  SUBMODE IS NO LONGER AVAILABLE AFTER 3/2002 AND IS SET TO 3
+C>      (ITS MISSING VALUE)
+C>
+C>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+C>               FORMAT FOR GOES SOUNDING/RADIANCE REPORTS
+C>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+C>                           HEADER
+C>   WORD   CONTENT                   UNIT                 FORMAT
+C>   ----   ----------------------    -------------------  ---------
+C>     1    LATITUDE                  0.01 DEGREES         REAL
+C>     2    LONGITUDE                 0.01 DEGREES WEST    REAL
+C>     3    FIELD OF VIEW NUMBER      NUMERIC              INTEGER
+C>     4    OBSERVATION TIME          0.01 HOURS (UTC)     REAL
+c>vvvvvdak port
+C>     5    YEAR/MONTH                4-CHAR. 'YYMM'       CHARACTER
+c>aaaaadak port
+C>                                    LEFT-JUSTIFIED
+C>     6    DAY/HOUR                  4-CHARACTERS 'DDHH'  CHARACTER
+C>     7    STATION ELEVATION         METERS               REAL
+C>     8    PROCESS. TECHNIQUE        (=21-CLEAR;          INTEGER
+C>     8    PROCESS. TECHNIQUE       =23-CLOUD-CORRECTED)
+C>     9    REPORT TYPE               61 (CONSTANT)        INTEGER
+C>    10    QUALITY FLAG      (BUFR CODE TABLE "0 33 002") INTEGER
+C>    11    STN. ID. (FIRST 4 CHAR.)  4-CHARACTERS         CHARACTER
+C>                                    LEFT-JUSTIFIED
+C>    12    STN. ID. (LAST  2 CHAR.)  2-CHARACTERS         CHARACTER
+C>                                    LEFT-JUSTIFIED (SEE %)
+C>
+C> 13-26    ZEROED OUT - NOT USED
+C>    27    CATEGORY 08, NO. LEVELS   COUNT                INTEGER
+C>    28    CATEGORY 08, DATA INDEX   COUNT                INTEGER
+C> 29-38    ZEROED OUT - NOT USED
+C>    39    CATEGORY 12, NO. LEVELS   COUNT                INTEGER
+C>    40    CATEGORY 12, DATA INDEX   COUNT                INTEGER
+C>    41    CATEGORY 13, NO. LEVELS   COUNT                INTEGER
+C>    42    CATEGORY 13, DATA INDEX   COUNT                INTEGER
+C>
+C> 43-END   UNPACKED DATA GROUPS      (FOLLOWS)            REAL
+C>
+C>   CATEGORY 12 - SATELLITE SOUNDING LEVEL DATA (FIRST LEVEL IS SURFACE;
+C>                 EACH LEVEL, SEE 39 ABOVE)
+C>     WORD   PARAMETER            UNITS               FORMAT
+C>     ----   ---------            -----------------   -------------
+C>       1    PRESSURE             0.1 MILLIBARS       REAL
+C>       2    GEOPOTENTIAL         METERS              REAL
+C>       3    TEMPERATURE          0.1 DEGREES C       REAL
+C>       4    DEWPOINT TEMPERATURE 0.1 DEGREES C       REAL
+C>       5    NOT USED             SET TO MISSING      REAL
+C>       6    NOT USED             SET TO MISSING      REAL
+C>       7    QUALITY MARKERS      4-CHARACTERS        CHARACTER
+C>                                 LEFT-JUSTIFIED (SEE &)
+C>
+C>   CATEGORY 13 - SATELLITE RADIANCE "LEVEL" DATA (EACH "LEVEL", SEE
+C>                 41 ABOVE)
+C>     WORD   PARAMETER            UNITS               FORMAT
+C>     ----   ---------            -----------------   -------------
+C>       1    CHANNEL NUMBER       NUMERIC             INTEGER
+C>       2    BRIGHTNESS TEMP.     0.01 DEG. KELVIN    REAL
+C>       3    QUALITY MARKERS      4-CHARACTERS        CHARACTER
+C>                                 LEFT-JUSTIFIED (SEE &&)
+C>
+C>   CATEGORY 08 - ADDITIONAL (MISCELLANEOUS) DATA (EACH LEVEL, SEE @
+C>                 BELOW)
+C>     WORD   PARAMETER            UNITS               FORMAT
+C>     ----   ---------            -----------------   -------------
+C>       1    VARIABLE             SEE @ BELOW         REAL
+C>       2    CODE FIGURE          SEE @ BELOW         REAL
+C>       3    MARKERS              2-CHARACTERS        CHARACTER
+C>                                 LEFT-JUSTIFIED (SEE #)
+C>
+C>  %-  SIXTH CHARACTER OF STATION ID IS A TAGGED AS FOLLOWS:
+C>          "I" - GOES-EVEN-1 (252, 256, ...) SAT. , CLEAR COLUMN  RETR.
+C>          "J" - GOES-EVEN-1 (252, 256, ...) SAT. , CLD-CORRECTED RETR.
 
-C          "O" - GOES-EVEN-2 (254, 258, ...) SAT. , CLEAR COLUMN  RETR.
-C          "P" - GOES-EVEN-2 (254, 258, ...) SAT. , CLD-CORRECTED RETR.
+C>          "L" - GOES-ODD-1  (253, 257, ...) SAT. , CLEAR COLUMN  RETR.
+C>          "M" - GOES-ODD-1  (253, 257, ...) SAT. , CLD-CORRECTED RETR.
 
-C          "Q" - GOES-ODD-2  (251, 255, ...) SAT. , CLEAR COLUMN  RETR.
-C          "R" - GOES-ODD-2  (251, 255, ...) SAT. , CLD-CORRECTED RETR.
+C>          "O" - GOES-EVEN-2 (254, 258, ...) SAT. , CLEAR COLUMN  RETR.
+C>          "P" - GOES-EVEN-2 (254, 258, ...) SAT. , CLD-CORRECTED RETR.
 
-C          "?" - EITHER SATELLITE AND/OR RETRIEVAL TYPE UNKNOWN
+C>          "Q" - GOES-ODD-2  (251, 255, ...) SAT. , CLEAR COLUMN  RETR.
+C>          "R" - GOES-ODD-2  (251, 255, ...) SAT. , CLD-CORRECTED RETR.
 
-C  &-  FIRST  CHARACTER IS Q.M. FOR GEOPOTENTIAL
-C      SECOND CHARACTER IS Q.M. FOR TEMPERATURE
-C      THIRD  CHARACTER IS Q.M. FOR DEWPOINT TEMPERATURE
-C      FOURTH CHARACTER IS NOT USED
-C          " " - INDICATES DATA NOT SUSPECT
-C          "Q" - INDICATES DATA ARE SUSPECT
-C          "F" - INDICATES DATA ARE BAD
-C  &&- FIRST  CHARACTER IS Q.M. FOR BRIGHTNESS TEMPERATURE
-C      SECOND-FOURTH CHARACTERS ARE NOT USED
-C          " " - INDICATES DATA NOT SUSPECT
-C          "Q" - INDICATES DATA ARE SUSPECT
-C          "F" - INDICATES DATA ARE BAD
-C  @-  NUMBER OF "LEVELS" FROM WORD 27.  MAXIMUM IS 12, AND ARE ORDERED
-C      AS FOLLOWS (IF A DATUM ARE MISSING THAT LEVEL NOT STORED)
-C           1 - LIFTED INDEX ---------- .01 DEG. KELVIN -- C. FIG. 250.
-C           2 - TOTAL PRECIP. WATER  -- .01 MILLIMETERS -- C. FIG. 251.
-C           3 - 1. TO .9 SIGMA P.WATER- .01 MILLIMETERS -- C. FIG. 252.
-C           4 - .9 TO .7 SIGMA P.WATER- .01 MILLIMETERS -- C. FIG. 253.
-C           5 - .7 TO .3 SIGMA P.WATER- .01 MILLIMETERS -- C. FIG. 254.
-C           6 -  SKIN TEMPERATURE ----- .01 DEG. KELVIN -- C. FIG. 255.
-C           7 -  CLOUD TOP TEMPERATURE- .01 DEG. KELVIN -- C. FIG. 256.
-C           8 -  CLOUD TOP PRESSURE --- .1 MILLIBARS ----- C. FIG. 257.
-C           9 -  CLOUD AMOUNT (BUFR TBL. C.T. 0-20-011) -- C. FIG. 258.
-C          10 -  INSTR. DATA USED IN PROC.
-C                             (BUFR TBL. C.T. 0-02-021) -- C. FIG. 259.
-C          11 -  SOLAR ZENITH ANGLE --- .01 DEGREE ------- C. FIG. 260.
-C          12 -  SAT. ZENITH ANGLE ---- .01 DEGREE ------- C. FIG. 261.
-C  #-  FIRST  CHARACTER IS Q.M. FOR THE DATUM
-C          " " - INDICATES DATA NOT SUSPECT
-C          "Q" - INDICATES DATA ARE SUSPECT
-C          "F" - INDICATES DATA ARE BAD
-C      SECOND CHARACTER IS NOT USED
-C
-CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-C                FORMAT FOR NEXRAD (VAD) WIND REPORTS
-CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-C                           HEADER
-C   WORD   CONTENT                   UNIT                 FORMAT
-C   ----   ----------------------    -------------------  ---------
-C     1    LATITUDE                  0.01 DEGREES         REAL
-C     2    LONGITUDE                 0.01 DEGREES WEST    REAL
-C     3    ** RESERVED **            SET TO 99999         INTEGER
-C     4    OBSERVATION TIME          0.01 HOURS (UTC)     REAL
-cvvvvvdak port
-C     5    YEAR/MONTH                4-CHAR. 'YYMM'       CHARACTER
-caaaaadak port
-C                                    LEFT-JUSTIFIED
-C     6    DAY/HOUR                  4-CHARACTERS 'DDHH'  CHARACTER
-C     7    STATION ELEVATION         METERS               REAL
-C     8    ** RESERVED **            SET TO 99999         INTEGER
-C
-C     9    REPORT TYPE               72 (CONSTANT)        INTEGER
-C    10    ** RESERVED **            SET TO 99999         INTEGER
-C    11    STN. ID. (FIRST 4 CHAR.)  4-CHARACTERS         CHARACTER
-C                                    LEFT-JUSTIFIED
-C    12    STN. ID. (LAST  2 CHAR.)  2-CHARACTERS         CHARACTER
-C                                    LEFT-JUSTIFIED
-C
-C 13-18    ZEROED OUT - NOT USED                          INTEGER
-C    19    CATEGORY 04, NO. LEVELS   COUNT                INTEGER
-C    20    CATEGORY 04, DATA INDEX   COUNT                INTEGER
-C 21-42    ZEROED OUT - NOT USED                          INTEGER
-C
-C 43-END   UNPACKED DATA GROUPS      (FOLLOWS)            REAL
-C
-C   CATEGORY 04 - UPPER-AIR WINDS-BY-HEIGHT DATA(FIRST LEVEL IS SURFACE)
-C                 (EACH LEVEL, SEE WORD 19 ABOVE)
-C     WORD   PARAMETER            UNITS               FORMAT
-C     ----   ---------            -----------------   -------------
-C       1    HEIGHT ABOVE SEA-LVL METERS              REAL
-C       2    HORIZ. WIND DIR.     DEGREES             REAL
-C       3    HORIZ. WIND SPEED    0.1 M/S (SEE *)     REAL
-C       4    QUALITY MARKERS      4-CHARACTERS        CHARACTER
-C                                 LEFT-JUSTIFIED (SEE %)
-C
-C  *-  UNITS HERE DIFFER FROM THOSE IN TRUE UNPACKED OFFICE NOTE 29
-C      (WHERE UNITS ARE KNOTS)
-C  %-  THE FIRST THREE CHARACTERS ARE ALWAYS BLANK, THE FOURTH
-C      CHARACTER IS A "CONFIDENCE LEVEL" WHICH IS RELATED TO THE ROOT-
-C      MEAN-SQUARE VECTOR ERROR FOR THE HORIZONTAL WIND.  IT IS
-C      DEFINED AS FOLLOWS:
-C               'A' = RMS OF  1.9 KNOTS
-C               'B' = RMS OF  3.9 KNOTS
-C               'C' = RMS OF  5.8 KNOTS
-C               'D' = RMS OF  7.8 KNOTS
-C               'E' = RMS OF  9.7 KNOTS
-C               'F' = RMS OF 11.7 KNOTS
-C               'G' = RMS  > 13.6 KNOTS
-CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-C
-C   FOR ALL REPORT TYPES, MISSING VALUES ARE:
-C                       99999. FOR REAL
-C                       99999  FOR INTEGER
-C                       9'S    FOR CHARACTERS IN WORD  5,  6 OF HEADER
-C                       BLANK  FOR CHARACTERS IN WORD 11, 12 OF HEADER
-C                              AND FOR CHARACTERS IN ANY CATEGORY LEVEL
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
-C$$$
+C>          "?" - EITHER SATELLITE AND/OR RETRIEVAL TYPE UNKNOWN
+
+C>  &-  FIRST  CHARACTER IS Q.M. FOR GEOPOTENTIAL
+C>      SECOND CHARACTER IS Q.M. FOR TEMPERATURE
+C>      THIRD  CHARACTER IS Q.M. FOR DEWPOINT TEMPERATURE
+C>      FOURTH CHARACTER IS NOT USED
+C>          " " - INDICATES DATA NOT SUSPECT
+C>          "Q" - INDICATES DATA ARE SUSPECT
+C>          "F" - INDICATES DATA ARE BAD
+C>  &&- FIRST  CHARACTER IS Q.M. FOR BRIGHTNESS TEMPERATURE
+C>      SECOND-FOURTH CHARACTERS ARE NOT USED
+C>          " " - INDICATES DATA NOT SUSPECT
+C>          "Q" - INDICATES DATA ARE SUSPECT
+C>          "F" - INDICATES DATA ARE BAD
+C>  @-  NUMBER OF "LEVELS" FROM WORD 27.  MAXIMUM IS 12, AND ARE ORDERED
+C>      AS FOLLOWS (IF A DATUM ARE MISSING THAT LEVEL NOT STORED)
+C>           1 - LIFTED INDEX ---------- .01 DEG. KELVIN -- C. FIG. 250.
+C>           2 - TOTAL PRECIP. WATER  -- .01 MILLIMETERS -- C. FIG. 251.
+C>           3 - 1. TO .9 SIGMA P.WATER- .01 MILLIMETERS -- C. FIG. 252.
+C>           4 - .9 TO .7 SIGMA P.WATER- .01 MILLIMETERS -- C. FIG. 253.
+C>           5 - .7 TO .3 SIGMA P.WATER- .01 MILLIMETERS -- C. FIG. 254.
+C>           6 -  SKIN TEMPERATURE ----- .01 DEG. KELVIN -- C. FIG. 255.
+C>           7 -  CLOUD TOP TEMPERATURE- .01 DEG. KELVIN -- C. FIG. 256.
+C>           8 -  CLOUD TOP PRESSURE --- .1 MILLIBARS ----- C. FIG. 257.
+C>           9 -  CLOUD AMOUNT (BUFR TBL. C.T. 0-20-011) -- C. FIG. 258.
+C>          10 -  INSTR. DATA USED IN PROC.
+C>                             (BUFR TBL. C.T. 0-02-021) -- C. FIG. 259.
+C>          11 -  SOLAR ZENITH ANGLE --- .01 DEGREE ------- C. FIG. 260.
+C>          12 -  SAT. ZENITH ANGLE ---- .01 DEGREE ------- C. FIG. 261.
+C>  #-  FIRST  CHARACTER IS Q.M. FOR THE DATUM
+C>          " " - INDICATES DATA NOT SUSPECT
+C>          "Q" - INDICATES DATA ARE SUSPECT
+C>          "F" - INDICATES DATA ARE BAD
+C>      SECOND CHARACTER IS NOT USED
+C>
+C>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+C>                FORMAT FOR NEXRAD (VAD) WIND REPORTS
+C>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+C>                           HEADER
+C>   WORD   CONTENT                   UNIT                 FORMAT
+C>   ----   ----------------------    -------------------  ---------
+C>     1    LATITUDE                  0.01 DEGREES         REAL
+C>     2    LONGITUDE                 0.01 DEGREES WEST    REAL
+C>     3    ** RESERVED **            SET TO 99999         INTEGER
+C>     4    OBSERVATION TIME          0.01 HOURS (UTC)     REAL
+c>vvvvvdak port
+C>     5    YEAR/MONTH                4-CHAR. 'YYMM'       CHARACTER
+c>aaaaadak port
+C>                                    LEFT-JUSTIFIED
+C>     6    DAY/HOUR                  4-CHARACTERS 'DDHH'  CHARACTER
+C>     7    STATION ELEVATION         METERS               REAL
+C>     8    ** RESERVED **            SET TO 99999         INTEGER
+C>
+C>     9    REPORT TYPE               72 (CONSTANT)        INTEGER
+C>    10    ** RESERVED **            SET TO 99999         INTEGER
+C>    11    STN. ID. (FIRST 4 CHAR.)  4-CHARACTERS         CHARACTER
+C>                                    LEFT-JUSTIFIED
+C>    12    STN. ID. (LAST  2 CHAR.)  2-CHARACTERS         CHARACTER
+C>                                    LEFT-JUSTIFIED
+C>
+C> 13-18    ZEROED OUT - NOT USED                          INTEGER
+C>    19    CATEGORY 04, NO. LEVELS   COUNT                INTEGER
+C>    20    CATEGORY 04, DATA INDEX   COUNT                INTEGER
+C> 21-42    ZEROED OUT - NOT USED                          INTEGER
+C>
+C> 43-END   UNPACKED DATA GROUPS      (FOLLOWS)            REAL
+C>
+C>   CATEGORY 04 - UPPER-AIR WINDS-BY-HEIGHT DATA(FIRST LEVEL IS SURFACE)
+C>                 (EACH LEVEL, SEE WORD 19 ABOVE)
+C>     WORD   PARAMETER            UNITS               FORMAT
+C>     ----   ---------            -----------------   -------------
+C>       1    HEIGHT ABOVE SEA-LVL METERS              REAL
+C>       2    HORIZ. WIND DIR.     DEGREES             REAL
+C>       3    HORIZ. WIND SPEED    0.1 M/S (SEE *)     REAL
+C>       4    QUALITY MARKERS      4-CHARACTERS        CHARACTER
+C>                                 LEFT-JUSTIFIED (SEE %)
+C>
+C>  *-  UNITS HERE DIFFER FROM THOSE IN TRUE UNPACKED OFFICE NOTE 29
+C>      (WHERE UNITS ARE KNOTS)
+C>  %-  THE FIRST THREE CHARACTERS ARE ALWAYS BLANK, THE FOURTH
+C>      CHARACTER IS A "CONFIDENCE LEVEL" WHICH IS RELATED TO THE ROOT-
+C>      MEAN-SQUARE VECTOR ERROR FOR THE HORIZONTAL WIND.  IT IS
+C>      DEFINED AS FOLLOWS:
+C>               'A' = RMS OF  1.9 KNOTS
+C>               'B' = RMS OF  3.9 KNOTS
+C>               'C' = RMS OF  5.8 KNOTS
+C>               'D' = RMS OF  7.8 KNOTS
+C>               'E' = RMS OF  9.7 KNOTS
+C>               'F' = RMS OF 11.7 KNOTS
+C>               'G' = RMS  > 13.6 KNOTS
+C>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+C>
+C>   FOR ALL REPORT TYPES, MISSING VALUES ARE:
+C>                       99999. FOR REAL
+C>                       99999  FOR INTEGER
+C>                       9'S    FOR CHARACTERS IN WORD  5,  6 OF HEADER
+C>                       BLANK  FOR CHARACTERS IN WORD 11, 12 OF HEADER
+C>                              AND FOR CHARACTERS IN ANY CATEGORY LEVEL
+C>
+C> @author Dennis Keyser @date 2002-03-05
       SUBROUTINE W3UNPK77(IDATE,IHE,IHL,LUNIT,RDATA,IRET)
       CHARACTER*4  CBUFR
       INTEGER  IDATE(4),LSDATE(4),jdate(8),IDATA(1200)
@@ -392,9 +351,9 @@ C$$$
       COMMON /PK77CC/INDEX
       COMMON /PK77DD/LSHE,LSHL,ICDATE(5),IDDATE(5)
       COMMON /PK77FF/IFOV(3),KNTSAT(250:260)
- 
+
       SAVE
- 
+
       EQUIVALENCE (RDATX,IDATA)
       DATA ITM/0/,LUNITL/-99/,KOUNT/0/
       IPRINT = 0
@@ -458,13 +417,13 @@ C-----------------------------------------------------------------------
 
 C COME HERE IF FIRST CALL TO SUBROUTINE OR IF INPUT DATA UNIT NUMBER OR
 C  IF INPUT DATE/TIME OR RANGE IN TIME HAS BEEN CHANGED FROM LAST CALL
- 
+
 C           CLOSE BUFR DATA SET (IN CASE OPEN FROM PREVIOUS RUN)
 C       REWIND INPUT BUFR DATA SET, GET CENTER TIME AND DUMP TIME,
 C                          OPEN BUFR DATA SET
 
 C     SET-UP TO DETERMINE IF BUFR MESSAGE IS WITHIN REQUESTED DATES
- 
+
 C (ALSO SET INDEX=0, FORCES BUFR MSG TO BE READ BEFORE RPTS ARE DECODED)
 
 C-----------------------------------------------------------------------
@@ -545,7 +504,7 @@ C            Y2K COMPLIANT (BUFRLIB DOES THE WINDOWING HERE)
          END IF
 
 C  OPEN BUFR FILE - READ IN DICTIONARY MESSAGES (TABLE A, B, D ENTRIES)
- 
+
          CALL OPENBF(LUNIT,'IN',LUNIT)
          PRINT 100, LUNIT
   100    FORMAT(/5X,'===> BUFR DATA SET IN UNIT',I3,' SUCCESSFULLY ',
@@ -669,40 +628,23 @@ C COME HERE IF NULL OR NON-BUFR FILE IS INPUT - RETURN WITH IRET = 1
       LSHE = IHE
       LSHL = IHL
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    UNPK7701    READS A SINGLE REPORT OUT OF BUFR DATASET
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 1996-12-16
-C
-C ABSTRACT: CALLS BUFRLIB ROUTINES TO READ IN A BUFR MESSAGE AND THEN
-C   READ A SINGLE REPORT (SUBSET) OUT OF THE MESSAGE.
-C
-C PROGRAM HISTORY LOG:
-C 1996-12-16  D. A. KEYSER NP22 - ORIGINAL AUTHOR
-C
-C USAGE:    CALL UNPK7701(LUNIT,ITP,IRET)
-C   INPUT ARGUMENT LIST:
-C     LUNIT    - FORTRAN UNIT NUMBER FOR INPUT DATA FILE
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     ITP      - THE TYPE OF REPORT THAT HAS BEEN DECODED {=1 -
-C              - WIND PROFILER, =2 - GOES SNDG, =3 - NEXRAD(VAD) WIND}
-C     IRET     - RETURN CODE AS DESCRIBED IN W3UNPK77 DOCBLOCK
-C
-C   INPUT FILES:
-C     UNIT AA  - (WHERE AA IS LUNIT ABOVE) FILE HOLDING THE DATA
-C              - IN THE FORM OF BUFR MESSAGES
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTINE W3UNPK77.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
-C$$$
+C> @brief Reads a single report out of bufr dataset
+C> @author Dennis Keyser @date 1996-12-16
+
+C> Calls bufrlib routines to read in a bufr message and then read a single
+C> report (subset) out of the message.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1996-12-16 | Dennis Keyser NP22 | Initial.
+C>
+C> @param[in] LUNIT Fortran unit number for input data file.
+C> @param[out] ITP The type of report that has been decoded {=1 - wind profiler,
+C> =2 - goes sndg, =3 - nexrad(vad) wind}
+C> @param[out] IRET Return code as described in w3unpk77 docblock
+C>
+C> @author Dennis Keyser @date 1996-12-16
       SUBROUTINE UNPK7701(LUNIT,ITP,IRET)
       CHARACTER*8   SUBSET
       integer  mdate(4),ndate(8)
@@ -710,7 +652,7 @@ C$$$
       COMMON /PK77BB/kdate(8),ldate(8),IPRINT
       COMMON /PK77CC/INDEX
       COMMON /PK77DD/LSHE,LSHL,ICDATE(5),IDDATE(5)
- 
+
       SAVE
 
       DATA  IREC/0/
@@ -718,9 +660,9 @@ C$$$
    10 CONTINUE
 C=======================================================================
       IF(INDEX.EQ.0)  THEN
- 
+
 C  READ IN NEXT BUFR MESSAGE
- 
+
          CALL READMG(LUNIT,SUBSET,IBDATE,JRET)
          IF(JRET.NE.0)  THEN
 C-----------------------------------------------------------------------
@@ -793,24 +735,24 @@ C CHECK DATE OF MESSAGE AGAINST SPECIFIED TIME RANGES
       END IF
 C=======================================================================
 C  READ NEXT SUBSET (REPORT) IN MESSAGE
- 
+
       IF(IPRINT.GT.1)  PRINT *,'CALL READSB'
       CALL READSB(LUNIT,JRET)
       IF(IPRINT.GT.1)  PRINT *,'BACK FROM READSB'
       IF(JRET.NE.0) THEN
          IF(INDEX.GT.0)  THEN
- 
+
 C ALL SUBSETS IN THIS MESSAGE PROCESSED, READ IN NEXT MESSAGE (IF ALL
 C  MESSAGES READ IN NO MORE DATA TO PROCESS)
- 
+
             IF(IPRINT.GT.1)  PRINT *, 'ALL REPORTS IN THIS MESSAGE ',
      $       'DECODED, GO ON TO NEXT MESSAGE'
          ELSE
- 
+
 C THERE WERE NO SUBSETS FOUND IN THIS BUFR MESSAGE, GOOD CHANCE IT IS
 C  ONE OF TWO DUMMY MESSAGES AT TOP OF FILE INDICATING CENTER TIME AND
 C  DATA DUMP TIME ONLY; READ IN NEXT MESSAGE
- 
+
             IF(IREC.EQ.1)  THEN
                PRINT 4567, ICDATE
  4567 FORMAT(/'===> BUFR MESSAGE NO.  1 IS A DUMMY MESSAGE CONTAINING ',
@@ -840,32 +782,20 @@ C***********************************************************************
       IF(IPRINT.GE.1)  PRINT *, 'WORKING WITH SUBSET NUMBER ',INDEX
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    UNPK7702    INITIALIZES THE OUTPUT ARRAY FOR A REPORT
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 1996-12-16
-C
-C ABSTRACT: INITIALIZES THE OUTPUT ARRAY WHICH HOLDS A SINGLE REPORT
-C   IN THE QUASI-OFFICE NOTE 29 UNPACKED FORMAT TO ALL MISSING.
-C
-C PROGRAM HISTORY LOG:
-C 1996-12-16  D. A. KEYSER NP22 - ORIGINAL AUTHOR
-C
-C USAGE:    CALL UNPK7702(RDATA,ITP)
-C   INPUT ARGUMENT LIST:
-C     ITP      - THE TYPE OF REPORT THAT HAS BEEN DECODED {=1 -
-C              - WIND PROFILER, =2 - GOES SNDG, =3 - NEXRAD(VAD) WIND}
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     RDATA    - SINGLE REPORT RETURNED AN A QUASI-OFFICE NOTE 29
-C                UNPACKED FORMAT; ALL DATA ARE MISSING
-C
-C REMARKS: CALLED BY SUBROUTINE W3UNPK77.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
-C$$$
+C> @brief Initializes the output array for a report.
+C> @author Dennis Keyser @date 1996-12-16
+
+C> Initializes the output array which holds a single report in the quasi-office
+C> note 29 unpacked format to all missing.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1996-12-16 | Dennis Keyser NP22 | Initial.
+C> @param[in] ITP the type of report that has been decoded {=1 - wind profiler, =2 - goes sndg, =3 - nexrad(vad) wind}
+C> @param[out] RDATA single report returned an a quasi-office note 29 unpacked format; all data are missing
+C>
+C> @author Dennis Keyser @date 1996-12-16
       SUBROUTINE UNPK7702(RDATA,ITP)
       REAL  RDATA(*),RDATX(1200)
       INTEGER  IDATA(1200),IRTYP(3)
@@ -942,48 +872,26 @@ C
       RDATA(1:1200) = RDATX(1:1200)
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    UNPK7703    FILLS IN HEADER IN O-PUT ARRAY - PFLR RPT
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 2002-03-05
-C
-C ABSTRACT: FOR REPORT (SUBSET) READ OUT OF BUFR MESSAGE (PASSED IN
-C   INTERNALLY VIA BUFRLIB STORAGE), CALLS BUFRLIB ROUTINE TO DECODE
-C   HEADER DATA FOR WIND PROFILER REPORT.  HEADER IS THEN FILLED INTO
-C   THE OUTPUT ARRAY WHICH HOLDS A SINGLE WIND PROFILER REPORT IN THE
-C   QUASI-OFFICE NOTE 29 UNPACKED FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C 1996-12-16  D. A. KEYSER NP22 - ORIGINAL AUTHOR
-C 2002-03-05  KEYSER -- ACCOUNTS FOR CHANGES IN INPUT PROFLR (WIND
-C                       PROFILER) BUFR DUMP FILE AFTER 3/2002: MNEMONIC
-C                       "NPSM" IS NO LONGER AVAILABLE, MNEMONIC "TPSE"
-C                       REPLACES "TPMI" (AVG. TIME IN MINUTES STILL
-C                       OUTPUT) (WILL STILL WORK PROPERLY FOR INPUT
-C                       PROFLR DUMP FILES PRIOR TO 3/2002)
-C
-C USAGE:    CALL UNPK7703(LUNIT,RDATA,IRET)
-C   INPUT ARGUMENT LIST:
-C     LUNIT    - FORTRAN UNIT NUMBER FOR INPUT DATA FILE
-C     RDATA    - SINGLE WIND PROFILER REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH ALL DATA INITIALIZED AS MISSING
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     RDATA    - SINGLE WIND PROFILER REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH HEADER INFORMATION FILLED IN
-C              - (ALL OTHER DATA REMAINS MISSING)
-C     IRET     - RETURN CODE AS DESCRIBED IN W3UNPK77 DOCBLOCK
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTINE W3UNPK77.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
-C$$$
+C> @brief Fills in header in o-put array - pflr rpt.
+C> @author Dennis Keyser @date 2002-03-05
+
+C> For report (subset) read out of bufr message (passed in
+C> internally via bufrlib storage), calls bufrlib routine to decode
+C> header data for wind profiler report.  header is then filled into
+C> the output array which holds a single wind profiler report in the
+C> quasi-office note 29 unpacked format.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1996-12-16 | Dennis Keyser NP22 | Initial.
+C> 2002-03-05 | Dennis Keyser | Accounts for changes in input proflr (wind profiler) bufr dump file after 3/2002: mnemonic "npsm" is no longer available, mnemonic "tpse" replaces "tpmi" (avg. time in minutes still output) (will still work properly for input proflr dump files prior to 3/2002)
+C>
+C> @param[in] LUNIT Fortran unit number for input data file
+C> @param[inout] RDATA Single wind profiler report in a quasi-office note 29 unpacked format with [out] header information filled in [in] all data initialized as missing
+C> @param[out] IRET Return code as described in w3unpk77 docblock
+C>
+C> @author Dennis Keyser @date 2002-03-05
       SUBROUTINE UNPK7703(LUNIT,RDATA,IRET)
       CHARACTER*6   STNID
       CHARACTER*8   COB
@@ -992,9 +900,9 @@ C$$$
       REAL(8) HDR_8(16)
       REAL  HDR(16),RDATA(*),RDATX(1200)
       COMMON /PK77BB/kdate(8),ldate(8),IPRINT
- 
+
       SAVE
- 
+
       EQUIVALENCE  (RDATX,IDATA),(COB,IOB)
       DATA  XMSG/99999./,IMSG/99999/
       DATA  HDR1/'CLAT CLON TSIG SELV NPSM TPSE WMOB '/
@@ -1013,9 +921,9 @@ C  SET IRET = 6 AND RETURN
          RETURN
 C.......................................................................
       END IF
- 
+
 C         LATITUDE (STORED AS REAL)
- 
+
       M = 1
       IF(IPRINT.GT.1)  PRINT 199, HDR(1),M
   199 FORMAT(5X,'HDR HERE IS: ',F17.4,'; INDEX IS: ',I3)
@@ -1031,9 +939,9 @@ C         LATITUDE (STORED AS REAL)
      $    'REPORT'/)
          RETURN
       END IF
- 
+
 C         LONGITUDE (STORED AS REAL)
- 
+
       M = 2
       IF(IPRINT.GT.1)  PRINT 199, HDR(2),M
       IF(HDR(2).LT.XMSG)  THEN
@@ -1047,31 +955,31 @@ C         LONGITUDE (STORED AS REAL)
      $    'REPORT'/)
          RETURN
       END IF
- 
+
 C         TIME SIGNIFICANCE (STORED AS INTEGER)
- 
+
       M = 3
       IF(IPRINT.GT.1)  PRINT 199, HDR(3),M
       IF(HDR(3).LT.XMSG)  IDATA(3) = NINT(HDR(3))
       NNNNN = 3
       IF(IPRINT.GT.1)  PRINT 197, NNNNN,IDATA(NNNNN)
   197 FORMAT(5X,'IDATA(',I5,') STORED AS: ',I10)
- 
+
 C         STATION ELEVATION (FROM REPORTED STN. HGHT; STORED IN OUTPUT)
 C          (STORED AS REAL)
- 
+
       M = 4
       IF(IPRINT.GT.1)  PRINT 199, HDR(4),M
       IF(HDR(4).LT.XMSG)  RDATX(7) = NINT(HDR(4))
       NNNNN = 7
       IF(IPRINT.GT.1)  PRINT 198, NNNNN,RDATX(NNNNN)
- 
+
 C         SUBMODE INFORMATION
 C         EDITION NUMBER (ALWAYS = 2)
 C         (PACKED AS SUBMODE TIMES 10 PLUS EDITION NUMBER - INTEGER)
 C          {NOTE: After 3/2002, the submode information is no longer
 C                  available and is stored as missing (3).}
- 
+
       M = 5
       IEDTN = 2
       IDATA(8) = (3 * 10) + IEDTN
@@ -1079,12 +987,12 @@ C                  available and is stored as missing (3).}
       IF(HDR(5).LT.XMSG)  IDATA(8) = (NINT(HDR(5)) * 10) + IEDTN
       NNNNN = 8
       IF(IPRINT.GT.1)  PRINT 197, NNNNN,IDATA(NNNNN)
- 
+
 C         AVERAGING TIME (STORED AS INTEGER)
 C        (NOTE: Prior to 3/2002, this is decoded in minutes, after
 C                3/2002 this is decoded in seconds - in either case
 C                it is stored in minutes)
- 
+
       M = 6
       IF(IPRINT.GT.1)  PRINT 199, HDR(6),M
       IF(IPRINT.GT.1)  PRINT 199, HDR(14),M
@@ -1096,20 +1004,20 @@ C                it is stored in minutes)
       NNNNN = 10
       IF(IPRINT.GT.1)  PRINT 197, NNNNN,IDATA(NNNNN)
 C-----------------------------------------------------------------------
- 
+
 C         STATION IDENTIFICATION (STORED AS CHARACTER)
 C         (OBTAINED FROM ENCODED WMO BLOCK/STN NUMBERS)
- 
+
       STNID = '      '
- 
+
 C            WMO BLOCK NUMBER (STORED AS CHARACTER)
- 
+
       M = 7
       IF(IPRINT.GT.1)  PRINT 199, HDR(7),M
       IF(HDR(7).LT.XMSG)  WRITE(STNID(1:2),'(I2.2)')  NINT(HDR(7))
- 
+
 C            WMO STATION NUMBER (STORED AS CHARACTER)
- 
+
       M = 8
       IF(IPRINT.GT.1)  PRINT 199, HDR(8),M
       IF(HDR(8).LT.XMSG)  WRITE(STNID(3:5),'(I3.3)')  NINT(HDR(8))
@@ -1122,11 +1030,11 @@ C            WMO STATION NUMBER (STORED AS CHARACTER)
       IDATA(12) = IOB
       NNNNN = 12
       IF(IPRINT.GT.1)  PRINT 196, NNNNN,COB(1:4)
- 
+
 cvvvvvdak port
 C         LOAD THE YEAR/MONTH (STORED AS CHARACTER IN FORM YYMM)
 caaaaadak port
- 
+
       M = 9
       IF(IPRINT.GT.1)  PRINT 199, HDR(9),M
       IYEAR = IMSG
@@ -1149,10 +1057,10 @@ caaaaadak port
       ELSE
          GO TO 30
       END IF
- 
+
 C         LOAD THE DAY/HOUR (STORED AS CHARACTER IN FORM DDHH)
 C          AND THE OBSERVATION TIME (STORED AS REAL)
- 
+
       M = 11
       IF(IPRINT.GT.1)  PRINT 199, HDR(11),M
       IDAY = IMSG
@@ -1182,50 +1090,27 @@ C          AND THE OBSERVATION TIME (STORED AS REAL)
       IRET = 4
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    UNPK7704    FILLS CAT.10 INTO O-PUT ARRAY - PFLR RPT
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 2002-03-05
-C
-C ABSTRACT: FOR REPORT (SUBSET) READ OUT OF BUFR MESSAGE (PASSED IN
-C   INTERNALLY VIA BUFRLIB STORAGE), CALLS BUFRLIB ROUTINE TO DECODE
-C   SURFACE DATA FOR WIND PROFILER REPORT.  SURFACE DATA ARE THEN
-C   FILLED INTO THE OUTPUT ARRAY AS CATEGORY 10.  THE OUPUT ARRAY
-C   HOLDS A SINGLE WIND PROFILER REPORT IN THE QUASI-OFFICE NOTE 29
-C   UNPACKED FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C 1996-12-16  D. A. KEYSER NP22 - ORIGINAL AUTHOR
-C 2002-03-05  KEYSER -- ACCOUNTS FOR CHANGES IN INPUT PROFLR (WIND
-C                       PROFILER) BUFR DUMP FILE AFTER 3/2002: SURFACE
-C                       DATA NOW ALL MISSING (MNEMONICS "PMSL",
-C                       "WDIR1","WSPD1", "TMDB", "REHU", "REQV" NO
-C                       LONGER AVAILABLE) (WILL STILL WORK PROPERLY FOR
-C                       INPUT PROFLR DUMP FILES PRIOR TO 3/2002)
-C
-C USAGE:    CALL UNPK7704(LUNIT,RDATA)
-C   INPUT ARGUMENT LIST:
-C     LUNIT    - FORTRAN UNIT NUMBER FOR INPUT DATA FILE
-C     RDATA    - SINGLE WIND PROFILER REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH ONLY HEADER INFORMATION FILLED
-C              - IN (ALL OTHER DATA REMAINS MISSING)
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     RDATA    - SINGLE WIND PROFILER REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH SURFACE INFORMATION FILLED IN
-C              - (AS WELL AS THE HEADER; ALL OTHER DATA REMAINS
-C              - MISSING)
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTINE W3UNPKB7.  AFTER 3/2002, THERE IS
-C          NO SURFACE DATA AVAILABLE.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
+C> @brief Fills cat.10 into o-put array - pflr rpt
+C> @author Dennis Keyser @date 2002-03-05
+
+C> For report (subset) read out of bufr message (passed in
+C> internally via bufrlib storage), calls bufrlib routine to decode
+C> surface data for wind profiler report. Surface data are then
+C> filled into the output array as category 10. The ouput array
+C> holds a single wind profiler report in the quasi-office note 29
+C> unpacked format.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1996-12-16 | Dennis Keyser NP22 | Initial.
+C> 2002-03-05 | Dennis Keyser | Accounts for changes in input proflr (wind profiler) bufr dump file after 3/2002: surface data now all missing (mnemonics "pmsl", "wdir1","wspd1", "tmdb", "rehu", "reqv" no longer available) (will still work properly for input proflr dump files prior to 3/2002)
+C>
+C> @param[in] LUNIT Fortran unit number for input data file
+C> @param[inout] RDATA Single wind profiler report in a quasi-office note 29 unpacked format with [out] header information filled in [in] all data initialized as missing
+C>
+C> @remark Called by subroutine w3unpkb7.  after 3/2002, there is no surface data available.
+C>
 C$$$
       SUBROUTINE UNPK7704(LUNIT,RDATA)
       CHARACTER*40  SRFC
@@ -1233,9 +1118,9 @@ C$$$
       REAL(8) SFC_8(8)
       REAL  SFC(8),RDATA(*),RDATX(1200)
       COMMON /PK77BB/kdate(8),ldate(8),IPRINT
- 
+
       SAVE
- 
+
       EQUIVALENCE (RDATX,IDATA)
       DATA  XMSG/99999./
       DATA  SRFC/'PMSL WDIR1 WSPD1 TMDB REHU REQV         '/
@@ -1251,9 +1136,9 @@ C PROBLEM: THE NUMBER OF DECODED "LEVELS" IS NOT WHAT IS EXPECTED --
          GO TO 99
 C.......................................................................
       END IF
- 
+
 C       MSL PRESSURE (STORED AS REAL)
- 
+
       M = 1
       IF(IPRINT.GT.1)  PRINT 199, SFC(1),M
   199 FORMAT(5X,'SFC HERE IS: ',F17.4,'; INDEX IS: ',I3)
@@ -1261,49 +1146,49 @@ C       MSL PRESSURE (STORED AS REAL)
       NNNNN = 43
       IF(IPRINT.GT.1)  PRINT 198, NNNNN,RDATX(43)
   198 FORMAT(5X,'RDATA(',I5,') STORED AS: ',F10.2)
- 
+
 C       SURFACE HORIZONTAL WIND DIRECTION (STORED AS REAL)
- 
+
       M = 2
       IF(IPRINT.GT.1)  PRINT 199, SFC(2),M
       IF(SFC(2).LT.XMSG)  RDATX(43+2) = NINT(SFC(2))
       NNNNN = 43 + 2
       IF(IPRINT.GT.1)  PRINT 198, NNNNN,RDATX(43+2)
- 
+
 C       SURFACE HORIZONTAL WIND SPEED (STORED AS REAL)
- 
+
       M = 3
       IF(IPRINT.GT.1)  PRINT 199, SFC(3),M
       IF(SFC(3).LT.XMSG)  RDATX(43+3) = NINT(SFC(3) * 10.)
       NNNNN = 43 + 3
       IF(IPRINT.GT.1)  PRINT 198, NNNNN,RDATX(43+3)
- 
+
 C       SURFACE TEMPERATURE (STORED AS REAL)
- 
+
       M = 4
       IF(IPRINT.GT.1)  PRINT 199, SFC(4),M
       IF(SFC(4).LT.XMSG)  RDATX(43+4) = NINT(SFC(4) * 10.)
       NNNNN = 43 + 4
       IF(IPRINT.GT.1)  PRINT 198, NNNNN,RDATX(43+4)
- 
+
 C       RELATIVE HUMIDITY (STORED AS REAL)
- 
+
       M = 5
       IF(IPRINT.GT.1)  PRINT 199, SFC(5),M
       IF(SFC(5).LT.XMSG)  RDATX(43+5) = NINT(SFC(5))
       NNNNN = 43 + 5
       IF(IPRINT.GT.1)  PRINT 198, NNNNN,RDATX(43+5)
- 
+
 C       RAINFALL RATE (STORED AS REAL)
- 
+
       M = 6
       IF(IPRINT.GT.1)  PRINT 199, SFC(6),M
       IF(SFC(6).LT.XMSG)  RDATX(43+6) = NINT(SFC(6) * 1.E7)
       NNNNN = 43 + 6
       IF(IPRINT.GT.1)  PRINT 198, NNNNN,RDATX(43+6)
- 
+
 C       SET CATEGORY COUNTERS FOR SURFACE DATA
- 
+
       IDATA(35) = 1
       IDATA(36) = 43
    99 CONTINUE
@@ -1312,51 +1197,26 @@ C       SET CATEGORY COUNTERS FOR SURFACE DATA
       RDATA(1:1200) = RDATX(1:1200)
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    UNPK7705    FILLS CAT.11 INTO O-PUT ARRAY - PFLR RPT
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 2002-03-05
-C
-C ABSTRACT: FOR REPORT (SUBSET) READ OUT OF BUFR MESSAGE (PASSED IN
-C   INTERNALLY VIA BUFRLIB STORAGE), CALLS BUFRLIB ROUTINE TO DECODE
-C   UPPER-AIR DATA FOR WIND PROFILER REPORT.  UPPER-AIR DATA ARE THEN
-C   FILLED INTO THE OUTPUT ARRAY AS CATEGORY 11.  THE OUPUT ARRAY
-C   HOLDS A SINGLE WIND PROFILER REPORT IN THE QUASI-OFFICE NOTE 29
-C   UNPACKED FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C 1996-12-16  D. A. KEYSER NP22 - ORIGINAL AUTHOR
-C 1998-07-09  KEYSER -- MODIFIED WIND PROFILER CAT. 11 (HEIGHT, HORIZ.
-C                       SIGNIFICANCE, VERT. SIGNIFICANCE) PROCESSING
-C                       TO ACCOUNT FOR UPDATES TO BUFRTABLE MNEMONICS
-C                       IN /dcom
-C 2002-03-05  KEYSER -- ACCOUNTS FOR CHANGES IN INPUT PROFLR (WIND
-C                       PROFILER) BUFR DUMP FILE AFTER 3/2002:
-C                       MNEMONICS "ACAVH", "ACAVV", "SPP0", AND "NPHL"
-C                       NO LONGER AVAILABLE; (WILL STILL WORK PROPERLY
-C                       FOR INPUT PROFLR DUMP FILES PRIOR TO 3/2002)
-C
-C USAGE:    CALL UNPK7705(LUNIT,RDATA)
-C   INPUT ARGUMENT LIST:
-C     LUNIT    - FORTRAN UNIT NUMBER FOR INPUT DATA FILE
-C     RDATA    - SINGLE WIND PROFILER REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH ONLY HEADER AND SURFACE
-C              - INFORMATION FILLED IN (UPPER-AIR DATA MISSING)
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     RDATA    - SINGLE WIND PROFILER REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH UPPER-AIR INFORMATION FILLED
-C              - IN (ALL DATA FOR REPORT NOW FILLED)
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTINE W3UNPK77.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
+C> @brief Fills cat.11 into o-put array - pflr rpt
+C> @author Dennis Keyser @date 2002-03-05
+
+C> For report (subset) read out of bufr message (passed in
+C> internally via bufrlib storage), calls bufrlib routine to decode
+C> upper-air data for wind profiler report.  upper-air data are then
+C> filled into the output array as category 11.  the ouput array
+C> holds a single wind profiler report in the quasi-office note 29
+C> unpacked format.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1996-12-16 | Dennis Keyser NP22 | Initial.
+C> 1998-07-09 | Dennis Keyser | Modified wind profiler cat. 11 (height, horiz. significance, vert. significance) processing to account for updates to bufrtable mnemonics in /dcom
+C> 2002-03-05 | Dennis Keyser | Accounts for changes in input proflr (wind profiler) bufr dump file after 3/2002: mnemonics "acavh", "acavv", "spp0", and "nphl" no longer available; (will still work properly for input proflr dump files prior to 3/2002)
+C>
+C> @param[in] LUNIT Fortran unit number for input data file
+C> @param[inout] RDATA Single wind profiler report in a quasi-office note 29 unpacked format with [out] header information filled in [in] all data initialized as missing
+C>
 C$$$
       SUBROUTINE UNPK7705(LUNIT,RDATA)
       CHARACTER*31  UAIR1,UAIR2
@@ -1365,9 +1225,9 @@ C$$$
       REAL(8) UAIR_8(16,255)
       REAL  UAIR(16,255),RDATA(*),RDATX(1200)
       COMMON /PK77BB/kdate(8),ldate(8),IPRINT
- 
+
       SAVE
- 
+
       EQUIVALENCE (RDATX,IDATA)
       DATA  XMSG/99999./
       DATA  UAIR1/'HEIT WDIR WSPD NPQC WCMP ACAVH '/
@@ -1425,7 +1285,7 @@ C.......................................................................
          IF(IPRINT.GT.1)  PRINT 1079, ILC,ILVL
  1079 FORMAT(' ATTEMPTING NEW LEVEL WITH ILC =',I5,'; NO. LEVELS ',
      $ 'PROCESSED TO NOW =',I5)
- 
+
 C       HEIGHT ABOVE SEA-LEVEL (STORED AS REAL)
 C        (NOTE: At one time, possibly even now, the height above sea
 C               level was erroneously stored under mnemonic "HAST"
@@ -1447,36 +1307,36 @@ C               routine to transition w/o change when the fix is made.)
          END IF
          IF(IPRINT.GT.1)  PRINT 198, 50+ILC,RDATX(50+ILC)
          ILVL = ILVL + 1
- 
+
 C       HORIZONTAL WIND DIRECTION (STORED AS REAL)
- 
+
          M = 2
          IF(IPRINT.GT.1)  PRINT 199, UAIR(2,I),M
          IF(UAIR(2,I).LT.XMSG)  RDATX(50+ILC+1) = NINT(UAIR(2,I))
          IF(IPRINT.GT.1)  PRINT 198, 50+ILC+1,RDATX(50+ILC+1)
- 
+
 C       HORIZONTAL WIND SPEED (STORED AS REAL)
- 
+
          M = 3
          IF(IPRINT.GT.1)  PRINT 199, UAIR(3,I),M
          IF(UAIR(3,I).LT.XMSG)  RDATX(50+ILC+2) =NINT(UAIR(3,I) * 10.)
          IF(IPRINT.GT.1)  PRINT 198, 50+ILC+2,RDATX(50+ILC+2)
- 
+
 C       QUALITY CODE (STORED AS INTEGER)
- 
+
          M = 4
          IF(IPRINT.GT.1)  PRINT 199, UAIR(4,I),M
          IF(UAIR(4,I).LT.XMSG)  IDATA(50+ILC+3) = NINT(UAIR(4,I))
          IF(IPRINT.GT.1)  PRINT 197, 50+ILC+3,IDATA(50+ILC+3)
   197 FORMAT(5X,'IDATA(',I5,') STORED AS: ',I10)
- 
+
 C       VERTICAL WIND COMPONENT (W) (STORED AS REAL)
- 
+
          M = 5
          IF(IPRINT.GT.1)  PRINT 199, UAIR(5,I),M
          IF(UAIR(5,I).LT.XMSG)  RDATX(50+ILC+4) = NINT(UAIR(5,I) * 100.)
          IF(IPRINT.GT.1)  PRINT 198, 50+ILC+4,RDATX(50+ILC+4)
- 
+
 C       HORIZONTAL CONSENSUS NUMBER (STORED AS INTEGER)
 C        (NOTE: Prior to 2/18/1999, the horizonal consensus number was
 C                stored under mnemonic "ACAV1".
@@ -1498,7 +1358,7 @@ C                this routine to work properly with historical data.)
             IF(UAIR(13,I).LT.XMSG)  IDATA(50+ILC+5) = NINT(UAIR(13,I))
          END IF
          IF(IPRINT.GT.1)  PRINT 197, 50+ILC+5,IDATA(50+ILC+5)
- 
+
 C       VERTICAL CONSENSUS NUMBER (STORED AS INTEGER)
 C        (NOTE: Prior to 2/18/1999, the vertical consensus number was
 C                stored under mnemonic "ACAV2".
@@ -1520,33 +1380,33 @@ C                this routine to work properly with historical data.)
             IF(UAIR(14,I).LT.XMSG)  IDATA(50+ILC+6) = NINT(UAIR(14,I))
          END IF
          IF(IPRINT.GT.1)  PRINT 197, 50+ILC+6,IDATA(50+ILC+6)
- 
+
 C       SPECTRAL PEAK POWER (STORED AS REAL)
 C        (NOTE: After 3/2002, the spectral peak power is no longer
 C                stored.)
- 
+
          M = 8
          IF(IPRINT.GT.1)  PRINT 199, UAIR(8,I),M
          IF(UAIR(8,I).LT.XMSG)  RDATX(50+ILC+7) = NINT(UAIR(8,I))
          IF(IPRINT.GT.1)  PRINT 198, 50+ILC+7,RDATX(50+ILC+7)
- 
+
 C       HORIZONTAL WIND SPEED STANDARD DEVIATION (STORED AS REAL)
- 
+
          M = 9
          IF(IPRINT.GT.1)  PRINT 199, UAIR(9,I),M
          IF(UAIR(9,I).LT.XMSG)  RDATX(50+ILC+8)=NINT(UAIR(9,I) * 10.)
          IF(IPRINT.GT.1)  PRINT 198, 50+ILC+8,RDATX(50+ILC+8)
- 
+
 C       VERTICAL WIND COMPONENT STANDARD DEVIATION (STORED AS REAL)
- 
+
          M = 10
          IF(IPRINT.GT.1)  PRINT 199, UAIR(10,I),M
          IF(UAIR(10,I).LT.XMSG)  RDATX(50+ILC+9) =NINT(UAIR(10,I) * 10.)
          IF(IPRINT.GT.1)  PRINT 198, 50+ILC+9,RDATX(50+ILC+9)
- 
+
 C       MODE INFORMATION (STORED AS INTEGER)
 C        (NOTE: After 3/2002, the mode information is no longer stored.)
- 
+
          M = 11
          IF(IPRINT.GT.1)  PRINT 199, UAIR(11,I),M
          IF(UAIR(11,I).LT.XMSG)  IDATA(50+ILC+10) = NINT(UAIR(11,I))
@@ -1555,10 +1415,10 @@ C.......................................................................
          ILC = ILC + 11
          IF(IPRINT.GT.1)  PRINT *,'HAVE COMPLETED LEVEL ',ILVL,
      $    '; GOING INTO NEXT LEVEL WITH ILC=',ILC
-      ENDDO    
- 
+      ENDDO
+
 C       SET CATEGORY COUNTERS FOR UPPER-AIR DATA
- 
+
    98 CONTINUE
       IDATA(37) = ILVL
       IDATA(38) = 50
@@ -1568,42 +1428,25 @@ C       SET CATEGORY COUNTERS FOR UPPER-AIR DATA
       RDATA(1:1200) = RDATX(1:1200)
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    UNPK7706    FILLS IN HEADER IN O-PUT ARRAY - VADW RPT
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 1997-06-02
-C
-C ABSTRACT: FOR REPORT (SUBSET) READ OUT OF BUFR MESSAGE (PASSED IN
-C   INTERNALLY VIA BUFRLIB STORAGE), CALLS BUFRLIB ROUTINE TO DECODE
-C   HEADER DATA FOR NEXRAD (VAD) WIND REPORT.  HEADER IS THEN FILLED
-C   INTO THE OUTPUT ARRAY WHICH HOLDS A SINGLE VAD WIND REPORT IN THE
-C   QUASI-OFFICE NOTE 29 UNPACKED FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C 1997-06-02  D. A. KEYSER NP22 - ORIGINAL AUTHOR
-C
-C USAGE:    CALL UNPK7706(LUNIT,RDATA,IRET)
-C   INPUT ARGUMENT LIST:
-C     LUNIT    - FORTRAN UNIT NUMBER FOR INPUT DATA FILE
-C     RDATA    - SINGLE NEXRAD (VAD) REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH ALL DATA INITIALIZED AS MISSING
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     RDATA    - SINGLE NEXRAD (VAD) REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH HEADER INFORMATION FILLED IN
-C              - (ALL OTHER DATA REMAINS MISSING)
-C     IRET     - RETURN CODE AS DESCRIBED IN W3UNPK77 DOCBLOCK
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTINE W3UNPK77.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
-C$$$
+C> @brief Fills in header in o-put array - vadw rpt.
+C> @author Dennis Keyser @date 1997-06-02
+
+C> For report (subset) read out of bufr message (passed in
+C> internally via bufrlib storage), calls bufrlib routine to decode
+C> header data for nexrad (vad) wind report. Header is then filled
+C> into the output array which holds a single vad wind report in the
+C> quasi-office note 29 unpacked format.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1997-06-02 | Dennis Keyser NP22 | Initial.
+C>
+C> @param[in] LUNIT Fortran unit number for input data file
+C> @param[inout] RDATA Single wind profiler report in a quasi-office note 29 unpacked format with [out] header information filled in [in] all data initialized as missing
+C> @param[out] IRET Return code as described in w3unpk77 docblock
+C>
+C> @author Dennis Keyser @date 1997-06-02
       SUBROUTINE UNPK7706(LUNIT,RDATA,IRET)
       CHARACTER*8   STNID,COB
       CHARACTER*45  HDR1
@@ -1611,9 +1454,9 @@ C$$$
       REAL(8) HDR_8(9)
       REAL  HDR(9),RDATA(*),RDATX(1200)
       COMMON /PK77BB/kdate(8),ldate(8),IPRINT
- 
+
       SAVE
- 
+
       EQUIVALENCE  (RDATX,IDATA),(STNID,HDR_8(4)),(COB,IOB)
       DATA  XMSG/99999./,IMSG/99999/
       DATA  HDR1/'CLAT CLON SELV RPID YEAR MNTH DAYS HOUR MINU '/
@@ -1631,9 +1474,9 @@ C  SET IRET = 6 AND RETURN
          RETURN
 C.......................................................................
       END IF
- 
+
 C         LATITUDE (STORED AS REAL)
- 
+
       M = 1
       IF(IPRINT.GT.1)  PRINT 199, HDR(1),M
   199 FORMAT(5X,'HDR HERE IS: ',F17.4,'; INDEX IS: ',I3)
@@ -1648,9 +1491,9 @@ C         LATITUDE (STORED AS REAL)
   102    FORMAT(' *** W3UNPK77 ERROR: LAT MISSING FOR VAD WIND REPORT'/)
          RETURN
       END IF
- 
+
 C         LONGITUDE (STORED AS REAL)
- 
+
       M = 2
       IF(IPRINT.GT.1)  PRINT 199, HDR(2),M
       IF(HDR(2).LT.XMSG)  THEN
@@ -1663,19 +1506,19 @@ C         LONGITUDE (STORED AS REAL)
   104    FORMAT(' *** W3UNPK77 ERROR: LON MISSING FOR VAD WIND REPORT'/)
          RETURN
       END IF
- 
+
 C         STATION ELEVATION (FROM REPORTED STN. HGHT; STORED IN OUTPUT)
 C          (STORED AS REAL)
- 
+
       M = 3
       IF(IPRINT.GT.1)  PRINT 199, HDR(3),M
       IF(HDR(3).LT.XMSG)  RDATX(7) = NINT(HDR(3))
       NNNNN = 7
       IF(IPRINT.GT.1)  PRINT 198, NNNNN,RDATX(NNNNN)
- 
+
 C         STATION IDENTIFICATION (STORED AS CHARACTER)
 C            ('99'//LAST 3-CHARACTERS OF PRODUCT SOURCE ID//'   ')
- 
+
       M = 4
       IF(IPRINT.GT.1)  PRINT 299, STNID,M
   299 FORMAT(5X,'HDR HERE IS: ',9X,A8,'; INDEX IS: ',I3)
@@ -1688,11 +1531,11 @@ C            ('99'//LAST 3-CHARACTERS OF PRODUCT SOURCE ID//'   ')
       IDATA(12) = IOB
       NNNNN = 12
       IF(IPRINT.GT.1)  PRINT 196, NNNNN,COB(1:4)
- 
+
 cvvvvvdak port
 C         LOAD THE YEAR/MONTH (STORED AS CHARACTER IN FORM YYMM)
 caaaaadak port
- 
+
       M = 5
       IF(IPRINT.GT.1)  PRINT 199, HDR(5),M
       IYEAR = IMSG
@@ -1715,10 +1558,10 @@ caaaaadak port
       ELSE
          GO TO 30
       END IF
- 
+
 C         LOAD THE DAY/HOUR (STORED AS CHARACTER IN FORM DDHH)
 C          AND THE OBSERVATION TIME (STORED AS REAL)
- 
+
       M = 7
       IF(IPRINT.GT.1)  PRINT 199, HDR(7),M
       IDAY = IMSG
@@ -1748,44 +1591,26 @@ C          AND THE OBSERVATION TIME (STORED AS REAL)
       IRET = 4
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    UNPK7707    FILLS CAT. 4 INTO O-PUT ARRAY - VADW RPT
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 1997-06-02
-C
-C ABSTRACT: FOR REPORT (SUBSET) READ OUT OF BUFR MESSAGE (PASSED IN
-C   INTERNALLY VIA BUFRLIB STORAGE), CALLS BUFRLIB ROUTINE TO DECODE
-C   UPPER-AIR DATA FOR NEXRAD (VAD) WIND REPORT.  UPPER-AIR DATA ARE
-C   THEN FILLED INTO THE OUTPUT ARRAY AS CATEGORY 4.  THE OUPUT ARRAY
-C   HOLDS A SINGLE VAD WIND REPORT IN THE QUASI-OFFICE NOTE 29
-C   UNPACKED FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C 1997-06-02  D. A. KEYSER NP22 - ORIGINAL AUTHOR
-C
-C USAGE:    CALL UNPK7707(LUNIT,RDATA,IRET)
-C   INPUT ARGUMENT LIST:
-C     LUNIT    - FORTRAN UNIT NUMBER FOR INPUT DATA FILE
-C     RDATA    - SINGLE NEXRAD (VAD) REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH ONLY HEADER INFORMATION FILLED
-C              - IN (CATEGORY 4 DATA MISSING)
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     RDATA    - SINGLE NEXRAD (VAD) REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH CATEGORY 4 INFORMATION FILLED IN
-C              - (ALL DATA FOR REPORT NOW FILLED)
-C     IRET     - RETURN CODE AS DESCRIBED IN W3UNPK77 DOCBLOCK
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTINE W3UNPK77.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
-C$$$
+C> @brief Fills cat. 4 into o-put array - vadw rpt
+C> @author Dennis Keyser @date 1997-06-02
+
+C> For report (subset) read out of bufr message (passed in
+C> internally via bufrlib storage), calls bufrlib routine to decode
+C> upper-air data for nexrad (vad) wind report. Upper-air data are
+C> then filled into the output array as category 4. The ouput array
+C> holds a single vad wind report in the quasi-office note 29
+C> unpacked format.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1997-06-02 | Dennis Keyser NP22 | Initial.
+C>
+C> @param[in] LUNIT Fortran unit number for input data file
+C> @param[inout] RDATA Single wind profiler report in a quasi-office note 29 unpacked format with [out] header information filled in [in] all data initialized as missing
+C> @param[out] IRET Return code as described in w3unpk77 docblock
+C>
+C> @author Dennis Keyser @date 1997-06-02
       SUBROUTINE UNPK7707(LUNIT,RDATA,IRET)
       CHARACTER*1  CRMS(0:12)
       CHARACTER*8  COB
@@ -1794,9 +1619,9 @@ C$$$
       REAL(8) UAIR_8(5,255)
       REAL  UAIR(5,255),RDATA(*),RDATX(1200)
       COMMON /PK77BB/kdate(8),ldate(8),IPRINT
- 
+
       SAVE
- 
+
       EQUIVALENCE (RDATX,IDATA),(COB,IOB)
       DATA  XMSG/99999./
       DATA  UAIR1/'HEIT WDIR WSPD RMSW QMWN '/
@@ -1852,9 +1677,9 @@ C.......................................................................
          IF(IPRINT.GT.1)  PRINT 1079, ILC,ILVL
  1079 FORMAT(' ATTEMPTING NEW LEVEL WITH ILC =',I5,'; NO. LEVELS ',
      $ 'PROCESSED TO NOW =',I5)
- 
+
 C       HEIGHT ABOVE SEA-LEVEL (STORED AS REAL)
- 
+
          M = 1
          IF(IPRINT.GT.1)  PRINT 199, UAIR(1,I),M
   199 FORMAT(5X,'UAIR HERE IS: ',F17.4,'; INDEX IS: ',I3)
@@ -1874,29 +1699,29 @@ C            HEIGHT GO ON TO NEXT INPUT LEVEL
             GO TO 10
          END IF
          IF(IPRINT.GT.1)  PRINT 198, 43+ILC,RDATX(43+ILC)
- 
+
 C       HORIZONTAL WIND DIRECTION (STORED AS REAL)
- 
+
          M = 2
          IF(IPRINT.GT.1)  PRINT 199, UAIR(2,I),M
          IF(UAIR(2,I).LT.XMSG)  RDATX(43+ILC+1) = NINT(UAIR(2,I))
          IF(IPRINT.GT.1)  PRINT 198, 43+ILC+1,RDATX(43+ILC+1)
- 
+
 C       HORIZONTAL WIND SPEED (STORED AS REAL) (OUTPUT STORED
 C       AS METERS/SECOND TIMES TEN, NOT IN KNOTS AS ON29 WOULD
 C       INDICATE FOR CAT. 4 WIND SPEED)
- 
+
          M = 3
          IF(IPRINT.GT.1)  PRINT 199, UAIR(3,I),M
          IF(UAIR(3,I).LT.XMSG)  RDATX(43+ILC+2) =NINT(UAIR(3,I) * 10.)
          IF(IPRINT.GT.1)  PRINT 198, 43+ILC+2,RDATX(43+ILC+2)
- 
+
 C       CONFIDENCE LEVEL (BASED ON RMS VECTOR WIND ERROR)
 C       (NOTE: CONVERTED TO ORIGINAL LETTER INDICATOR AND PACKED
 C        IN BYTE 4 OF CATEGORY 4 QUALITY MARKER LOCATION -- SEE
 C        W3UNPK77 DOCBLOCK REMARKS 5. FOR UNPACKED VAD WIND REPORT
 C        LAYOUT FOR VALUES
- 
+
          M = 4
          IF(IPRINT.GT.1)  PRINT 199, UAIR(4,I),M
          IF(UAIR(4,I).LT.XMSG)  THEN
@@ -1915,9 +1740,9 @@ CDAKCDAK    KRMS = INT(1.93333 * UAIR(4,I))
          END IF
          IF(IPRINT.GT.1)  PRINT 196, 43+ILC+3,COB(1:4)
   196 FORMAT(5X,'IDATA(',I5,') STORED IN CHARACTER AS: "',A4,'"')
- 
+
 C       ON29 WIND QUALITY MARKER (CURRENTLY NOT STORED)
- 
+
          M = 5
          IF(IPRINT.GT.1)  PRINT 199, UAIR(5,I),M
 C.......................................................................
@@ -1926,10 +1751,10 @@ C.......................................................................
      $    '; GOING INTO NEXT LEVEL WITH ILC=',ILC
 
    10    CONTINUE
-      ENDDO    
- 
+      ENDDO
+
 C       SET CATEGORY COUNTERS FOR UPPER-AIR DATA
- 
+
    98 CONTINUE
       IDATA(19) = ILVL
    99 CONTINUE
@@ -1944,47 +1769,27 @@ C       SET CATEGORY COUNTERS FOR UPPER-AIR DATA
       RDATA(1:1200) = RDATX(1:1200)
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    UNPK7708    FILLS IN HEADER IN O-PUT ARRAY - GOES SND
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 1998-07-09
-C
-C ABSTRACT: FOR REPORT (SUBSET) READ OUT OF BUFR MESSAGE (PASSED IN
-C   INTERNALLY VIA BUFRLIB STORAGE), CALLS BUFRLIB ROUTINE TO DECODE
-C   HEADER DATA FOR GOES SOUNDING REPORT.  HEADER IS THEN FILLED INTO
-C   THE OUTPUT ARRAY WHICH HOLDS A SINGLE GOES SOUNDING REPORT IN THE
-C   QUASI-OFFICE NOTE 29 UNPACKED FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C 1997-06-05  D. A. KEYSER NP22 - ORIGINAL AUTHOR
-C 1998-07-09  KEYSER -- CHANGED CHAR. 6 OF GOES STNID TO BE UNIQUE FOR
-C                       TWO DIFFERENT EVEN OR ODD SATELLITE ID'S
-C                       (EVERY OTHER EVEN OR ODD SAT. ID NOW GETS SAME
-C                       CHAR. 6 TAG)
-C
-C USAGE:    CALL UNPK7708(LUNIT,RDATA,KOUNT,IRET)
-C   INPUT ARGUMENT LIST:
-C     LUNIT    - FORTRAN UNIT NUMBER FOR INPUT DATA FILE
-C     RDATA    - SINGLE GOES SNDG REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH ALL DATA INITIALIZED AS MISSING
-C     KOUNT    - NUMBER OF REPORTS PROCESSED INCLUDING THIS ONE
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     RDATA    - SINGLE GOES SNDG REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH HEADER INFORMATION FILLED IN
-C              - (ALL OTHER DATA REMAINS MISSING)
-C     IRET     - RETURN CODE AS DESCRIBED IN W3UNPK77 DOCBLOCK
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTINE W3UNPK77.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
-C$$$
+C> @brief Fills in header in o-put array - goes snd
+C> @author Dennis Keyser @date 1998-07-09
+
+C> For report (subset) read out of bufr message (passed in
+C> internally via bufrlib storage), calls bufrlib routine to decode
+C> header data for goes sounding report. Header is then filled into
+C> the output array which holds a single goes sounding report in the
+C> quasi-office note 29 unpacked format.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1997-06-05 | Dennis Keyser NP22 | Initial.
+C> 1998-07-09 | Dennis Keyser | Changed char. 6 of goes stnid to be unique for two different even or odd satellite id's (every other even or odd sat. id now gets same char. 6 tag)
+C>
+C> @param[in] LUNIT Fortran unit number for input data file
+C> @param[inout] RDATA Single wind profiler report in a quasi-office note 29 unpacked format with [out] header information filled in [in] all data initialized as missing
+C> @param[in] KOUNT Number of reports processed including this one
+C> @param[out] IRET Return code as described in w3unpk77 docblock
+C>
+C> @author Dennis Keyser @date 1998-07-09
       SUBROUTINE UNPK7708(LUNIT,RDATA,KOUNT,IRET)
       CHARACTER*1  C6TAG(3,0:3)
       CHARACTER*8   STNID,COB
@@ -1994,14 +1799,14 @@ C$$$
       REAL  HDR(12),RDATA(*),RDATX(1200)
       COMMON /PK77BB/kdate(8),ldate(8),IPRINT
       COMMON /PK77FF/IFOV(3),KNTSAT(250:260)
- 
+
       SAVE
- 
+
       EQUIVALENCE  (RDATX,IDATA),(COB,IOB)
       DATA  XMSG/99999./,IMSG/99999/
       DATA  HDR1/'CLAT CLON ACAV GSDP QMRK SAID YEAR '/
       DATA  HDR2/'MNTH DAYS HOUR MINU SECO           '/
- 
+
 
 C     CURRENT LIST OF  SATELLITE IDENTIFIERS (BUFR C.F. 0-01-007)
 C     -----------------------------------------------------------
@@ -2031,9 +1836,9 @@ C  SET IRET = 6 AND RETURN
          RETURN
 C.......................................................................
       END IF
- 
+
 C         LATITUDE (STORED AS REAL)
- 
+
       M = 1
       IF(IPRINT.GT.1)  PRINT 199, HDR(1),M
   199 FORMAT(5X,'HDR HERE IS: ',F17.4,'; INDEX IS: ',I3)
@@ -2048,9 +1853,9 @@ C         LATITUDE (STORED AS REAL)
   102    FORMAT(' *** W3UNPK77 ERROR: LAT MISSING FOR GOES SOUNDING'/)
          RETURN
       END IF
- 
+
 C         LONGITUDE (STORED AS REAL)
- 
+
       M = 2
       IF(IPRINT.GT.1)  PRINT 199, HDR(2),M
       IF(HDR(2).LT.XMSG)  THEN
@@ -2063,9 +1868,9 @@ C         LONGITUDE (STORED AS REAL)
   104    FORMAT(' *** W3UNPK77 ERROR: LON MISSING FOR GOES SOUNDING'/)
          RETURN
       END IF
- 
+
 C         NUMBER OF FIELDS OF VIEW - SAMPLE SIZE (STORED AS INTEGER)
- 
+
       M = 3
       IF(IPRINT.GT.1)  PRINT 199, HDR(3),M
       IF(HDR(3).LT.XMSG)  IDATA(3) = NINT(HDR(3))
@@ -2075,11 +1880,11 @@ C         NUMBER OF FIELDS OF VIEW - SAMPLE SIZE (STORED AS INTEGER)
 
 C         STATION ELEVATION (FROM HEIGHT OF FIRST -SURFACE- LEVEL)
 C          (STORED AS REAL) -- STORED IN SUBROUTINE UNPK7709
- 
- 
+
+
 C         RETRIEVAL TYPE (GEOSTATIONARY SATELLITE DATA-PROCESSING
 C         TECHNIQUE USED) (STORED AS INTEGER)
- 
+
       M = 4
       IF(IPRINT.GT.1)  PRINT 199, HDR(4),M
       IF(HDR(4).LT.XMSG)  IDATA(8) = NINT(HDR(4))
@@ -2091,19 +1896,19 @@ C         TECHNIQUE USED) (STORED AS INTEGER)
       END IF
       NNNNN = 8
       IF(IPRINT.GT.1)  PRINT 197, NNNNN,IDATA(NNNNN)
- 
+
 C         PRODUCT QUALITY BIT FLAGS - QUALITY INFO. (STORED AS INTEGER)
- 
+
       M = 5
       IF(IPRINT.GT.1)  PRINT 199, HDR(5),M
       IF(HDR(5).LT.XMSG)  IDATA(10) = NINT(HDR(5))
       NNNNN = 10
       IF(IPRINT.GT.1)  PRINT 197, NNNNN,IDATA(NNNNN)
- 
+
 C         STATION IDENTIFICATION (STORED AS CHARACTER)
 C         (FIRST 5-CHARACTERS OBTAINED FROM 5-DIGIT COUNT NUMBER,
 C          6'TH CHARACTER OBTAINED FROM SAT. ID/RETRIEVAL TYPE TAG)
- 
+
       WRITE(STNID(1:5),'(I5.5)') MIN(KOUNT,99999)
 
 C DECODE THE SATELLITE ID
@@ -2131,11 +1936,11 @@ C DECODE THE SATELLITE ID
       IDATA(12) = IOB
       NNNNN = 12
       IF(IPRINT.GT.1)  PRINT 196, NNNNN,COB(1:4)
- 
+
 cvvvvvdak port
 C         LOAD THE YEAR/MONTH (STORED AS CHARACTER IN FORM YYMM)
 caaaaadak port
- 
+
       M = 7
       IF(IPRINT.GT.1)  PRINT 199, HDR(7),M
       IYEAR = IMSG
@@ -2158,10 +1963,10 @@ caaaaadak port
       ELSE
          GO TO 30
       END IF
- 
+
 C         LOAD THE DAY/HOUR (STORED AS CHARACTER IN FORM DDHH)
 C          AND THE OBSERVATION TIME (STORED AS REAL)
- 
+
       M = 9
       IF(IPRINT.GT.1)  PRINT 199, HDR(9),M
       M = 10
@@ -2191,45 +1996,27 @@ C          AND THE OBSERVATION TIME (STORED AS REAL)
       IRET = 4
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    UNPK7709    FILLS CAT. 12,8 TO O-PUT ARRAY -GOES SNDG
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 1997-06-05
-C
-C ABSTRACT: FOR REPORT (SUBSET) READ OUT OF BUFR MESSAGE (PASSED IN
-C   INTERNALLY VIA BUFRLIB STORAGE), CALLS BUFRLIB ROUTINE TO DECODE
-C   UPPER-AIR (SOUNDING) AND ADDITIONAL DATA FOR GOES SOUNDING.  UPPER-
-C   AIR DATA ARE THEN FILLED INTO THE OUTPUT ARRAY AS CATEGORY 12
-C   (SATELLITE SOUNDING) AND ADDITIONAL DATA ARE FILLED AS CATEGORY 8.
-C   THE OUPUT ARRAY HOLDS A SINGLE GOES SOUNDING IN THE QUASI-OFFICE
-C   NOTE 29 UNPACKED FORMAT.
-C
-C PROGRAM HISTORY LOG:
-C 1997-06-05  D. A. KEYSER NP22 - ORIGINAL AUTHOR
-C
-C USAGE:    CALL UNPK7709(LUNIT,RDATA,IRET)
-C   INPUT ARGUMENT LIST:
-C     LUNIT    - FORTRAN UNIT NUMBER FOR INPUT DATA FILE
-C     RDATA    - SINGLE GOES SNDG REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH ONLY HEADER INFORMATION FILLED
-C              - IN (CATEGORY 12 AND 8 DATA MISSING)
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     RDATA    - SINGLE GOES SNDG REPORT IN A QUASI-OFFICE NOTE 29
-C              - UNPACKED FORMAT WITH CATEGORY 12 AND 8 INFORMATION
-C              - FILLED IN (ALL DATA FOR REPORT NOW FILLED)
-C     IRET     - RETURN CODE AS DESCRIBED IN W3UNPK77 DOCBLOCK
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTINE W3UNPK77.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP, CRAY, SGI
-C
-C$$$
+C> @brief Fills cat. 12,8 to o-put array -goes sndg
+C> @author Dennis Keyser @date 1997-06-05
+
+C> For report (subset) read out of bufr message (passed in
+C> internally via bufrlib storage), calls bufrlib routine to decode
+C> upper-air (sounding) and additional data for goes sounding. Upper-
+C> air data are then filled into the output array as category 12
+C> (satellite sounding) and additional data are filled as category 8.
+C> The ouput array holds a single goes sounding in the quasi-office
+C> note 29 unpacked format.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1997-06-05 | Dennis Keyser NP22 | Initial.
+C>
+C> @param[in] LUNIT Fortran unit number for input data file
+C> @param[inout] RDATA Single wind profiler report in a quasi-office note 29 unpacked format with [out] header information filled in [in] all data initialized as missing
+C> @param[out] IRET Return code as described in w3unpk77 docblock
+C>
+C> @author Dennis Keyser @date 1997-06-05
       SUBROUTINE UNPK7709(LUNIT,RDATA,IRET)
       CHARACTER*1  CQMFLG
       CHARACTER*8  COB
@@ -2240,9 +2027,9 @@ C$$$
       REAL  UAIR(4,255),CAT8(12),RDATA(*),RDATX(1200),SC8(12),RAD(2,255)
       COMMON /PK77BB/kdate(8),ldate(8),IPRINT
       COMMON /PK77FF/IFOV(3),KNTSAT(250:260)
- 
+
       SAVE
- 
+
       EQUIVALENCE (RDATX,IDATA),(COB,IOB)
       DATA  XMSG/99999./,YMSG/99999.8/
       DATA  UAIR1/'PRLC HGHT TMDB TMDP                             '/
@@ -2298,9 +2085,9 @@ C.......................................................................
          IF(IPRINT.GT.1)  PRINT 1079, I,ILC,ILVL
  1079 FORMAT(' ATTEMPTING NEW CAT. 12 INPUT LEVEL NUMBER',I4,' WITH ',
      $ 'ILC =',I5,'; NO. LEVELS PROCESSED TO NOW =',I5)
- 
+
 C       LEVEL PRESSURE (STORED AS REAL)
- 
+
          M = 1
          IF(IPRINT.GT.1)  PRINT 199, UAIR(1,I),M
   199 FORMAT(5X,'UAIR HERE IS: ',F17.4,'; INDEX IS: ',I3)
@@ -2326,9 +2113,9 @@ C WE HAVE A VALID CATEGORY 12 LEVEL -- THERE IS A VALID PRESSURE
          ILVL = ILVL + 1
          IF(IPRINT.GT.1)  PRINT 198, 43+ILC,RDATX(43+ILC)
   198 FORMAT(5X,'RDATA(',I5,') STORED AS: ',F10.2)
- 
+
 C       GEOPOTENTIAL HEIGHT (STORED AS REAL)
- 
+
          M = 2
          IF(IPRINT.GT.1)  PRINT 199, UAIR(2,I),M
          IF(UAIR(2,I).LT.XMSG)  RDATX(43+ILC+1) = NINT(UAIR(2,I))
@@ -2340,27 +2127,27 @@ C       GEOPOTENTIAL HEIGHT (STORED AS REAL)
             NNNNN = 7
             IF(IPRINT.GT.1)  PRINT 198, NNNNN,RDATX(NNNNN)
          END IF
- 
+
 C       TEMPERATURE (STORED AS REAL)
- 
+
          M = 3
          IF(IPRINT.GT.1)  PRINT 199, UAIR(3,I),M
          ITMP = NINT(UAIR(3,I)*100.)
          IF(UAIR(3,I).LT.XMSG)
      $    RDATX(43+ILC+2) = NINT((ITMP - 27315) * 0.1)
          IF(IPRINT.GT.1)  PRINT 198, 43+ILC+2,RDATX(43+ILC+2)
- 
+
 C       DEWPOINT TEMPERATURE (STORED AS REAL)
- 
+
          M = 4
          IF(IPRINT.GT.1)  PRINT 199, UAIR(4,I),M
          ITMP = NINT(UAIR(4,I)*100.)
          IF(UAIR(4,I).LT.XMSG)
      $    RDATX(43+ILC+3) = NINT((ITMP - 27315) * 0.1)
          IF(IPRINT.GT.1)  PRINT 198, 43+ILC+3,RDATX(43+ILC+3)
- 
+
 C       QUALITY MARKERS (STORED AS CHARACTER)
- 
+
          COB = CQMFLG//CQMFLG//CQMFLG//'     '
          IDATA(43+ILC+6) = IOB
          IF(IPRINT.GT.1)  PRINT 196, 43+ILC+6,COB(1:4)
@@ -2371,15 +2158,15 @@ C.......................................................................
      $    'LEVEL ',ILVL,'; GOING INTO NEXT LEVEL WITH ILC=',ILC
 
    10    CONTINUE
-      ENDDO    
- 
+      ENDDO
+
 C       SET CATEGORY COUNTERS FOR CATEGORY 12 (SOUNDING) DATA
- 
+
       IDATA(39) = ILVL
    98 CONTINUE
       IF(IPRINT.GT.1)  PRINT *, IDATA(39),' CAT. 12 LEVELS PROCESSED'
       IF(IDATA(39).GT.0)  IDATA(40) = 43
- 
+
 C***********************************************************************
 C                  FILL CATEGORY 8 PART OF OUTPUT
 C                  WILL ATTEMPT TO FILL 12 "LEVELS"
@@ -2399,7 +2186,7 @@ C LVL 12- SATELLITE ZENITH ANGLE (ELEV) (DEG. X 100)  --- CODE FIG. 261.
 C
 C     IF DATA ONE ANY LEVEL ARE MISSING, THAT LEVEL IS NOT PROCESSED
 C***********************************************************************
- 
+
       ILVL = 0
       ILC = 0
       CAT8_8 = 10.0E10
@@ -2482,9 +2269,9 @@ C  SELECTION FLAG IS BAD (.NE. 0), SET QUALITY MARKER TO "F"
      $       'FAR=',ILVL,'; ILC=',ILC,')'
          END IF
       ENDDO
- 
+
 C       SET CATEGORY COUNTERS FOR CATEGORY 8 (ADDITIONAL) DATA
- 
+
       IDATA(27) = ILVL
    99 CONTINUE
       IF(IPRINT.GT.1)  PRINT *, IDATA(27),' CAT. 08 LEVELS PROCESSED'
@@ -2521,9 +2308,9 @@ C.......................................................................
          IF(IPRINT.GT.1)  PRINT 2079, I,ILC,ILVL
  2079 FORMAT(' ATTEMPTING NEW CAT. 13 INPUT "LEVEL" NUMBER',I4,' WITH ',
      $ 'ILC =',I5,'; NO. LEVELS (CHANNELS) PROCESSED TO NOW =',I5)
- 
+
 C       CHANNEL NUMBER (STORED AS INTEGER)
- 
+
          M = 1
          IF(IPRINT.GT.1)  PRINT 499, RAD(1,I),M
   499 FORMAT(5X,'RAD  HERE IS: ',F17.4,'; INDEX IS: ',I3)
@@ -2541,16 +2328,16 @@ C WE HAVE A VALID CATEGORY 13 LEVEL -- THERE IS A VALID CHANNEL NUMBER
          ILVL = ILVL + 1
          IF(IPRINT.GT.1)  PRINT 197, 429+ILC,IDATA(429+ILC)
   197 FORMAT(5X,'IDATA(',I5,') STORED AS: ',I10)
- 
+
 C       BRIGHTNESS TEMPERATURE (STORED AS REAL)
- 
+
          M = 2
          IF(IPRINT.GT.1)  PRINT 499, RAD(2,I),M
          IF(RAD(2,I).LT.XMSG)  RDATX(429+ILC+1) = NINT(RAD(2,I) * 100.)
          IF(IPRINT.GT.1)  PRINT 198, 429+ILC+1,RDATX(429+ILC+1)
- 
+
 C       QUALITY MARKERS (STORED AS CHARACTER)
- 
+
          COB = '        '
          IDATA(429+ILC+2) = IOB
          IF(IPRINT.GT.1)  PRINT 196, 429+ILC+2,COB(1:4)
@@ -2560,10 +2347,10 @@ C.......................................................................
      $    'LEVEL ',ILVL,'; GOING INTO NEXT LEVEL WITH ILC=',ILC
 
   210    CONTINUE
-      ENDDO    
- 
+      ENDDO
+
 C       SET CATEGORY COUNTERS FOR CATEGORY 13 (RADIANCE) DATA
- 
+
       IDATA(41) = ILVL
   100 CONTINUE
       IF(IPRINT.GT.1)  PRINT *, IDATA(41),' CAT. 13 LEVELS PROCESSED'
