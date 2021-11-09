@@ -1,42 +1,29 @@
-!-----------------------------------------------------------------------
+!> @file
+!> @brief Format a date and time into characters
+!> @author Mark Iredell @date 1998-01-05
+
+!> This subprogram forms various character strings useful
+!> in describing an NCEP absolute date and time.
+!>
+!> ### Program History Log:
+!> Date | Programmer | Comment
+!> -----|------------|--------
+!> 1998-01-05 | Mark Iredell | Initial.
+!>
+!> @param[in] IDAT NCEP absolute date and time (year, month, day, time zone,
+!> hour, minute, second, millisecond)
+!> @param[out] CDAT Strings describing date and time:
+!> - CDAT(1) is the name of the day of the week;
+!> - CDAT(2) is the name of the month;
+!> - CDAT(3) is the day of month, year;
+!> - CDAT(4) is the date in yyyy-mm-dd format;
+!> - CDAT(5) is the date in yyyy.doy format;
+!> - CDAT(6) is the time in hh:mm:ss format;
+!> - CDAT(7) is the milliseconds in .xxx format;
+!> - CDAT(8) is the time zone.
+!>
+!> @author Mark Iredell @date 1998-01-05
       subroutine w3pradat(idat,cdat)
-!$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-!
-! SUBPROGRAM: W3PRADAT       FORMAT A DATE AND TIME INTO CHARACTERS
-!   AUTHOR: MARK IREDELL     ORG: WP23       DATE: 98-01-05
-!
-! ABSTRACT: THIS SUBPROGRAM FORMS VARIOUS CHARACTER STRINGS USEFUL
-!   IN DESCRIBING AN NCEP ABSOLUTE DATE AND TIME.
-!
-! PROGRAM HISTORY LOG:
-!   98-01-05  MARK IREDELL
-!
-! USAGE:  CALL W3PRADAT(IDAT,CDAT)
-!
-!   INPUT VARIABLES:
-!     IDAT       INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!                (YEAR, MONTH, DAY, TIME ZONE,
-!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!
-!   OUTPUT VARIABLES:
-!     CDAT       CHARACTER*10 (8) STRINGS DESCRIBING DATE AND TIME
-!                (CDAT(1) IS THE NAME OF THE DAY OF THE WEEK;
-!                 CDAT(2) IS THE NAME OF THE MONTH;
-!                 CDAT(3) IS THE DAY OF MONTH, YEAR;
-!                 CDAT(4) IS THE DATE IN YYYY-MM-DD FORMAT;
-!                 CDAT(5) IS THE DATE IN YYYY.DOY FORMAT;
-!                 CDAT(6) IS THE TIME IN HH:MM:SS FORMAT;
-!                 CDAT(7) IS THE MILLISECONDS IN .XXX FORMAT;
-!                 CDAT(8) IS THE TIME ZONE.)
-!
-! SUBPROGRAMS CALLED:
-!     IW3JDN         COMPUTE JULIAN DAY NUMBER     
-!     W3FS26         YEAR, MONTH, DAY FROM JULIAN DAY NUMBER
-!
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
-!
-!$$$
       integer idat(8)
       character*(*) cdat(8)
       character*10 ctmp(8)

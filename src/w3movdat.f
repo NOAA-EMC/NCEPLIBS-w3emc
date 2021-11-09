@@ -1,41 +1,27 @@
-!-----------------------------------------------------------------------
+!> @file
+!> @brief Return a date from a time interval and date
+!> @author Mark Iredell @date 1998-08-01
+
+!> This subprogram returns the date and time that is a given
+!> NCEP relative time interval from an NCEP absolute date and time.
+!> The output is in the NCEP absolute date and time data structure.
+!>
+!> ### Program History Log:
+!> Date | Programmer | Comment
+!> -----|------------|--------
+!> 1998-01-05 | Mark Iredell | Initial.
+!>
+!> @param[in] RINC NCEP relative time interval (days, hours, minutes, seconds
+!> milliseconds)
+!> @param[in] IDAT NCEP absolute date and time (year, month, day, time zone,
+!> hour, minute, second, millisecond)
+!> @param[in] JDAT NCEP absolute date and time (year, month, day, time zone,
+!> hour, minute, second, millisecond) (jdat is later than idat if time
+!> interval is positive.)
+!>
+!> @author Mark Iredell @date 1998-08-01
       subroutine w3movdat(rinc,idat,jdat)
-!$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
-!
-! SUBPROGRAM: W3MOVDAT       RETURN A DATE FROM A TIME INTERVAL AND DATE
-!   AUTHOR: MARK IREDELL     ORG: WP23       DATE: 98-01-05
-!
-! ABSTRACT: THIS SUBPROGRAM RETURNS THE DATE AND TIME THAT IS A GIVEN
-!   NCEP RELATIVE TIME INTERVAL FROM AN NCEP ABSOLUTE DATE AND TIME.
-!   THE OUTPUT IS IN THE NCEP ABSOLUTE DATE AND TIME DATA STRUCTURE.
-!
-! PROGRAM HISTORY LOG:
-!   98-01-05  MARK IREDELL
-!
-! USAGE:  CALL W3MOVDAT(RINC,IDAT,JDAT)
-!
-!   INPUT VARIABLES:
-!     RINC       REAL (5) NCEP RELATIVE TIME INTERVAL
-!                (DAYS, HOURS, MINUTES, SECONDS, MILLISECONDS)
-!     IDAT       INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!                (YEAR, MONTH, DAY, TIME ZONE,
-!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!
-!   OUTPUT VARIABLES:
-!     JDAT       INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!                (YEAR, MONTH, DAY, TIME ZONE,
-!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!                (JDAT IS LATER THAN IDAT IF TIME INTERVAL IS POSITIVE.)
-!
-! SUBPROGRAMS CALLED:
-!     IW3JDN         COMPUTE JULIAN DAY NUMBER     
-!     W3FS26         YEAR, MONTH, DAY FROM JULIAN DAY NUMBER
-!     W3REDDAT       REDUCE A TIME INTERVAL TO A CANONICAL FORM
-!
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
-!
-!$$$
+
       real rinc(5)
       integer idat(8),jdat(8)
       real rinc1(5),rinc2(5)

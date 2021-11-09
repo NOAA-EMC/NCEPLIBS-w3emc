@@ -1,36 +1,30 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    XSTORE      STORES A CONSTANT VALUE INTO AN ARRAY
-C>   PRGMMR: KEYSER           ORG: W/NMC22    DATE: 07-02-92
+C> @brief Stores a constant value into an array
+C> @author Dennis Keyser @date 1992-07-02
+
+C> Stores an 8-byte (fullword) value through consecutive storage locations.
+C> (moving is accomplished with a do loop.)
 C>
-C> ABSTRACT: STORES AN 8-BYTE (FULLWORD) VALUE THROUGH CONSECUTIVE
-C>   STORAGE LOCATIONS.  (MOVING IS ACCOMPLISHED WITH A DO LOOP.)
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1992-07-02 | Dennis Keyser (W/NMC22) | Initial.
+C> 1995-10-31 | Mark Iredell | Removed saves and prints.
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-07-02  D. A. KEYSER (W/NMC22)
-C>   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
+C> @param[in] CON Constant to be stored into "mwords" consecutive
+C> fullwords beginning with "cout" array
+C> @param[in] MWORDS Number of fullwords in "cout" array to store "con";
+C> must be .gt. zero (not checked for this)
+C> @param[out] COUT Starting address for array of "mwords" fullwords
+C> set to the contents of the value "con"
 C>
-C> USAGE:    CALL XSTORE(COUT,CON,MWORDS)
-C>   INPUT ARGUMENT LIST:
-C>     CON      - CONSTANT TO BE STORED INTO "MWORDS" CONSECUTIVE
-C>                FULLWORDS BEGINNING WITH "COUT" ARRAY
-C>     MWORDS   - NUMBER OF FULLWORDS IN "COUT" ARRAY TO STORE "CON";
-C>                MUST BE .GT. ZERO (NOT CHECKED FOR THIS)
+C> @remark The version of this subroutine on the hds common library
+C> is nas-specific subr. written in assembly lang. to allow fast
+C> computation time.  subr. placed in cray w3lib to allow codes to
+C> compile on both the hds and cray machines.
+C> subprogram can be called from a multiprocessing environment.
 C>
-C>   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C>     COUT     - STARTING ADDRESS FOR ARRAY OF "MWORDS" FULLWORDS
-C>                SET TO THE CONTENTS OF THE VALUE "CON"
-C>
-C> REMARKS: THE VERSION OF THIS SUBROUTINE ON THE HDS COMMON LIBRARY
-C>   IS NAS-SPECIFIC SUBR. WRITTEN IN ASSEMBLY LANG. TO ALLOW FAST
-C>   COMPUTATION TIME.  SUBR. PLACED IN CRAY W3LIB TO ALLOW CODES TO
-C>   COMPILE ON BOTH THE HDS AND CRAY MACHINES.
-C>   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/864
-C>
+C> @author Dennis Keyser @date 1992-07-02
       SUBROUTINE XSTORE(COUT,CON,MWORDS)
 C
       DIMENSION  COUT(*)

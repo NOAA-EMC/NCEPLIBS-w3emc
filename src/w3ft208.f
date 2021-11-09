@@ -1,47 +1,29 @@
 C> @file
-C
-C> SUBROUTINE: W3FT208   CONVERT (361,91) GRID TO (29,27) MERCATOR GRID
-C>   AUTHOR:  JONES,R.E.        ORG:  W342         DATE: 93-10-19
+C> @brief Convert (361,91) grid to (29,27) mercator grid.
+C> @author Ralph Jones @date 1993-10-19
+
+C> Convert a northern hemisphere 1.0 degree lat.,lon. 361 by
+C> 91 grid to a regional - hawaii (mercator) 29*27 awips 208
+C> grid.
 C>
-C> ABSTRACT:  CONVERT A NORTHERN HEMISPHERE 1.0 DEGREE LAT.,LON. 361 BY
-C>   91 GRID TO A REGIONAL - HAWAII (MERCATOR) 29*27 AWIPS 208 
-C>   GRID.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1993-10-19 | Ralph Jones | Initial
 C>
-C> PROGRAM HISTORY LOG:
-C>   93-10-19  R.E.JONES  
+C> @param[in] ALOLA 361*91 GRID 1.0 DEG. LAT,LON GRID N. HEMI.
+C> 32851 point grid. 360 * 181 one degree grib grid 3 was flipped, greenwish added
+C> to right side and cut to 361 * 91.
+C> @param[in] INTERP 1 linear interpolation , ne.1 biquadratic
+C> @param[out] AMERC 29*27 grid of northern mercator 783 point grid is awips
+C> grid type 208
 C>
-C> USAGE:  CALL W3FT208(ALOLA,AMERC,INTERP)
+C> @note
+C> - 1. W1 and w2 are used to store sets of constants which are
+C> reusable for repeated calls to the subroutine. 20 other array
+C> are saved and reused on the next call.
 C>
-C>   INPUT ARGUMENTS:  ALOLA  - 361*91 GRID 1.0 DEG. LAT,LON GRID N. HEMI.
-C>                              32851 POINT GRID. 360 * 181 ONE DEGREE
-C>                              GRIB GRID 3 WAS FLIPPED, GREENWISH ADDED
-C>                              TO RIGHT SIDE AND CUT TO 361 * 91.  
-C>                     INTERP - 1 LINEAR INTERPOLATION , NE.1 BIQUADRATIC
-C>
-C>   INPUT FILES:  NONE
-C>
-C>   OUTPUT ARGUMENTS: AMERC - 29*27 GRID OF NORTHERN MERCATOR
-C>                             783 POINT GRID IS AWIPS GRID TYPE 208
-C>
-C>   OUTPUT FILES: ERROR MESSAGE TO FORTRAN OUTPUT FILE
-C>
-C>   WARNINGS:
-C>
-C>   1. W1 AND W2 ARE USED TO STORE SETS OF CONSTANTS WHICH ARE
-C>   REUSABLE FOR REPEATED CALLS TO THE SUBROUTINE. 20 OTHER ARRAY
-C>   ARE SAVED AND REUSED ON THE NEXT CALL.
-C>
-C>   RETURN CONDITIONS: NORMAL SUBROUTINE EXIT
-C>
-C>   SUBPROGRAMS CALLED:
-C>     UNIQUE :  NONE
-C>
-C>     LIBRARY:  ASIN , ATAN2
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C>
+C> @author Ralph Jones @date 1993-10-19
       SUBROUTINE W3FT208(ALOLA,AMERC,INTERP)
 C
        PARAMETER   (NPTS=783,II=29,JJ=27)
@@ -53,7 +35,7 @@ C
 C
        REAL        WLON(NPTS),    XLAT(NPTS)
        REAL        XI(II,JJ),     XJ(II,JJ)
-       REAL        XII(NPTS),     XJJ(NPTS)  
+       REAL        XII(NPTS),     XJJ(NPTS)
        REAL        ALOLA(361,91), AMERC(NPTS), ERAS(NPTS,4)
        REAL        W1(NPTS),      W2(NPTS)
        REAL        XDELI(NPTS),   XDELJ(NPTS)

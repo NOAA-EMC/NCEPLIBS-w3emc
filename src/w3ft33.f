@@ -1,43 +1,35 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    W3FT33      THICKEN THINNED WAFS GRIB GRID 37-44
-C>   PRGMMR: RALPH PETTERSON  ORG: W/NMCXX    DATE: 94-11-13
+C> @brief Thicken thinned wafs grib grid 37-44
+C> @author Ralph Peterson @date 1994
+
+C> Subroutine thickens one thinned wafs grib grid to a
+C> real array of 5329 numbers (73,73) 1.25 degree grid.
 C>
-C> ABSTRACT: SUBROUTINE THICKENS ONE THINNED WAFS GRIB GRID TO A
-C>   REAL ARRAY OF 5329 NUMBERS (73,73) 1.25 DEGREE GRID.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1994-??-?? | Ralph Peterson
+C> 1994-11-07 | Ralph Jones | Add doc block, change call to 3 parameters.
+C> Replace cos with table lookup.
+C> 1995-06-02 | Ralph Peterson | Changes to correct miss-position
+C> between + or - 8.75 n/s.
+C> 1995-06-03 | Ralph Jones | Changes so 8 rows with 73 values
+C> are not thickened, 10% faster.
 C>
-C> PROGRAM HISTORY LOG:
-C>   94-??-??  RALPH PETERSON
-C>   94-11-07  R.E.JONES        ADD DOC BLOCK, CHANGE CALL TO 3
-C>                              PARAMETERS. REPLACE COS WITH TABLE
-C>                              LOOKUP.
-C>   95-06-02  RALPH PETERSON   CHANGES TO CORRECT MISS-POSITION
-C>                              BETWEEN + OR - 8.75 N/S.
-C>   95-06-03  R.E.JONES        CHANGES SO 8 ROWS WITH 73 VALUES
-C>                              ARE NOT THICKENED, 10% FASTER.  
+C> @param[in] AIN Real 3447 word array with unpacked thinned wafs
+C> grib type 37-44.
+C> @param[in] NSFLAG Integer = 1 AIN is wafs grib grid 37-40 n. hemi.
+C> = -1 AIN is wafs grib grid 41-44 s. hemi.
+C> @param[out] OUT Real (73,73) word array with thickened wafs grib grid 37-44.
 C>
-C> USAGE:    CALL W3FT33(AIN, OUT, NSFLAG)
-C>   INPUT ARGUMENT LIST:
-C>     AIN      - REAL 3447 WORD ARRAY WITH UNPACKED THINNED WAFS
-C>                GRIB TYPE 37-44.
-C>     NSFLAG   - INTEGER =  1  AIN IS WAFS GRIB GRID 37-40  N. HEMI.
-C>                        = -1  AIN IS WAFS GRIB GRID 41-44  S. HEMI.   
+C> @remark The pole point for u and v wind components will have only
+C> one point. If you need the pole row corrected see page 9 section
+C> 1 in office note 388. You need both u and v to make the
+C> correction.
 C>
-C>   OUTPUT ARGUMENT LIST:  
-C>     OUT      - REAL (73,73) WORD ARRAY WITH THICKENED WAFS GRIB
-C>                GRID 37-44.
-C>
-C> REMARKS: THE POLE POINT FOR U AND V WIND COMPONENTS WILL HAVE ONLY
-C>   ONE POINT. IF YOU NEED THE POLE ROW CORRECTED SEE PAGE 9 SECTION
-C>   1 IN OFFICE NOTE 388. YOU NEED BOTH U AND V TO MAKE THE 
-C>   CORRECTION.
-C> 
-C> ATTRIBUTES:
-C>   LANGUAGE: SiliconGraphics 5.2 FORTRAN 77
-C>   MACHINE:  SiliconGraphics IRIS-4D/25, 35, INDIGO, Indy
-C>
+C> @author Ralph Peterson @date 1994
       SUBROUTINE W3FT33(AIN,OUT,NSFLAG)
-C         
+C
          PARAMETER (NX=73,NY=73)
          PARAMETER (NIN=3447)
 C
@@ -62,8 +54,8 @@ C        TEST FOR GRIDS (37-40)
 C
          IF (NSFLAG.GT.0) THEN
 C
-C          DO NOT THICKEN 8 ROWS WITH 73 VALUES, MOVE DATA 
-C          TO OUT ARRAY. GRIDS (37-40) N. 
+C          DO NOT THICKEN 8 ROWS WITH 73 VALUES, MOVE DATA
+C          TO OUT ARRAY. GRIDS (37-40) N.
 C
            IS = 0
            DO J = 1,8
@@ -102,7 +94,7 @@ C
 C
          ELSE
 C
-C         DO NOT THICKEN 8 ROWS WITH 73 VALUES, MOVE DATA  
+C         DO NOT THICKEN 8 ROWS WITH 73 VALUES, MOVE DATA
 C         TO OUT ARRAY. GRIDS (41-44) S.
 C
            IS = NIN - (8 * NX)

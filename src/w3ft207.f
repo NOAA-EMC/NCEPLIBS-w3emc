@@ -1,51 +1,32 @@
 C> @file
-C
-C> SUBROUTINE: W3FT207   CONVERT (361,91) GRID TO (49,35) N. HEMI. GRID
-C>   AUTHOR:  JONES,R.E.        ORG:  W342         DATE: 93-10-19
+C> @brief Convert (361,91) grid to (49,35) n. hemi. grid
+C> @author Ralph Jones @date 1993-10-19
+
+C> Convert a northern hemisphere 1.0 degree lat.,lon. 361 by
+C> 91 grid to a polar stereographic 49 by 35 grid. The polar
+C> stereographic map projection is true at 60 deg. n. , The mesh
+C> length is 95.25 km. and the oriention is 150 deg. w.
+C> awips grid 207  regional - alaska.
 C>
-C> ABSTRACT:  CONVERT A NORTHERN HEMISPHERE 1.0 DEGREE LAT.,LON. 361 BY
-C>   91 GRID TO A POLAR STEREOGRAPHIC 49 BY 35 GRID. THE POLAR
-C>   STEREOGRAPHIC MAP PROJECTION IS TRUE AT 60 DEG. N. , THE MESH
-C>   LENGTH IS 95.25 KM. AND THE ORIENTION IS 150 DEG. W.
-C>   AWIPS GRID 207  REGIONAL - ALASKA.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1993-10-19 | Ralph Jones | Initial.
 C>
-C> PROGRAM HISTORY LOG:
-C>   93-10-19  R.E.JONES  
+C> @param[in] ALOLA 361*91 grid 1.0 deg. lat,lon grid n. hemi.
+C> 32851 point grid. 360 * 181 one degree grib grid 3 was flipped, greenwish added
+C> to right side and cut to 361 * 91.
+C> @param[in] INTERP 1 linear interpolation , ne.1 biquadratic
+C> @param[out] APOLA 49*35 grid of northern hemisphere. 1715 point grid is
+C> awips grid type 207
 C>
-C> USAGE:  CALL W3FT207(ALOLA,APOLA,INTERP)
+C> @note
+C> - 1. W1 and w2 are used to store sets of constants which are
+C> reusable for repeated calls to the subroutine.
+C> - 2. Wind components are not rotated to the 49*35 grid orientation
+C> after interpolation. You may use w3fc08() to do this.
 C>
-C>   INPUT ARGUMENTS:  ALOLA  - 361*91 GRID 1.0 DEG. LAT,LON GRID N. HEMI.
-C>                              32851 POINT GRID. 360 * 181 ONE DEGREE
-C>                              GRIB GRID 3 WAS FLIPPED, GREENWISH ADDED
-C>                              TO RIGHT SIDE AND CUT TO 361 * 91. 
-C>                     INTERP - 1 LINEAR INTERPOLATION , NE.1 BIQUADRATIC
-C>
-C>   INPUT FILES:  NONE
-C>
-C>   OUTPUT ARGUMENTS: APOLA - 49*35 GRID OF NORTHERN HEMISPHERE.
-C>                             1715 POINT GRID IS AWIPS GRID TYPE 207
-C>
-C>   OUTPUT FILES: ERROR MESSAGE TO FORTRAN OUTPUT FILE
-C>
-C>   WARNINGS:
-C>
-C>   1. W1 AND W2 ARE USED TO STORE SETS OF CONSTANTS WHICH ARE
-C>   REUSABLE FOR REPEATED CALLS TO THE SUBROUTINE.
-C>
-C>   2. WIND COMPONENTS ARE NOT ROTATED TO THE 49*35 GRID ORIENTATION
-C>   AFTER INTERPOLATION. YOU MAY USE W3FC08 TO DO THIS.
-C>
-C>   RETURN CONDITIONS: NORMAL SUBROUTINE EXIT
-C>
-C>   SUBPROGRAMS CALLED:
-C>     UNIQUE :  NONE
-C>
-C>     LIBRARY:  ASIN , ATAN2
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916/128, Y-MP8/864, Y-MP EL92/256
-C>
+C> @author Ralph Jones @date 1993-10-19
       SUBROUTINE W3FT207(ALOLA,APOLA,INTERP)
 C
        PARAMETER   (NPTS=1715,II=49,JJ=35)

@@ -1,48 +1,30 @@
 C> @file
-C
-C> SUBROUTINE: W3FT203   CONVERT (361,91) GRID TO (45,39) N. HEMI. GRID
-C>   AUTHOR:  JONES,R.E.        ORG:  W342         DATE: 94-05-18
+C> @brief Convert (361,91) grid to (45,39) n. hemi. grid
+C> @author Ralph Jones @date 1994-05-18
+
+C> Convert a northern hemisphere 1.0 degree lat.,lon. 361 by
+C> 91 grid to a polar stereographic 45 by 39 grid. The polar
+C> stereographic map projection is true at 60 deg. n. , The mesh
+C> length is 190.5 km. and the oriention is 150 deg. w.
 C>
-C> ABSTRACT:  CONVERT A NORTHERN HEMISPHERE 1.0 DEGREE LAT.,LON. 361 BY
-C>   91 GRID TO A POLAR STEREOGRAPHIC 45 BY 39 GRID. THE POLAR
-C>   STEREOGRAPHIC MAP PROJECTION IS TRUE AT 60 DEG. N. , THE MESH
-C>   LENGTH IS 190.5 KM. AND THE ORIENTION IS 150 DEG. W.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1994-05-18 | Ralph Jones | Initial.
 C>
-C> PROGRAM HISTORY LOG:
-C>   94-05-18  R.E.JONES  
+C> @param[in] ALOLA 361*91 grid 1.0 lat,lon grid n. hemisphere
+C> 32851 point grid is o.n. 84 type ?? or ?? hex
+C> @param[in] INTERP 1 linear interpolation , ne.1 biquadratic
+C> @param[out] APOLA 45*39 grid of northern hemisphere. 1755 point grid is
+C> awips grid type 203
 C>
-C> USAGE:  CALL W3FT203(ALOLA,APOLA,INTERP)
+C> @note
+C> - 1. W1 and w2 are used to store sets of constants which are
+C> reusable for repeated calls to the subroutine.
+C> - 2. Wind components are not rotated to the 45*39 grid orientation
+C> after interpolation. You may use w3fc08() to do this.
 C>
-C>   INPUT ARGUMENTS:  ALOLA  - 361*91 GRID 1.0 LAT,LON GRID N. HEMISPHERE
-C>                     32851 POINT GRID IS O.N. 84 TYPE ?? OR ?? HEX 
-C>                     INTERP - 1 LINEAR INTERPOLATION , NE.1 BIQUADRATIC
-C>
-C>   INPUT FILES:  NONE
-C>
-C>   OUTPUT ARGUMENTS: APOLA - 45*39 GRID OF NORTHERN HEMISPHERE.
-C>                             1755 POINT GRID IS AWIPS GRID TYPE 203
-C>
-C>   OUTPUT FILES: ERROR MESSAGE TO FORTRAN OUTPUT FILE
-C>
-C>   WARNINGS:
-C>
-C>   1. W1 AND W2 ARE USED TO STORE SETS OF CONSTANTS WHICH ARE
-C>   REUSABLE FOR REPEATED CALLS TO THE SUBROUTINE.
-C>
-C>   2. WIND COMPONENTS ARE NOT ROTATED TO THE 45*39 GRID ORIENTATION
-C>   AFTER INTERPOLATION. YOU MAY USE W3FC08 TO DO THIS.
-C>
-C>   RETURN CONDITIONS: NORMAL SUBROUTINE EXIT
-C>
-C>   SUBPROGRAMS CALLED:
-C>     UNIQUE :  NONE
-C>
-C>     LIBRARY:  ASIN , ATAN2
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL92/256
-C>
+C> @author Ralph Jones @date 1994-05-18
       SUBROUTINE W3FT203(ALOLA,APOLA,INTERP)
 C
        PARAMETER   (NPTS=1755,II=45,JJ=39)

@@ -1,28 +1,22 @@
 C> @file
-C                .      .    .                                       .
-C> SUBPROGRAM:    XDOPEN      DUMMY SUBROUTINE
-C>   PRGMMR: KEYSER           ORG: W/NMC22    DATE: 07-02-92
+C> @brief Dummy subroutine
+C> @author Dennis Keyser @date 1992-07-02
+
+C> This subroutine and the corresponding entries: "errset",
+C> "xdchek", "xdclos", "xdwrit", "xdread", and "xdform"  are placed
+C> here to allow calling routines which reside on both the nas and
+C> the cray to compile. These subroutines perform nas-specific
+C> functions, but have no corresponding function on the cray. There-
+C> fore this subroutine is a "dummy". ft06 print is provided to
+C> alert the user that the call to the subroutine results in an
+C> immediate return with no function.
 C>
-C> ABSTRACT: THIS SUBROUTINE AND THE CORRESPONDING ENTRIES: "ERRSET",
-C>   "XDCHEK", "XDCLOS", "XDWRIT", "XDREAD", AND "XDFORM"  ARE PLACED
-C>   HERE TO ALLOW CALLING ROUTINES WHICH RESIDE ON BOTH THE NAS AND
-C>   THE CRAY TO COMPILE.  THESE SUBROUTINES PERFORM NAS-SPECIFIC
-C>   FUNCTIONS, BUT HAVE NO CORRESPONDING FUNCTION ON THE CRAY. THERE-
-C>   FORE THIS SUBROUTINE IS A "DUMMY".  FT06 PRINT IS PROVIDED TO
-C>   ALERT THE USER THAT THE CALL TO THE SUBROUTINE RESULTS IN AN
-C>   IMMEDIATE RETURN WITH NO FUNCTION.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1992-07-02 | Dennis Keyser (W/NMC22) | Initial.
 C>
-C> PROGRAM HISTORY LOG:
-C>   92-07-02  D. A. KEYSER (W/NMC22)
-C>
-C> USAGE:    CALL XDOPEN
-C>
-C> REMARKS: NONE.
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT77 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author Dennis Keyser @date 1992-07-02
       SUBROUTINE XDOPEN
 C
       CHARACTER*6  ROUTIN(7)

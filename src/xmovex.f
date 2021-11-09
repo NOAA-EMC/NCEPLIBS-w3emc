@@ -1,11 +1,23 @@
+C> @file
+C> @brief Assembler language to move data
+C> @author Unknown @date Unknown
+
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> Unkonwn | Unknonw | Initial.
+C>
+C> @param[out] OUT
+C> @param[in] IN
+C> @param IBYTES
+C> This subroutine may not be needed, its was in
+C> assembler language to move data, it ran about three
+C> times faster than a fortan do loop, it was used to
+C> make sure the data to be unpacked was on a word boundary,
+C> this may not be needed on some brands of computers.
+C>
+C> @author Unknown @date Unknown
        SUBROUTINE XMOVEX(OUT,IN,IBYTES)
-C
-C      THIS SUBROUTINE MAY NOT BE NEEDED, ITS WAS IN
-C      ASSEMBLER LANGUAGE TO MOVE DATA, IT RAN ABOUT THREE
-C      TIMES FASTER THAN A FORTAN DO LOOP, IT WAS USED TO
-C      MAKE SURE THE DATA TO BE UNPACKED WAS ON A WORD BOUNDARY,
-C      THIS MAY NOT BE NEEDED ON SOME BRANDS OF COMPUTERS.
-C
        CHARACTER*1 OUT(*)
        CHARACTER*1 IN(*)
 C
@@ -17,4 +29,3 @@ C
 C
        RETURN
        END
-

@@ -1,331 +1,220 @@
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM:    W3MISCAN    READS 1 SSM/I SCAN LINE FROM BUFR D-SET
-C   PRGMMR: KEYSER           ORG: NP22        DATE: 2011-08-04
-C
-C ABSTRACT: READS ONE SSM/I SCAN LINE (64 RETRIEVALS) FROM THE NCEP
-C   BUFR SSM/I DUMP FILE.  EACH SCAN IS TIME CHECKED AGAINST THE
-C   USER-REQUESTED TIME WINDOW AND SATELLITE ID COMBINATIONS.  WHEN A
-C   VALID SCAN IS READ THE PROGRAM RETURNS TO THE CALLING PROGRAM.
-C   THE USER MUST PASS IN THE TYPE OF THE INPUT SSM/I DUMP FILE,
-C   EITHER DERIVED PRODUCTS (REGARDLESS OF SOURCE) OR BRIGHTNESS
-C   TEMPERATURES (7-CHANNELS).  IF THE LATTER IS CHOSEN, THE USER
-C   HAS THE FURTHER OPTION OF PROCESSING, IN ADDITION TO THE
-C   BRIGHTNESS TEMPERATURES, IN-LINE CALCULATION OF WIND SPEED
-C   PRODUCT VIA THE GOODBERLET ALGORITHM, AND/OR IN-LINE CALCULATION
-C   OF BOTH WIND SPEED AND TOTAL COLUMN PRECIPITABLE WATER (TPW)
-C   PRODUCTS USING THE NEURAL NET 3 ALGORITHM.  IF THE WIND SPEED
-C   OR TPW IS CALCULATED HERE (EITHER ALGORITHM), THIS SUBROUTINE
-C   WILL CHECK FOR BRIGHTNESS TEMPERATURES OUTSIDE OF A PRESET RANGE
-C   AND WILL RETURN A MISSING WIND SPEED/TPW IF ANY B. TEMP IS
-C   UNREASONABLE.  ALSO, FOR CALCULATED WIND SPEEDS AND TPW, THIS
-C   PROGRAM WILL CHECK TO SEE IF THE B. TEMPS ARE OVER LAND OR ICE,
-C   AND IF THEY ARE IT WILL ALSO RETURN MISSING VALUES SINCE THESE
-C   DATA ARE VALID ONLY OVER OCEAN.
-C
-C PROGRAM HISTORY LOG:
-C 1996-07-30  D. A. KEYSER -- ORIGINAL AUTHOR - SUBROUTINE IS A
-C             MODIFIED VERSION OF W3LIB W3FI86 WHICH READ ONE SCAN
-C             LINE FROM THE 30-ORBIT SHARED PROCESSING DATA SETS
-C 1997-05-22  D. A. KEYSER -- CRISIS FIX TO ACCOUNT FOR CLON NOW
-C             RETURNED FROM BUFR AS -180 TO 0 (WEST) OR 0 TO 180
-C             (EAST), USED TO RETURN AS 0 TO 360 EAST WHICH WAS NOT
-C             THE BUFR STANDARD
-C 1998-01-28  D. A. KEYSER -- REPLACED NEURAL NET 2 ALGORITHM WHICH
-C             CALCULATED ONLY WIND SPEED PRODUCT WITH NEURAL NET 3
-C             ALGORITHM WHICH CALCULATES BOTH WIND SPEED AND TOTAL
-C             PRECIPITABLE WATER PRODUCTS (AMONG OTHERS) BUT, UNLIKE
-C             NN2, DOES NOT RETURN A RAIN FLAG VALUE (IT DOES SET
-C             ALL RETRIEVALS TO MISSING THAT FAIL RAIN FLAG AND ICE
-C             CONTAMINATION TESTS)
-C 1998-03-30  D. A. KEYSER -- MODIFIED TO HANDLE NEURAL NET 3 SSM/I
-C             PRODUCTS INPUT IN A PRODUCTS BUFR DATA DUMP FILE; NOW
-C             PRINTS OUT NUMBER OF SCANS PROCESSED BY SATELLITE
-C             NUMBER IN FINAL SUMMARY
-C 1998-10-23  D. A. KEYSER -- SUBROUTINE NOW Y2K AND FORTRAN 90
-C             COMPLIANT
-C 1999-02-18  D. A. KEYSER -- MODIFIED TO COMPILE AND RUN PROPERLY
-C             ON IBM-SP
-C 2000-06-08  D. A. KEYSER -- CORRECTED MNEMONIC FOR RAIN RATE TO
-C             "REQV" (WAS "PRER" FOR SOME UNKNOWN REASON)
-C 2001-01-03  D. A. KEYSER -- CHANGED UNITS OF RETURNED RAIN RATE
-C             FROM WHOLE MM/HR TO 10**6 MM/SEC, CHANGED UNITS OF
-C             RETURNED SURFACE TEMP FROM WHOLE KELVIN TO 10**2
-C             KELVIN (TO INCR. PRECISION TO THAT ORIG. IN INPUT BUFR
-C             FILE)
-C 2004-09-12  D. A. KEYSER -- NOW DECODES SEA-SURFACE TEMPERATURE IF
-C             VALID INTO SAME LOCATION AS SURFACE TEMPERATURE, QUANTITY
-C             IS SURFACE TEMPERATURE IF SURFACE TAG IS NOT 5, OTHERWISE
-C             QUANTITY IS SEA-SURFACE TEMPERATURE (NCEP PRODUCTS DATA
-C             DUMP FILE NOW CONTAINS SST); CHECKS TO SEE IF OLD OR NEW
-C             VERSION OF MNEMONIC TABLE bufrtab.012 IS BEING USED HERE
-C             (OLD VERSION HAD "PH2O" INSTEAD OF "TPWT", "SNDP" INSTEAD
-C             OF "TOSD", "WSOS" INSTEAD OF "WSPD" AND "CH2O" INSTEAD OF
-C             THE SEQUENCE "METFET VILWC METFET"), AND DECODES USING
-C             WHICHEVER MNEMONICS ARE FOUND {NOTE: A FURTHER
-C             REQUIREMENT FOR "VILWC" IS THAT THE FIRST "METFET"
-C             (METEOROLOGICAL FEATURE) IN THE SEQUENCE MUST BE 12
-C             (=CLOUD), ELSE CLOUD WATER SET TO MISSING, REGARDLESS OF
-C             "VILWC" VALUE}
-C 2011-08-04  D. A. KEYSER -- ADD IBDATE (INPUT BUFR MESSAGE DATE) TO
-C             OUTPUT ARGUMENT LIST (NOW USED BY CALLING PROGRAM
-C             PREPOBS_PREPSSMI)
-C
-C USAGE:    CALL W3MISCAN(INDTA,INLSF,INGBI,INGBD,LSAT,LPROD,LBRIT,
-C          $ NNALG,GBALG,KDATE,LDATE,IGNRTM,IBUFTN,IBDATE,IER)
-C   INPUT ARGUMENT LIST:
-C     INDTA    - UNIT NUMBER OF NCEP BUFR SSM/I DUMP DATA SET
-C     INLSF    - UNIT NUMBER OF DIRECT ACCESS NESDIS LAND/SEA FILE
-C              - (VALID ONLY IF LBRIT AND EITHER NNALG OR GBALG TRUE)
-C     INGBI    - UNIT NUMBER OF GRIB INDEX FILE FOR GRIB FILE
-C              - CONTAINING GLOBAL 1-DEGREE SEA-SURFACE TEMP FIELD
-C              - (VALID ONLY IF LBRIT AND EITHER NNALG OR GBALG TRUE)
-C     INGBD    - UNIT NUMBER OF GRIB FILE CONTAINING GLOBAL 1-DEGREE
-C              - SEA-SURFACE TEMP FIELD (VALID ONLY IF LBRIT AND EITHER
-C              - NNALG OR GBALG TRUE)
-C     LSAT     - 10-WORD LOGICAL ARRAY (240:249) INDICATING WHICH
-C                SATELLITE IDS SHOULD BE PROCESSED (SEE REMARKS)
-C     LPROD    - LOGICAL INDICATING IF THE INPUT BUFR FILE CONTAINS
-C              - PRODUCTS (REGARDLESS OF SOURCE) - IN THIS CASE ONE OR
-C              - MORE AVAILABLE PRODUCTS CAN BE PROCESSED AND RETURNED
-C     LBRIT    - LOGICAL INDICATING IF THE INPUT BUFR FILE CONTAINS
-C              - BRIGHTNESS TEMPERATURES - IN THIS CASE B. TEMPS ARE
-C              - PROCESSED AND RETURNED ALONG WITH, IF REQUESTED, IN-
-C              - LINE GENERATED PRODUCTS FROM ONE OR BOTH ALGORITHMS
-C              - (SEE NEXT TWO SWITCHES)
-C    THE FOLLOWING TWO SWITCHES APPLY ONLY IF LBRIT IS TRUE -----
-C         NNALG    - LOGICAL INDICATING IF THE SUBROUTINE SHOULD
-C                  - CALCULATE AND RETURN SSM/I WIND SPEED AND TPW
-C                  - VIA THE NEURAL NET 3 ALGORITHM (NOTE: B O T H
-C                  - WIND SPEED AND TPW ARE RETURNED HERE)
-C         GBALG    - LOGICAL INDICATING IF THE SUBROUTINE SHOULD
-C                  - CALCULATE AND RETURN SSM/I WIND SPEED VIA THE
-C                  - GOODBERLET ALGORITHM
-C
-C     KDATE    - REQUESTED EARLIEST YEAR(YYYY), MONTH, DAY, HOUR,
-C              - MIN FOR ACCEPTING SCANS
-C     LDATE    - REQUESTED LATEST   YEAR(YYYY), MONTH, DAY, HOUR,
-C              - MIN FOR ACCEPTING SCANS
-C     IGNRTM   - SWITCH TO INDICATE WHETHER SCANS SHOULD BE TIME-
-C              - CHECKED (= 0) OR NOT TIME CHECKED (=1) {IF =1, ALL
-C              - SCANS READ IN ARE PROCESSED REGARDLESS OF THEIR TIME.
-C              - THE INPUT ARGUMENTS "KDATE" AND "LDATE" (EARLIEST AND
-C              - LATEST DATE FOR PROCESSING DATA) ARE IGNORED IN THE
-C              - TIME CHECKING FOR SCANS. (NOTE: THE EARLIEST AND
-C              - LATEST DATES SHOULD STILL BE SPECIFIED TO THE
-C              - "EXPECTED" TIME RANGE, BUT THEY WILL NOT BE USED FOR
-C              - TIME CHECKING IN THIS CASE)}
-C
-C   OUTPUT ARGUMENT LIST:
-C     IBUFTN   - OUTPUT BUFFER HOLDING DATA FOR A SCAN (1737 WORDS -
-C              - SEE REMARKS FOR FORMAT. SOME WORDS MAY BE MISSING
-C              - DEPENDING UPON LPROD, LBRIT, NNALG AND GBALG
-C     IBDATE   - INPUT BUFR MESSAGE SECTION 1 DATE (YYYYMMDDHH)
-C     IER      - ERROR RETURN CODE (SEE REMARKS)
-C
-C   INPUT FILES:
-C     UNIT AA  - (WHERE AA IS EQUAL TO INPUT ARGUMENT 'INDTA') NCEP
-C              - BUFR SSM/I DUMP DATA SET HOLDING SCANS (SEE REMARKS
-C              - REGARDING ASSIGN)
-C     UNIT BB  - (WHERE BB IS EQUAL TO INPUT ARGUMENT 'INLSF')
-C              - DIRECT ACCESS NESDIS LAND/SEA FILE (SEE REMARKS
-C              - REGARDING ASSIGN) (VALID ONLY IF LBRIT AND EITHER
-C              - NNALG OR GBALG TRUE)
-C     UNIT CC  - (WHERE CC IS EQUAL TO INPUT ARGUMENT 'INGBI') GRIB
-C              - INDEX FILE FOR GRIB FILE CONTAINING GLOBAL 1-DEGREE
-C              - SEA-SURFACE TEMPERATURE FIELD (SEE REMARKS
-C              - REGARDING CREATION AND ASSIGN) (VALID ONLY IF LBRIT
-C              - AND EITHER NNALG OR GBALG TRUE)
-C     UNIT DD  - (WHERE DD IS EQUAL TO INPUT ARGUMENT 'INGBD')
-C              - UNBLOCKED GRIB FILE CONTAINING GLOBAL 1-DEGREE SEA-
-C              - SURFACE TEMPERATURE FIELD (SEE REMARKS REGARDING
-C              - ASSIGN) (VALID ONLY IF LBRIT AND EITHER NNALG OR
-C              - GBALG TRUE)
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C   SUBPROGRAMS CALLED:
-C     UNIQUE:    - MISC01   RISC02   RISC03   MISC04   MISC05
-C                - MISC06   MISC10
-C     LIBRARY:
-C       IBM      - GETENV
-C       BALIB:   - BAOPER   BACLOSE
-C       W3LIB:   - W3FI04   W3MOVDAT W3DIFDAT GBYTE    GETGB
-C       BUFRLIB: - DATELEN  DUMPBF   OPENBF   READMG   READSB
-C                - UFBINT   UFBREP
-C
-C REMARKS:  RETURN CODE IER CAN HAVE THE FOLLOWING VALUES:
-C               IER = 0  SUCCESSFUL RETURN OF SCAN
-C               IER = 1  ALL SCANS HAVE BEEN READ, ALL DONE
-C               IER = 2  ABNORMAL RETURN - INPUT BUFR FILE IN UNIT
-C                        'INDTA' IS EITHER EMPTY (NULL) OR IS NOT BUFR
-C               IER = 3  ABNORMAL RETURN - REQUESTED EARLIEST AND
-C                        LATEST DATES ARE BACKWARDS
-C               IER = 4  ABNORMAL RETURN - ERROR OPENING RANDOM
-C                        ACCESS FILE HOLDING LAND/SEA TAGS
-C               IER = 5  ABNORMAL RETURN - THE NUMBER OF DECODED
-C                        "LEVELS" IS NOT WHAT IS EXPECTED
-C               IER = 6  ABNORMAL RETURN - SEA-SURFACE TEMPERATURE
-C                        NOT FOUND IN GRIB INDEX FILE - ERROR RETURNED
-C                        FROM GRIB DECODER GETGB IS 96
-C               IER = 7  ABNORMAL RETURN - SEA-SURFACE TEMPERATURE
-C                        GRIB MESSAGE HAS A DATE THAT IS EITHER:
-C                        1) MORE THAN 7-DAYS PRIOR TO THE EARLIEST
-C                        REQUESTED DATE OR 2) MORE THAN 7-DAYS AFTER
-C                        THE LATEST REQUESTED DATE
-C               IER = 8  ABNORMAL RETURN - BYTE-ADDRESSABLE READ ERROR
-C                        FOR GRIB FILE CONTAINING SEA-SURFACE
-C                        TEMPERATURE FIELD - ERROR RETURNED FROM GRIB
-C                        DECODER GETGB IS 97-99
-C               IER = 9  ABNORMAL RETURN - ERROR RETURNED FROM GRIB
-C                        DECODER - GETGB - FOR SEA-SURFACE
-C                        TEMPERATURE FIELD - > 0 BUT NOT 96-99
-CC
-C           INPUT ARGUMENT LSAT IS SET-UP AS FOLLOWS:
-C
-C         LSAT(X) = TRUE -- PROCESS SCANS FROM SATELLITE ID X (WHERE X
-C                         IS CODE FIGURE FROM BUFR CODE TABLE 0-01-007)
-C         LSAT(X) = FALSE - DO NOT PROCESS SCANS FROM SATELLITE ID X
-C
-C                   X = 240 IS F-7  DMSP SATELLITE (THIS SATELLITE IS
-C                           NO LONGER AVAILABLE)
-C                   X = 241 IS F-8  DMSP SATELLITE (THIS SATELLITE IS
-C                           NO LONGER AVAILABLE)
-C                   X = 242 IS F-9  DMSP SATELLITE (THIS SATELLITE IS
-C                           NO LONGER AVAILABLE)
-C                   X = 243 IS F-10 DMSP SATELLITE (THIS SATELLITE IS
-C                           NO LONGER AVAILABLE)
-C                   X = 244 IS F-11 DMSP SATELLITE (THIS IS AVAILABLE
-C                           AS OF 8/96 BUT IS NOT CONSIDERED TO BE AN
-C                           OPERATIONAL DMSP SSM/I SATELLITE)
-C                   X = 245 IS F-12 DMSP SATELLITE (THIS SATELLITE IS
-C                           NO LONGER AVAILABLE)
-C                   X = 246 IS F-13 DMSP SATELLITE (THIS IS AVAILABLE
-C                           AND IS CONSIDERED TO BE AN OPERATIONAL
-C                           ODD DMSP SSM/I SATELLITE AS OF 8/1996)
-C                   X = 247 IS F-14 DMSP SATELLITE (THIS IS AVAILABLE
-C                           AS OF 5/97 BUT IS NOT CONSIDERED TO BE AN
-C                           OPERATIONAL DMSP SSM/I SATELLITE)
-C                   X = 248 IS F-15 DMSP SATELLITE (THIS IS AVAILABLE
-C                           AS OF 2/2000 AND IS CONSIDERED TO BE AN
-C                           OPERATIONAL ODD DMSP SSM/I SATELLITE AS OF
-C                           2/2000)
-C                   X = 249 IS RESERVED FOR A FUTURE DMSP SATELLITE
-C
-C        NOTE: HERE "EVEN" MEANS VALUE IN IBUFTN(1) IS AN ODD NUMBER
-C              WHILE "ODD" MEANS VALUE IN IBUFTN(1) IS AN EVEN NUMBER
-CC
-C
-C   CONTENTS OF ARRAY 'IBUFTN' HOLDING ONE COMPLETE SCAN (64 INDIVIDUAL
-C    RETRIEVLAS (1737 WORDS)
-C
-C    =====> ALWAYS RETURNED:
-C
-C          WORD   CONTENTS
-C          ----   --------
-C            1    SATELLITE ID (244 IS F-11; 246 IS F-13; 247 IS F-14;
-C                  248 IS F-15)
-C            2    4-DIGIT YEAR FOR SCAN
-C            3    2-DIGIT MONTH OF YEAR FOR SCAN
-C            4    2-DIGIT DAY OF MONTH FOR SCAN
-C            5    2-DIGIT HOUR OF DAY FOR SCAN
-C            6    2-DIGIT MINUTE OF HOUR FOR SCAN
-C            7    2-DIGIT SECOND OF MINUTE FOR SCAN
-C            8    SCAN NUMBER IN ORBIT
-C            9    ORBIT NUMBER FOR SCAN
-C
-C           10    RETRIEVAL #1 LATITUDE  (*100 DEGREES: + N, - S)
-C           11    RETRIEVAL #1 LONGITUDE (*100 DEGREES EAST)
-C           12    RETRIEVAL #1 POSITION NUMBER
-C           13    RETRIEVAL #1 SURFACE TAG (CODE FIGURE)
-C
-C    =====> FOR LPROD = TRUE {INPUT PRODUCTS FILE: NOTE ALL PRODUCTS
-C            BELOW EXCEPT SEA-SURFACE TEMPERATURE ARE AVAILABLE IN THE
-C            FNOC "OPERATIONAL" PRODUCTS DATA DUMP; MOST NCEP PRODUCTS
-C            DATA DUMPS CONTAIN ONLY WIND SPEED, TOTAL PRECIPITABLE
-C            WATER, CLOUD WATER AND SEA-SURFACE TEMPERATURE (ALL OVER
-C            OCEAN ONLY)}:
-C
-C           14    RETRIEVAL #1 CLOUD WATER (*100 KILOGRAM/METER**2)
-C           15    RETRIEVAL #1 RAIN RATE (*1000000 MILLIMETERS/SECOND)
-C           16    RETRIEVAL #1 WIND SPEED (*10 METERS/SECOND)
-C           17    RETRIEVAL #1 SOIL MOISTURE (MILLIMETERS)
-C           18    RETRIEVAL #1 SEA-ICE CONCENTRATION (PER CENT)
-C           19    RETRIEVAL #1 SEA-ICE AGE (CODE FIGURE)
-C           20    RETRIEVAL #1 ICE EDGE (CODE FIGURE)
-C           21    RETRIEVAL #1 TOTAL PRECIP. WATER (*10 MILLIMETERS)
-C           22    RETRIEVAL #1 SURFACE TEMP (*100 K) IF NOT OVER OCEAN
-C                                       -- OR --
-C           22    RETRIEVAL #1 SEA-SURFACE TEMP (*100 K) IF OVER OCEAN
-C           23    RETRIEVAL #1 SNOW DEPTH (MILLIMETERS)
-C           24    RETRIEVAL #1 RAIN FLAG (CODE FIGURE)
-C           25    RETRIEVAL #1 CALCULATED SURFACE TYPE (CODE FIGURE)
-C
-C    =====> FOR LBRIT = TRUE (INPUT BRIGHTNESS TEMPERATURE FILE):
-C
-C           26    RETRIEVAL #1 19 GHZ V BRIGHTNESS TEMP (*100 DEG. K)
-C           27    RETRIEVAL #1 19 GHZ H BRIGHTNESS TEMP (*100 DEG. K)
-C           28    RETRIEVAL #1 22 GHZ V BRIGHTNESS TEMP (*100 DEG. K)
-C           29    RETRIEVAL #1 37 GHZ V BRIGHTNESS TEMP (*100 DEG. K)
-C           30    RETRIEVAL #1 37 GHZ H BRIGHTNESS TEMP (*100 DEG. K)
-C           31    RETRIEVAL #1 85 GHZ V BRIGHTNESS TEMP (*100 DEG. K)
-C           32    RETRIEVAL #1 85 GHZ H BRIGHTNESS TEMP (*100 DEG. K)
-C
-C    =====> FOR LBRIT = TRUE AND NNALG = TRUE (INPUT BRIGHTNESS
-C            TEMPERATURE FILE):
-C
-C           33    RETRIEVAL #1 NEURAL NET 3 ALGORITHM WIND SPEED
-C                  (GENERATED IN-LINE) (*10 METERS/SECOND)
-C           34    RETRIEVAL #1 NEURAL NET 3 ALGORITHM TOTAL PRECIP.
-C                  WATER (GENERATED IN-LINE) (*10 MILLIMETERS)
-C
-C    =====> FOR LBRIT = TRUE AND GBALG = TRUE (INPUT BRIGHTNESS
-C            TEMPERATURE FILE):
-C
-C           35    RETRIEVAL #1 GOODBERLET ALGORITHM WIND SPEED
-C                  (GENERATED IN-LINE) (*10 METERS/SECOND)
-C           36    RETRIEVAL #1 GOODBERLET ALGORITHM RAIN FLAG
-C                  (CODE FIGURE)
-C
-C      37-1737    REPEAT 10-36 FOR 63 MORE RETRIEVALS
-C
-C             (NOTE:  ALL MISSING DATA OR DATA NOT SELECTED BY
-C                     CALLING PROGRAM ARE SET TO 99999)
-C
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP
-C
-C$$$
+C> @file
+C> @brief Reads 1 ssm/i scan line from bufr d-set
+C> @author Dennis Keyser @date 1996-07-30
+
+C> Reads one ssm/i scan line (64 retrievals) from the NCEP
+C> bufr ssm/i dump file. Each scan is time checked against the
+C> user-requested time window and satellite id combinations. When a
+C> valid scan is read the program returns to the calling program.
+C> the user must pass in the type of the input ssm/i dump file,
+C> either derived products (regardless of source) or brightness
+C> temperatures (7-channels). If the latter is chosen, the user
+C> has the further option of processing, in addition to the
+C> brightness temperatures, in-line calculation of wind speed
+C> product via the goodberlet algorithm, and/or in-line calculation
+C> of both wind speed and total column precipitable water (tpw)
+C> products using the neural net 3 algorithm. If the wind speed
+C> or tpw is calculated here (either algorithm), this subroutine
+C> will check for brightness temperatures outside of a preset range
+C> and will return a missing wind speed/tpw if any b. temp is
+C> unreasonable. Also, for calculated wind speeds and tpw, this
+C> program will check to see if the b. temps are over land or ice,
+C> and if they are it will also return missing values since these
+C> data are valid only over ocean.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1996-07-30 | Dennis Keyser | Original author - subroutine is a modified version of w3lib w3fi86 which read one scan line from the 30-orbit shared processing data sets
+C> 1997-05-22 | Dennis Keyser | Crisis fix to account for clon now returned from bufr as -180 to 0 (west) or 0 to 180 (east), used to return as 0 to 360 east which was not the bufr standard
+C> 1998-01-28 | Dennis Keyser | Replaced neural net 2 algorithm which calculated only wind speed product with neural net 3 algorithm which calculates both wind speed and total precipitable water products (among others) but, unlike nn2, does not return a rain flag value (it does set all retrievals to missing that fail rain flag and ice contamination tests)
+C> 1998-03-30 | Dennis Keyser | Modified to handle neural net 3 ssm/i products input in a products bufr data dump file; now prints out number of scans processed by satellite number in final summary
+C> 1998-10-23 | Dennis Keyser | Subroutine now y2k and fortran 90 compliant
+C> 1999-02-18 | Dennis Keyser | Modified to compile and run properly on ibm-sp
+C> 2000-06-08 | Dennis Keyser | Corrected mnemonic for rain rate to "reqv" (was "prer" for some unknown reason)
+C> 2001-01-03 | Dennis Keyser | Changed units of returned rain rate from whole mm/hr to 10**6 mm/sec, changed units of returned surface temp from whole kelvin to 10**2 kelvin (to incr. precision to that orig. in input bufr file)
+C> 2004-09-12 | Dennis Keyser | Now decodes sea-surface temperature if valid into same location as surface temperature, quantity is surface temperature if surface tag is not 5, otherwise quantity is sea-surface temperature (ncep products data dump file now contains sst); checks to see if old or new version of mnemonic table bufrtab.012 is being used here (old version had "ph2o" instead of "tpwt", "sndp" instead of "tosd", "wsos" instead of "wspd" and "ch2o" instead of the sequence "metfet vilwc metfet"), and decodes using whichever mnemonics are found {note: a further requirement for "vilwc" is that the first "metfet" (meteorological feature) in the sequence must be 12 (=cloud), else cloud water set to missing, regardless of "vilwc" value}
+C> 2011-08-04 | Dennis Keyser | Add ibdate (input bufr message date) to output argument list (now used by calling program prepobs_prepssmi)
+C>
+C> @param[in] INDTA Unit number of ncep bufr ssm/i dump data set
+C> @param[in] INLSF Unit number of direct access nesdis land/sea file
+C> (valid only if lbrit and either nnalg or gbalg true).
+C> @param[in] INGBI Unit number of grib index file for grib file
+C> Containing global 1-degree sea-surface temp field.
+C> (valid only if lbrit and either nnalg or gbalg true).
+C> @param[in] INGBD Unit number of grib file containing global 1-degree
+C> Sea-surface temp field (valid only if lbrit and either.
+C> Nnalg or gbalg true).
+C> @param[in] LSAT 10-word logical array (240:249) indicating which
+C> Satellite ids should be processed (see remarks)
+C> @param[in] LPROD Logical indicating if the input bufr file contains
+C> Products (regardless of source) - in this case one or.
+C> More available products can be processed and returned.
+C> @param[in] LBRIT Logical indicating if the input bufr file contains
+C> Brightness temperatures - in this case b. temps are.
+C> Processed and returned along with, if requested, in-.
+C> Line generated products from one or both algorithms.
+C> (see next two switches).
+C> - The following two switches apply only if lbrit is true -----
+C> @param[in] NNALG Indicating if the subroutine should
+C> calculate and return ssm/i wind speed and tpw
+C> via the neural net 3 algorithm (note: b o t h
+C> wind speed and tpw are returned here)
+C> @param[in] GBALG Indicating if the subroutine should
+C> calculate and return ssm/i wind speed via the
+C> goodberlet algorithm
+C> @param[in] KDATE Requested earliest year(yyyy), month, day, hour,
+C> Min for accepting scans.
+C> @param[in] LDATE Requested latest   year(yyyy), month, day, hour,
+C> Min for accepting scans.
+C> @param[in] IGNRTM Switch to indicate whether scans should be time-
+C> Checked (= 0) or not time checked (=1) {if =1, all.
+C> Scans read in are processed regardless of their time..
+C> The input arguments "kdate" and "ldate" (earliest and.
+C> Latest date for processing data) are ignored in the.
+C> Time checking for scans. (note: the earliest and.
+C> Latest dates should still be specified to the.
+C> "expected" time range, but they will not be used for.
+C> Time checking in this case)}.
+C> @param[out] IBUFTN Output buffer holding data for a scan (1737 words -
+C> See remarks for format. some words may be missing
+C> Depending upon lprod, lbrit, nnalg and gbalg
+C> @param[out] IBDATE Input bufr message section 1 date (yyyymmddhh)
+C> @param[out] IER Error return code (see remarks)
+C>
+C> @remark
+C> Return code ier can have the following values:
+C> - IER = 0  Successful return of scan
+C> - IER = 1  All scans have been read, all done
+C> - IER = 2  Abnormal return - input bufr file in unit
+C> 'indta' is either empty (null) or is not bufr
+C> - IER = 3  Abnormal return - requested earliest and
+C> latest dates are backwards
+C> - IER = 4  Abnormal return - error opening random
+C> access file holding land/sea tags
+C> - IER = 5  Abnormal return - the number of decoded
+C> "levels" is not what is expected
+C> - IER = 6  Abnormal return - sea-surface temperature
+C> not found in grib index file - error returned
+C> from grib decoder getgb is 96
+C> - IER = 7  Abnormal return - sea-surface temperature
+C> grib message has a date that is either:
+C> 1) more than 7-days prior to the earliest
+C> requested date or 2) more than 7-days after
+C> the latest requested date
+C> - IER = 8  Abnormal return - byte-addressable read error
+C> for grib file containing sea-surface
+C> temperature field - error returned from grib
+C> decoder getgb is 97-99
+C> - IER = 9  Abnormal return - error returned from grib
+C> decoder - getgb - for sea-surface
+C> temperature field - > 0 but not 96-99
+C>
+C> Input argument lsat is set-up as follows:
+C> - LSAT(X) = TRUE -- Process scans from satellite id x (where x is code figure from bufr code table 0-01-007)
+C> - LSAT(X) = FALSE - Do not process scans from satellite id x
+C>  - X = 240 is f-7  dmsp satellite (this satellite is no longer available)
+C>  - X = 241 is f-8  dmsp satellite (this satellite is no longer available)
+C>  - X = 242 is f-9  dmsp satellite (this satellite is no longer available)
+C>  - X = 243 is f-10 dmsp satellite (this satellite is no longer available)
+C>  - X = 244 is f-11 dmsp satellite (this is available as of 8/96 but is not considered to be an operational dmsp ssm/i satellite)
+C>  - X = 245 is f-12 dmsp satellite (this satellite is no longer available)
+C>  - X = 246 is f-13 dmsp satellite (this is available and is considered to be an operational odd dmsp ssm/i satellite as of 8/1996)
+C>  - X = 247 is f-14 dmsp satellite (this is available as of 5/97 but is not considered to be an operational dmsp ssm/i satellite)
+C>  - X = 248 is f-15 dmsp satellite (this is available as of 2/2000 and is considered to be an operational odd dmsp ssm/i satellite as of 2/2000)
+C>  - X = 249 is reserved for a future dmsp satellite
+C>
+C> @note Here "even" means value in ibuftn(1) is an odd number while "odd" means value in ibuftn(1) is an even number
+C> Contents of array 'ibuftn' holding one complete scan (64 individual retrievlas (1737 words)
+C>
+C> #### Always returned:
+C> WORD |  CONTENTS
+C> ---- |  --------
+C>   1  |  Satellite id (244 is f-11; 246 is f-13; 247 is f-14; 248 is f-15)
+C>   2  |  4-digit year for scan
+C>   3  |  2-digit month of year for scan
+C>   4  |  2-digit day of month for scan
+C>   5  |  2-digit hour of day for scan
+C>   6  |  2-digit minute of hour for scan
+C>   7  |  2-digit second of minute for scan
+C>   8  |  Scan number in orbit
+C>   9  |  Orbit number for scan
+C>  10  |  Retrieval #1 latitude  (*100 degrees: + n, - s)
+C>  11  |  Retrieval #1 longitude (*100 degrees east)
+C>  12  |  Retrieval #1 position number
+C>  13  |  Retrieval #1 surface tag (code figure)
+C>
+C> #### For LPROD = TRUE {Input products file: note all products below except sea-surface temperature are available in the fnoc "operational" products data dump; most ncep products data dumps contain only wind speed, total precipitable water, cloud water and sea-surface temperature (all over ocean only)}:
+C> WORD |  CONTENTS
+C> ---- |  --------
+C> 14  |  Retrieval #1 cloud water (*100 kilogram/meter**2)
+C> 15  |  Retrieval #1 rain rate (*1000000 millimeters/second)
+C> 16  |  Retrieval #1 wind speed (*10 meters/second)
+C> 17  |  Retrieval #1 soil moisture (millimeters)
+C> 18  |  Retrieval #1 sea-ice concentration (per cent)
+C> 19  |  Retrieval #1 sea-ice age (code figure)
+C> 20  |  Retrieval #1 ice edge (code figure)
+C> 21  |  Retrieval #1 total precip. water (*10 millimeters)
+C> 22  |  Retrieval #1 surface temp (*100 k) if not over ocean -OR-
+C> 22  |  Retrieval #1 sea-surface temp (*100 k) if over ocean
+C> 23  |  Retrieval #1 snow depth (millimeters)
+C> 24  |  Retrieval #1 rain flag (code figure)
+C> 25  |  Retrieval #1 calculated surface type (code figure)
+C>
+C> #### For LBRIT = TRUE (Input brightness temperature file):
+C> WORD |  CONTENTS
+C> ---- |  --------
+C> 26  |  Retrieval #1 19 ghz v brightness temp (*100 deg. k)
+C> 27  |  Retrieval #1 19 ghz h brightness temp (*100 deg. k)
+C> 28  |  Retrieval #1 22 ghz v brightness temp (*100 deg. k)
+C> 29  |  Retrieval #1 37 ghz v brightness temp (*100 deg. k)
+C> 30  |  Retrieval #1 37 ghz h brightness temp (*100 deg. k)
+C> 31  |  Retrieval #1 85 ghz v brightness temp (*100 deg. k)
+C> 32  |  Retrieval #1 85 ghz h brightness temp (*100 deg. k)
+C>
+C> #### For LBRIT = TRUE and NNALG = TRUE (Input brightness temperature file):
+C> WORD |  CONTENTS
+C> ---- |  --------
+C> 33  |  Retrieval #1 Neural net 3 algorithm wind speed (generated in-line) (*10 meters/second)
+C> 34  |  Retrieval #1 Neural net 3 algorithm total precip. water (generated in-line) (*10 millimeters)
+C>
+C> #### For LBRIT = TRUE and GBALG = TRUE (Input brightness temperature file):
+C> WORD |  CONTENTS
+C> ---- |  --------
+C> 35  |  Retrieval #1 goodberlet algorithm wind speed (generated in-line) (*10 meters/second)
+C> 36  |  Retrieval #1 goodberlet algorithm rain flag (code figure)
+C> 37-1737 | Repeat 10-36 for 63 more retrievals
+C>
+C> @note All missing data or data not selected by calling program are set to 99999
+C>
+C> @author Dennis Keyser @date 1996-07-30
 
       SUBROUTINE W3MISCAN(INDTA,INLSF,INGBI,INGBD,LSAT,LPROD,LBRIT,
      $ NNALG,GBALG,KDATE,LDATE,IGNRTM,IBUFTN,IBDATE,IER)
 
       LOGICAL  LPROD,LBRIT,NNALG,GBALG,LSAT(240:249)
- 
+
       CHARACTER*1  CDUMMY
       CHARACTER*2  ATXT(2)
       CHARACTER*8  SUBSET
       CHARACTER*20 RHDER,PROD2,BRITE
       CHARACTER*46 SHDER,PROD1
- 
+
       REAL  SHDR(9),RHDR(4,64),PROD(13,64),BRIT(2,448),RINC(5),
      $ METFET(64)
 
       REAL(8)  SHDR_8(9),RHDR_8(4,64),PROD_8(13,64),BRIT_8(2,448),
      $ UFBINT_8(64)
- 
+
       INTEGER  IBUFTN(1737),KDATA(7),KDATE(5),LDATE(5),LBTER(7),
      $ KSPSAT(239:249),KNTSAT(239:249),IFLAG(64),KDAT(8),LDAT(8),
      $ MDAT(8),ICDATE(5),IDDATE(5)
- 
+
       COMMON/MISCCC/SSTDAT(360,180)
       COMMON/MISCEE/LFLAG,LICEC
- 
+
       SAVE
- 
+
       DATA  SHDER /'SAID  YEAR MNTH DAYS HOUR MINU SECO SCNN ORBN '/
       DATA  RHDER /'CLAT CLON POSN SFTG '/
       DATA  PROD1 /'VILWC REQV WSPD SMOI ICON ICAG ICED TPWT TMSK '/
@@ -335,7 +224,7 @@ C$$$
       DATA  IMSG  /99999/,KNTSCN/0/,KNTTIM/0/,LAERR/0/,
      $ LOERR/0/,LBTER/7*0/,ITIMES/0/,NLR/0/,NIR/0/,DMAX/-99999./,
      $ DMIN/99999./,KSPSAT/11*0/,KNTSAT/11*0/,ILFLG/0/,BMISS/10.0E10/
- 
+
       IF(ITIMES.EQ.0)  THEN
 
 C***********************************************************************
@@ -510,7 +399,7 @@ C READ THE FIRST BUFR MESSAGE IN THE BUFR FILE
          IF(IRET.NE.0)  GO TO 998
 
 C***********************************************************************
- 
+
       END IF
 
    30 CONTINUE
@@ -542,7 +431,7 @@ C  AND RETURN TO CALLING PROGRAM
      $       'PROCESSED AND RETURNED',11X,I7)
             DO JJ = 239,249
                IF(KNTSAT(JJ).GT.0)  THEN
-                  PRINT  294, JJ,KNTSAT(JJ) 
+                  PRINT  294, JJ,KNTSAT(JJ)
   294             FORMAT(35X,'......NO. OF SCANS PROCESSED AND ',
      $             'RETURNED FROM SAT',I4,':',I7)
                END IF
@@ -551,7 +440,7 @@ C  AND RETURN TO CALLING PROGRAM
                IF(KSPSAT(JJ).GT.0)  THEN
                   II = JJ
                   IF(JJ.EQ.239)  II = 1
-                  PRINT  224, II,KSPSAT(JJ) 
+                  PRINT  224, II,KSPSAT(JJ)
   224             FORMAT(35X,'NO. OF SCANS SKIPPED DUE TO BEING FROM ',
      $             'NON-REQ SAT',I4,':',I7)
                END IF
@@ -760,7 +649,7 @@ C***********************************************************************
 C-----------------------------------------------------------------------
 C             LOOP THROUGH THE 64 RETRIEVALS IN A SCAN
 C-----------------------------------------------------------------------
-            IF(IFLAG(IRT).NE.0)  GO TO 111  
+            IF(IFLAG(IRT).NE.0)  GO TO 111
 
 C STORE THE CLOUD WATER (*100 KG/M**2) IF AVAILABLE
 
@@ -857,7 +746,7 @@ C***********************************************************************
 C-----------------------------------------------------------------------
 C             LOOP THROUGH THE 64 RETRIEVALS IN A SCAN
 C-----------------------------------------------------------------------
-            IF(IFLAG(IRT).NE.0)  GO TO 112  
+            IF(IFLAG(IRT).NE.0)  GO TO 112
 
 C STORE THE 7 BRIGHTNESS TEMPS (*100 DEGREES KELVIN)
 C  -- CHANNELS ARE IN THIS ORDER FOR A PARTICULAR RETRIEVAL:
@@ -1073,75 +962,61 @@ C          IER = 5 AND RETURN
 
 C.......................................................................
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    MISC01      PREPARES FOR IN-LINE CALUCLATION OF PRODS
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 1998-01-28
-C
-C ABSTRACT: BASED ON INPUT 7-CHANNEL SSM/I BRIGHTNESS TEMPERATURES,
-C   DETERMINES THE RAIN FLAG CATEGORY FOR WIND SPEED PRODUCT FOR THE
-C   GOODBERLET ALGORITHM.  THEN CALLS THE APPROPRIATE FUNCTION TO
-C   CALCULATE EITHER THE WIND SPEED PRODUCT FOR THE GOODBERLET
-C   ALGORITHM (IF REQUESTED) OR THE WIND SPEED AND TPW PRODUCTS FOR
-C   THE NEURAL NET 3 ALGORITHM (IF REQUESTED).
-C
-C PROGRAM HISTORY LOG:
-C ????-??-??  W. GEMMILL (W/NMC21) -- ORIGINAL AUTHOR
-C 1995-01-04  D. A. KEYSER -- INCORPORATED INTO W3MISCAN AND
-C       STREAMLINED CODE
-C 1996-05-07  D. A. KEYSER (NP22) -- IN-LINE NEURAL NETWORK 1 ALGORITM
-C       REPLACED BY NEURAL NETWORK 2 ALGORITHM
-C 1996-07-30  D. A. KEYSER (NP22) -- CAN NOW PROCESS WIND SPEED FROM
-C       BOTH ALGORITHMS IF DESIRED
-C 1998-01-28  D. A. KEYSER (NP22) -- REPLACED NEURAL NET 2 ALGORITHM
-C       WHICH CALCULATED ONLY WIND SPEED PRODUCT WITH NEURAL NET 3
-C       ALGORITHM WHICH CALCULATES BOTH WIND SPEED AND TOTAL
-C       PRECIPITABLE WATER PRODUCTS (AMONG OTHERS) BUT, UNLIKE NN2,
-C       DOES NOT RETURN A RAIN FLAG VALUE (IT DOES SET ALL RETRIEVALS
-C       TO MISSING THAT FAIL RAIN FLAG AND ICE CONTAMINATION TESTS)
-C
-C USAGE:    CALL MISC01(NNALG,GBALG,KDATA,SWNN,TPWNN,SWGB,NRFGB)
-C   INPUT ARGUMENT LIST:
-C     NNALG    - PROCESS WIND SPEED AND TPW VIA NEURAL NET 3 ALGORITHM
-C              - IF TRUE
-C     GBALG    - PROCESS WIND SPEED VIA GOODBERLET ALGORITHM IF TRUE
-C     KDATA    - 7-WORD ARRAY CONTAINING 7 CHANNELS OF BRIGHTNESS
-C              - TEMPERATURE (KELVIN X 100)
-C
-C   OUTPUT ARGUMENT LIST:
-C     SWNN     - CALCULATED WIND SPEED BASED ON NEURAL NET 3 ALGORITHM
-C              - (METERS/SECOND)
-C     TPWNN    - CALCULATED TOTAL COLUMN PRECIPITABLE WATER BASED ON
-C              - NEURAL NET 3 ALGORITHM (MILLIMETERS)
-C     SWGB     - CALCULATED WIND SPEED BASED ON GOODBERLET ALGORITH
-C              - (METERS/SECOND)
-C     NRFGB    - RAIN FLAG CATEGORY FOR CALCULATED WIND SPEED FROM
-C              - GOODBERLET ALGORITHM
-C
-C REMARKS: IF AN ALGORITHM IS NOT CHOSEN, THE OUTPUT PRODUCTS ARE SET
-C   TO VALUES OF 99999. FOR THAT ALGORITHM AND, FOR THE GOODBERLET
-C   ALGORITHM ONLY, THE RAIN FLAG IS SET TO 99999.  CALLED BY
-C   SUBROUTINE W3MISCAN.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP
-C
-C$$$
+C> @brief Prepares for in-line caluclation of prods.
+C> @author Dennis Keyser @date 1995-01-04
+
+C> Based on input 7-channel ssm/i brightness temperatures,
+C> determines the rain flag category for wind speed product for the
+C> goodberlet algorithm. Then calls the appropriate function to
+C> calculate either the wind speed product for the goodberlet
+C> algorithm (if requested) or the wind speed and tpw products for
+C> the neural net 3 algorithm (if requested).
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> ????-??-?? | W. Gemmill | (w/nmc21) -- original author
+C> 1995-01-04 | Dennis Keyser | -- incorporated into w3miscan and
+C> streamlined code
+C> 1996-05-07 | Dennis Keyser | (np22) -- in-line neural network 1 algoritm
+C> replaced by neural network 2 algorithm
+C> 1996-07-30 | Dennis Keyser | (np22) -- can now process wind speed from
+C> both algorithms if desired
+C> 1998-01-28 | Dennis Keyser | (np22) -- replaced neural net 2 algorithm
+C> which calculated only wind speed product with neural net 3
+C> algorithm which calculates both wind speed and total
+C> precipitable water products (among others) but, unlike nn2,
+C> does not return a rain flag value (it does set all retrievals
+C> to missing that fail rain flag and ice contamination tests)
+C>
+C> @param[in] NNALG Process wind speed and tpw via neural net 3 algorithm if true
+C> @param[in] GBALG Process wind speed via goodberlet algorithm if true
+C> @param[in] KDATA 7-word array containing 7 channels of brightness temperature (kelvin x 100)
+C> @param[out] SWNN  alculated wind speed based on neural net 3 algorithm (meters/second)
+C> @param[out] TPWNN Calculated total column precipitable water based on neural net 3 algorithm (millimeters)
+C> @param[out] SWGB Calculated wind speed based on goodberlet algorith (meters/second)
+C> @param[out] NRFGB Rain flag category for calculated wind speed from goodberlet algorithm
+C>
+C> @remark If an algorithm is not chosen, the output products are set
+C> to values of 99999. for that algorithm and, for the goodberlet
+C> algorithm only, the rain flag is set to 99999. Called by
+C> subroutine w3miscan().
+C>
+C> @author Dennis Keyser @date 1995-01-04
       SUBROUTINE MISC01(NNALG,GBALG,KDATA,SWNN,TPWNN,SWGB,NRFGB)
       LOGICAL  NNALG,GBALG
       REAL  BTA(4),BTAA(7)
       INTEGER  KDATA(7)
- 
+
       COMMON/MISCEE/LFLAG,LICEC
 
       SAVE
- 
+
       SWNN  = 99999.
       TPWNN = 99999.
       SWGB  = 99999.
       NRFGB = 99999
- 
+
       TB19V = REAL(KDATA(1))/100.
       TB19H = REAL(KDATA(2))/100.
       TB22V = REAL(KDATA(3))/100.
@@ -1194,96 +1069,82 @@ C COMPUTE WIND SPEED FROM GOODBERLET ALGORITHM
 
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    RISC02      CALC. SSM/I PRODS FROM NEURAL NET 3 ALG.
-C   PRGMMR: V. KRASNOPOLSKY  ORG: NP20       DATE: 1997-02-02
-C
-C ABSTRACT: THIS RETRIEVAL ALGORITHM IS A NEURAL NETWORK IMPLEMENTATION
-C   OF THE SSM/I TRANSFER FUNCTION.  IT RETRIEVES THE WIND SPEED (W)
-C   AT THE HEIGHT 20 METERS, COLUMNAR WATER VAPOR (V), COLUMNAR LIQUID
-C   WATER (L) AND SST. THE NN WAS TRAINED USING BACK-PROPAGATION
-C   ALGORITHM.  TRANSFER FUNCTION IS DESCRIBED AND COMPARED WITH
-C   CAL/VAL AND OTHER ALGORITHMS IN OMB TECHNICAL NOTE NO. 137.  SEE
-C   REMARKS FOR DETAILED INFO ON THIS ALGORITHM.  THIS IS AN IMPROVED
-C   VERSION OF THE EARLIER NEURAL NETWORK 2 ALGORITHM.
-C
-C PROGRAM HISTORY LOG:
-C 1997-02-02  V. KRASNOPOLSKY -- ORIGINAL AUTHOR
-C
-C USAGE:    XX = RISC02(XT,V,L,SST,JERR)
-C   INPUT ARGUMENT LIST:
-C     XT       - 7-WORD ARRAY CONTAINING BRIGHTNESS TEMPERATURE IN THE
-C              - ORDER: T19V (WORD 1), T19H (WORD 2), T22V (WORD 3),
-C              - T37V (WORD 4), T37H (WORD 5), T85V (WORD 6), T85H
-C              - (WORD 7) (ALL IN KELVIN)
-C
-C   OUTPUT ARGUMENT LIST:
-C     V        - COLUMNAR WATER VAPOR (TOTAL PRECIP. WATER) (MM)
-C     L        - COLUMNAR LIQUID WATER (MM)
-C     SST      - SEA SURFACE TEMPERATURE (DEG. C)
-C     XX       - WIND SPEED (METERS/SECOND) AT THE HEIGHT OF 20 METERS
-C     JERR     - ERROR RETURN CODE:
-C                    = 0 -- GOOD RETRIEVALS
-C                    = 1 -- RETRIEVALS COULD NOT BE MADE DUE TO ONE OR
-C                           MORE BRIGHTNESS TEMPERATURES OUT OF RANGE
-C                           (I.E, FAILED THE RAIN FLAG TEST)
-C                    = 2 -- RETRIEVALS COULD NOT BE MADE DUE TO ICE
-C                           CONTAMINATION
-C                   {FOR EITHER 1 OR 2 ABOVE, ALL RETRIEVALS SET TO
-C                    99999. (MISSING)}
-C
-C REMARKS: FUNCTION, CALLED BY SUBROUTINE MISC01.
-C
-C      Description of training and test data set:
-C      ------------------------------------------
-C      The training set consists of 3460 matchups which were received
-C      from two sources:
-C         1.  3187 F11/SSMI/buoy matchups were filtered out from a
-C             preliminary version of the new NRL database which was
-C             kindly provided by G. Poe (NRL). Maximum available wind
-C             speed is 24 m/s.
-C         2.  273 F11/SSMI/OWS matchups were filtered out from two
-C             datasets collected by high latitude OWS LIMA and MIKE.
-C             These data sets were kindly provided by D. Kilham
-C             (University of Bristol).  Maximum available wind speed
-C             is 26.4 m/s.  
-C
-C      Satellite data are collocated with both buoy and OWS data in
-C      space within 15 km and in time within 15 min.
-C
-C      The test data set has the same structure, the same number of
-C      matchups and maximum buoy wind speed.
-C
-C      Description of retrieval flags:
-C      -------------------------------
-C      Retrieval flags by Stogryn et al. are used.  The algorithm
-C      produces retrievals under CLEAR + CLOUDY conditions, that is
-C      if:
-C
-C                T37V - T37H > 50.   => CLEAR condition
-C                or
-C                T37V - T37H =< 50.|
-C                T19H =< 185.  and |
-C                T37H =< 210.  and | => CLOUDY conditions
-C                T19V  < T37V      |
-C
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP
-C
-C$$$
+C> @brief Calc. ssm/i prods from neural net 3 alg.
+C> @author V. Krasnopolsky @date 1997-02-02
+
+C> This retrieval algorithm is a neural network implementation
+C> of the ssm/i transfer function. It retrieves the wind speed (w)
+C> at the height 20 meters, columnar water vapor (v), columnar liquid
+C> water (l) and sst. The nn was trained using back-propagation
+C> algorithm. Transfer function is described and compared with
+C> cal/val and other algorithms in omb technical note no. 137. See
+C> remarks for detailed info on this algorithm. This is an improved
+C> version of the earlier neural network 2 algorithm.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1997-02-02 | V. Krasnopolsky | Initial.
+C>
+C> @param[in] XT 7-word array containing brightness temperature in the order:
+C> t19v (word 1), t19h (word 2), t22v (word 3), t37v (word 4), t37h (word 5),
+C> t85v (word 6), t85h (word 7) (all in kelvin)
+C> @param[in] V Columnar water vapor (total precip. water) (mm)
+C> @param[in] L Columnar liquid water (mm)
+C> @param[in] SST Sea surface temperature (deg. c)
+C> @param[in] JERR Error return code:
+C> - = 0 -- Good retrievals
+C> - = 1 -- Retrievals could not be made due to one or
+C> more brightness temperatures out of range
+C> (i.e, failed the rain flag test)
+C> - = 2 -- Retrievals could not be made due to ice
+C> contamination
+C> {for either 1 or 2 above, all retrievals set to
+C> 99999. (missing)}
+C>
+C> @remark Function, called by subroutine misc01.
+C> Description of training and test data set:
+C> ------------------------------------------
+C> The training set consists of 3460 matchups which were received
+C> from two sources:
+C> - 1.  3187 F11/SSMI/buoy matchups were filtered out from a
+C> preliminary version of the new NRL database which was
+C> kindly provided by G. Poe (NRL). Maximum available wind
+C> speed is 24 m/s.
+C> - 2.  273 F11/SSMI/OWS matchups were filtered out from two
+C> datasets collected by high latitude OWS LIMA and MIKE.
+C> These data sets were kindly provided by D. Kilham
+C> (University of Bristol).  Maximum available wind speed
+C> is 26.4 m/s.
+C>
+C> Satellite data are collocated with both buoy and OWS data in
+C> space within 15 km and in time within 15 min.
+C>
+C> The test data set has the same structure, the same number of
+C> matchups and maximum buoy wind speed.
+C>
+C> Description of retrieval flags:
+C> -------------------------------
+C> Retrieval flags by Stogryn et al. are used.  The algorithm
+C> produces retrievals under CLEAR + CLOUDY conditions, that is
+C> if:
+C> - T37V - T37H > 50.   => CLEAR condition -or-
+C> - T37V - T37H =< 50.|
+C> - T19H =< 185.  and |
+C> - T37H =< 210.  and | => CLOUDY conditions
+C> - T19V  < T37V      |
+C>
+C> @author V. Krasnopolsky @date 1997-02-02
       FUNCTION RISC02(XT,V,L,SST,JERR)
       PARAMETER (IOUT =4)
       LOGICAL  LQ1,LQ2,LQ3,LQ4
       REAL  XT(7),Y(IOUT),V,L,SST
       EQUIVALENCE (Y(1),SPN)
- 
+
       JERR = 0
 
 C --------  Retrieval flag (Stogryn) -------------------------
- 
+
 C  T19H =< 185
 
       LQ1 = (XT(2).LE.185.)
@@ -1323,7 +1184,7 @@ C --------- Remove negative values  ----------------------------
       IF(SPN.LT.0.0)  SPN = 0.0
       IF(SST.LT.0.0)  SST = 0.0
       IF(V  .LT.0.0)  V   = 0.0
-         
+
 C ------ Remove ice contamination ------------------------------------
 
       ICE = 0
@@ -1348,39 +1209,31 @@ C ------ Remove ice contamination ------------------------------------
 
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    MISC10      CALC. SSM/I PRODS FROM NEURAL NET 3 ALG.
-C   PRGMMR: V. KRASNOPOLSKY  ORG: NP20       DATE: 1996-07-15
-C
-C ABSTRACT: THIS NN CALCULATES W (IN M/S), V (IN MM), L (IN MM), AND
-C   SST (IN DEG C).  THIS NN WAS TRAINED ON BLENDED F11 DATA SET
-C   (SSMI/BUOY MATCHUPS PLUS SSMI/OWS MATCHUPS 15 KM X 15 MIN) UNDER
-C   CLEAR + CLOUDY CONDITIONS.
-C
-C PROGRAM HISTORY LOG:
-C 1996-07-15  V. KRASNOPOLSKY -- ORIGINAL AUTHOR
-C
-C USAGE:    CALL MISC10(X,Y)
-C   INPUT ARGUMENT LIST:
-C     X        - 5-WORD ARRAY CONTAINING BRIGHTNESS TEMPERATURE IN THE
-C              - ORDER: T19V (WORD 1), T19H (WORD 2), T22V (WORD 3),
-C              - T37V (WORD 4), T37H (WORD 5) (ALL IN KELVIN)
-C
-C   OUTPUT ARGUMENT LIST:
-C     Y        - 4-WORD ARRAY CONTAINING CALCULATED PRODUCTS IN THE
-C              - ORDER: WIND SPEED (M/S) (WORD 1), COLUMNAR WATER
-C              - VAPOR (TOTAL PRECIP. WATER) (MM) (WORD 2),  COLUMNAR
-C              - LIQUID WATER (MM) (WORD 3), SEA SURFACE TEMPERATURE
-C              - (DEG. C) (WORD 4)
-C
-C REMARKS: CALLED BY SUBROUTINE RISC02.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP
-C
-C$$$
+C> @brief Calc. ssm/i prods from neural net 3 alg.
+C> @author V. Krasnopolsky @date 1996-07-15
+
+C> This nn calculates w (in m/s), v (in mm), l (in mm), and
+C> sst (in deg c). This nn was trained on blended f11 data set
+C> (ssmi/buoy matchups plus ssmi/ows matchups 15 km x 15 min) under
+C> clear + cloudy conditions.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1996-07-15 | V. Krasnopolsky | Initial.
+C>
+C> @param[in] X 5-word array containing brightness temperature in the
+C> order: t19v (word 1), t19h (word 2), t22v (word 3),
+C> t37v (word 4), t37h (word 5) (all in kelvin)
+C> @param[out] Y 4-word array containing calculated products in the
+C> order: wind speed (m/s) (word 1), columnar water
+C> vapor (total precip. water) (mm) (word 2),  columnar
+C> liquid water (mm) (word 3), sea surface temperature
+C> (deg. c) (word 4)
+C>
+C> @remark Called by subroutine risc02().
+C>
+C> @author V. Krasnopolsky @date 1996-07-15
       SUBROUTINE MISC10(X,Y)
       INTEGER  HID,OUT
 
@@ -1392,7 +1245,7 @@ C  OUT IS THE NUMBER OF OUTPUTS
      $ O1(IN),X2(HID),O2(HID),X3(OUT),O3(OUT),A(OUT),B(OUT)
 
 C W1 HOLDS INPUT WEIGHTS
- 
+
       DATA ((W1(I,J),J = 1,HID),I = 1,IN)/
      $-0.0435901, 0.0614709,-0.0453639,-0.0161106,-0.0271382, 0.0229015,
      $-0.0650678, 0.0704302, 0.0383939, 0.0773921, 0.0661954,-0.0643473,
@@ -1407,7 +1260,7 @@ C W1 HOLDS INPUT WEIGHTS
      $-0.0418217,-0.0165812, 0.0291809/
 
 C W2 HOLDS HIDDEN WEIGHTS
- 
+
       DATA ((W2(I,J),J = 1,OUT),I = 1,HID)/
      $-0.827004, -0.169961,-0.230296, -0.311201, -0.243296, 0.00454425,
      $ 0.950679,  1.09296,  0.0842604, 0.0140775, 1.80508, -0.198263,
@@ -1420,7 +1273,7 @@ C W2 HOLDS HIDDEN WEIGHTS
      $-0.781417/
 
 C B1 HOLDS HIDDEN BIASES
- 
+
       DATA (B1(I), I=1,HID)/
      $ -9.92116,-10.3103,-17.2536,  -5.26287, 17.7729,-20.4812,
      $ -4.80869,-11.5222,  0.592880,-4.89773,-17.3294, -7.74136/
@@ -1437,11 +1290,11 @@ C A(OUT), B(OUT) HOLD TRANSFORMATION COEFFICIENTS
 C INITIALIZE
 
       O1 = X
- 
+
 C START NEURAL NETWORK
- 
+
 C  - INITIALIZE X2
- 
+
       DO I = 1,HID
          X2(I) = 0.
          DO J = 1,IN
@@ -1460,57 +1313,49 @@ C - INITIALIZE X3
          END DO
 
          X3(K) = X3(K) + B2(K)
- 
+
 C --- CALCULATE O3
- 
+
          O3(K) = TANH(X3(K))
          Y(K) = (A(K) * O3(K)) + B(K)
       END DO
- 
+
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    RISC02xx    CALC. WSPD FROM NEURAL NET 2 ALGORITHM
-C   PRGMMR: V. KRASNOPOLSKY  ORG: NP20       DATE: 1996-05-07
-C
-C ABSTRACT: CALCULATES A SINGLE NEURAL NETWORK OUTPUT FOR WIND SPEED.
-C   THE NETWORK WAS TRAINED ON THE WHOLE DATA SET WITHOUT ANY
-C   SEPARATION INTO SUBSETS. IT GIVES RMS = 1.64 M/S FOR TRAINING SET
-C   AND 1.65 M/S FOR TESTING SET.  THIS IS AN IMPROVED VERSION OF THE 
-C   EARLIER NEURAL NETWORK 1 ALGORITHM.
-C
-C PROGRAM HISTORY LOG:
-C 1994-03-20  V. KRASNOPOLSKY -- ORIGINAL AUTHOR
-C 1995-05-07  V. KRASNOPOLSKY -- REPLACED WITH NEURAL NET 2 ALGORITHM
-C
-C USAGE:    XX = RISC02xx(X)
-C   INPUT ARGUMENT LIST:
-C     X        - 5-WORD ARRAY CONTAINING BRIGHTNESS TEMPERATURE IN THE
-C              - ORDER: T19V (WORD 1), T22V (WORD 2), T37V (WORD 3),
-C              - T37H (WORD 4), T85V (WORD 5) (ALL IN KELVIN)
-C
-C   OUTPUT ARGUMENT LIST:
-C     XX       - WIND SPEED (METERS/SECOND)
-C
-C REMARKS: FUNCTION, NO LONGER CALLED BY THIS PROGRAM.  IT IS HERE
-C   SIMPLY TO SAVE NEURAL NET 2 ALGORITHM FOR POSSIBLE LATER USE
-C   (HAS BEEN REPLACED BY NEURAL NET 3 ALGORITHM, SEE SUBR. RISC02
-C   AND MISC10).
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP
-C
-C$$$
+C> @brief Calc. wspd from neural net 2 algorithm
+C> @author V. Krasnopolsky @date 1996-05-07
+
+C> Calculates a single neural network output for wind speed.
+C> the network was trained on the whole data set without any
+C> separation into subsets. It gives rms = 1.64 m/s for training set
+C> and 1.65 m/s for testing set. This is an improved version of the
+C> earlier neural network 1 algorithm.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1994-03-20 | V. Krasnopolsky | Initial.
+C> 1995-05-07 | V. Krasnopolsky | Replaced with neural net 2 algorithm.
+C>
+C> @param[in] X 5-Word array containing brightness temperature in the
+C> order: t19v (word 1), t22v (word 2), t37v (word 3),
+C> t37h (word 4), t85v (word 5) (all in kelvin)
+C> @return XX Wind speed (meters/second)
+C>
+C> @remark Function, no longer called by this program. It is here
+C> simply to save neural net 2 algorithm for possible later use
+C> (has been replaced by neural net 3 algorithm, see subr. risc02
+C> and misc10).
+C>
+C> @author V. Krasnopolsky @date 1996-05-07
       FUNCTION RISC02xx(X)
       INTEGER  HID
 C IN IS THE NUMBER OF B. TEMP. CHNLS, HID IS THE NUMBER OF HIDDEN NODES
       PARAMETER (IN =5, HID =2)
       DIMENSION  X(IN),W1(IN,HID),W2(HID),B1(HID),O1(IN),X2(HID),O2(HID)
- 
+
       SAVE
- 
+
 C W1 HOLDS INPUT WEIGHTS
       DATA ((W1(I,J),J=1,HID),I=1,IN)/
      $ 4.402388E-02, 2.648334E-02, 6.361322E-04,-1.766535E-02,
@@ -1545,86 +1390,69 @@ C BIAS CORRECTION
       RISC02xx = RISC02xx + BIAS
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    RISC03      CALC. W.SPD FROM B TEMP.- GOODBERLET  ALG
-C   PRGMMR: W. GEMMILL       ORG: NP21       DATE: 1994-08-15
-C
-C ABSTRACT: CALCULATES A SINGLE GOODBERLET OUTPUT FOR WIND SPEED.
-C   THIS IS A LINEAR REGRESSION ALGORITHM FROM 1989.
-C
-C PROGRAM HISTORY LOG:
-C 1994-08-15  W. GEMMILL -- ORIGINAL AUTHOR
-C
-C USAGE:    XX = RISC03(X)
-C   INPUT ARGUMENT LIST:
-C     X        - 4-WORD ARRAY CONTAINING BRIGHTNESS TEMPERATURE IN THE
-C              - ORDER: T19V (WORD 1), T22V (WORD 2), T37V (WORD 3),
-C              - T37H (WORD 4) (ALL IN KELVIN)
-C
-C   OUTPUT ARGUMENT LIST:
-C     XX       - WIND SPEED (METERS/SECOND)
-C
-C REMARKS: FUNCTION, CALLED BY SUBROUTINE MISC01.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP
-C
-C$$$
+C> @brief Calc. w.spd from b temp.- goodberlet alg.
+C> @author W. Gemmill @date 1994-08-15
+
+C> Calculates a single goodberlet output for wind speed.
+C> This is a linear regression algorithm from 1989.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1994-08-15 | W. Gemmill | Initial.
+C>
+C> @param[in] X 4-word array containing brightness temperature in the
+C> order: t19v (word 1), t22v (word 2), t37v (word 3),
+C> t37h (word 4) (all in kelvin)
+C> @return XX Wind speed (meters/second)
+C>
+C> @remark Function, called by subroutine misc01.
+C>
+C> @author W. Gemmill @date 1994-08-15
       FUNCTION RISC03(X)
       DIMENSION  X(4)
- 
+
       SAVE
- 
+
       RISC03 = 147.90 + (1.0969 * X(1)) - (0.4555 * X(2)) -
      $ (1.76 * X(3)) + (0.7860 * X(4))
       RETURN
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    MISC04      RETURNS LAND/SEA TAG FOR GIVEN LAT/LON
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 1995-01-04
-C
-C ABSTRACT: FINDS AND RETURNS THE LOW RESOLUTION LAND/SEA TAG NEAREST
-C   TO THE REQUESTED LATITUDE AND LONGITUDE.
-C
-C PROGRAM HISTORY LOG:
-C 1978-01-20  J. K. KALINOWSKI (S11213) -- ORIGINAL AUTHOR
-C 1978-10-03  J. K. KALINOWSKI (S1214) -- CHANGES UNKNOWN
-C 1985-03-01  N. DIGIROLAMO (SSAI) -- CONVERSION TO VS FORTRAN
-C 1995-01-04  D. A. KEYSER -- INCORPORATED INTO W3MISCAN AND
-C       STREAMLINED CODE
-C
-C USAGE:    CALL MISC04(INLSF,BLAT,BLNG,LSTAG)
-C   INPUT ARGUMENT LIST:
-C     INLSF    - UNIT NUMBER OF DIRECT ACCESS NESDIS LAND/SEA FILE
-C     BLAT     - LATITUDE (WHOLE DEGREES: RANGE IS 0. TO +90. NORTH,
-C              - 0. TO -90. SOUTH)
-C     BLNG     - LONGITUDE (WHOLE DEGREES: RANGE IS 0. TO +179.99 EAST,
-C              - 0. TO -180. WEST)
-C
-C   OUTPUT ARGUMENT LIST:
-C     LSTAG    - LAND/SEA TAG {=0 - SEA; =1 - LAND; =2 - COASTAL
-C              - INTERFACE (HIGHER RESOLUTION TAGS ARE AVAILABLE);
-C              - =3 - COASTAL INTERFACE (NO HIGHER RESOLUTION TAGS
-C              - EXIST)}
-C
-C REMARKS: CALLED BY SUBROUTINE W3MISCAN.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP
-C
-C$$$
+C> @brief Returns land/sea tag for given lat/lon
+C> @author Dennis Keyser @date 1995-01-04
+
+C> Finds and returns the low resolution land/sea tag nearest
+C> to the requested latitude and longitude.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1978-01-20 | J. K. Kalinowski (S11213) | Original author
+C> 1978-10-03 | J. K. Kalinowski (S1214) | Changes unknown
+C> 1985-03-01 | N. Digirolamo (SSAI) | Conversion to vs fortran
+C> 1995-01-04 | Dennis Keyser | Incorporated into w3miscan and streamlined code
+C>
+C> @param[in] INLSF Unit number of direct access nesdis land/sea file
+C> @param[in] BLAT Latitude (whole degrees: range is 0. to +90. north,
+C> 0. to -90. south)
+C> @param[in] BLNG Longitude (whole degrees: range is 0. to +179.99 east,
+C> 0. to -180. west)
+C> @param[out] LSTAG Land/sea tag {=0 - sea; =1 - land; =2 - coastal
+C> interface (higher resolution tags are available);
+C> =3 - coastal interface (no higher resolution tags
+C> exist)}
+C>
+C> @remark Called by subroutine w3miscan.
+C>
+C> @author Dennis Keyser @date 1995-01-04
       SUBROUTINE MISC04(INLSF,BLAT,BLNG,LSTAG)
       CHARACTER*1  LPUT
       REAL  RGS(3)
 C LPUT CONTAINS A REGION OF LAND/SEA TAGS (RETURNED FROM CALL TO MISC05)
       COMMON/MISCDD/LPUT(21960)
- 
+
       SAVE
- 
+
 C RGS IS ARRAY HOLDING SOUTHERN BOUNDARIES OF EACH LAND/SEA TAG REGION
       DATA  RGS/-85.,-30.,25./,NUMRGL/0/,IFLAG/0/
 C INITIALIZE LAND/SEA TAG AS 1 (OVER LAND)
@@ -1666,40 +1494,26 @@ C  (IN THIS CASE IT WILL REMAIN SET TO 1 INDICATING OVER LAND)
       RETURN
 C-----------------------------------------------------------------------
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    MISC05      READS 2 RECORDS FROM LAND/SEA TAG DTABASE
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 1995-01-04
-C
-C ABSTRACT: READS TWO RECORDS FROM A LOW RESOLUTION LAND/SEA DATABASE
-C   AND STORES INTO COMMON.
-C
-C PROGRAM HISTORY LOG:
-C 1978-01-20  J. K. KALINOWSKI (S11213) -- ORIGINAL AUTHOR
-C 1995-01-04  D. A. KEYSER -- INCORPORATED INTO W3MISCAN AND
-C       STREAMLINED CODE; MODIFIED TO BE MACHINE INDEPENDENT THRU
-C       USE OF STANDARD FORTRAN DIRECT ACCESS READ
-C
-C USAGE:    CALL MISC05(INLSF,NUMRGN)
-C   INPUT ARGUMENT LIST:
-C     INLSF    - UNIT NUMBER OF DIRECT ACCESS NESDIS LAND/SEA FILE
-C     NUMRGN   - THE REGION (1,2 OR 3) OF THE DATABASE TO BE ACCESSED
-C              - (DEPENDENT ON LATITUDE BAND)
-C
-C   INPUT FILES:
-C     UNIT AA  - (WHERE AA IS EQUAL TO INPUT ARGUMENT 'INLSF')
-C              - DIRECT ACCESS NESDIS LAND/SEA FILE
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTNE MISC04.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP
-C
-C$$$
+C> @brief Reads 2 records from land/sea tag database
+C> @author Dennis Keyser @date 195-01-04
+
+C> Reads two records from a low resolution land/sea database and stores into common.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1978-01-20 | J. K. Kalinowski (S11213) | Original author
+C> 1995-01-04 | Dennis Keyser | Incorporated into w3miscan and
+C> streamlined code; modified to be machine independent thru
+C> use of standard fortran direct access read
+C>
+C> @param[in] INLSF Unit number of direct access nesdis land/sea file
+C> @param[in] NUMRGN The region (1,2 or 3) of the database to be accessed
+C> (dependent on latitude band)
+C>
+C> @remark Called by subroutne misc04.
+C>
+C> @author Dennis Keyser @date 195-01-04
       SUBROUTINE MISC05(INLSF,NUMRGN,*)
       CHARACTER*1  LPUT
 
@@ -1708,9 +1522,9 @@ C  LAND/SEA FILE) -- 180 BYTES OF DOCUMENTATION FOLLOWED BY 21780 BYTES
 C  OF LAND/SEA TAGS
 
       COMMON/MISCDD/LPUT(21960)
- 
+
       SAVE
- 
+
       NREC = (2 * NUMRGN) - 1
       READ(INLSF,REC=NREC,ERR=10)  (LPUT(II),II=1,10980)
       NREC = NREC + 1
@@ -1726,41 +1540,31 @@ C  SET TO 1 MEANING OVER LAND IN THIS CASE)
       RETURN 1
 C-----------------------------------------------------------------------
       END
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    MISC06      READS IN NH AND SH 1-DEG. SEA-SFC TEMPS.
-C   PRGMMR: D. A. KEYSER     ORG: NP22       DATE: 2000-02-18
-C
-C ABSTRACT: READS IN GLOBAL SEA-SURFACE TEMPERATURE FIELD ON A ONE-
-C   DEGREE GRID FROM GRIB FILE.
-C
-C PROGRAM HISTORY LOG:
-C ????-??-??  W. GEMMILL (NP21) -- ORIGINAL AUTHOR
-C 1995-01-04  D. A. KEYSER -- INCORPORATED INTO W3MISCAN AND
-C       STREAMLINED CODE; CONVERTED SST INPUT FILE FROM VSAM/ON84 TO
-C       GRIB TO ALLOW CODE COMPILE AND RUN ON THE CRAY MACHINES.
-C 2000-02-18  D. A. KEYSER -- MODIFIED TO CALL W3LIB ROUTINE "GETGB",
-C       THIS ALLOWS CODE TO COMPILE AND RUN PROPERLY ON IBM-SP
-C
-C USAGE:    CALL MISC06(INGBI,INGBD,IDAT1,IDAT2,*,*,*,*)
-C   INPUT ARGUMENT LIST:
-C     INGBI    - UNIT NUMBER OF GRIB INDEX FILE FOR GRIB FILE
-C              - CONTAINING GLOBAL 1-DEGREE SEA-SURFACE TEMP FIELD
-C     INGBD    - UNIT NUMBER OF GRIB FILE CONTAINING GLOBAL 1-DEGREE
-C              - SEA-SURFACE TEMP FIELD
-C     IDAT1    - REQUESTED EARLIEST YEAR(YYYY), MONTH, DAY, HOUR, MIN
-C     IDAT2    - REQUESTED LATEST   YEAR(YYYY), MONTH, DAY, HOUR, MIN
-C
-C   OUTPUT FILES:
-C     UNIT 06  - PRINTOUT
-C
-C REMARKS: CALLED BY SUBROUTINE W3MISCAN.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM-SP
-C
-C$$$
+C> @brief Reads in nh and sh 1-deg. sea-sfc temps.
+C> @author Dennis Keyser @date 200-02-18
+
+C> Reads in global sea-surface temperature field on a one-degree grid from grib file.
+C>
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> ????-??-?? | W. Gemmill (NP21) | Original author
+C> 1995-01-04 | Dennis Keyser | Incorporated into w3miscan and
+C> streamlined code; converted sst input file from vsam/on84 to
+C> grib to allow code compile and run on the cray machines.
+C> 2000-02-18 | Dennis Keyser | Modified to call w3lib routine "getgb",
+C> this allows code to compile and run properly on ibm-sp
+C>
+C> @param[in] INGBI Unit number of grib index file for grib file
+C> containing global 1-degree sea-surface temp field
+C> @param[in] INGBD Unit number of grib file containing global 1-degree
+C> sea-surface temp field
+C> @param[in] IDAT1 Requested earliest year(yyyy), month, day, hour, min
+C> @param[in] IDAT2 Requested latest   year(yyyy), month, day, hour, min
+C>
+C> @remark Called by subroutine w3miscan.
+C>
+C> @author Dennis Keyser @date 200-02-18
       SUBROUTINE MISC06(INGBI,INGBD,IDAT1,IDAT2,*,*,*,*)
       PARAMETER (MAXPTS=360*180)
       LOGICAL*1  LBMS(360,180)
@@ -1770,9 +1574,9 @@ C$$$
       CHARACTER*11 ENVVAR
       CHARACTER*80 FILEB,FILEI
       COMMON/MISCCC/SSTDAT(360,180)
- 
+
       SAVE
- 
+
       ENVVAR='XLFUNIT_   '
       WRITE(ENVVAR(9:10),FMT='(I2)') INGBD
       CALL GETENV(ENVVAR,FILEB)

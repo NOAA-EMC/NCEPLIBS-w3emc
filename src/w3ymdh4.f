@@ -1,68 +1,44 @@
 C> @file
-C
-C> SUBPROGRAM: W3YMDH4          4-BYTE DATE WORD UNPACKER AND PACKER
-C>   AUTHOR: Brill,K.F.       ORG: NP/22       DATE: 98-07-29
+C> @brief 4-byte date word unpacker and packer.
+C> @author K. F. Brill @date 1998-07-29
+
+C> Obtains the components of the nmc date word (ncep y2k
+C> compliant form), or given its components, forms an nmc type date
+C> word. The packing is done using base 32.
 C>
-C> ABSTRACT: OBTAINS THE COMPONENTS OF THE NMC DATE WORD (NCEP Y2K
-C>   COMPLIANT FORM), OR GIVEN ITS COMPONENTS, FORMS AN NMC TYPE DATE
-C>   WORD.  THE PACKING IS DONE USING BASE 32.
+C> If the first byte of IDATE is less than 101, then the old
+C> Office Note 84 packing is assumed. A four-digit year is
+C> always returned. To pack the "old" way, pass in a 2-digit
+C> year.
 C>
-C>   If the first byte of IDATE is less than 101, then the old
-C>   Office Note 84 packing is assumed.  A four-digit year is
-C>   always returned.  To pack the "old" way, pass in a 2-digit
-C>   year.
+C> This program will work for the years ranging from A.D. 101
+C> through 79359.
 C>
-C>   This program will work for the years ranging from A.D. 101
-C>   through 79359.
+C> On unpacking, years less than or equal to 100 are returned
+C> as follows:
 C>
-C>   On unpacking, years less than or equal to 100 are returned
-C>   as follows:
-C>
-C>	0-50   2000--2050
-C>	51-100 1951--2000
+C> - 0-50   2000--2050
+C> - 51-100 1951--2000
 C>
 C>
-C> PROGRAM HISTORY LOG:
-C>   98-07-29  K.F.BRILL
-C> 1999-03-15  Gilbert      -   Removed Call to W3FS11 and put its
-C>                              processing inline.  W3FS11 was deleted
-C>                              from the W3LIB.
+C> ### Program History Log:
+C> Date | Programmer | Comment
+C> -----|------------|--------
+C> 1998-07-29 | K. F. Brill | Initial.
+C> 1999-03-15 | Gilbert | Removed Call to W3FS11() and put its processing inline.
+C> W3FS11 was deleted from the W3LIB.
 C>
-C> USAGE:  CALL W3YMDH4 (IDATE, IYEAR, MONTH, IDAY, IHOUR, NN)
+C> @param[inout] IDATE Left 4 bytes of integer 64 bit word, or can be
+C> IDATE(4) or CHARACTER*4 IDATE.
+C> @param[inout] IYEAR Year (4 digits or 2 digits for on84)
+C> @param[inout] MONTH Month
+C> @param[inout] IDAY Day
+C> @param[inout] IHOUR Hour
+C> @param[in] NN Code:
+C>  - .eq. 0 pack iyear, month, iday, ihour into idate
+C>  - .ne. 0 unpack idate into iyear, month, iday, ihour
 C>
-C>   INPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     IDATE  ARG LIST  LEFT 4 BYTES OF INTEGER 64 BIT WORD, OR CAN BE
-C>                      CHARACTER*1 IDATE(4) OR CHARACTER*4 IDATE.
-C>     IYEAR  ARG LIST  INTEGER   YEAR (4 DIGITS or 2 DIGITS for ON84)
-C>     MONTH  ARG LIST  INTEGER   MONTH
-C>     IDAY   ARG LIST  INTEGER   DAY
-C>     IHOUR  ARG LIST  INTEGER   HOUR
-C>     NN     ARG LIST  INTEGER   CODE:
-C>                     .EQ. 0 PACK IYEAR, MONTH, IDAY, IHOUR INTO IDATE
-C>                     .NE. 0 UNPACK IDATE INTO IYEAR, MONTH, IDAY, IHOUR
-C>
-C>   OUTPUT VARIABLES:
-C>     NAMES  INTERFACE DESCRIPTION OF VARIABLES AND TYPES
-C>     ------ --------- -----------------------------------------------
-C>     IDATE  ARG LIST  LEFT 4 BYTES OF INTEGER 64 BIT WORD, OR CAN BE
-C>                      CHARACTER*1 IDATE(4) OR CHARACTER*4 IDATE.
-C>     IYEAR  ARG LIST  INTEGER   YEAR (4 DIGITS)
-C>     MONTH  ARG LIST  INTEGER   MONTH
-C>     IDAY   ARG LIST  INTEGER   DAY
-C>     IHOUR  ARG LIST  INTEGER   HOUR
-C>
-C>   SUBROGRAMS CALLED:
-C>     NAMES                                                   LIBRARY
-C>     ------------------------------------------------------- --------
-C>     CHAR					         	F90
-C>     MOVA2I							W3
-C>
-C> ATTRIBUTES:
-C>   LANGUAGE: CRAY CFT90 FORTRAN
-C>   MACHINE:  CRAY Y-MP8/832
-C>
+C> @author K. F. Brill @date 1998-07-29
       SUBROUTINE W3YMDH4 (IDATE,IYEAR,MONTH,IDAY,IHOUR,NN)
 C
       CHARACTER IDATE(4)
