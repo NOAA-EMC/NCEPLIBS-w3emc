@@ -105,37 +105,37 @@
 !! @author Mark Iredell
 !! @date April 1996
 SUBROUTINE MAKGDS(IOPT,KGDS,GDS,LENGDS,IRET)
- IMPLICIT NONE
-!
- CHARACTER,          INTENT(INOUT) :: GDS(400)
-!
- INTEGER,            INTENT(IN   ) :: IOPT
- INTEGER,            INTENT(INOUT) :: KGDS(200)
- INTEGER,            INTENT(  OUT) :: IRET, LENGDS
-!
- INTEGER                           :: ICOMP, IPDS(200), IGDS(200)
- INTEGER                           :: KPTR(200), KPDS(200), NPTS
-!
- DATA KPTR/200*0/, KPDS/200*0/
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  UNPACK GDS INTO KGDS
- IF(IOPT.EQ.-1) THEN
-   CALL FI633(GDS,KPTR,KGDS,IRET)
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  USE KGDS TO PACK GDS
- ELSEIF(IOPT.EQ.255) THEN
-   CALL R63W72(KPDS,KGDS,IPDS,IGDS)
-   ICOMP=MOD(IGDS(8)/8,2)
-   CALL W3FI74(IGDS,ICOMP,GDS,LENGDS,NPTS,IRET)
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  USE NCEP GRID ID TO MAKE GDS AND KGDS
- ELSEIF(IOPT.GT.0.AND.IOPT.LT.255) THEN
-   CALL W3FI71(IOPT,IGDS,IRET)
-   IF(IRET.EQ.0) THEN
+  IMPLICIT NONE
+  !
+  CHARACTER,          INTENT(INOUT) :: GDS(400)
+  !
+  INTEGER,            INTENT(IN   ) :: IOPT
+  INTEGER,            INTENT(INOUT) :: KGDS(200)
+  INTEGER,            INTENT(  OUT) :: IRET, LENGDS
+  !
+  INTEGER                           :: ICOMP, IPDS(200), IGDS(200)
+  INTEGER                           :: KPTR(200), KPDS(200), NPTS
+  !
+  DATA KPTR/200*0/, KPDS/200*0/
+  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  !  UNPACK GDS INTO KGDS
+  IF(IOPT.EQ.-1) THEN
+     CALL FI633(GDS,KPTR,KGDS,IRET)
+     ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     !  USE KGDS TO PACK GDS
+  ELSEIF(IOPT.EQ.255) THEN
+     CALL R63W72(KPDS,KGDS,IPDS,IGDS)
      ICOMP=MOD(IGDS(8)/8,2)
      CALL W3FI74(IGDS,ICOMP,GDS,LENGDS,NPTS,IRET)
-     IF(IRET.EQ.0) CALL FI633(GDS,KPTR,KGDS,IRET)
-   ENDIF
- ENDIF
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- END SUBROUTINE MAKGDS
+     ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     !  USE NCEP GRID ID TO MAKE GDS AND KGDS
+  ELSEIF(IOPT.GT.0.AND.IOPT.LT.255) THEN
+     CALL W3FI71(IOPT,IGDS,IRET)
+     IF(IRET.EQ.0) THEN
+        ICOMP=MOD(IGDS(8)/8,2)
+        CALL W3FI74(IGDS,ICOMP,GDS,LENGDS,NPTS,IRET)
+        IF(IRET.EQ.0) CALL FI633(GDS,KPTR,KGDS,IRET)
+     ENDIF
+  ENDIF
+  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+END SUBROUTINE MAKGDS
