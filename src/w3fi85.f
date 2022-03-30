@@ -2091,7 +2091,7 @@ C                                 UNUSED POSITIONS IN LAST WORD
           END IF
       ELSE IF (KFUNC.EQ.3) THEN
 C                          SEQUENCE DESCRIPTOR - ERROR
-          CALL FI8503(KDESC,NRDESC,
+          CALL FI8503(KARY(11),KDESC,NRDESC,
      *                     ISECT3,IUNITD,KSEQ,KNUM,KLIST,IERRTN)
           IF (IERRTN.NE.0) THEN
               RETURN
