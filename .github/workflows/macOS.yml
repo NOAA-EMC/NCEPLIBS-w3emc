@@ -8,7 +8,7 @@ jobs:
       FC: ${{ matrix.compiler }}
     strategy:
       matrix:
-        compiler: [gfortran-9, gfortran-10]
+        compiler: [gfortran-11, gfortran-12]
 
     steps:
     - name: checkout-bacio
