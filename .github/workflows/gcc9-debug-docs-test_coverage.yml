@@ -5,8 +5,8 @@ jobs:
   gcc9-debug-build:
     runs-on: ubuntu-latest
     env:
-      FC: gfortran-9
-      CC: gcc-9
+      FC: gfortran-12
+      CC: gcc-12
 
     steps:
     
