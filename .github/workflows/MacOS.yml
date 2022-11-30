@@ -34,7 +34,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/bacio
-        key: bacio-${{ runner.os }}-v${{ matrix.bacio-version }}
+        key: bacio-${{ runner.os }}-v${{ matrix.bacio-version }}-${{ matrix.compiler }}
 
     - name: build-bacio
       if: steps.cache-bacio.outputs.cache-hit != 'true'
