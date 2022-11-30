@@ -71,5 +71,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: w3emc-test-coverage
-        path: w3emc/build/*.html
+        path: |
+          w3emc/build/*.html
+          w3emc/build/*.css
 
