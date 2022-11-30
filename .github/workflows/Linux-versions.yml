@@ -15,8 +15,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      FC: gfortran-10
-      CC: gcc-10
+      FC: gfortran-11
+      CC: gcc-11
+    strategy:
+      matrix:
+        bacio-version: [2.4.1, 2.5.0]
 
     steps:
     
@@ -25,7 +28,7 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
-        ref: v2.5.0
+        ref: v${{ matrix.bacio-version }}
     
     - name: build-bacio
       run: |
