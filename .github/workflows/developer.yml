@@ -50,7 +50,7 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake .. -DCMAKE_PREFIX_PATH="~/;~/bacio" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall"
+        cmake -DCMAKE_PREFIX_PATH="~/;~/bacio" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_BUILD_TYPE=Debug ..
         make -j2
 
     - name: build-docs
