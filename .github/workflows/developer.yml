@@ -1,4 +1,5 @@
 name: developer
+on:
   push:
     branches:
     - develop

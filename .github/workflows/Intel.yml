@@ -1,4 +1,5 @@
 name: Intel
+on:
   push:
     branches:
     - develop

@@ -1,4 +1,5 @@
 name: Linux-versions
+on:
   push:
     branches:
     - develop
