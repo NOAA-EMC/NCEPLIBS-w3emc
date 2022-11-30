@@ -30,7 +30,7 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
-        ref: v2.5.0
+        ref: develop
     
     - name: build-bacio
       run: |

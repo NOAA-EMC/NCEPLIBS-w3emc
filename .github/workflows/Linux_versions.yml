@@ -30,7 +30,15 @@ jobs:
         path: bacio
         ref: v${{ matrix.bacio-version }}
     
+    - name: cache-bacio
+      id: cache-bacio
+      uses: actions/cache@v2
+      with:
+        path: ~/bacio
+        key: bacio-${{ runner.os }}-v${{ matrix.bacio-version }}
+
     - name: build-bacio
+      if: steps.cache-bacio.outputs.cache-hit != 'true'
       run: |
         cd bacio
         mkdir build && cd build
