@@ -1,12 +1,25 @@
-name: GCC-10_build_and_test
-on: [push, pull_request]
+name: Linux_versions
+on:
+  push:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
+  pull_request:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
 
 jobs:
-  gcc10-build-and-test:
+  build:
     runs-on: ubuntu-latest
     env:
-      FC: gfortran-10
-      CC: gcc-10
+      FC: gfortran-11
+      CC: gcc-11
+    strategy:
+      matrix:
+        bacio-version: [2.4.1, 2.5.0]
 
     steps:
     
@@ -15,9 +28,17 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
-        ref: v2.5.0
+        ref: v${{ matrix.bacio-version }}
     
+    - name: cache-bacio
+      id: cache-bacio
+      uses: actions/cache@v2
+      with:
+        path: ~/bacio
+        key: bacio-${{ runner.os }}-v${{ matrix.bacio-version }}
+
     - name: build-bacio
+      if: steps.cache-bacio.outputs.cache-hit != 'true'
       run: |
         cd bacio
         mkdir build && cd build
@@ -41,4 +62,4 @@ jobs:
     - name: test-w3emc
       run: |
         cd w3emc/build
-        ctest --output-on-failure
+        ctest --output-on-failure --rerun-failed --verbose

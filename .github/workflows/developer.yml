@@ -1,12 +1,22 @@
-name: gcc-9_debug_docs-test_coverage
-on: [push, pull_request]
+name: developer
+on:
+  push:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
+  pull_request:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
 
 jobs:
   gcc9-debug-build:
     runs-on: ubuntu-latest
     env:
-      FC: gfortran-9
-      CC: gcc-9
+      FC: gfortran-11
+      CC: gcc-11
 
     steps:
     
@@ -20,7 +30,7 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
-        ref: v2.5.0
+        ref: develop
     
     - name: build-bacio
       run: |
@@ -40,7 +50,7 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake .. -DCMAKE_PREFIX_PATH="~/;~/bacio" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0"
+        cmake .. -DCMAKE_PREFIX_PATH="~/;~/bacio" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall"
         make -j2
 
     - name: build-docs
@@ -51,7 +61,7 @@ jobs:
     - name: test-w3emc
       run: |
         cd w3emc/build
-        ctest --output-on-failure
+        ctest --output-on-failure --rerun-failed --verbose
 
     - name: generate-test-coverage
       run: |

@@ -1,14 +1,25 @@
-name: macOS-gcc
-on: [push, pull_request]
+name: MacOS
+on:
+  push:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
+  pull_request:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
 
 jobs:
-  macOS-build:
+  MacOS:
     runs-on: macos-latest
     env:
       FC: ${{ matrix.compiler }}
     strategy:
       matrix:
-        compiler: [gfortran-9, gfortran-10]
+        compiler: [gfortran-11, gfortran-12]
+        bacio-version: [2.4.1, 2.5.0]
 
     steps:
     - name: checkout-bacio
@@ -16,9 +27,17 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
-        ref: v2.5.0
+        ref: v${{ matrix.bacio-version }}
     
+    - name: cache-bacio
+      id: cache-bacio
+      uses: actions/cache@v2
+      with:
+        path: ~/bacio
+        key: bacio-${{ runner.os }}-v${{ matrix.bacio-version }}-${{ matrix.compiler }}
+
     - name: build-bacio
+      if: steps.cache-bacio.outputs.cache-hit != 'true'
       run: |
         cd bacio
         mkdir build && cd build
@@ -42,5 +61,5 @@ jobs:
     - name: test-w3emc
       run: |
         cd w3emc/build
-        ctest --output-on-failure
+        ctest --output-on-failure --rerun-failed --verbose
 
