@@ -1,5 +1,14 @@
-name: gcc-9_debug_docs-test_coverage
-on: [push, pull_request]
+name: developer
+  push:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
+  pull_request:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
 
 jobs:
   gcc9-debug-build:
@@ -51,7 +60,7 @@ jobs:
     - name: test-w3emc
       run: |
         cd w3emc/build
-        ctest --output-on-failure
+        ctest --output-on-failure --rerun-failed --verbose
 
     - name: generate-test-coverage
       run: |

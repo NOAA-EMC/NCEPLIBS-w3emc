@@ -1,5 +1,14 @@
 name: Intel
-on: [push, pull_request]
+  push:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
+  pull_request:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
 
 # Use custom shell with -l so .bash_profile is sourced which loads intel/oneapi/setvars.sh
 # without having to do it in manually every step
@@ -59,4 +68,4 @@ jobs:
     - name: test-w3emc
       run: |
         cd w3emc/build
-        ctest --output-on-failure
+        ctest --output-on-failure --rerun-failed --verbose

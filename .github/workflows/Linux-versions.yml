@@ -1,8 +1,17 @@
-name: GCC-10_build_and_test
-on: [push, pull_request]
+name: Linux-versions
+  push:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
+  pull_request:
+    branches:
+    - develop
+    paths-ignore:
+    - README.md
 
 jobs:
-  gcc10-build-and-test:
+  build:
     runs-on: ubuntu-latest
     env:
       FC: gfortran-10
@@ -41,4 +50,4 @@ jobs:
     - name: test-w3emc
       run: |
         cd w3emc/build
-        ctest --output-on-failure
+        ctest --output-on-failure --rerun-failed --verbose
