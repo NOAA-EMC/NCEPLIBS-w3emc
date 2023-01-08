@@ -2,11 +2,17 @@
 
 # Kyle Gerheiser, Ed Hartnett
 
-function(w3emc_test name)
-  add_executable(${name} ${name}.f90)
-  target_link_libraries(${name} PRIVATE w3emc_d)
-  add_test(NAME ${name} COMMAND ${name})
-endfunction()
+# We only have tests for the _d version of the library.
+if(BUILD_D)
 
-w3emc_test(test_summary)
-w3emc_test(test_w3tagb)
+  # This function builds and runs a test.
+  function(w3emc_test name)
+    add_executable(${name} ${name}.f90)
+    target_link_libraries(${name} PRIVATE w3emc_d)
+    add_test(NAME ${name} COMMAND ${name})
+  endfunction()
+
+  # These are the tests.
+  w3emc_test(test_summary)
+  w3emc_test(test_w3tagb)
+endif()
