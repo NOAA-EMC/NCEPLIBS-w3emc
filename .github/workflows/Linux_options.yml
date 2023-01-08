@@ -1,9 +1,9 @@
 # This is a CI workflow for the NCEPLIBS-w3emc project.
 #
-# This workflow builds for the MacOS system.
+# This workflow builds on Linux with different CMake build options.
 #
 # Ed Hartnett, 1/8/23
-name: MacOS
+name: Linux_options
 on:
   push:
     branches:
@@ -17,29 +17,30 @@ on:
     - README.md
 
 jobs:
-  MacOS:
-    runs-on: macos-latest
+  Linux_options:
+    runs-on: ubuntu-latest
     env:
-      FC: ${{ matrix.compiler }}
+      FC: gfortran-11
+      CC: gcc-11
     strategy:
       matrix:
-        compiler: [gfortran-11, gfortran-12]
-        bacio-version: [2.4.1, 2.5.0]
+        options: [-DBUILD_D=OFF, -DBUILD_4=OFF]
 
     steps:
+    
     - name: checkout-bacio
       uses: actions/checkout@v2
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
-        ref: v${{ matrix.bacio-version }}
+        ref: v2.5.0
     
     - name: cache-bacio
       id: cache-bacio
       uses: actions/cache@v2
       with:
         path: ~/bacio
-        key: bacio-${{ runner.os }}-v${{ matrix.bacio-version }}-${{ matrix.compiler }}
+        key: bacio-Linux_options_${{ runner.os }}-v2.5.0
 
     - name: build-bacio
       if: steps.cache-bacio.outputs.cache-hit != 'true'
@@ -60,11 +61,10 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake -DCMAKE_PREFIX_PATH=~/bacio ..
+        cmake -DCMAKE_PREFIX_PATH=~/bacio ${{ matrix.options }} ..
         make -j2
 
     - name: test-w3emc
       run: |
         cd w3emc/build
         ctest --output-on-failure --rerun-failed --verbose
-

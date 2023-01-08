@@ -1,3 +1,9 @@
+# This is a CI workflow for the NCEPLIBS-w3emc project.
+#
+# This workflow builds on Linux with different versions of the
+# dependent packages.
+#
+# Ed Hartnett, 1/8/23
 name: Linux_versions
 on:
   push:
