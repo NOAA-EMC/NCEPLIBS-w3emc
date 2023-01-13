@@ -15,4 +15,5 @@ if(BUILD_D)
   # These are the tests.
   w3emc_test(test_summary)
   w3emc_test(test_w3tagb)
+  w3emc_test(test_w3fi71)
 endif()
