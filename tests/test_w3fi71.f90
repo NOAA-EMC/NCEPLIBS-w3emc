@@ -1,4 +1,9 @@
  program test_w3fi71
+
+! Call routine w3fi71 for NCEP grids 172 and 220.
+! Compare the Grib1 grid description section
+! against expected values.
+
    implicit none
    integer :: igrid, igds(18), ierr
 
