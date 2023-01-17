@@ -1,38 +1,41 @@
-/***************************************************************
-
-This code will make a system call to return various
-useful parameters.  When subroutine summary is called, a list
-of system resource statistics is printed to stdout.
-
-Users need to place a call to start() at the beginning of the
-section of code to be "measured" and a call to summary() at the end.
-
-Use as follows:
-
-call start()
-   do stuff
-call summary()
-
-Jim Tuccillo August 1999
-***************************************************************/
+/**
+ * @file
+ * @brief Make a system call to return various useful parameters.
+ *
+ * This code will make a system call to return various useful
+ * parameters. When subroutine summary() is called, a list of system
+ * resource statistics is printed to stdout.
+ *
+ * Users need to place a call to start() at the beginning of the
+ * section of code to be "measured" and a call to summary() at the
+ * end.
+ *
+ * Use as follows:
+ *
+ * @code
+ * call start()
+ *   do stuff
+ * call summary()
+ * @endcode
+ *
+ * @author Jim Tuccillo @date August 1999
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-//#include <sys/time.h>
+#include <sys/time.h>
 #include <sys/times.h>
 #include <sys/utsname.h>
 #ifdef _AIX
-#include <sys/proc.h>   
+#include <sys/proc.h>
 #endif
 #ifdef __linux__
 #include <errno.h>
 #include <sys/resource.h>
 #endif
-
-/* #include "trace_mpif.h" */
 
 static FILE *fp = NULL;
 int numtask, mypid;
@@ -46,18 +49,18 @@ double cpu_comm, wall_comm;
 extern double rtc ();
 #endif
 struct time_data {
-     double s_cpu;
-     double s_wall;
-     double f_cpu;
-     double f_wall;
-     double c_cpu;
-     double c_wall;
-     double c_bytes;
-     int    c_calls;
-     int    c_buckets[32];
-     float  c_sum[32];
-     double b_cpu[32];
-     double b_wall[32];
+    double s_cpu;
+    double s_wall;
+    double f_cpu;
+    double f_wall;
+    double c_cpu;
+    double c_wall;
+    double c_bytes;
+    int    c_calls;
+    int    c_buckets[32];
+    float  c_sum[32];
+    double b_cpu[32];
+    double b_wall[32];
 };
 
 struct time_data MPI_Allgather_data;
@@ -186,301 +189,283 @@ struct time_data MPI_Graph_neighbors_count_data;
 struct time_data MPI_Graphdims_get_data;
 struct time_data MPI_Topo_test_data;
 
-
+/**
+ * @param lng
+ * @author Jim Tuccillo @date August 1999
+ */
 int bucket (lng)
-   int    lng;
+int    lng;
 {
-   int    i, j;
-   if (lng <= 0) {return(0);}
-   for (i=1, j=--lng; j>0; ++i) {
-      j = j>>1;
-   }
-   return (i);
+    int    i, j;
+    if (lng <= 0) {return(0);}
+    for (i=1, j=--lng; j>0; ++i) {
+        j = j>>1;
+    }
+    return (i);
 }
 
-
-
+/**
+ * @param timer
+ * @author Jim Tuccillo @date August 1999
+ */
 void elapse (timer)
-     double *timer;
-
+double *timer;
 {
-
-/*
-
-      typedef struct { unsigned long tv_sec;
-               long tv_nsec; } timestruc;
-
-      timestruc TimePointer;
-      int ret;
-
-      ret = gettimer (TIMEOFDAY, &TimePointer);
-      if (ret != 0) {
-            printf ("getttimer FAILED!!!\n");
-            printf ("ret = %d\n", ret);
-            return;
-      }
-
-
-      *timer = ((double) TimePointer.tv_sec) + (((double) TimePointer.tv_nsec) * ((double) 0.000000001));
-      return;
-
-*/
 #ifdef _AIX
-      *timer = rtc();
+    *timer = rtc();
 #endif
 #ifdef __linux__
-  struct timeval st;
-  if (gettimeofday (&st, NULL) == -1) {
-    fprintf (stderr,
-             "elapse: gettimeofday: %s.\n",
-             strerror (errno));
-    *timer = 0.;
-  }
-  *timer = ((double) st.tv_sec) + 1.e-6 * ((double) st.tv_usec);
+    struct timeval st;
+    if (gettimeofday (&st, NULL) == -1) {
+        fprintf (stderr,
+                 "elapse: gettimeofday: %s.\n",
+                 strerror (errno));
+        *timer = 0.;
+    }
+    *timer = ((double) st.tv_sec) + 1.e-6 * ((double) st.tv_usec);
 #endif
-
 }
 
-
+/**
+ * @param usr
+ * @param sys
+ * @author Jim Tuccillo @date August 1999
+ */
 void cputim (usr, sys)
-     double *usr;
-     double *sys;
-
+double *usr;
+double *sys;
 {
+    double real;
+    typedef struct { int tms_utime;
+        int tms_stime;
+        int tms_cutime;
+        int tms_cstime; } tms;
 
-      double real;
-      typedef struct { int tms_utime;
-                       int tms_stime;
-                       int tms_cutime;
-                       int tms_cstime; } tms;
+    struct tms Time_buffer;
+    int ret;
 
-      struct tms Time_buffer;
-      int ret;
+    ret = times (&Time_buffer);
 
-      ret = times (&Time_buffer);
+    real = ((double) ret) * 0.01;
 
-      real = ((double) ret) * 0.01;
-
-      *usr = ((double) Time_buffer.tms_utime) * 0.01;
-      *sys = ((double) Time_buffer.tms_stime) * 0.01;
-      return;
-
+    *usr = ((double) Time_buffer.tms_utime) * 0.01;
+    *sys = ((double) Time_buffer.tms_stime) * 0.01;
+    return;
 }
 
-
+/**
+ * @param time
+ * @author Jim Tuccillo @date August 1999
+ */
 void start_timer (time)
-   struct time_data *time;
-
+struct time_data *time;
 {
-   double user, sys;
-   double wall;
+    double user, sys;
+    double wall;
 
-   cputim (&user, &sys);
-   elapse (&wall);
-   time->s_cpu = user + sys;
-   time->s_wall = wall;
+    cputim (&user, &sys);
+    elapse (&wall);
+    time->s_cpu = user + sys;
+    time->s_wall = wall;
 
-   return;
+    return;
 }
 
+/**
+ *
+ * @param time
+ * @author Jim Tuccillo @date August 1999
+ */
 void end_timer (time)
-   struct time_data *time;
-
+struct time_data *time;
 {
-   double user, sys;
-   double wall;
+    double user, sys;
+    double wall;
 
-   cputim (&user, &sys);
-   elapse (&wall);
-   time->f_cpu = user + sys;
-   time->f_wall = wall;
-   time->c_cpu += time->f_cpu - time->s_cpu;
-   time->c_wall += time->f_wall - time->s_wall;
+    cputim (&user, &sys);
+    elapse (&wall);
+    time->f_cpu = user + sys;
+    time->f_wall = wall;
+    time->c_cpu += time->f_cpu - time->s_cpu;
+    time->c_wall += time->f_wall - time->s_wall;
 
-   return;
+    return;
 }
 
-
-
-
+/**
+ *
+ * @author Jim Tuccillo @date August 1999
+ */
 void resource ()
 
 {
-
-      double usr, sys;
-      long data[14];
+    double usr, sys;
+    long data[14];
 #ifdef _AIX
-      typedef struct {
-          int             tv_sec;         /* seconds */
-          int             tv_usec;        /* microseconds */
-      } timeval;
+    typedef struct {
+        int             tv_sec;         /* seconds */
+        int             tv_usec;        /* microseconds */
+    } timeval;
 #endif
-      double user, system;
-      int ret;
+    double user, system;
+    int ret;
 
-      struct rusage RU;
-      ret = getrusage (0, &RU);
+    struct rusage RU;
+    ret = getrusage (0, &RU);
 
-      if (ret != 0) {
-            printf ("getrusage FAILED!!!\n");
-            printf ("ret = %d\n", ret);
-            return;
-      }
+    if (ret != 0) {
+        printf ("getrusage FAILED!!!\n");
+        printf ("ret = %d\n", ret);
+        return;
+    }
 
+    user = ((double) RU.ru_utime.tv_sec) + (((double) RU.ru_utime.tv_usec) * ((double) 0.000001));
+    system = ((double) RU.ru_stime.tv_sec) + (((double) RU.ru_stime.tv_usec) * ((double) 0.000001));
 
-      user = ((double) RU.ru_utime.tv_sec) + (((double) RU.ru_utime.tv_usec) * ((double) 0.000001));
-      system = ((double) RU.ru_stime.tv_sec) + (((double) RU.ru_stime.tv_usec) * ((double) 0.000001));
-
-
-     printf("*****************RESOURCE STATISTICS*******************************\n");
-     printf("The total amount of wall time                        = %f\n", tot_wall);
-     printf("The total amount of time in user mode                = %f\n", user);
-     printf("The total amount of time in sys mode                 = %f\n", system);
+    printf("*****************RESOURCE STATISTICS*******************************\n");
+    printf("The total amount of wall time                        = %f\n", tot_wall);
+    printf("The total amount of time in user mode                = %f\n", user);
+    printf("The total amount of time in sys mode                 = %f\n", system);
 #ifdef _AIX
-     printf("The maximum resident set size (KB)                   = %d\n", RU.ru_maxrss);
-     printf("Average shared memory use in text segment (KB*sec)   = %d\n", RU.ru_ixrss);
-     printf("Average unshared memory use in data segment (KB*sec) = %d\n", RU.ru_idrss);
-     printf("Average unshared memory use in stack segment(KB*sec) = %d\n", RU.ru_isrss);
-     printf("Number of page faults without I/O activity           = %d\n", RU.ru_minflt);
-     printf("Number of page faults with I/O activity              = %d\n", RU.ru_majflt);
-     printf("Number of times process was swapped out              = %d\n", RU.ru_nswap);
-     printf("Number of times filesystem performed INPUT           = %d\n", RU.ru_inblock);
-     printf("Number of times filesystem performed OUTPUT          = %d\n", RU.ru_oublock);
-     printf("Number of IPC messages sent                          = %d\n", RU.ru_msgsnd);
-     printf("Number of IPC messages received                      = %d\n", RU.ru_msgrcv);
-     printf("Number of Signals delivered                          = %d\n", RU.ru_nsignals);
-     printf("Number of Voluntary Context Switches                 = %d\n", RU.ru_nvcsw);
-     printf("Number of InVoluntary Context Switches               = %d\n", RU.ru_nivcsw);
+    printf("The maximum resident set size (KB)                   = %d\n", RU.ru_maxrss);
+    printf("Average shared memory use in text segment (KB*sec)   = %d\n", RU.ru_ixrss);
+    printf("Average unshared memory use in data segment (KB*sec) = %d\n", RU.ru_idrss);
+    printf("Average unshared memory use in stack segment(KB*sec) = %d\n", RU.ru_isrss);
+    printf("Number of page faults without I/O activity           = %d\n", RU.ru_minflt);
+    printf("Number of page faults with I/O activity              = %d\n", RU.ru_majflt);
+    printf("Number of times process was swapped out              = %d\n", RU.ru_nswap);
+    printf("Number of times filesystem performed INPUT           = %d\n", RU.ru_inblock);
+    printf("Number of times filesystem performed OUTPUT          = %d\n", RU.ru_oublock);
+    printf("Number of IPC messages sent                          = %d\n", RU.ru_msgsnd);
+    printf("Number of IPC messages received                      = %d\n", RU.ru_msgrcv);
+    printf("Number of Signals delivered                          = %d\n", RU.ru_nsignals);
+    printf("Number of Voluntary Context Switches                 = %d\n", RU.ru_nvcsw);
+    printf("Number of InVoluntary Context Switches               = %d\n", RU.ru_nivcsw);
 #endif
 #ifdef __linux__
-     printf ("The maximum resident set size (KB)                   = %ld\n", RU.ru_maxrss);
-     printf ("Number of page faults without I/O activity           = %ld\n", RU.ru_minflt);
-     printf ("Number of page faults with I/O activity              = %ld\n", RU.ru_majflt);
-     printf ("Number of times filesystem performed INPUT           = %ld\n", RU.ru_inblock);
-     printf ("Number of times filesystem performed OUTPUT          = %ld\n", RU.ru_oublock);
-     printf ("Number of Voluntary Context Switches                 = %ld\n", RU.ru_nvcsw);
-     printf ("Number of InVoluntary Context Switches               = %ld\n", RU.ru_nivcsw);
+    printf ("The maximum resident set size (KB)                   = %ld\n", RU.ru_maxrss);
+    printf ("Number of page faults without I/O activity           = %ld\n", RU.ru_minflt);
+    printf ("Number of page faults with I/O activity              = %ld\n", RU.ru_majflt);
+    printf ("Number of times filesystem performed INPUT           = %ld\n", RU.ru_inblock);
+    printf ("Number of times filesystem performed OUTPUT          = %ld\n", RU.ru_oublock);
+    printf ("Number of Voluntary Context Switches                 = %ld\n", RU.ru_nvcsw);
+    printf ("Number of InVoluntary Context Switches               = %ld\n", RU.ru_nivcsw);
 #endif
-     printf("*****************END OF RESOURCE STATISTICS*************************\n\n");
+    printf("*****************END OF RESOURCE STATISTICS*************************\n\n");
 
-
-      usr = user;
-      sys = system;
-      data[0] = RU.ru_maxrss;
-      data[1] = RU.ru_ixrss;
-      data[2] = RU.ru_idrss;
-      data[3] = RU.ru_isrss;
-      data[4] = RU.ru_minflt;
-      data[5] = RU.ru_majflt;
-      data[6] = RU.ru_nswap;
-      data[7] = RU.ru_inblock;
-      data[8] = RU.ru_oublock;
-      data[9] = RU.ru_msgsnd;
-      data[10] = RU.ru_msgrcv;
-      data[11] = RU.ru_nsignals;
-      data[12] = RU.ru_nvcsw;
-      data[13] = RU.ru_nivcsw;
-
-      return;
-
+    usr = user;
+    sys = system;
+    data[0] = RU.ru_maxrss;
+    data[1] = RU.ru_ixrss;
+    data[2] = RU.ru_idrss;
+    data[3] = RU.ru_isrss;
+    data[4] = RU.ru_minflt;
+    data[5] = RU.ru_majflt;
+    data[6] = RU.ru_nswap;
+    data[7] = RU.ru_inblock;
+    data[8] = RU.ru_oublock;
+    data[9] = RU.ru_msgsnd;
+    data[10] = RU.ru_msgrcv;
+    data[11] = RU.ru_nsignals;
+    data[12] = RU.ru_nvcsw;
+    data[13] = RU.ru_nivcsw;
+    return;
 }
 
-
-
-
-
+/**
+ *
+ * @param string
+ * @param time
+ * @author Jim Tuccillo @date August 1999
+ */
 void print_timing (string, time)
-   char             *string;
-   struct time_data *time;
-
+char             *string;
+struct time_data *time;
 {
+    if (time->c_calls > 0) {
+        fprintf (fp, "Information for %s: AVG. Length = %13.2f, CALLS = %d, WALL = %13.3f, CPU = %13.3f \n",
+                 string, (double) (time->c_bytes) / (double) time->c_calls, time->c_calls,
+                 time->c_wall, time->c_cpu);
+    }
 
+    if (time->c_wall > 0.001 ) {
+        fprintf (fp, "                %s: Total BYTES = %g, BW = %8.3f MBYTES/WALL SEC., BW = %8.3f MBYTES/CPU SEC.\n",
+                 string, time->c_bytes,
+                 ((double) time->c_bytes * 0.000001)/time->c_wall,
+                 ((double) time->c_bytes * 0.000001)/time->c_cpu);
+    }
 
-   if (time->c_calls > 0) {
-     fprintf (fp, "Information for %s: AVG. Length = %13.2f, CALLS = %d, WALL = %13.3f, CPU = %13.3f \n",
-     string, (double) (time->c_bytes) / (double) time->c_calls, time->c_calls,
-                       time->c_wall, time->c_cpu);
-   }
+    twall  += time->c_wall;
+    tcpu   += time->c_cpu;
+    tbytes += time->c_bytes * 0.000001;
 
-   if (time->c_wall > 0.001 ) {
-     fprintf (fp, "                %s: Total BYTES = %g, BW = %8.3f MBYTES/WALL SEC., BW = %8.3f MBYTES/CPU SEC.\n",
-     string, time->c_bytes,
-             ((double) time->c_bytes * 0.000001)/time->c_wall,
-             ((double) time->c_bytes * 0.000001)/time->c_cpu);
-   }
+    /* Print the distribution of the message lengths */
+    if (time->c_calls > 0) {
+        int i, j1, j2;
 
-   twall  += time->c_wall;
-   tcpu   += time->c_cpu;
-   tbytes += time->c_bytes * 0.000001;
+        j1 = 0; j2 = 0;
+        fprintf (fp, "       AVG. Length    # of Calls    MB/WALL Sec.  MB/CPU Sec.   WALL Secs.     CPU Secs.   \n");
+        if (time->c_buckets[0] >0) {
+            fprintf (fp, " %13.2f %13d    %13.3f %13.3f %13.4f %13.4f \n",
+                     time->c_sum[0]/(float)time->c_buckets[0], time->c_buckets[0],
+                     ((double) time->c_sum[0] * 0.000001)/time->b_wall[0],
+                     ((double) time->c_sum[0] * 0.000001)/time->b_cpu[0],
+                     time->b_wall[0], time->b_cpu[0]);
+        }
+        time->c_buckets[3] = time->c_buckets[1] + time->c_buckets[2] + time->c_buckets[3];
+        j1 = 1; j2 = 4;
+        for (i =3; i < 31; ++i) {
+            if (time->c_buckets[i] > 0) {
+                fprintf (fp, " %13.2f %13d    %13.3f %13.3f %13.4f %13.4f \n",
+                         time->c_sum[i]/(float)time->c_buckets[i], time->c_buckets[i],
+                         ((double) time->c_sum[i] * 0.000001)/time->b_wall[i],
+                         ((double) time->c_sum[i] * 0.000001)/time->b_cpu[i],
+                         time->b_wall[i], time->b_cpu[i]);
+            }
+            j1 = j2 +1;
+            j2 = j2 + j2;
+        }
 
-   /* Print the distribution of the message lengths */
-   if (time->c_calls > 0) {
-     int i, j1, j2;
-
-     j1 = 0; j2 = 0;
-     fprintf (fp, "       AVG. Length    # of Calls    MB/WALL Sec.  MB/CPU Sec.   WALL Secs.     CPU Secs.   \n");
-     if (time->c_buckets[0] >0) {
-      fprintf (fp, " %13.2f %13d    %13.3f %13.3f %13.4f %13.4f \n",
-                   time->c_sum[0]/(float)time->c_buckets[0], time->c_buckets[0],
-                   ((double) time->c_sum[0] * 0.000001)/time->b_wall[0],
-                   ((double) time->c_sum[0] * 0.000001)/time->b_cpu[0],
-                   time->b_wall[0], time->b_cpu[0]);
-       }
-     time->c_buckets[3] = time->c_buckets[1] + time->c_buckets[2] + time->c_buckets[3];
-     j1 = 1; j2 = 4;
-     for (i =3; i < 31; ++i) {
-      if (time->c_buckets[i] > 0) {
-      fprintf (fp, " %13.2f %13d    %13.3f %13.3f %13.4f %13.4f \n",
-                   time->c_sum[i]/(float)time->c_buckets[i], time->c_buckets[i],
-                   ((double) time->c_sum[i] * 0.000001)/time->b_wall[i],
-                   ((double) time->c_sum[i] * 0.000001)/time->b_cpu[i],
-                   time->b_wall[i], time->b_cpu[i]);
-      }
-       j1 = j2 +1;
-       j2 = j2 + j2;
-     }
-
-   fprintf (fp, "\n");
-
-   }
-
+        fprintf (fp, "\n");
+    }
 }
 
+/**
+ * @param returnVal
+ * @author Jim Tuccillo @date August 1999
+ */
 void summary_ (int *returnVal)
 {
-
-  double temp, temp1;
-  char trace_file[255], processor[8];
+    double temp, temp1;
+    char trace_file[255], processor[8];
 
 /*
-    MPI_Finalize - prototyping replacement for MPI_Finalize
+  MPI_Finalize - prototyping replacement for MPI_Finalize
 */
-
-   elapse(&final_wall);
-   tot_wall = final_wall - start_wall;
-
+    elapse(&final_wall);
+    tot_wall = final_wall - start_wall;
 
     resource();
 
-   if (fp) fclose (fp);
-
-  return;
+    if (fp) fclose (fp);
+    return;
 }
 
+/**
+ *
+ * @author Jim Tuccillo @date August 1999
+ */
 void start_ ()
 {
-  int stateid;
-  int  Argc;
-  char **Argv;
+    int stateid;
+    int  Argc;
+    char **Argv;
 
-  char *answer;
- 
+    char *answer;
 
-  trace_flag=1;
+    trace_flag=1;
 
-  profile = 0;
-  elapse (&start_wall);
-
-  return;
+    profile = 0;
+    elapse (&start_wall);
+    return;
 }
-
