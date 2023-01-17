@@ -1,3 +1,8 @@
+! This is a test in the NCEPLIBS-w3emc project.
+!
+! Test the w3fi71() subroutine.
+!
+! George Gayno
  program test_w3fi71
 
 ! Call routine w3fi71 for NCEP grids 172 and 220.

@@ -1,3 +1,8 @@
+! This is a test in the NCEPLIBS-w3emc project.
+!
+! Test the w3tagb function.
+!
+! Kyle Gerheiser
 program test_w3tagb
   implicit none
   integer :: year, julian_day, hundreths_of_julian_day

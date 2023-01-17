@@ -3,7 +3,7 @@
  * @brief Make a system call to return various useful parameters.
  *
  * This code will make a system call to return various useful
- * parameters.  When subroutine summary is called, a list of system
+ * parameters. When subroutine summary() is called, a list of system
  * resource statistics is printed to stdout.
  *
  * Users need to place a call to start() at the beginning of the
