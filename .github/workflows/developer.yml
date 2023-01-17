@@ -74,3 +74,8 @@ jobs:
           w3emc/build/*.html
           w3emc/build/*.css
 
+    - uses: actions/upload-artifact@v2
+      with:
+        name: docs
+        path: |
+          bufr/build/docs/html
