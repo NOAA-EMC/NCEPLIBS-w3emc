@@ -11,6 +11,8 @@ project(w3emc VERSION ${pVersion} LANGUAGES C Fortran)
 
 # Handle user options.
 option(ENABLE_DOCS "Enable generation of doxygen-based documentation." OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_STATIC_LIBS "Build static libraries" ON)
 option(BUILD_4 "Build the 4-byte real version of the library, libw3emc_4.a" ON)
 option(BUILD_D "Build the 8-byte real version of the library, libw3emc_d.a" ON)
 

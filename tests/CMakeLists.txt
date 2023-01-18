@@ -8,7 +8,7 @@ if(BUILD_D)
   # This function builds and runs a test.
   function(w3emc_test name)
     add_executable(${name} ${name}.f90)
-    target_link_libraries(${name} PRIVATE w3emc_d)
+    target_link_libraries(${name} PUBLIC w3emc::w3emc_d)
     add_test(NAME ${name} COMMAND ${name})
   endfunction()
 

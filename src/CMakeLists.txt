@@ -64,20 +64,43 @@ foreach(kind ${kinds})
   set(lib_name ${PROJECT_NAME}_${kind})
   set(module_dir "${CMAKE_CURRENT_BINARY_DIR}/include_${kind}")
 
-  add_library(${lib_name} STATIC ${fortran_src} $<TARGET_OBJECTS:c_obj_lib>)
-  add_library(${PROJECT_NAME}::${lib_name} ALIAS ${lib_name})
+  # Create object library. The object library will be used to build
+  # static and shared libraries.
+#  add_library(${lib_name} STATIC ${fortran_src} $<TARGET_OBJECTS:c_obj_lib>)
+  add_library(${lib_name}_objlib OBJECT ${fortran_src} $<TARGET_OBJECTS:c_obj_lib>)
+  if(BUILD_SHARED_LIBS)
+    set_property(TARGET ${lib_name}_objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
+  endif()
+  add_library(${PROJECT_NAME}::${lib_name} ALIAS ${lib_name}_objlib)
 
-  set_target_properties(${lib_name} PROPERTIES COMPILE_FLAGS
+  if(BUILD_STATIC_LIBS)
+    # Create static object library from object library.
+    add_library(${lib_name}_static STATIC $<TARGET_OBJECTS:${lib_name}_objlib>)
+    set_target_properties(${lib_name}_static PROPERTIES OUTPUT_NAME ${lib_name})
+    set_target_properties(${lib_name}_static PROPERTIES EXPORT_NAME ${lib_name})
+    set_target_properties(${lib_name}_static PROPERTIES EXPORT_NAME ${lib_name}_static)
+    list(APPEND LIB_TARGETS ${lib_name}_static)
+  endif()
+
+  if(BUILD_SHARED_LIBS)
+    # Create shared object library from object library.
+    add_library(${lib_name}_shared SHARED $<TARGET_OBJECTS:${lib_name}_objlib>)
+    set_target_properties(${lib_name}_shared PROPERTIES OUTPUT_NAME ${lib_name})
+    set_target_properties(${lib_name}_shared PROPERTIES EXPORT_NAME ${lib_name})
+    set_target_properties(${lib_name}_shared PROPERTIES SOVERSION 0)
+    list(APPEND LIB_TARGETS ${lib_name}_shared)
+  endif()
+
+  set_target_properties(${lib_name}_objlib PROPERTIES COMPILE_FLAGS
     "${fortran_${kind}_flags}")
-  set_target_properties(${lib_name} PROPERTIES Fortran_MODULE_DIRECTORY
+  set_target_properties(${lib_name}_objlib PROPERTIES Fortran_MODULE_DIRECTORY
     ${module_dir})
 
-  target_include_directories(${lib_name} INTERFACE
+  target_include_directories(${lib_name}_objlib INTERFACE
     $<BUILD_INTERFACE:${module_dir}>
     $<INSTALL_INTERFACE:include_${kind}>)
-  list(APPEND LIB_TARGETS ${lib_name})
 
-  target_link_libraries(${lib_name} PUBLIC bacio::${bacio_name})
+  target_link_libraries(${lib_name}_objlib PUBLIC bacio::${bacio_name})
 
   install(DIRECTORY ${module_dir} DESTINATION ${CMAKE_INSTALL_PREFIX})
 endforeach()
