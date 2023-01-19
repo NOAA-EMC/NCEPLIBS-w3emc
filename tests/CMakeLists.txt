@@ -9,6 +9,7 @@ if(BUILD_D)
   function(w3emc_test name)
     add_executable(${name} ${name}.f90)
     target_link_libraries(${name} PUBLIC w3emc::w3emc_d)
+    target_link_libraries(${name} PUBLIC bacio::${bacio_name})
     add_test(NAME ${name} COMMAND ${name})
   endfunction()
 
