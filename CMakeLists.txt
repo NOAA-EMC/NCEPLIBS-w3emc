@@ -13,6 +13,7 @@ project(w3emc VERSION ${pVersion} LANGUAGES C Fortran)
 option(ENABLE_DOCS "Enable generation of doxygen-based documentation." OFF)
 option(BUILD_4 "Build the 4-byte real version of the library, libw3emc_4.a" ON)
 option(BUILD_D "Build the 8-byte real version of the library, libw3emc_d.a" ON)
+option(BUILD_TESTING "Build tests of the library" ON)
 
 # Figure whether user wants a _4, a _d, or both libraries.
 if(BUILD_4 AND BUILD_D)
@@ -47,12 +48,32 @@ else()
   set(bacio_name bacio_4)
 endif()
 
+# Set compiler flags.
+if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
+  set(CMAKE_Fortran_FLAGS "-g -traceback ${CMAKE_Fortran_FLAGS}")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
+  set(fortran_d_flags "-r8")
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU)$")
+  set(CMAKE_Fortran_FLAGS
+      "-g -fno-range-check -fbacktrace -funroll-loops ${CMAKE_Fortran_FLAGS}")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-ggdb -Wall")
+  set(fortran_d_flags "-fdefault-real-8")
+endif()
+
+# Deal with argument mismatch on GNU compilers version 10 or later.
+if(${CMAKE_Fortran_COMPILER_ID} MATCHES "^(GNU)$" AND ${CMAKE_Fortran_COMPILER_VERSION} VERSION_GREATER_EQUAL 10)
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -w -fallow-argument-mismatch -fallow-invalid-boz")
+endif()
+
 # Compile the source code in the src directory.
 add_subdirectory(src)
 
 # Add tests.
-enable_testing()
-add_subdirectory(tests)
+if(BUILD_TESTING)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
 
 # Determine whether or not to generate documentation.
 if(ENABLE_DOCS)

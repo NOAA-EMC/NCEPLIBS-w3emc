@@ -34,28 +34,10 @@ w3fi71.f w3fi72.f w3fi73.f w3fi74.f w3fi75.f w3fi76.f w3fi82.f
 w3fi83.f w3fi88.f w3fi92.f w3fp11.f w3fp12.f w3fp13.f w3fs13.f
 w3fs15.f w3fs21.f w3fs26.f w3ft32.f w3kind.f w3locdat.f w3movdat.f
 w3nogds.f w3pradat.f w3reddat.f w3trnarg.f w3unpk77.f w3utcdat.f
-w3valdat.f w3ymdh4.f xmovex.f xstore.f w3tagb.f makgds.f90 )
+w3valdat.f w3ymdh4.f xmovex.f xstore.f w3tagb.f makgds.f90)
 
-# THis is the C source code.
+# This is the C source code.
 set(c_src summary.c)
-
-# Set compiler flags.
-if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
-  set(CMAKE_Fortran_FLAGS "-g -traceback ${CMAKE_Fortran_FLAGS}")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-  set(fortran_d_flags "-r8")
-elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU)$")
-  set(CMAKE_Fortran_FLAGS
-      "-g -fno-range-check -fbacktrace -funroll-loops ${CMAKE_Fortran_FLAGS}")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-ggdb -Wall")
-  set(fortran_d_flags "-fdefault-real-8")
-endif()
-
-# Deal with argument mismatch on GNU compilers version 10 or later.
-if(${CMAKE_Fortran_COMPILER_ID} MATCHES "^(GNU)$" AND ${CMAKE_Fortran_COMPILER_VERSION} VERSION_GREATER_EQUAL 10)
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -w -fallow-argument-mismatch -fallow-invalid-boz")
-endif()
 
 add_library(c_obj_lib OBJECT ${c_src})
 
