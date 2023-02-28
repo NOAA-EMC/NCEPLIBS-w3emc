@@ -5,19 +5,25 @@
 ! Ed Hartnett, 2/28/23
 program test_w3fi74
   implicit none
-  integer :: i, iret
+  integer :: i
+!  integer :: iret
   integer :: kf, nbit
   parameter(kf = 4)
   parameter(nbit = 8)
   integer maxbit
   parameter(maxbit=24)  
-  character pds(400),grib(1000+kf*12)  
+!  character pds(400)
+!  character grib(1000+kf*12)  
   real f(kf)
   integer igflag, igrid
   parameter (igflag = 0)
-  integer ibm(kf),ipds(200),igds(200),ibds(200)
-  integer kfo, lgrib, icomp
+  integer ipds(200),igds(200)
+  integer icomp
+!  integer kfo, lgrib
   integer ierr
+  integer npts
+  character*1 gds(200)
+  integer lengds
 
   print *, "Testing w3fi74..."
 
@@ -35,11 +41,12 @@ program test_w3fi74
   call w3fi71(igrid, igds, ierr)
   if (ierr .ne. 0) stop 1
 
-  ! This call comes from NCEPLIBS-grib_util cnvgrb, putbexn.F90.
-  ! call w3fi72(0, f, 0, nbit, 1, ipds, pds,  &
-  !      igflag, igrid, igds, icomp, 0, ibm, kf, ibds,  &
-  !      kfo, grib, lgrib, iret)
-  ! print *, kfo, lgrib, iret
+  ! Fill the igds array. This call comes from w3if72.f.
+  npts = 4
+  call w3fi74(igds, icomp, gds, lengds, npts, ierr)
+!  print *, lengds, npts
+  if (ierr .ne. 0) stop 1
+  if (lengds .ne. 32 .or. npts .ne. 489900) stop 2
 
   print *, "SUCCESS"
 end program test_w3fi74
