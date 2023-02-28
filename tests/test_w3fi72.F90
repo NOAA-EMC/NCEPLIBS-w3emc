@@ -5,15 +5,24 @@
 ! Ed Hartnett, 2/28/23
 program test_w3fi72
   implicit none
-  integer :: year, julian_day, hundreths_of_julian_day
+  integer :: i, iret
+  integer :: kf, nbit
+  parameter(kf = 4)
+  parameter(nbit = 8)
+  
+  real f(kf)
 
   print *, "Testing w3fi72..."
-  
-  year = 2021
-  julian_day = 21278
-  hundreths_of_julian_day = 0
 
-  ! prints information
-  call w3tagb("test_w3tagb", year, julian_day, hundreths_of_julian_day, "emc")
+  ! Fill up some test data.
+  do i = 1, kf
+     f(i) = i / 2
+  end do
+  
+  ! ! This call comes from NCEPLIBS-grib_util cnvgrb, putbexn.F90.
+  ! call w3fi72(0, f, 0, nbit, 1, ipds, pds,  &
+  !      igflag, igrid, igds, icomp, 0, ibm, kf, ibds,  &
+  !      kfo, grib, lgrib, iret)
+
   print *, "SUCCESS"
 end program test_w3fi72

@@ -1,12 +1,12 @@
 C> @file
-C> @brief Make a complete grib message
+C> @brief Make a complete GRIB message.
 C> @author Ralph Jones @date 1991-05-08
 
-C> Makes a complete grib message from a user supplied
+C> Makes a complete GRIB message from a user supplied
 C> array of floating point or integer data. The user has the
-C> option of supplying the pds or an integer array that will be
-C> used to create a pds (with w3fi68()). The user must also
-C> supply other necessary info; See usage section below.
+C> option of supplying the PDS or an integer array that will be
+C> used to create a PDS (with w3fi68()). The user must also
+C> supply other necessary information.
 C>
 C> Program history log:
 C> - Ralph Jones 1991-05-08
