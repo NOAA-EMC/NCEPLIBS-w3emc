@@ -52,7 +52,7 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bufr
         path: bufr
-        ref: v11.7.1
+        ref: bufr_v11.7.1
     
     - name: cache-bufr
       id: cache-bufr
