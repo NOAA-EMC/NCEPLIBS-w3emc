@@ -46,6 +46,29 @@ jobs:
         make -j2
         make install
 
+    - name: checkout-bufr
+      uses: actions/checkout@v2
+      with:
+        repository: NOAA-EMC/NCEPLIBS-bufr
+        path: bufr
+        ref: bufr_v11.7.1
+    
+    - name: cache-bufr
+      id: cache-bufr
+      uses: actions/cache@v2
+      with:
+        path: ~/bufr
+        key: bufr-Linux_options_${{ runner.os }}-v11.7.1
+
+    - name: build-bufr
+      if: steps.cache-bufr.outputs.cache-hit != 'true'
+      run: |
+        cd bufr
+        mkdir build && cd build
+        cmake -DCMAKE_INSTALL_PREFIX=~/bufr ..
+        make -j2
+        make install
+
     - name: checkout-w3emc
       uses: actions/checkout@v2
       with: 
@@ -56,7 +79,7 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake -DCMAKE_PREFIX_PATH=~/bacio ..
+        cmake -DCMAKE_PREFIX_PATH="~/bacio;~/bufr" ..
         make -j2
 
     - name: test-w3emc

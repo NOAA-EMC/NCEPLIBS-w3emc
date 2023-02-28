@@ -11,9 +11,19 @@ project(w3emc VERSION ${pVersion} LANGUAGES C Fortran)
 
 # Handle user options.
 option(ENABLE_DOCS "Enable generation of doxygen-based documentation." OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(BUILD_4 "Build the 4-byte real version of the library, libw3emc_4.a" ON)
 option(BUILD_D "Build the 8-byte real version of the library, libw3emc_d.a" ON)
 option(BUILD_TESTING "Build tests of the library" ON)
+option(BUILD_WITH_EXTRA_DEPS "Build w3emc with subprograms which call unknown dependencies" ON)
+option(BUILD_WITH_BUFR "Build w3emc with subprograms which call NCEPLIBS-bufr" ON)
+
+# If building shared, extra dependencies must be eliminated.
+if(BUILD_SHARED_LIBS)
+  if(BUILD_WITH_EXTRA_DEPS)
+      message(FATAL_ERROR "Shared libraries cannot be built without setting -DBUILD_WITH_EXTRA_DEPS=OFF.")
+  endif()
+endif()
 
 # Figure whether user wants a _4, a _d, or both libraries.
 if(BUILD_4 AND BUILD_D)
@@ -38,8 +48,13 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel)$")
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-# Bacio is required.
+# NCEPLIBS-bacio is required.
 find_package(bacio 2.4.0 REQUIRED)
+
+# NCEPLIBS-bufr may be required.
+if(BUILD_WITH_BUFR)
+  find_package(bufr REQUIRED)
+endif()
 
 # The name of the bacio library changed with NCEPLIBS-bacio-2.5.0.
 if(bacio_VERSION GREATER_EQUAL 2.5.0)

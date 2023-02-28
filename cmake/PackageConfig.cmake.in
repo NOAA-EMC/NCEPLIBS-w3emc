@@ -18,5 +18,9 @@ check_required_components("@PROJECT_NAME@")
 
 find_dependency(bacio)
 
+if(@BUILD_WITH_BUFR@)
+  find_dependency(bufr)
+endif()
+  
 get_target_property(location @PROJECT_NAME@::@PROJECT_NAME@_4 LOCATION)
 message(STATUS "Found @PROJECT_NAME@: ${location} (found version \"@PROJECT_VERSION@\")")
