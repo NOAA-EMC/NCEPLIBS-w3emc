@@ -1,9 +1,9 @@
 ! This is a test in the NCEPLIBS-w3emc project.
 !
-! Test the w3fi72() function.
+! Test the w3fi74() function.
 !
 ! Ed Hartnett, 2/28/23
-program test_w3fi72
+program test_w3fi74
   implicit none
   integer :: i, iret
   integer :: kf, nbit
@@ -19,7 +19,7 @@ program test_w3fi72
   integer kfo, lgrib, icomp
   integer ierr
 
-  print *, "Testing w3fi72..."
+  print *, "Testing w3fi74..."
 
   ! Fill up some test data.
   do i = 1, 200
@@ -42,4 +42,4 @@ program test_w3fi72
   ! print *, kfo, lgrib, iret
 
   print *, "SUCCESS"
-end program test_w3fi72
+end program test_w3fi74
