@@ -2,25 +2,46 @@
 
 # W3EMC
 
-This library contains Fortran 90 decoder/encoder routines for GRIB
-edition 1. This version has combined the w3emc and w3nco
-libraries. For more detailed documentation see
-https://noaa-emc.github.io/NCEPLIBS-w3emc/.
+This library contains Fortran decoder/encoder routines for GRIB
+edition 1. GRIB1 is a WMO standard for gridded data. For more
+information see the [WMO GRIB1
+site](https://community.wmo.int/en/activity-areas/wis/grib-edition-1). For
+programmer documentation see the [NCEPLIBS-w3emc
+documentation](https://noaa-emc.github.io/NCEPLIBS-w3emc/).
+
+Since version 2.8.0 the NCEPLIBS-w3emc library has combined the
+subprograms from the
+[NCEPLIBS-w3nco](https://noaa-emc.github.io/NCEPLIBS-w3nco/)
+repository.
 
 This is part of
 the [NCEPLIBS](https://github.com/NOAA-EMC/NCEPLIBS) project.
+
+## Related NCEPLIBS Projects
+
+Repository | Notes
+-----------|------
+[NCEPLIBS-g2c](https://github.com/NOAA-EMC/NCEPLIBS-g2c) | C implementation of the GRIB 2 functions
+[NCEPLIBS-grib_util](https://github.com/NOAA-EMC/NCEPLIBS-grib_util) | A collection of GRIB1 and GRIB2 utilities
+[NCEPLIBS-g2tmpl](https://github.com/NOAA-EMC/NCEPLIBS-g2tmpl) | Utilities for GRIB2 codes and templates
+[NCEPLIBS-w3nco](https://noaa-emc.github.io/NCEPLIBS-w3nco/) | Subprograms now incorporated into NCEPLIBS-w3emc
 
 ## Authors
 
 NCEP/EMC developers.
 
-Code manager: Alex Richert, Hang Lei
+Code manager: Alex Richert, Hang Lei, Ed Hartnett
 
 ## Prerequisites
 
 The NCEPLIBS-w3emc library depends on
 [NCEPLIBS-bacio](https://github.com/NOAA-EMC/NCEPLIBS-bacio). The
 bacio library does binary file I/O.
+
+NCEPLIBS-w3emc also optionally depends on the
+[NCEPLIBS-bufr](https://github.com/NOAA-EMC/NCEPLIBS-bufr)
+library. The bufr library encodes and decodes messages in the WMO BUFR
+format.
 
 ## Installing
 
@@ -32,7 +53,7 @@ and do:
 cd NCEPLIBS-w3emc
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/install/location/myw3emc -DCMAKE_PREFIX_PATH="/location/of/bacio"  ..
+cmake -DCMAKE_INSTALL_PREFIX=/install/location/myw3emc -DCMAKE_PREFIX_PATH="/location/of/bacio;/location/of/bufr"  ..
 make -j2
 make install
 
