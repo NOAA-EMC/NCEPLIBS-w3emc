@@ -22,6 +22,9 @@ The NCEPLIBS-w3emc library depends on
 [NCEPLIBS-bacio](https://github.com/NOAA-EMC/NCEPLIBS-bacio). The
 bacio library does binary file I/O.
 
+NCEPLIBS-w3emc also optionally depends on the
+[NCEPLIBS-bufr](https://github.com/NOAA-EMC/NCEPLIBS-bufr) library.
+
 ## Installing
 
 Download latest release from
@@ -32,7 +35,7 @@ and do:
 cd NCEPLIBS-w3emc
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/install/location/myw3emc -DCMAKE_PREFIX_PATH="/location/of/bacio"  ..
+cmake -DCMAKE_INSTALL_PREFIX=/install/location/myw3emc -DCMAKE_PREFIX_PATH="/location/of/bacio;/location/of/bufr"  ..
 make -j2
 make install
 
