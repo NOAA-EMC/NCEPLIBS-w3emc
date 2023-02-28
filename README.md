@@ -2,7 +2,7 @@
 
 # W3EMC
 
-This library contains Fortran 90 decoder/encoder routines for GRIB
+This library contains Fortran decoder/encoder routines for GRIB
 edition 1. GRIB1 is a WMO standard for gridded data. For more
 information see the [WMO GRIB1
 site](https://community.wmo.int/en/activity-areas/wis/grib-edition-1). For
