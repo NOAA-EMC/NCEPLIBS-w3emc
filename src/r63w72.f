@@ -1,10 +1,10 @@
 C> @file
-C> @brief Convert w3fi63 parms to w3fi72 parms.
+C> @brief Convert w3fi63() parms to w3fi72() parms.
 C> @author Mark Iredell @date 1992-10-31
 
-C> determines the integer pds and gds parameters
-C> for the grib1 packing routine w3fi72 given the parameters
-C> returned from the grib1 unpacking routine w3fi63.
+C> Determines the integer PDS and GDS parameters
+C> for the GRIB1 packing routine w3fi72() given the parameters
+C> returned from the GRIB1 unpacking routine w3fi63().
 C>
 C> Program history log:
 C> - Mark Iredell 1991-10-31
@@ -14,20 +14,18 @@ C> - Mark Iredell 1997-02-14 Only altered ipds(26:27) for extended pds
 C> - Chris Caruso 1998-06-01 Y2K fix for year of century
 C> - Diane Stoken 2005-05-06 Recognize level 236
 C>
-C> Usage:    call r63w72(kpds,kgds,ipds,igds)
-C>
-C> @param[in] kpds integer (200) pds parameters from w3fi63
-C> @param[in] kgds integer (200) gds parameters from w3fi63
-C> @param[out] ipds integer (200) pds parameters for w3fi72
-C> @param[out] igds integer (200) gds parameters for w3fi72
-C>
 C> @note kgds and igds extend beyond their dimensions here
 C> if pl parameters are present.
+C>
+C> @param[in] kpds integer (200) PDS parameters from w3fi63().
+C> @param[in] kgds integer (200) GDS parameters from w3fi63().
+C> @param[out] ipds integer (200) PDS parameters for w3fi72().
+C> @param[out] igds integer (200) GDS parameters for w3fi72().
 C>
 C> @author Mark Iredell @date 1992-10-31
       SUBROUTINE R63W72(KPDS,KGDS,IPDS,IGDS)
       DIMENSION KPDS(200),KGDS(200),IPDS(200),IGDS(200)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 C  DETERMINE PRODUCT DEFINITION SECTION (PDS) PARAMETERS
       IF(KPDS(23).NE.2) THEN
         IPDS(1)=28                      ! LENGTH OF PDS
@@ -70,7 +68,7 @@ C  DETERMINE PRODUCT DEFINITION SECTION (PDS) PARAMETERS
         IPDS(26)=0                      ! PDS BYTE 29
         IPDS(27)=0                      ! PDS BYTE 30
       ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 C  DETERMINE GRID DEFINITION SECTION (GDS) PARAMETERS
       IGDS(1)=KGDS(19)                  ! NUMBER OF VERTICAL COORDINATES
       IGDS(2)=KGDS(20)                  ! VERTICAL COORDINATES
@@ -113,6 +111,6 @@ C  EXTENSION FOR PL PARAMETERS
           IGDS(18+J)=KGDS(21+J)
         ENDDO
       ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
       RETURN
       END
