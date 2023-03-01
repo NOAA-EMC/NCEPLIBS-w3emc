@@ -7,12 +7,13 @@ program test_w3fi72
   implicit none
   integer :: i, iret
   integer :: kf, nbit
-  parameter(kf = 4)
+  parameter(kf = 489900)
   parameter(nbit = 8)
   integer maxbit
   parameter(maxbit=24)  
-  character pds(400),grib(1000+kf*12)  
-  real f(kf)
+  character pds(40000)
+  real*8, dimension(:), allocatable :: fld
+  character*1, dimension(:), allocatable :: grib
   integer igflag, igrid
   parameter (igflag = 0)
   integer ibm(kf),ipds(200),igds(200),ibds(200)
@@ -21,12 +22,15 @@ program test_w3fi72
 
   print *, "Testing w3fi72..."
 
+  allocate(fld(kf))
+  allocate(grib(1000+kf*12))
+
   ! Fill up some test data.
   do i = 1, 200
      ipds(i) = 0
   end do
   do i = 1, kf
-     f(i) = i / 2
+     fld(i) = i / 2
   end do
 
   ! Fill the igds array. This call comes from test_w3fi71.F90.
@@ -36,10 +40,13 @@ program test_w3fi72
   if (ierr .ne. 0) stop 1
 
   ! This call comes from NCEPLIBS-grib_util cnvgrb, putbexn.F90.
-  ! call w3fi72(0, f, 0, nbit, 1, ipds, pds,  &
-  !      igflag, igrid, igds, icomp, 0, ibm, kf, ibds,  &
-  !      kfo, grib, lgrib, iret)
-  ! print *, kfo, lgrib, iret
+  call w3fi72(0, fld, 0, nbit, 1, ipds, pds,  &
+       igflag, igrid, igds, icomp, 0, ibm, kf, ibds,  &
+       kfo, grib, lgrib, iret)
+  print *, kfo, lgrib, iret
+
+  deallocate(fld)
+  deallocate(grib)
 
   print *, "SUCCESS"
 end program test_w3fi72
