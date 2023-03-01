@@ -12,7 +12,7 @@ program test_w3fi72
   integer maxbit
   parameter(maxbit=24)  
   character pds(40000)
-  real*8, dimension(:), allocatable :: fld
+  real, dimension(:), allocatable :: fld
   character*1, dimension(:), allocatable :: grib
   integer igflag, igrid
   parameter (igflag = 0)
