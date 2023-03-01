@@ -43,7 +43,10 @@ program test_w3fi72
   call w3fi72(0, fld, 0, nbit, 1, ipds, pds,  &
        igflag, igrid, igds, icomp, 0, ibm, kf, ibds,  &
        kfo, grib, lgrib, iret)
-  print *, kfo, lgrib, iret
+!  print *, kfo, lgrib, iret
+  if (kfo .ne. 489900) stop 2
+  if (lgrib .ne. 489956) stop 3
+  if (iret .ne. 0) stop 4
 
   deallocate(fld)
   deallocate(grib)
