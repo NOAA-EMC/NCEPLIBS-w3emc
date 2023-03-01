@@ -1,158 +1,52 @@
 C> @file
-C> @brief Unpk grib field to grib grid.
+C> @brief Unpack GRIB field to a GRIB grid.
 C> @author Bill Cavanaugh @date 1991-09-13
 
-C> Unpack a grib (edition 1) field to the exact grid
-C> specified in the grib message, isolate the bit map, and make
-C> the values of the product descripton section (pds) and the
-C> grid description section (gds) available in return arrays.
+C> Unpack a GRIB (edition 1) field to the exact grid
+C> specified in the GRIB message, isolate the bit map, and make
+C> the values of the product descripton section (PDS) and the
+C> grid description section (GDS) available in return arrays.
 C>
 C> When decoding is completed, data at each grid point has been
-C> returned in the units specified in the grib manual.
+C> returned in the units specified in the GRIB manual.
 C>
-C> PROGRAM HISTORY LOG:
-C> - Bill Cavanaugh 1991-09-13
-C> - Bill Cavanaugh 1991-11-12 Modified size of ecmwf grids 5-8
-C> - Bill Cavanaugh 1991-12-22 Corrected processing of mercator projections
-C> in grid definition section (gds) in
-C> routine fi633
-C> - Bill Cavanaugh 1992-08-05 Corrected maximum grid size to allow for
-C> one degree by one degree global grids
-C> - Bill Cavanaugh 1992-08-27 Corrected typo error, added code to compare
-C> total byte size from section 0 with sum of
-C> section sizes.
-C> - Bill Cavanaugh 1992-10-21 Corrections were made (in fi634) to reduce
-C> processing time for international grids.
-C> removed a typographical error in fi635.
-C> - Bill Cavanaugh 1993-01-07 Corrections were made (in fi635) to
-C> facilitate use of these routines on a pc.
-C> a typographical error was also corrected
-C> - Bill Cavanaugh 1993-01-13 Corrections were made (in fi632) to
-C> properly handle condition when
-C> time range indicator = 10.
-C> added u.s.grid 87.
-C> - Bill Cavanaugh 1993-02-04 Added u.s.grids 85 and 86
-C> - Bill Cavanaugh 1993-02-26 Added grids 2, 3, 37 thru 44,and
-C> grids 55, 56, 90, 91, 92, and 93 to
-C> list of u.s. grids.
-C> - Bill Cavanaugh 1993-04-07 Added grids 67 thru 77 to
-C> list of u.s. grids.
-C> - Bill Cavanaugh 1993-04-20 Increased max size to accomodate
-C> gaussian grids.
-C> - Bill Cavanaugh 1993-05-26 Corrected grid range selection in fi634
-C> for ranges 67-71 & 75-77
-C> - Bill Cavanaugh 1993-06-08 Corrected fi635 to accept grib messages
-C> with second order packing. added routine fi636
-C> to process messages with second order packing.
-C> - Bill Cavanaugh 1993-09-22 Modified to extract sub-center number from
-C> pds byte 26
-C> - Bill Cavanaugh 1993-10-13 Modified fi634 to correct grid sizes for
-C> grids 204 and 208
-C> - Bill Cavanaugh 1993-10-14 Increased size of kgds to include entries for
-C> number of points in grid and number of words
-C> in each row
-C> - Bill Cavanaugh 1993-12-08 Corrected test for edition number instead
-C> of version number
-C> - Bill Cavanaugh 1993-12-15 Modified second order pointers to first order
-C> values and second order values correctly
-C> in routine fi636
-C> - Bill Cavanaugh 1994-03-02 Added call to w3fi83 within decoder.  user
-C> no longer needs to make call to this routine
-C> - Bill Cavanaugh 1994-04-22 Modified fi635, fi636 to process row by row
-C> second order packing, added scaling correction
-C> to fi635, and corrected typographical errors
-C> in comment fields in fi634
-C> - Bill Cavanaugh 1994-05-17 COrrected error in fi633 to extract resolution
-C> for lambert-conformal grids. added clarifying
-C> information to docblock entries
-C> - Bill Cavanaugh 1994-05-25 Added code to process column by column as well
-C> as row by row ordering of second order data
-C> - Bill Cavanaugh 1994-06-27 Added processing for grids 45, 94 and 95.
-C> includes construction of second order bit maps
-C> for thinned grids in fi636.
-C> - Bill Cavanaugh 1994-07-08 Commented out print outs used for debugging
-C> - Bill Cavanaugh 1994-09-08 Added grids 220, 221, 223 for fnoc
-C> - Farley 1994-11-10 Increased mxsize from 72960 to 260000
-C> for .5 degree sst analysis fields
-C> - Ralph Jones 1994-12-06 Changes in fi632 for pds greater than 28
-C> - Ralph Jones 1995-02-14 Correct in fi633 for navy wafs grib
-C> - M Baldwin 1995-03-20 Fi633 modification to get
-C> data rep types [kgds(1)] 201 and 202 to work.
-C> - M. Baldwin 1995-04-10 Added grids 96 and 97 for eta model in fi634.
-C> - Ralph Jones 1995-04-26 Fi636 corection for 2nd order complex
-C> unpacking. r
-C> - Ralph Jones 1995-05-19 Added grid 215, 20 km awips grid
-C> - Ralph Jones 1995-07-06 Added gaussian t62, t126 grid 98, 126
-C> - Ralph Jones 1995-10-19 Added grid 216, 45 km eta awips alaska grid
-C> - Mark Iredell 1995-10-31 Removed saves and prints
-C> - Ralph Jones 1996-03-07 Continue unpack with kret error 9 in fi631.
-C> - Ralph Jones 1996-08-19 Added mercator grids 8 and 53, and grid 196
-C> - W. Bostelman 1997-02-12 Corrects ecmwf us grid 2 processing
-C> - Mark Iredell 1998-06-17 Removed alternate return in fi637
-C> - Mark Iredell 1998-08-31 Eliminated need for mxsize
-C> - Stephen Gilbert 1998-09-02 Corrected error in map size for U.S. Grid 92
-C> - M. Baldwin 1998-09-08 Add data rep type [kgds(1)] 203
-C> - Eric Rogers 2001-03-08 Changed eta grids 90-97, added eta grids
-C> 194, 198. added awips grids 241,242,243,
-C> 245, 246, 247, 248, and 250
-C> - Boi Vuong 2001-03-19 Added awips grids 238,239,240, and 244
-C> - Stephen Gilbert 2001-06-06 Changed gbyte/sbyte calls to refer to
-C> Wesley Ebisuzaki's endian independent
-C> versions gbytec/sbytec.
-C> Removed equivalences.
-C> - Eric Rogers 2001-05-03 Added grid 249  (12km for alaska)
-C> - Eric Rogers 2001-10-10 Redefined grid 218 for 12 km eta
-C> redefined grid 192 for new 32-km eta grid
-C> - Boi Vuong 2002-03-27  VUONG       Added rsas grid 88 and awips grids 219, 220,
-C> 223, 224, 225, 226, 227, 228, 229, 230, 231,
-C> 232, 233, 234, 235, 251, and 252
-C> - Eric Rogers 2002-08-06 Redefined grids 90-93,97,194,245-250 for the
-C> 8km hi-res-window model and add awips grid 253
-C> - Stephen Gilbert 2003-06-30 Set new values in array kptr to pass back additional
-C> packing info.
-C> kptr(19) - binary scale factor
-C> kptr(20) - num bits used to pack each datum
-C> - Stephen Gilbert 2003-06-30 Added grids 145 and 146 for cmaq
-C> and grid 175 for awips over guam.
-C> - Boi Vuong 2003-07-08 Added grids 110, 127, 171, 172 and modified grid 170
-C> - Boi Vuong 2004-09-02 Added awips grids 147, 148, 173 and 254
-C> 2005-01-04  COOKE       Added awips grids 160 and 161
-C> - Boi Vuong 2005-03-03 Moved grid 170 to grid 174 and add grid 170
-C> - Boi Vuong 2005-03-21 Added awips grid 130
-C> - Boi Vuong 2005-10-11 Added awips grid 163
-C> - Boi Vuong 2006-12-12 Added awips grid 120
-C> - Boi Vuong 2007-04-12 Added awips 176 and  data rep type kgds(1) 204
-C> - Boi Vuong 2007-06-11 Added new grids 11 to 18 and 122 to 125 and 138
-C> and 180 to 183
-C> - Boi Vuong 2007-11-06 Changed grid 198 from arakawa staggered e-grid to polar
-C> stereograpgic grid added new grid 10, 99, 150, 151, 197
-C> - Boi Vuong 2008-01-17 Added new grid 195 and changed grid 196 (arakawa-e to mercator)
-C> - Boi Vuong 2009-05-21 Modified to handle grid 45
-C> - Boi Vuong 2010-05-11 Data rep type kgds(1) 205
-C> - Boi Vuong 2010-02-18 Added grid 128, 139 and 140
-C> 2010-07-20 Added rotated lat/lon "a,b,c,d" staggers -> kgds(1) 205
-C> - Boi Vuong 2010-08-05 Added new grid 184, 199, 83 and
-C> redefined grid 90 for new rtma conus 1.27-km
-C> redefined grid 91 for new rtma alaska 2.976-km
-C> redefined grid 92 for new rtma alaska 1.488-km
-C> - Eric Rogers 2010-09-08 Changed grid 94 to alaska 6km staggered b-grid
-C> changed grid 95 to puerto rico 3km staggered b-grid
-C> changed grid 96 to hawaii 3km staggered b-grid
-C> changed grid 96 to hawaii 3km staggered b-grid
-C> changed grid 97 to conus 4km staggered b-grid
-C> changed grid 99 to nam 12km staggered b-grid
-C> added grid 179 (12 km polar stereographic over north america)
-C> changed grid 194 to 3km mercator grid over puerto rico
-C> corrected latitude of sw corner point of grid 151
-C> - Boi Vuong 2011-10-12 Added grid 129, 187, 188, 189 and 193
-C> - Boi Vuong 2012-04-16 Added new grid 132, 200
-C> - Boi Vuong 2017-07-17 Correct grid 161 number of point nj from 102 to 103
-C> and map size from 13974 to 14111
+C> See "GRIB - THE WMO FORMAT FOR THE STORAGE OF WEATHER PRODUCT
+C> INFORMATION AND THE EXCHANGE OF WEATHER PRODUCT MESSAGES IN
+C> GRIDDED BINARY FORM" dated July 1, 1988 by John D. Stackpolem
+C> DOC, NOAA, NWS, National Meteorological Center.
+C>
+C>  List of text messages from code:
+C>  - W3FI63/FI632
+C>    - 'HAVE ENCOUNTERED A NEW GRID FOR NMC, PLEASE NOTIFY
+C>       AUTOMATION DIVISION, PRODUCTION MANAGEMENT BRANCH
+C>       (W/NMC42)'
+C>
+C>    - 'HAVE ENCOUNTERED A NEW GRID FOR ECMWF, PLEASE NOTIFY
+C>       AUTOMATION DIVISION, PRODUCTION MANAGEMENT BRANCH
+C>       (W/NMC42)'
+C>
+C>    - 'HAVE ENCOUNTERED A NEW GRID FOR U.K. METEOROLOGICAL
+C>      OFFICE, BRACKNELL.  PLEASE NOTIFY AUTOMATION DIVISION,
+C>      PRODUCTION MANAGEMENT BRANCH (W/NMC42)'
+C>
+C>    - 'HAVE ENCOUNTERED A NEW GRID FOR FNOC, PLEASE NOTIFY
+C>      AUTOMATION DIVISION, PRODUCTION MANAGEMENT BRANCH
+C>      (W/NMC42)'
+C>
+C>  - W3FI63/FI633
+C>    - 'POLAR STEREO PROCESSING NOT AVAILABLE'
+C>
+C>  - W3FI63/FI634
+C>    - 'WARNING - BIT MAP MAY NOT BE ASSOCIATED WITH SPHERICAL
+C>      COEFFICIENTS'
+C>
+C>  - W3FI63/FI637
+C>    - 'NO CURRENT LISTING OF FNOC GRIDS'
 C>
 C> @param[in] MSGA Grib field - "grib" thru "7777"   char*1
-C> (message can be preceded by junk chars)
-C> @param[out] DATA Array containing data elements
-C> @param[out] KPDS Array containing pds elements.  (edition 1)
+C> (message can be preceded by junk chars). Contains the grib message to be unpacked. characters
+C> "GRIB" may begin anywhere within first 100 bytes.
+C> @param[out] KPDS Array of size 100 containing PDS elements, GRIB (edition 1):
 C> - 1 Id of center
 C> - 2 Generating process id number
 C> - 3 Grid definition
@@ -300,6 +194,8 @@ C>  - 12 Latitude of last point
 C>  - 13 Longitude of last point
 C> @param[out] KBMS Bitmap describing location of output elements.
 C> (always constructed)
+C> @param[out] DATA Array containing the unpacked data elements.
+C> Note: 65160 is maximun field size allowable.
 C> @param[out] KPTR Array containing storage for following parameters
 C> - 1 Total length of grib message
 C> - 2 Length of indicator (section  0)
@@ -321,7 +217,7 @@ C> - 17 Reserved
 C> - 18 Reserved
 C> - 19 Binary scale factor
 C> - 20 Num bits used to pack each datum
-C> @param[out] KRET Flag indicating quality of completion
+C> @param[out] KRET Flag indicating quality of completion.
 C>
 C> @note When decoding is completed, data at each grid point has been
 C> returned in the units specified in the grib manual.
@@ -344,272 +240,6 @@ C>  program is not set to process flag combinations
 C>
 C> @author Bill Cavanaugh @date 1991-09-13
       SUBROUTINE W3FI63(MSGA,KPDS,KGDS,KBMS,DATA,KPTR,KRET)
-C                                                         4 AUG 1988
-C                               W3FI63
-C
-C
-C                       GRIB UNPACKING ROUTINE
-C
-C
-C       THIS ROUTINE WILL UNPACK A 'GRIB' FIELD TO THE EXACT GRID
-C  TYPE SPECIFIED IN THE MESSAGE, RETURN A BIT MAP AND MAKE THE
-C  VALUES OF THE PRODUCT DEFINITION SEC   (PDS) AND THE GRID
-C  DESCRIPTION SEC   (GDS) AVAILABLE IN RETURN ARRAYS.
-C  SEE "GRIB - THE WMO FORMAT FOR THE STORAGE OF WEATHER PRODUCT
-C  INFORMATION AND THE EXCHANGE OF WEATHER PRODUCT MESSAGES IN
-C  GRIDDED BINARY FORM" DATED JULY 1, 1988 BY JOHN D. STACKPOLE
-C  DOC, NOAA, NWS, NATIONAL METEOROLOGICAL CENTER.
-C
-C       THE CALL TO THE GRIB UNPACKING ROUTINE IS AS FOLLOWS:
-C
-C            CALL W3FI63(MSGA,KPDS,KGDS,LBMS,DATA,KPTR,KRET)
-C
-C  INPUT:
-C
-C       MSGA  = CONTAINS THE GRIB MESSAGE TO BE UNPACKED. CHARACTERS
-C               "GRIB" MAY BEGIN ANYWHERE WITHIN FIRST 100 BYTES.
-C
-C  OUTPUT:
-C
-C       KPDS(100)      INTEGER*4
-C               ARRAY TO CONTAIN THE ELEMENTS OF THE PRODUCT
-C               DEFINITION SEC  .
-C         (VERSION 1)
-C            KPDS(1)  - ID OF CENTER
-C            KPDS(2)  - MODEL IDENTIFICATION (SEE "GRIB" TABLE 1)
-C            KPDS(3)  - GRID IDENTIFICATION (SEE "GRIB" TABLE 2)
-C            KPDS(4)  - GDS/BMS FLAG
-C                           BIT       DEFINITION
-C                            25        0 - GDS OMITTED
-C                                      1 - GDS INCLUDED
-C                            26        0 - BMS OMITTED
-C                                      1 - BMS INCLUDED
-C                        NOTE:- LEFTMOST BIT = 1,
-C                               RIGHTMOST BIT = 32
-C            KPDS(5)  - INDICATOR OF PARAMETER (SEE "GRIB" TABLE 5)
-C            KPDS(6)  - TYPE OF LEVEL (SEE "GRIB" TABLES 6 & 7)
-C            KPDS(7)  - HEIGHT,PRESSURE,ETC  OF LEVEL
-C            KPDS(8)  - YEAR INCLUDING CENTURY
-C            KPDS(9)  - MONTH OF YEAR
-C            KPDS(10) - DAY OF MONTH
-C            KPDS(11) - HOUR OF DAY
-C            KPDS(12) - MINUTE OF HOUR
-C            KPDS(13) - INDICATOR OF FORECAST TIME UNIT (SEE "GRIB"
-C                       TABLE 8)
-C            KPDS(14) - TIME 1               (SEE "GRIB" TABLE 8A)
-C            KPDS(15) - TIME 2               (SEE "GRIB" TABLE 8A)
-C            KPDS(16) - TIME RANGE INDICATOR (SEE "GRIB" TABLE 8A)
-C            KPDS(17) - NUMBER INCLUDED IN AVERAGE
-C            KPDS(18) - EDITION NR OF GRIB SPECIFICATION
-C            KPDS(19) - VERSION NR OF PARAMETER TABLE
-C
-C       KGDS(13)       INTEGER*4
-C             ARRAY CONTAINING GDS ELEMENTS.
-C
-C            KGDS(1)  - DATA REPRESENTATION TYPE
-C
-C         LATITUDE/LONGITUDE GRIDS (SEE "GRIB" TABLE 10)
-C            KGDS(2)  - N(I) NUMBER OF POINTS ON LATITUDE
-C                       CIRCLE
-C            KGDS(3)  - N(J) NUMBER OF POINTS ON LONGITUDE
-C                       CIRCLE
-C            KGDS(4)  - LA(1) LATITUDE OF ORIGIN
-C            KGDS(5)  - LO(1) LONGITUDE OF ORIGIN
-C            KGDS(6)  - RESOLUTION FLAG
-C                           BIT       MEANING
-C                            25       0 - DIRECTION INCREMENTS NOT
-C                                         GIVEN
-C                                     1 - DIRECTION INCREMENTS GIVEN
-C            KGDS(7)  - LA(2) LATITUDE OF EXTREME POINT
-C            KGDS(8)  - LO(2) LONGITUDE OF EXTREME POINT
-C            KGDS(9)  - DI LONGITUDINAL DIRECTION INCREMENT
-C            KGDS(10) - REGULAR LAT/LON GRID
-C                           DJ - LATITUDINAL DIRECTION
-C                                INCREMENT
-C                       GAUSSIAN GRID
-C                           N  - NUMBER OF LATITUDE CIRCLES
-C                                BETWEEN A POLE AND THE EQUATOR
-C            KGDS(11) - SCANNING MODE FLAG
-C                           BIT       MEANING
-C                            25       0 - POINTS ALONG A LATITUDE
-C                                         SCAN FROM WEST TO EAST
-C                                     1 - POINTS ALONG A LATITUDE
-C                                         SCAN FROM EAST TO WEST
-C                            26       0 - POINTS ALONG A MERIDIAN
-C                                         SCAN FROM NORTH TO SOUTH
-C                                     1 - POINTS ALONG A MERIDIAN
-C                                         SCAN FROM SOUTH TO NORTH
-C                            27       0 - POINTS SCAN FIRST ALONG
-C                                         CIRCLES OF LATITUDE, THEN
-C                                         ALONG MERIDIANS
-C                                         (FORTRAN: (I,J))
-C                                     1 - POINTS SCAN FIRST ALONG
-C                                         MERIDIANS THEN ALONG
-C                                         CIRCLES OF LATITUDE
-C                                         (FORTRAN: (J,I))
-C
-C         POLAR STEREOGRAPHIC GRIDS  (SEE GRIB TABLE 12)
-C            KGDS(2)  - N(I) NR POINTS ALONG LAT CIRCLE
-C            KGDS(3)  - N(J) NR POINTS ALONG LON CIRCLE
-C            KGDS(4)  - LA(1) LATITUDE OF ORIGIN
-C            KGDS(5)  - LO(1) LONGITUDE OF ORIGIN
-C            KGDS(6)  - RESERVED
-C            KGDS(7)  - LOV GRID ORIENTATION
-C            KGDS(8)  - DX - X DIRECTION INCREMENT
-C            KGDS(9)  - DY - Y DIRECTION INCREMENT
-C            KGDS(10) - PROJECTION CENTER FLAG
-C            KGDS(11) - SCANNING MODE
-C
-C         SPHERICAL HARMONIC COEFFICIENTS (SEE "GRIB" TABLE 14)
-C            KGDS(2)  - J PENTAGONAL RESOLUTION PARAMETER
-C            KGDS(3)  - K PENTAGONAL RESOLUTION PARAMETER
-C            KGDS(4)  - M PENTAGONAL RESOLUTION PARAMETER
-C            KGDS(5)  - REPRESENTATION TYPE
-C            KGDS(6)  - COEFFICIENT STORAGE MODE
-C
-C       MERCATOR GRIDS
-C            KGDS(2)   - N(I) NR POINTS ON LATITUDE CIRCLE
-C            KGDS(3)   - N(J) NR POINTS ON LONGITUDE MERIDIAN
-C            KGDS(4)   - LA(1) LATITUDE OF ORIGIN
-C            KGDS(5)   - LO(1) LONGITUDE OF ORIGIN
-C            KGDS(6)   - RESOLUTION FLAG
-C            KGDS(7)   - LA(2) LATITUDE OF LAST GRID POINT
-C            KGDS(8)   - LO(2) LONGITUDE OF LAST GRID POINT
-C            KGDS(9)   - LATIN - LATITUDE OF PROJECTION INTERSECTION
-C            KGDS(10)  - RESERVED
-C            KGDS(11)  - SCANNING MODE FLAG
-C            KGDS(12)  - LONGITUDINAL DIR GRID LENGTH
-C            KGDS(13)  - LATITUDINAL DIR GRID LENGTH
-C       LAMBERT CONFORMAL GRIDS
-C            KGDS(2)   - NX NR POINTS ALONG X-AXIS
-C            KGDS(3)   - NY NR POINTS ALONG Y-AXIS
-C            KGDS(4)   - LA1 LAT OF ORIGIN (LOWER LEFT)
-C            KGDS(5)   - LO1 LON OF ORIGIN (LOWER LEFT)
-C            KGDS(6)   - RESOLUTION (RIGHT ADJ COPY OF OCTET 17)
-C            KGDS(7)   - LOV - ORIENTATION OF GRID
-C            KGDS(8)   - DX - X-DIR INCREMENT
-C            KGDS(9)   - DY - Y-DIR INCREMENT
-C            KGDS(10)  - PROJECTION CENTER FLAG
-C            KGDS(11)  - SCANNING MODE FLAG
-C            KGDS(12)  - LATIN 1 - FIRST LAT FROM POLE OF
-C                        SECANT CONE INTERSECTION
-C            KGDS(13)  - LATIN 2 - SECOND LAT FROM POLE OF
-C                        SECANT CONE INTERSECTION
-C
-C       LBMS(*)    LOGICAL
-C               ARRAY TO CONTAIN THE BIT MAP DESCRIBING THE
-C               PLACEMENT OF DATA IN THE OUTPUT ARRAY.  IF A
-C               BIT MAP IS NOT INCLUDED IN THE SOURCE MESSAGE,
-C               ONE WILL BE GENERATED AUTOMATICALLY BY THE
-C               UNPACKING ROUTINE.
-C
-C
-C       DATA(*)    REAL*4
-C               THIS ARRAY WILL CONTAIN THE UNPACKED DATA POINTS.
-C
-C                      NOTE:- 65160 IS MAXIMUN FIELD SIZE ALLOWABLE
-C
-C       KPTR(10)       INTEGER*4
-C               ARRAY CONTAINING STORAGE FOR THE FOLLOWING
-C               PARAMETERS.
-C
-C                 (1)  -    UNUSED
-C                 (2)  -    UNUSED
-C                 (3)  -    LENGTH OF PDS (IN BYTES)
-C                 (4)  -    LENGTH OF GDS (IN BYTES)
-C                 (5)  -    LENGTH OF BMS (IN BYTES)
-C                 (6)  -    LENGTH OF BDS (IN BYTES)
-C                 (7)  -    USED BY UNPACKING ROUTINE
-C                 (8)  -    NUMBER OF DATA POINTS FOR GRID
-C                 (9)  -    "GRIB" CHARACTERS START IN BYTE NUMBER
-C                 (10) -    USED BY UNPACKING ROUTINE
-C
-C
-C       KRET      INTEGER*4
-C                 THIS VARIABLE WILL CONTAIN THE RETURN INDICATOR.
-C
-C                 0    -    NO ERRORS DETECTED.
-C
-C                 1    -    'GRIB' NOT FOUND IN FIRST 100
-C                           CHARACTERS.
-C
-C                 2    -    '7777' NOT FOUND, EITHER MISSING OR
-C                           TOTAL OF SEC   COUNTS OF INDIVIDUAL
-C                           SECTIONS  IS INCORRECT.
-C
-C                 3    -    UNPACKED FIELD IS LARGER THAN 65160.
-C
-C                 4    -    IN GDS, DATA REPRESENTATION TYPE
-C                           NOT ONE OF THE CURRENTLY ACCEPTABLE
-C                           VALUES. SEE "GRIB" TABLE 9. VALUE
-C                           OF INCORRECT TYPE RETURNED IN KGDS(1).
-C
-C                 5    -    GRID INDICATED IN KPDS(3) IS NOT
-C                           AVAILABLE FOR THE CENTER INDICATED IN
-C                           KPDS(1) AND NO GDS SENT.
-C
-C                 7    -    EDITION INDICATED IN KPDS(18) HAS NOT
-C                           YET BEEN INCLUDED IN THE DECODER.
-C
-C                 8    -    GRID IDENTIFICATION = 255 (NOT STANDARD
-C                           GRID) BUT FLAG INDICATING PRESENCE OF
-C                           GDS IS TURNED OFF. NO METHOD OF
-C                           GENERATING PROPER GRID.
-C
-C                 9    -    PRODUCT OF KGDS(2) AND KGDS(3) DOES NOT
-C                           MATCH STANDARD NUMBER OF POINTS FOR THIS
-C                           GRID (FOR OTHER THAN SPECTRALS). THIS
-C                           WILL OCCUR ONLY IF THE GRID.
-C                           IDENTIFICATION, KPDS(3), AND A
-C                           TRANSMITTED GDS ARE INCONSISTENT.
-C
-C                10    -    CENTER INDICATOR WAS NOT ONE INDICATED
-C                           IN "GRIB" TABLE 1.  PLEASE CONTACT AD
-C                           PRODUCTION MANAGEMENT BRANCH (W/NMC42)
-C                                     IF THIS ERROR IS ENCOUNTERED.
-C
-C                11    -    BINARY DATA SECTION (BDS) NOT COMPLETELY
-C                           PROCESSED.  PROGRAM IS NOT SET TO PROCESS
-C                           FLAG COMBINATIONS AS SHOWN IN
-C                           OCTETS 4 AND 14.
-C
-C
-C  LIST OF TEXT MESSAGES FROM CODE
-C
-C
-C  W3FI63/FI632
-C
-C            'HAVE ENCOUNTERED A NEW GRID FOR NMC, PLEASE NOTIFY
-C            AUTOMATION DIVISION, PRODUCTION MANAGEMENT BRANCH
-C            (W/NMC42)'
-C
-C            'HAVE ENCOUNTERED A NEW GRID FOR ECMWF, PLEASE NOTIFY
-C            AUTOMATION DIVISION, PRODUCTION MANAGEMENT BRANCH
-C            (W/NMC42)'
-C
-C            'HAVE ENCOUNTERED A NEW GRID FOR U.K. METEOROLOGICAL
-C            OFFICE, BRACKNELL.  PLEASE NOTIFY AUTOMATION DIVISION,
-C            PRODUCTION MANAGEMENT BRANCH (W/NMC42)'
-C
-C            'HAVE ENCOUNTERED A NEW GRID FOR FNOC, PLEASE NOTIFY
-C            AUTOMATION DIVISION, PRODUCTION MANAGEMENT BRANCH
-C            (W/NMC42)'
-C
-C
-C  W3FI63/FI633
-C
-C            'POLAR STEREO PROCESSING NOT AVAILABLE'  *
-C
-C  W3FI63/FI634
-C
-C            'WARNING - BIT MAP MAY NOT BE ASSOCIATED WITH SPHERICAL
-C            COEFFICIENTS'
-C
-C
-C  W3FI63/FI637
-C
-C            'NO CURRENT LISTING OF FNOC GRIDS'      *
-C
 C
 C  * WILL BE AVAILABLE IN NEXT UPDATE
 C  ***************************************************************
