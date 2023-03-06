@@ -1,5 +1,5 @@
 C> @file
-C> @brief Convert 25 word array to grib pds
+C> @brief Convert 25 word array to GRIB pds.
 C> @author Ralph Jones @date 1991-05-08
 
 C> Converts an array of 25, or 27 integer words into a

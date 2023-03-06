@@ -1,124 +1,10 @@
 C> @file
-C> @brief Make array used by grib packer for gds.
+C> @brief Make array used by GRIB packer for GDS.
 C> @author Ralph Jones @date 1992-02-21
 
-C> W3FI71 Makes a 18, 37, 55, 64, or 91 word integer array
-C> used by w3fi72() grib packer to make the grid description section
-C> (gds) - section 2.
-C>
-C> Program history log:
-C> - Ralph Jones 1992-02-21
-C> - M. Farley 1992-07-01 Added remarks for 'igds' array elements.
-C> added lambert conformal grids and enlarged
-C> idgs array from 14 to 18 words.
-C> - Ralph Jones 1992-10-03 Added corrections to awips grib tables
-C> - Ralph Jones 1992-10-16 Add gaussian grid 126 to tables
-C> - Ralph Jones 1992-10-18 Corrections to lambert conformal tables
-C> and other tables
-C> - Ralph Jones 1992-10-19 Add gaussian grid  98 to tables
-C> - Ralph Jones 1993-01-25 Add on84 grids 87, 106, 107 to tables
-C> - Ralph Jones 1993-03-10 Add on84 grids 1, 55, 56 to tables
-C> - Ralph Jones 1993-03-26 Add grib grids 2, 3 to tables
-C> - Ralph Jones 1993-03-29 Add save statement
-C> - Ralph Jones 1993-06-15 Add grib grids 37 to 44 to tables
-C> - Ralph Jones 1993-09-29 Gaussian grid document not correct,
-C> w3fi74 will be changed to agree with
-C> it. gaussian grid 98 table has wrong
-C> value.
-C> - Ralph Jones 1993-10-12 Changes for on388 rev. oct 8,1993 for
-C> grid 204, 208.
-C> - Ralph Jones 1993-10-13 Correction for grids 37-44, bytes 7-8,
-C> 24-25 set to all bits 1 for missing.
-C> - Ralph Jones 1993-11-23 Add grids 90-93 for eta model
-C> add grid 4 for 720*361 .5 deg. grid
-C> - Ralph Jones 1994-04-12 Correction for grid 28
-C> - Ralph Jones 1994-06-01 Add grid 45, 288*145 1.25 deg. grid
-C> - Ralph Jones 1994-06-22 Add grids 94, 95 for eta model
-C> - Ralph Jones 1995-04-11 Add grids 96, 97 for eta model
-C> - Ralph Jones 1995-05-19 Add from 20 km eta model awips grid 215
-C> - Ralph Jones 1995-10-19 Add from 20 km eta model alaska grid 216
-C> - Mark Iredell 1995-10-31 Removed saves and prints
-C> - Mark Iredell 1996-05-08 Correct first latitude for grids 27 and 28
-C> - Ralph Jones 1996-07-02 Add from 10 km eta model olympic grid 218
-C> - Ralph Jones 1996-07-02 Add 196 for eta model
-C> - Ralph Jones 1996-08-15 Add o.n. 84 grid 8 and 53 as grib grid 8
-C> and 53
-C> - Ralph Jones 1996-11-29 Correction to tables for grid 21-26, 61-64
-C> - Mark Iredell 1997-01-31 Correct first latitude for grid 30
-C> - Mark Iredell 1997-10-20 Correct last longitude for grid 98
-C> - Stephen Gilbert 1998-07-07 Add grids 217 and 219 through 235
-C> - Baldwin 1998-09-21 Add grids 190, 192 for eta model
-C> - Bladwin 1999-01-20 Add grids 236, 237
-C> - Mark Iredell 1999-08-18 Add grid 170
-C> - Eric Rogers 2001-03-08 Changed eta grids 90-97, added eta grids
-C> 194, 198. added awips grids 241,242,243,
-C> 245, 246, 247, 248, and 250
-C> - Boi Vuong 2001-03-19 Added awips grids 238,239,240, and 244
-C> - Boi Vuong 2001-04-02 Correct last longitude for grid 225
-C> - Eric Rogers 2001-05-03 Added grid 249
-C> - Eric Rogers 2001-10-10 Redefined 218 for 12-km eta
-C> redefined grid 192 for new 32-km eta grid
-C> - Boi Vuong 2002-03-27 Added rsas grid 88 and awips grids 251 and 252
-C> - Eric Rogers 2002-08-06 Redefined grids 90-93,97,194,245-250 for the
-C> 8km hi-res-window model and add awips grid 253
-C> - Stephen Gilbert 2003-06-30 Added grids 145 and 146 for cmaq
-C> and grid 175 for awips over guam.
-C> - Boi Vuong 2003-07-08 Corrected latitude for grid 253 and 170, add grid
-C> 110, 127, 171 and 172
-C> - Boi Vuong 2004-08-05 Corrected latitude for grid 253
-C> - Stephen Gilbert 2004-09-01 Corrected the orientation and projection center flag
-C> for southern hemisphere grids 28, 172, 220 and 224
-C> - Boi Vuong 2004-09-02 Added grids 147, 148, 173 and 254
-C> - Matt Cooke 2005-01-04 Added grids 160, 161 and corrected longitude of orientation for grid 172
-C> - Boi Vuong 2005-03-03 Moved grid 170 to grid 174 and add grid 170
-C> - Boi Vuong 2005-03-21 Added grids 130
-C> - Boi Vuong 2005-09-12 Added grids 163
-C> - Boi Vuong 2006-10-27 Corrected x and y-direction grid length for grids 252
-C> - Boi Vuong 2006-11-16 Changed the longitude from negative to positive degree for grids 252
-C> - Boi Vuong 2006-12-12 Changed data representation type (octet 6) from 0 to 1 for grid 254
-C> add grid 120 (curvilinear orthogonal grid)
-C> - Boi Vuong 2006-12-27 Corrected the lat/lon direction increment for grid 160
-C> - Boi Vuong 2007-03-21 Corrected the lat/lon direction increment, resoulution,
-C> scanning mode for grid 235 and grid type 204 for grid 120
-C> - Boi Vuong 2007-04-24 Corrected the lat/lon direction increment, resoulution,
-C> for grids (219,173,220,171,233,238,239,244,253) and added
-C> grid 176.
-C> - Boi Vuong 2007-06-11 Added new grids (11,12,13,14,15,16,18,122,123,124,125,138
-C> 180, 181, 182, 183) and corrected the lat/lon direction
-C> increment for grid 240.
-C> - Boi Vuong 2007-11-06 Corrected the scanning mode for grids (11,12,13,14,15,16,18)
-C> changed grid 198 from arakawa staggered e-grid to polar
-C> stereographic grid added new grid 10, 99, 150, 151, 197
-C> - Boi Vuong 2008-01-17 Added new grid 195 and changed grid 196 (arakawa-e to mercator)
-C> - Boi Vuong 2010-02-15 Modified to correct latitude for grid 151 and added
-C> - Boi Vuong 2010-06-01 Modified to correct latitude and longitude for grid 196
-C> - Boi Vuong 2010-08-05 Added new grid 184, 199, 83 and
-C> redefined grid 90 for new rtma conus 1.27-km
-C> redefined grid 91 for new rtma alaska 2.976-km
-C> redefined grid 92 for new rtma alaska 1.488-km
-C> - Eric Rogers 2010-09-08 Changed grid 94 to alaska 6km staggered b-grid
-C> changed grid 95 to puerto rico 3km staggered b-grid
-C> changed grid 96 to hawaii 3km staggered b-grid
-C> changed grid 96 to hawaii 3km staggered b-grid
-C> changed grid 97 to conus 4km staggered b-grid
-C> changed grid 99 to nam 12km staggered b-grid
-C> added grid 179 (12 km polar stereographic over north america)
-C> changed grid 194 to 3km mercator grid over puerto rico
-C> corrected latitude of sw corner point of grid 151
-C> - Boi Vuong 2011-10-12 Added grid 129, 187, 188, 189 and 193
-C> - Boi Vuong 2012-04-16 Added grid 132, 200
-C> - Boi Vuong 2012-11-07 Corrected grid 174 for res. and comp. flag set to 128
-C> - Boi Vuong 2017-07-17 Correct grid 161 number of point nj from 102 to 103
-C> and map size from 13974 to 14111
-C> - Boi Vuong 2020-06-15 Corrected grid 200,212,216 and 236 for res. and comp. flag
-C> set to 136 and south pole to -90.00
-C>
-C> @param[in] IGRID GRIB grid number, or office note 84 grid number
-C> @param[out] IGDS 18, 37, 55, 64, or 91 word integer array with
-C> information to make a grib grid description section.
-C> @param[out] IERR:
-C> - 0  Correct exit
-C> - 1  Grid type in igrid is not in table
+C> Makes a 18, 37, 55, 64, or 91 word integer array
+C> used by w3fi72() GRIB packer to make the grid description section
+C> (GDS) - section 2.
 C>
 C> @note
 C> - 1) Office note grid type 26 is 6 in grib, 26 is an
@@ -289,6 +175,14 @@ C>  - IGDS(13) = scanning mode flags (code table 8)
 C>  - IGDS(14) = ... through ...
 C>  - IGDS(18) = ... not used for this grid
 C>
+C> @param[in] IGRID GRIB grid number, or office note 84 grid number
+C> @param[out] IGDS 18, 37, 55, 64, or 91 word integer array with
+C> information to make a grib grid description section.
+C> @param[out] IERR:
+C> - 0  Correct exit
+C> - 1  Grid type in igrid is not in table
+C>
+C> @author Ralph Jones @date 1992-02-21
       SUBROUTINE W3FI71 (IGRID, IGDS, IERR)
 C
       INTEGER       IGRID
