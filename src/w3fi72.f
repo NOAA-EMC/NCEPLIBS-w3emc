@@ -1,42 +1,12 @@
 C> @file
-C> @brief Make a complete grib message
+C> @brief Make a complete GRIB message.
 C> @author Ralph Jones @date 1991-05-08
 
-C> Makes a complete grib message from a user supplied
+C> Makes a complete GRIB message from a user supplied
 C> array of floating point or integer data. The user has the
-C> option of supplying the pds or an integer array that will be
-C> used to create a pds (with w3fi68()). The user must also
-C> supply other necessary info; See usage section below.
-C>
-C> Program history log:
-C> - Ralph Jones 1991-05-08
-C> - M. Farley 1992-07-01 Added gds and bms logic. Placed existing
-C> logic for bds in a routine.
-C> - Ralph Jones 1992-10-02 Add error exit for w3fi73()
-C> - Ralph Jones 1993-04-30 Replace do loops to move character data
-C> with xmovex, use xstore to zero character
-C> array. make change so flat field will pack.
-C> - Bill Cavanaugh 1993-08-06 Modified call to w3fi75
-C> - Bill Cavanaugh 1993-10-26 Added code to restore input field to original
-C> values if d-scale not 0
-C> - Bill Cavanaugh 1994-01-27 Added igds array in call to w3fi75 to provide
-C> information for boustrophedonic processing
-C> - Bill Cavanaugh 1994-03-03 Increased size of gds array for thin grids
-C> - M. Farley 1994-05-16 Cleaned up documentation
-C> - M. Farley 1994-11-10 Increased size of pfld/ifld arrarys from
-C> 100k to 260k for .5 degree sst anal fields
-C> - Ralph Jones 1994-12-04 Change document for ipflag.
-C> - Mark Iredell 1995-10-31 Removed saves and prints
-C> - Stephen Gilbert 1998-05-19 Increased array dimensions to handle grids
-C> of up to 500,000 grid points.
-C> - Mark Iredell 1995-10-31 Generalized word size
-C> - Stephen Gilbert 1998-12-21 Replaced Function ICHAR with mova2i.
-C> - Stephen Gilbert 1999-02-01 Changed the method of zeroing out array KBUF.
-C> the old method, using W3FI01() and XSTORE() was
-C> incorrect with 4-byte integers and 8-byte reals.
-C> - Stephen Gilbert 2001-06-07 Removed calls to xmovex.
-C> changed IPFLD from integer to character.
-C> - George Gayno 2010-02-19 Fix allocation of array bms
+C> option of supplying the PDS or an integer array that will be
+C> used to create a PDS (with w3fi68()). The user must also
+C> supply other necessary information.
 C>
 C> @param[in] ITYPE
 C> - 0 = Floating point data supplied in array 'fld'
