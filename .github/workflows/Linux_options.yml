@@ -44,7 +44,7 @@ jobs:
         cd bacio
         mkdir build && cd build
         cmake -DCMAKE_INSTALL_PREFIX=~/bacio ..
-        make -j2
+        make -j2 VERBOSE=1
         make install
 
     - name: checkout-bufr
@@ -67,7 +67,7 @@ jobs:
         cd bufr
         mkdir build && cd build
         cmake -DCMAKE_INSTALL_PREFIX=~/bufr ..
-        make -j2
+        make -j2 VERBOSE=1
         make install
 
     - name: checkout-w3emc
@@ -81,7 +81,7 @@ jobs:
         mkdir build 
         cd build
         cmake -DCMAKE_PREFIX_PATH="~/bacio;~/bufr" ${{ matrix.options }} ..
-        make -j2
+        make -j2 VERBOSE=1
 
     - name: test-w3emc
       run: |

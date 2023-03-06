@@ -77,7 +77,7 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake -DCMAKE_PREFIX_PATH="~/;~/bacio;~/bufr" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_BUILD_TYPE=Debug ..
+        cmake -DCMAKE_PREFIX_PATH="~/;~/bacio;~/bufr" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_C_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_BUILD_TYPE=Debug ..
         make -j2
 
     - name: test-w3emc
