@@ -2,19 +2,21 @@
 
 # Kyle Gerheiser, Ed Hartnett
 
-# We only have tests for the _d version of the library.
-if(BUILD_D)
+# This function builds, links, and runs a test program.
+function(create_test name kind)
+  add_executable(${name}_${kind} ${name}.F90)
+  target_link_libraries(${name}_${kind} PRIVATE w3emc_${kind})
+  set_target_properties(${name}_${kind} PROPERTIES COMPILE_FLAGS "${fortran_${kind}_flags}")
+  set_target_properties(${name}_${kind} PROPERTIES Fortran_MODULE_DIRECTORY
+    ${CMAKE_CURRENT_BINARY_DIR}/include_${kind})
+  add_test(NAME ${name}_${kind} COMMAND ${name}_${kind})
+  target_compile_definitions(${name}_${kind} PUBLIC -DKIND_${kind})  
+endfunction()
 
-  # This function builds and runs a test.
-  function(w3emc_test name)
-    add_executable(${name} ${name}.F90)
-    target_link_libraries(${name} PRIVATE w3emc_d)
-    add_test(NAME ${name} COMMAND ${name})
-  endfunction()
-
-  # These are the tests.
-  w3emc_test(test_summary)
-  w3emc_test(test_w3tagb)
-  w3emc_test(test_w3fi71)
-  w3emc_test(test_w3fi74)
-endif()
+# These are the tests.
+foreach(kind ${kinds})
+  create_test(test_summary ${kind})
+  create_test(test_w3tagb ${kind})
+  create_test(test_w3fi71 ${kind})
+  create_test(test_w3fi74 ${kind})
+endforeach()  
