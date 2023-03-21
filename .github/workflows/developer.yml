@@ -77,13 +77,16 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake -DCMAKE_PREFIX_PATH="~/;~/bacio;~/bufr" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_C_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_BUILD_TYPE=Debug -DBUILD_8=ON -DBUILD_SHARED=ON ..
+        cmake -DCMAKE_INSTALL_PATH="~/w1" -DCMAKE_PREFIX_PATH="~/;~/bacio;~/bufr" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_C_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_BUILD_TYPE=Debug -DBUILD_8=ON -DBUILD_SHARED=ON ..
         make -j2
 
     - name: test-w3emc
       run: |
         cd w3emc/build
         ctest --output-on-failure --rerun-failed --verbose
+        make install
+        ls -l ~/w1
+        ls -l ~/w1/lib
 
     - name: generate-test-coverage
       run: |
