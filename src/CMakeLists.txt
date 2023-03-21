@@ -51,19 +51,23 @@ set(c_src summary.c)
 
 add_library(c_obj_lib OBJECT ${c_src})
 
-# For shared, add fPIC.
-if(BUILD_SHARED_LIBS)
-  set_property(TARGET c_obj_lib PROPERTY POSITION_INDEPENDENT_CODE 1)
-endif()
-
 # We buld a _4 and a _d by default.
 foreach(kind ${kinds})
   set(lib_name ${PROJECT_NAME}_${kind})
   set(module_dir "${CMAKE_CURRENT_BINARY_DIR}/include_${kind}")
 
+  # Create library. It will be STATIC by default, but SHARED if option
+  # BUILD_SHARED_LIBS is on.
   add_library(${lib_name} ${fortran_src} $<TARGET_OBJECTS:c_obj_lib>)
   add_library(${PROJECT_NAME}::${lib_name} ALIAS ${lib_name})
 
+  # For shared, set SOVERSION; increment it if API changes (other than
+  # adding new functions).
+  if(BUILD_SHARED_LIBS)
+    set_target_properties(${lib_name} PROPERTIES SOVERSION 0)
+  endif()
+
+  # Set the flags for _4 or _d.
   set_target_properties(${lib_name} PROPERTIES COMPILE_FLAGS
     "${fortran_${kind}_flags}")
   set_target_properties(${lib_name} PROPERTIES Fortran_MODULE_DIRECTORY
@@ -74,7 +78,10 @@ foreach(kind ${kinds})
     $<INSTALL_INTERFACE:include_${kind}>)
   list(APPEND LIB_TARGETS ${lib_name})
 
+  # Link with bacio.
   target_link_libraries(${lib_name} PUBLIC bacio::${bacio_name})
+
+  # Optionally link with bufr.
   if(BUILD_WITH_BUFR)
     target_link_libraries(${lib_name} PUBLIC bufr::bufr_4)
   endif()
