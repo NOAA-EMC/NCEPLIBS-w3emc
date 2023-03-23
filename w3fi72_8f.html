@@ -89,7 +89,7 @@ $(document).ready(function(){initNavTree('w3fi72_8f.html',''); initResizable(); 
 </div><!--header-->
 <div class="contents">
 
-<p>Make a complete grib message.  
+<p>Make a complete GRIB message.  
 <a href="#details">More...</a></p>
 
 <p><a href="w3fi72_8f_source.html">Go to the source code of this file.</a></p>
@@ -97,11 +97,11 @@ $(document).ready(function(){initNavTree('w3fi72_8f.html',''); initResizable(); 
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions/Subroutines</h2></td></tr>
 <tr class="memitem:aaac6e022f341c919316466672ef3e70c"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="w3fi72_8f.html#aaac6e022f341c919316466672ef3e70c">w3fi72</a> (ITYPE, FLD, IFLD, IBITL, IPFLAG, ID, PDS, IGFLAG, IGRID, IGDS, ICOMP, IBFLAG, IBMAP, IBLEN, IBDSFL, NPTS, KBUF, ITOT, JERR)</td></tr>
-<tr class="memdesc:aaac6e022f341c919316466672ef3e70c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes a complete grib message from a user supplied array of floating point or integer data.  <a href="w3fi72_8f.html#aaac6e022f341c919316466672ef3e70c">More...</a><br /></td></tr>
+<tr class="memdesc:aaac6e022f341c919316466672ef3e70c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes a complete GRIB message from a user supplied array of floating point or integer data.  <a href="w3fi72_8f.html#aaac6e022f341c919316466672ef3e70c">More...</a><br /></td></tr>
 <tr class="separator:aaac6e022f341c919316466672ef3e70c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Make a complete grib message. </p>
+<div class="textblock"><p>Make a complete GRIB message. </p>
 <dl class="section author"><dt>Author</dt><dd>Ralph Jones </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>1991-05-08 </dd></dl>
 
@@ -235,28 +235,8 @@ Functions/Subroutines</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Makes a complete grib message from a user supplied array of floating point or integer data. </p>
-<p>The user has the option of supplying the pds or an integer array that will be used to create a pds (with <a class="el" href="w3fi68_8f.html#a627b0d3ff494874dd3fb243e39cfa991" title="Converts an array of 25, or 27 integer words into a grib product definition section (pds) of 28 bytes...">w3fi68()</a>). The user must also supply other necessary info; See usage section below.</p>
-<p>Program history log:</p><ul>
-<li>Ralph Jones 1991-05-08</li>
-<li>M. Farley 1992-07-01 Added gds and bms logic. Placed existing logic for bds in a routine.</li>
-<li>Ralph Jones 1992-10-02 Add error exit for <a class="el" href="w3fi73_8f.html#a89eedc9b7ba4fd46b1f6ac9eba1f773e" title="This subroutine constructs a grib bit map section.">w3fi73()</a></li>
-<li>Ralph Jones 1993-04-30 Replace do loops to move character data with xmovex, use xstore to zero character array. make change so flat field will pack.</li>
-<li>Bill Cavanaugh 1993-08-06 Modified call to w3fi75</li>
-<li>Bill Cavanaugh 1993-10-26 Added code to restore input field to original values if d-scale not 0</li>
-<li>Bill Cavanaugh 1994-01-27 Added igds array in call to w3fi75 to provide information for boustrophedonic processing</li>
-<li>Bill Cavanaugh 1994-03-03 Increased size of gds array for thin grids</li>
-<li>M. Farley 1994-05-16 Cleaned up documentation</li>
-<li>M. Farley 1994-11-10 Increased size of pfld/ifld arrarys from 100k to 260k for .5 degree sst anal fields</li>
-<li>Ralph Jones 1994-12-04 Change document for ipflag.</li>
-<li>Mark Iredell 1995-10-31 Removed saves and prints</li>
-<li>Stephen Gilbert 1998-05-19 Increased array dimensions to handle grids of up to 500,000 grid points.</li>
-<li>Mark Iredell 1995-10-31 Generalized word size</li>
-<li>Stephen Gilbert 1998-12-21 Replaced Function ICHAR with mova2i.</li>
-<li>Stephen Gilbert 1999-02-01 Changed the method of zeroing out array KBUF. the old method, using W3FI01() and XSTORE() was incorrect with 4-byte integers and 8-byte reals.</li>
-<li>Stephen Gilbert 2001-06-07 Removed calls to xmovex. changed IPFLD from integer to character.</li>
-<li>George Gayno 2010-02-19 Fix allocation of array bms</li>
-</ul>
+<p>Makes a complete GRIB message from a user supplied array of floating point or integer data. </p>
+<p>The user has the option of supplying the PDS or an integer array that will be used to create a PDS (with <a class="el" href="w3fi68_8f.html#a627b0d3ff494874dd3fb243e39cfa991" title="Converts an array of 25, or 27 integer words into a grib product definition section (pds) of 28 bytes...">w3fi68()</a>). The user must also supply other necessary information.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">ITYPE</td><td><ul>
@@ -279,7 +259,7 @@ Functions/Subroutines</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>If pds is greater than 30, use iplfag=1. The user could call <a class="el" href="w3fi68_8f.html#a627b0d3ff494874dd3fb243e39cfa991" title="Converts an array of 25, or 27 integer words into a grib product definition section (pds) of 28 bytes...">w3fi68()</a> before he calls <a class="el" href="w3fi72_8f.html#aaac6e022f341c919316466672ef3e70c" title="Makes a complete grib message from a user supplied array of floating point or integer data.">w3fi72()</a>. This would make the first 30 bytes of the pds, user then would make bytes after 30. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>If pds is greater than 30, use iplfag=1. The user could call <a class="el" href="w3fi68_8f.html#a627b0d3ff494874dd3fb243e39cfa991" title="Converts an array of 25, or 27 integer words into a grib product definition section (pds) of 28 bytes...">w3fi68()</a> before he calls <a class="el" href="w3fi72_8f.html#aaac6e022f341c919316466672ef3e70c" title="Makes a complete GRIB message from a user supplied array of floating point or integer data.">w3fi72()</a>. This would make the first 30 bytes of the pds, user then would make bytes after 30. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">ID</td><td>Integer array of values that <a class="el" href="w3fi68_8f.html#a627b0d3ff494874dd3fb243e39cfa991" title="Converts an array of 25, or 27 integer words into a grib product definition section (pds) of 28 bytes...">w3fi68()</a> will use to make an edition 1 pds if ipflag=0. (see the docblock for <a class="el" href="w3fi68_8f.html#a627b0d3ff494874dd3fb243e39cfa991" title="Converts an array of 25, or 27 integer words into a grib product definition section (pds) of 28 bytes...">w3fi68()</a> for layout of array) </td></tr>
@@ -294,7 +274,7 @@ Functions/Subroutines</h2></td></tr>
 <li>255 = If user defined grid; igds must be supplied and igflag must =1. </li>
 </ul>
 </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">IGDS</td><td>Integer array containing user gds info (same format as supplied by <a class="el" href="w3fi71_8f.html#add1b6b2b2c9fda60094914f5e676ec42" title="W3FI71 Makes a 18, 37, 55, 64, or 91 word integer array used by w3fi72() grib packer to make the grid...">w3fi71()</a> - see dockblock for layout) if igflag=1. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">IGDS</td><td>Integer array containing user gds info (same format as supplied by <a class="el" href="w3fi71_8f.html#add1b6b2b2c9fda60094914f5e676ec42" title="Makes a 18, 37, 55, 64, or 91 word integer array used by w3fi72() GRIB packer to make the grid descri...">w3fi71()</a> - see dockblock for layout) if igflag=1. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">ICOMP</td><td>Resolution and component flag for bit 5 of gds(17)<ul>
 <li>0 = Earth oriented winds</li>
 <li>1 = Grid oriented winds </li>
@@ -377,7 +357,7 @@ Functions/Subroutines</h2></td></tr>
 <dl class="section author"><dt>Author</dt><dd>Ralph Jones </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>1991-05-08 </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="w3fi72_8f_source.html#l00151">151</a> of file <a class="el" href="w3fi72_8f_source.html">w3fi72.f</a>.</p>
+<p class="definition">Definition at line <a class="el" href="w3fi72_8f_source.html#l00121">121</a> of file <a class="el" href="w3fi72_8f_source.html">w3fi72.f</a>.</p>
 
 </div>
 </div>

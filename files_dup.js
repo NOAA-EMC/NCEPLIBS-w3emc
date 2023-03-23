@@ -64,6 +64,7 @@ var files_dup =
     [ "sbytes.f", "sbytes_8f.html", "sbytes_8f" ],
     [ "sbytesc.f", "sbytesc_8f.html", "sbytesc_8f" ],
     [ "skgb.f", "skgb_8f.html", "skgb_8f" ],
+    [ "summary.c", "summary_8c.html", "summary_8c" ],
     [ "w3ai00.f", "w3ai00_8f.html", "w3ai00_8f" ],
     [ "w3ai01.f", "w3ai01_8f.html", "w3ai01_8f" ],
     [ "w3ai08.f", "w3ai08_8f.html", "w3ai08_8f" ],

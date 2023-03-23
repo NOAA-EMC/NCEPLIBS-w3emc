@@ -89,7 +89,7 @@ $(document).ready(function(){initNavTree('w3fi74_8f.html',''); initResizable(); 
 </div><!--header-->
 <div class="contents">
 
-<p>CONSTRUCT GRID DEFINITION SECTION (GDS)  
+<p>Construct Grid Definition Section (GDS).  
 <a href="#details">More...</a></p>
 
 <p><a href="w3fi74_8f_source.html">Go to the source code of this file.</a></p>
@@ -97,11 +97,11 @@ $(document).ready(function(){initNavTree('w3fi74_8f.html',''); initResizable(); 
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ab921a7e370356989116ba2ac3e429d61"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="w3fi74_8f.html#ab921a7e370356989116ba2ac3e429d61">w3fi74</a> (IGDS, ICOMP, GDS, LENGDS, NPTS, IGERR)</td></tr>
-<tr class="memdesc:ab921a7e370356989116ba2ac3e429d61"><td class="mdescLeft">&#160;</td><td class="mdescRight">This subroutine constructs a grib grid definition section.  <a href="w3fi74_8f.html#ab921a7e370356989116ba2ac3e429d61">More...</a><br /></td></tr>
+<tr class="memdesc:ab921a7e370356989116ba2ac3e429d61"><td class="mdescLeft">&#160;</td><td class="mdescRight">This subroutine constructs a GRIB grid definition section.  <a href="w3fi74_8f.html#ab921a7e370356989116ba2ac3e429d61">More...</a><br /></td></tr>
 <tr class="separator:ab921a7e370356989116ba2ac3e429d61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>CONSTRUCT GRID DEFINITION SECTION (GDS) </p>
+<div class="textblock"><p>Construct Grid Definition Section (GDS). </p>
 <dl class="section author"><dt>Author</dt><dd>M. Farley </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>1992-07-07 </dd></dl>
 
@@ -157,36 +157,23 @@ Functions/Subroutines</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This subroutine constructs a grib grid definition section. </p>
-<p>Program history log:</p><ul>
-<li>M. Farley 1992-07-07</li>
-<li>Ralph Jones 1992-10-16 Add code to lat/lon section to do gaussian grids.</li>
-<li>Ralph Jones 1993-03-29 Add save statement</li>
-<li>Ralph Jones 1993-08-24 Changes for grib grids 37-44</li>
-<li>Ralph Jones 1993-09-29 Changes for gaussian grid for document change in <a class="el" href="w3fi71_8f.html#add1b6b2b2c9fda60094914f5e676ec42" title="W3FI71 Makes a 18, 37, 55, 64, or 91 word integer array used by w3fi72() grib packer to make the grid...">w3fi71()</a>.</li>
-<li>Ralph Jones 1994-02-15 Changes for eta model grids 90-93</li>
-<li>Ralph Jones 1995-04-20 Change 200 and 201 to 201 and 202</li>
-<li>Mark Iredell 1995-10-31 Removed saves and prints</li>
-<li>M. Baldwin 1998-08-20 Add type 203</li>
-<li>Boi Vuong 2007-03-20 Add type 204</li>
-<li>George Gayno 2010-01-21 Add grid 205 - rotated lat/lon a,b,c,d staggers</li>
-</ul>
+<p>This subroutine constructs a GRIB grid definition section. </p>
+<dl class="section note"><dt>Note</dt><dd>Subprogram can be called from a multiprocessing environment.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">IGDS</td><td>Integer array supplied by <a class="el" href="w3fi71_8f.html#add1b6b2b2c9fda60094914f5e676ec42" title="W3FI71 Makes a 18, 37, 55, 64, or 91 word integer array used by w3fi72() grib packer to make the grid...">w3fi71()</a> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ICOMP</td><td>Table 7- resolution &amp; component flag (bit 5) for gds(17) wind components </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">GDS</td><td>Completed grib grid definition section </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">LENGDS</td><td>Length of gds </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">NPTS</td><td>Number of points in grid </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">IGERR</td><td>1, grid representation type not valid</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">IGDS</td><td>Integer array supplied by <a class="el" href="w3fi71_8f.html#add1b6b2b2c9fda60094914f5e676ec42" title="Makes a 18, 37, 55, 64, or 91 word integer array used by w3fi72() GRIB packer to make the grid descri...">w3fi71()</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ICOMP</td><td>Table 7- resolution &amp; component flag (bit 5) for gds(17) wind components. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">GDS</td><td>Completed grib grid definition section. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">LENGDS</td><td>Length of gds. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">NPTS</td><td>Number of points in grid. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">IGERR</td><td>1, grid representation type not valid.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Subprogram can be called from a multiprocessing environment.</dd></dl>
 <dl class="section author"><dt>Author</dt><dd>M. Farley </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>1992-07-07 </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="w3fi74_8f_source.html#l00034">34</a> of file <a class="el" href="w3fi74_8f_source.html">w3fi74.f</a>.</p>
+<p class="definition">Definition at line <a class="el" href="w3fi74_8f_source.html#l00019">19</a> of file <a class="el" href="w3fi74_8f_source.html">w3fi74.f</a>.</p>
 
 </div>
 </div>
