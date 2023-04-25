@@ -17,6 +17,8 @@ repository.
 This is part of
 the [NCEPLIBS](https://github.com/NOAA-EMC/NCEPLIBS) project.
 
+To submit bug reports, feature requests, or other code-related issues including installation and usage questions, please create a [GitHub issue](https://github.com/NOAA-EMC/NCEPLIBS-w3emc/issues). For general NCEPLIBS inquiries, contact [Edward Hartnett](mailto:edward.hartnett@noaa.gov) (secondary point of contact [Alex Richert](mailto:alexander.richert@noaa.gov)).
+
 ## Related NCEPLIBS Projects
 
 Repository | Notes
@@ -30,7 +32,7 @@ Repository | Notes
 
 NCEP/EMC developers.
 
-Code manager: Alex Richert, Hang Lei, Ed Hartnett
+Code manager: [Alex Richert](mailto:alexander.richert@noaa.gov), [Hang Lei](mailto:hang.lei@noaa.gov), [Edward Hartnett](mailto:edward.hartnett@noaa.gov)
 
 ## Prerequisites
 
