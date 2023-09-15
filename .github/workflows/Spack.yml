@@ -43,7 +43,7 @@ jobs:
         cp $GITHUB_WORKSPACE/w3emc/spack/package.py $SPACK_ROOT/var/spack/repos/builtin/packages/w3emc/package.py
         mv $GITHUB_WORKSPACE/w3emc $SPACK_ENV/w3emc
         spack develop --no-clone w3emc@develop
-        spack add w3emc@develop%gcc@11 ${{ matrix.pic_shared_extradeps }} ${{ matrix.pic }} ${{ matrix.precision }}
+        spack add w3emc@develop%gcc@11 ${{ matrix.pic_shared_extradeps }} ${{ matrix.precision }} ${{ matrix.bufr }}
         spack external find cmake gmake
         spack concretize
         # Run installation and run CTest suite
