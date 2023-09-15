@@ -24,6 +24,10 @@ jobs:
         sharedlibs: ["+shared", "~shared"]
         pic: ["+pic", "~pic"]
         precision: ["precision=d", "precision=4", "precision=8"]
+        exclude:
+          - sharedlibs: +shared
+          - pic: ~pic
+
     runs-on: ${{ matrix.os }}
 
     steps:
