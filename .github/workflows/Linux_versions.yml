@@ -21,7 +21,7 @@ jobs:
       CC: gcc-11
     strategy:
       matrix:
-        bacio-version: [2.4.1, 2.5.0]
+        bacio-version: [2.4.1, 2.5.0, 2.6.0]
 
     steps:
     
@@ -53,14 +53,14 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bufr
         path: bufr
-        ref: bufr_v11.7.1
+        ref: bufr_v12.0.1
     
     - name: cache-bufr
       id: cache-bufr
       uses: actions/cache@v2
       with:
         path: ~/bufr
-        key: bufr-Linux_options_${{ runner.os }}-v11.7.1
+        key: bufr-Linux_options_${{ runner.os }}-v12.0.1
 
     - name: build-bufr
       if: steps.cache-bufr.outputs.cache-hit != 'true'
