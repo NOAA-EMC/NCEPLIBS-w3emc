@@ -43,7 +43,7 @@ jobs:
       run: |
         cd bacio
         mkdir build && cd build
-        if [ ${{ matrix.options }} = '-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF' ]
+        if [ "${{ matrix.options }}" = "-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF" ]
         then
            cmake -DCMAKE_INSTALL_PREFIX=~/bacio -DBUILD_SHARED_LIBS=ON ..
         else
@@ -75,9 +75,9 @@ jobs:
         mkdir build && cd build
         if [ "${{ matrix.options }}" = "-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF" ]
         then
-           cmake -DCMAKE_INSTALL_PREFIX=~/bufr -DBUILD_SHARED_LIBS=ON ..
+           cmake -DCMAKE_INSTALL_PREFIX=~/bufr -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON ..
         else
-           cmake -DCMAKE_INSTALL_PREFIX=~/bufr ..
+           cmake -DCMAKE_INSTALL_PREFIX=~/bufr -DBUILD_TESTING=OFF ..
         fi
         make -j2 VERBOSE=1
         make install
