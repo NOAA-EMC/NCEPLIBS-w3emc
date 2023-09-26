@@ -41,6 +41,7 @@ jobs:
     - name: build-bacio
       if: steps.cache-bacio.outputs.cache-hit != 'true'
       run: |
+        set -x
         cd bacio
         mkdir build && cd build
         if [ "${{ matrix.options }}" = "-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF" ]
@@ -49,7 +50,6 @@ jobs:
         else
            cmake -DCMAKE_INSTALL_PREFIX=~/bacio ..
         fi
-           
         make -j2 VERBOSE=1
         make install
 
