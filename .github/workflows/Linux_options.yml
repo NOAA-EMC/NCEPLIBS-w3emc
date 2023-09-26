@@ -29,21 +29,27 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
-        ref: v2.5.0
+        ref: v2.6.0
     
     - name: cache-bacio
       id: cache-bacio
       uses: actions/cache@v2
       with:
         path: ~/bacio
-        key: bacio-Linux_options_${{ runner.os }}-v2.5.0
+        key: bacio-Linux_options_${{ runner.os }}-v2.5.0-${{ matrix.options }}
 
     - name: build-bacio
       if: steps.cache-bacio.outputs.cache-hit != 'true'
       run: |
+        set -x
         cd bacio
         mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=~/bacio ..
+        if [ "${{ matrix.options }}" = "-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF" ]
+        then
+           cmake -DCMAKE_INSTALL_PREFIX=~/bacio -DBUILD_SHARED_LIBS=ON ..
+        else
+           cmake -DCMAKE_INSTALL_PREFIX=~/bacio ..
+        fi
         make -j2 VERBOSE=1
         make install
 
@@ -59,14 +65,20 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/bufr
-        key: bufr-Linux_options_${{ runner.os }}-v11.7.1
+        key: bufr-Linux_options_${{ runner.os }}-v11.7.1-${{ matrix.options }}
 
     - name: build-bufr
       if: steps.cache-bufr.outputs.cache-hit != 'true'
       run: |
+        set -x
         cd bufr
         mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=~/bufr ..
+        if [ "${{ matrix.options }}" = "-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF" ]
+        then
+           cmake -DCMAKE_INSTALL_PREFIX=~/bufr -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON ..
+        else
+           cmake -DCMAKE_INSTALL_PREFIX=~/bufr -DBUILD_TESTING=OFF ..
+        fi
         make -j2 VERBOSE=1
         make install
 
@@ -77,14 +89,14 @@ jobs:
 
     - name: build-w3emc
       run: |
+        set -x
         cd w3emc
         mkdir build 
         cd build
-        cmake -DCMAKE_PREFIX_PATH="~/bacio;~/bufr" ${{ matrix.options }} -DCMAKE_INSTALL_PREFIX="~/w3emc/install" ..
+        cmake -DCMAKE_PREFIX_PATH="~/bacio;~/bufr" ${{ matrix.options }} ..
         make -j2 VERBOSE=1
 
     - name: test-w3emc
       run: |
         cd w3emc/build
         ctest --output-on-failure --rerun-failed --verbose
-        make install
