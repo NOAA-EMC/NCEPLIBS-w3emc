@@ -20,7 +20,7 @@ jobs:
       CC: gcc-11
     strategy:
       matrix:
-        options: [-DBUILD_D=OFF, -DBUILD_4=OFF, '-D-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF']
+        options: [-DBUILD_D=OFF, -DBUILD_4=OFF, '-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF']
 
     steps:
     

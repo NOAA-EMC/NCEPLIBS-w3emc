@@ -48,8 +48,10 @@ endif()
 
 # This is the C source code.
 set(c_src summary.c)
-
 add_library(c_obj_lib OBJECT ${c_src})
+if(BUILD_SHARED_LIBS)
+  set_property(TARGET c_obj_lib PROPERTY POSITION_INDEPENDENT_CODE 1)
+endif()
 
 # We buld a _4 and a _d by default.
 foreach(kind ${kinds})
