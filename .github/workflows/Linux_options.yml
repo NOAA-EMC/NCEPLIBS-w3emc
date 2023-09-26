@@ -20,7 +20,7 @@ jobs:
       CC: gcc-11
     strategy:
       matrix:
-        options: [-DBUILD_D=OFF, -DBUILD_4=OFF, '-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF']
+        options: ['-DBUILD_D=OFF -DBUILD_WITH_BUFR=ON -DBUILD_WITH_EXTRA_DEPS=ON', '-DBUILD_4=OFF -DBUILD_WITH_BUFR=ON -DBUILD_WITH_EXTRA_DEPS=ON', '-DBUILD_SHARED_LIBS=ON']
 
     steps:
     
@@ -44,7 +44,7 @@ jobs:
         set -x
         cd bacio
         mkdir build && cd build
-        if [ "${{ matrix.options }}" = "-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF" ]
+        if [ "${{ matrix.options }}" = "-DBUILD_SHARED_LIBS=ON" ]
         then
            cmake -DCMAKE_INSTALL_PREFIX=~/bacio -DBUILD_SHARED_LIBS=ON ..
         else
@@ -58,14 +58,14 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bufr
         path: bufr
-        ref: bufr_v11.7.1
+        ref: bufr_v12.0.0
     
     - name: cache-bufr
       id: cache-bufr
       uses: actions/cache@v2
       with:
         path: ~/bufr
-        key: bufr-Linux_options_${{ runner.os }}-v11.7.1-${{ matrix.options }}
+        key: bufr-Linux_options_${{ runner.os }}-v12.0.0-${{ matrix.options }}
 
     - name: build-bufr
       if: steps.cache-bufr.outputs.cache-hit != 'true'
@@ -73,7 +73,7 @@ jobs:
         set -x
         cd bufr
         mkdir build && cd build
-        if [ "${{ matrix.options }}" = "-DBUILD_SHARED_LIBS=ON -DBUILD_WITH_BUFR=OFF -DBUILD_WITH_EXTRA_DEPS=OFF" ]
+        if [ "${{ matrix.options }}" = "-DBUILD_SHARED_LIBS=ON" ]
         then
            cmake -DCMAKE_INSTALL_PREFIX=~/bufr -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON ..
         else
