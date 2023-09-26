@@ -53,14 +53,14 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bufr
         path: bufr
-        ref: bufr_v12.0.1
+        ref: v12.0.1
     
     - name: cache-bufr
       id: cache-bufr
       uses: actions/cache@v2
       with:
         path: ~/bufr
-        key: bufr-Linux_options_${{ runner.os }}-v12.0.1
+        key: bufr-Linux_options_${{ runner.os }}-v12.0.0
 
     - name: build-bufr
       if: steps.cache-bufr.outputs.cache-hit != 'true'
