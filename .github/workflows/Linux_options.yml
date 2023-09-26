@@ -91,7 +91,7 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake -DCMAKE_PREFIX_PATH="~/bacio;~/bufr" ${{ matrix.options }} -DBUILD_SHARED_LIBS=ON ..
+        cmake -DCMAKE_PREFIX_PATH="~/bacio;~/bufr" ${{ matrix.options }} ..
         make -j2 VERBOSE=1
 
     - name: test-w3emc
