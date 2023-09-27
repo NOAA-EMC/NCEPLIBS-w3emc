@@ -1,0 +1,71 @@
+# This is a CI workflow for the NCEPLIBS-w3emc project.
+#
+# This workflow builds w3emc with Spack, including installing with the "--test
+# root" option to run the CTest suite. It also has a one-off job that validates
+# the recipe by ensuring that every CMake option that should be set in the
+# Spack recipe is so set.
+#
+# Alex Richert, Sep 2023
+name: Spack
+on:
+  push:
+    branches:
+    - develop
+  pull_request:
+    branches:
+    - develop
+
+jobs:
+  # This job builds with Spack using every combination of variants and runs the CTest suite each time
+  Spack:
+    strategy:
+      matrix:
+        os: ["ubuntu-latest"]
+        pic_shared_extradeps: ["+pic +shared", "+pic ~shared +extradeps", "+pic ~shared ~extradeps", "~pic +extradeps", "~pic ~extradeps"]
+        precision: ["precision=d", "precision=4", "precision=8"]
+        bufr: ["~bufr"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    
+    - name: checkout-w3emc
+      uses: actions/checkout@v4
+      with: 
+        path: w3emc
+
+    - name: spack-build-and-test
+      run: |
+        git clone -c feature.manyFiles=true https://github.com/jcsda/spack
+        . spack/share/spack/setup-env.sh
+        spack env create w3emc-env
+        spack env activate w3emc-env
+        cp $GITHUB_WORKSPACE/w3emc/spack/package.py $SPACK_ROOT/var/spack/repos/builtin/packages/w3emc/package.py
+        mv $GITHUB_WORKSPACE/w3emc $SPACK_ENV/w3emc
+        spack develop --no-clone w3emc@develop
+        spack add w3emc@develop%gcc@11 ${{ matrix.pic_shared_extradeps }} ${{ matrix.precision }} ${{ matrix.bufr }}
+        spack external find cmake gmake
+        spack concretize
+        # Run installation and run CTest suite
+        spack install --verbose --fail-fast --test root
+        # Run 'spack load' to check for obvious errors in setup_run_environment
+        spack load w3emc
+
+  # This job validates the Spack recipe by making sure each cmake build option is represented
+  recipe-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: checkout-w3emc
+      uses: actions/checkout@v4
+      with: 
+        path: w3emc
+
+    - name: recipe-check
+      run: |
+        echo "If this jobs fails, look at the most recently output CMake option below and make sure that option appears in spack/package.py"
+        for opt in $(grep -ioP '^option\(\K(?!(ENABLE_DOCS))[^ ]+' $GITHUB_WORKSPACE/w3emc/CMakeLists.txt) ; do
+          echo "Checking for presence of '$opt' CMake option in package.py"
+          grep -cP "define.+\b${opt}\b" $GITHUB_WORKSPACE/w3emc/spack/package.py
+        done
