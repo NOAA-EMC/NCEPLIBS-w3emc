@@ -1,26 +1,35 @@
-![Status](https://github.com/NOAA-EMC/NCEPLIBS-sp/workflows/Build%20and%20Test/badge.svg)
+![Status](https://github.com/NOAA-EMC/NCEPLIBS-w3emc/workflows/developer/badge.svg)
 
-# W3EMC
+# NCEPLIBS-w3emc
 
 This library contains Fortran decoder/encoder routines for GRIB
-edition 1. GRIB1 is a WMO standard for gridded data. For more
-information see the [WMO GRIB1
+edition 1. GRIdded Binary or General Regularly-distributed Information
+in Binary form (GRIB) is a World Meteorological Organization (WMO)
+standard for gridded data. For more information see the [WMO GRIB1
 site](https://community.wmo.int/en/activity-areas/wis/grib-edition-1). For
 programmer documentation see the [NCEPLIBS-w3emc
 documentation](https://noaa-emc.github.io/NCEPLIBS-w3emc/).
 
-Since version 2.8.0 the NCEPLIBS-w3emc library has combined the
+Since version 2.8.0 the NCEPLIBS-w3emc library has included the
 subprograms from the
 [NCEPLIBS-w3nco](https://noaa-emc.github.io/NCEPLIBS-w3nco/)
 repository.
 
-This is part of
-the [NCEPLIBS](https://github.com/NOAA-EMC/NCEPLIBS) project.
+This is part of the [NCEPLIBS](https://github.com/NOAA-EMC/NCEPLIBS)
+project.
+
+To submit bug reports, feature requests, or other code-related issues
+including installation and usage questions, please create a [GitHub
+issue](https://github.com/NOAA-EMC/NCEPLIBS-w3emc/issues). For general
+NCEPLIBS inquiries, contact [Edward
+Hartnett](mailto:edward.hartnett@noaa.gov) (secondary point of contact
+[Alex Richert](mailto:alexander.richert@noaa.gov)).
 
 ## Related NCEPLIBS Projects
 
 Repository | Notes
 -----------|------
+[NCEPLIBS-g2](https://github.com/NOAA-EMC/NCEPLIBS-g2) | Fortran implementation of the GRIB 2 functions
 [NCEPLIBS-g2c](https://github.com/NOAA-EMC/NCEPLIBS-g2c) | C implementation of the GRIB 2 functions
 [NCEPLIBS-grib_util](https://github.com/NOAA-EMC/NCEPLIBS-grib_util) | A collection of GRIB1 and GRIB2 utilities
 [NCEPLIBS-g2tmpl](https://github.com/NOAA-EMC/NCEPLIBS-g2tmpl) | Utilities for GRIB2 codes and templates
@@ -28,9 +37,19 @@ Repository | Notes
 
 ## Authors
 
+Robert Allard, K. F. Brill, Bill Cavanaugh, P. Chase, Ray Crayton,
+Brian Curtis, Armand Desmarais, M. Farley, Robert C. Gammill, George
+Gayno, Kyle Gerheiser, Stephen Gilbert, Edward Hartnett, A. Heermann,
+Dom Heinzeller, Peter Henrichsen, Robert Hirano, J. Horodeck, James
+Howcroft, Mark Iredell, Ralph Jones, Dennis Keyser, R. Kistler,
+V. Krasnopolsky, Luke Lin, A.J. McClees, L. Marx, James McDonell,
+Shelley Melchior, J. Newell, Alan Nierow, John Stackpole, Joe Sela,
+B. Struble, Zoltan Toth, Boi Vuong, Jun Wang, Dexin Zhang, other
 NCEP/EMC developers.
 
-Code manager: Alex Richert, Hang Lei, Ed Hartnett
+Code manager: [Alex Richert](mailto:alexander.richert@noaa.gov), [Hang
+Lei](mailto:hang.lei@noaa.gov), [Edward
+Hartnett](mailto:edward.hartnett@noaa.gov)
 
 ## Prerequisites
 
