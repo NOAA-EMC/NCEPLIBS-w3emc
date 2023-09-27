@@ -12,11 +12,11 @@ C>
 C> @param[in] IBFLAG
 C> - 0, if bit map supplied by user
 C> - #, Number of predefined center bit map
-C> @param[in] IBMAP Integer array containing user bit map
-C> @param[in] IBLEN Length of bit map
-C> @param[out] BMS Completed grib bit map section
-C> @param[out] LENBMS Length of bit map section
-C> @param[out] IER 0 normal exit, 8 = ibmap values are all zero
+C> @param[in] IBMAP Integer array containing user bit map.
+C> @param[in] IBLEN Length of bit map.
+C> @param[out] BMS Completed grib bit map section.
+C> @param[out] LENBMS Length of bit map section in bytes.
+C> @param[out] IER 0 normal exit, 8 = ibmap values are all zero.
 C>
 C> @author M. Farley @date 1992-07-01
       SUBROUTINE W3FI73 (IBFLAG,IBMAP,IBLEN,BMS,LENBMS,IER)
