@@ -44,7 +44,7 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
-        ref: v2.5.0
+        ref: v2.6.0
     
     - name: build-bacio
       run: |
@@ -59,14 +59,14 @@ jobs:
       with:
         repository: NOAA-EMC/NCEPLIBS-bufr
         path: bufr
-        ref: bufr_v11.7.1
+        ref: bufr_v12.0.0
     
     - name: cache-bufr
       id: cache-bufr
       uses: actions/cache@v2
       with:
         path: ~/bufr
-        key: bufr-intel-${{ matrix.compilers }}-${{ runner.os }}-v11.7.1
+        key: bufr-intel-${{ matrix.compilers }}-${{ runner.os }}-v12.0.0
 
     - name: build-bufr
       if: steps.cache-bufr.outputs.cache-hit != 'true'
