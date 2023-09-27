@@ -31,7 +31,6 @@ program test_w3fi74
 
   ! Fill the igds array. This call comes from w3if72.f.
   icomp = 0
-  npts = 4
   call w3fi74(igds, icomp, gds, lengds, npts, ierr)
   if (ierr .ne. 0) stop 1
   if (lengds .ne. 32 .or. npts .ne. 489900) stop 2
