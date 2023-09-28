@@ -44,7 +44,6 @@ program test_w3fi73
      print *, ichar(cbms(i))
      if (ichar(cbms(i)) .ne. expected_cbms(i)) stop 100
   end do
-!  if (bms(1) .ne. 218628096 .or. bms(2) .ne. 14680064) stop 7
 
   print*,"SUCCESS"
 end program test_w3fi73
