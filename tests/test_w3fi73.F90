@@ -31,6 +31,9 @@ program test_w3fi73
   do i = 1, BLEN
      ibmap(i) = 1
   end do
+  do i = 1, 8
+     cbms(i) = achar(0)
+  end do
   iblen = BLEN
   call w3fi73(ibflag, ibmap, iblen, bms, lenbms, ierr)
   if (ierr .ne. 0) stop 4
