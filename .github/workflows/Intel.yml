@@ -40,7 +40,7 @@ jobs:
         echo "source /opt/intel/oneapi/setvars.sh" >> ~/.bash_profile
 
     - name: checkout-bacio
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
@@ -55,7 +55,7 @@ jobs:
         make install
 
     - name: checkout-bufr
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: NOAA-EMC/NCEPLIBS-bufr
         path: bufr
@@ -63,7 +63,7 @@ jobs:
     
     - name: cache-bufr
       id: cache-bufr
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/bufr
         key: bufr-intel-${{ matrix.compilers }}-${{ runner.os }}-v12.0.0
@@ -78,7 +78,7 @@ jobs:
         make install
 
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with: 
         path: w3emc
 

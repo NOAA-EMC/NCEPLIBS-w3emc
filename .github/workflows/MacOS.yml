@@ -24,7 +24,7 @@ jobs:
 
     steps:
     - name: checkout-bacio
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: NOAA-EMC/NCEPLIBS-bacio
         path: bacio
@@ -32,7 +32,7 @@ jobs:
     
     - name: cache-bacio
       id: cache-bacio
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/bacio
         key: bacio-${{ runner.os }}-v${{ matrix.bacio-version }}-${{ matrix.compiler }}
@@ -47,7 +47,7 @@ jobs:
         make install
 
     - name: checkout-bufr
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: NOAA-EMC/NCEPLIBS-bufr
         path: bufr
@@ -55,7 +55,7 @@ jobs:
     
     - name: cache-bufr
       id: cache-bufr
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/bufr
         key: bufr-Linux_options_${{ runner.os }}-v11.7.1
@@ -70,7 +70,7 @@ jobs:
         make install
 
     - name: checkout-w3emc
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with: 
         path: w3emc
 
