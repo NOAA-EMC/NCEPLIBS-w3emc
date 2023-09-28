@@ -10,7 +10,8 @@ program test_w3fi73
   parameter (BLEN = 3)
   parameter (BMSLEN = 3)
   integer :: ibmap(BLEN), bms(BMSLEN)
-  character :: cbms(4)
+  character :: cbms(8)
+  integer :: expected_cbms(8) = (/ 0, 0, 8, 13, 0, 0, 224, 0 /)
   integer :: i
   integer :: ierr
 
@@ -36,7 +37,8 @@ program test_w3fi73
   if (lenbms .ne. 8) stop 5
   cbms = transfer(bms, cbms)
   do i = 1, 8
-     print '(z1)', cbms(i)
+     print *, ichar(cbms(i))
+     if (ichar(cbms(i)) .ne. expected_cbms(i)) stop 100
   end do
 !  if (bms(1) .ne. 218628096 .or. bms(2) .ne. 14680064) stop 7
 
