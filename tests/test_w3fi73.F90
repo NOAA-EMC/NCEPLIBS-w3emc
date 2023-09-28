@@ -10,6 +10,7 @@ program test_w3fi73
   parameter (BLEN = 3)
   parameter (BMSLEN = 3)
   integer :: ibmap(BLEN), bms(BMSLEN)
+  character :: cbms(4)
   integer :: i
   integer :: ierr
 
@@ -33,6 +34,10 @@ program test_w3fi73
   call w3fi73(ibflag, ibmap, iblen, bms, lenbms, ierr)
   if (ierr .ne. 0) stop 4
   if (lenbms .ne. 8) stop 5
+  cbms = transfer(bms, cbms)
+  do i = 0, 8
+     print '(z1)', cbms(i)
+  end do
 !  if (bms(1) .ne. 218628096 .or. bms(2) .ne. 14680064) stop 7
 
   print*,"SUCCESS"
