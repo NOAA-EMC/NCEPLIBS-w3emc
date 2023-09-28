@@ -30,6 +30,7 @@ program test_w3fi73
   ibflag = 0
   do i = 1, BLEN
      ibmap(i) = 1
+     bms(i) = 0
   end do
   do i = 1, 8
      cbms(i) = achar(0)
