@@ -35,7 +35,7 @@ program test_w3fi73
   if (ierr .ne. 0) stop 4
   if (lenbms .ne. 8) stop 5
   cbms = transfer(bms, cbms)
-  do i = 0, 8
+  do i = 1, 8
      print '(z1)', cbms(i)
   end do
 !  if (bms(1) .ne. 218628096 .or. bms(2) .ne. 14680064) stop 7
