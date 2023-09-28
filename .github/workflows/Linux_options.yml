@@ -93,10 +93,11 @@ jobs:
         cd w3emc
         mkdir build 
         cd build
-        cmake -DCMAKE_PREFIX_PATH="~/bacio;~/bufr" ${{ matrix.options }} ..
+        cmake -DCMAKE_PREFIX_PATH="~/bacio;~/bufr" -DCMAKE_INSTALL_PREFIX="~/w3emc/install" ${{ matrix.options }} ..
         make -j2 VERBOSE=1
 
     - name: test-w3emc
       run: |
         cd w3emc/build
         ctest --output-on-failure --rerun-failed --verbose
+        make install
