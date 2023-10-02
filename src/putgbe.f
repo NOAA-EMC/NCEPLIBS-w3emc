@@ -2,7 +2,7 @@ C> @file
 C> @brief Packs and writes a grib message.
 C> @author Mark Iredell @date 1994-04-01
 
-C> THIS SUBPROGRAM IS NEARLY THE INVERSE OF GETGBE.
+C> This subprogram is nearly the inverse of getgbe.
 C>
 C> Program history log:
 C> - Mark Iredell 1994-04-01

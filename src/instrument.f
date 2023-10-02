@@ -2,7 +2,6 @@
 !> @brief Monitor wall-clock times, etc.
 !> @author Mark Iredell @date 1998-07-16
 
-!>
 !> This subprogram is useful in instrumenting a code
 !> by monitoring the number of times each given section
 !> of a program is invoked as well as the minimum, maximum
