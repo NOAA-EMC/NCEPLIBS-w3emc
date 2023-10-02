@@ -184,7 +184,7 @@ Some legacy dummy subroutines are in xdopen.f. See also w3log().
 * w3fc07()
 * w3fc08()
 
-## Many Office-Note 85 Subroutines
+## Office-Note 85 Subroutines
 
 * w3fi01()
 * w3fi02()

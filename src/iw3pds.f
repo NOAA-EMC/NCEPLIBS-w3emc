@@ -2,9 +2,7 @@ C> @file
 C> @brief Test two pds (grib product definition section) to see
 C> if all equal; otherwise .false.
 C> @author Ralph Jones @date 1988-02-22
-C> FUNCTION: IW3PDS           TEST FOR MATCH OF TWO PDS
-C>   AUTHOR: JONES, R.E.      ORG: W342       DATE: 88-02-22
-C>
+
 C> Test two pds (grib product definition section) to see
 C> if all equal; otherwise .false. if key = 1, all 24 characters
 C> are tested, if key = 0 , the date (characters 13-17) are not
@@ -32,13 +30,15 @@ C> @param[in] KEY 0, DO NOT INCLUDE THE DATE (BYTES 13-17) IN MATCH.
 C> - 1, match 24 bytes of pds
 C> - 2, match bytes 1-3, 5-12 of pds
 C> - 3, match bytes 1-3, 7-12 of pds
-C> @param[out] IW3PDB logical .true. if l1 and l2 match on all char.,
+C>
+C> @return logical .true. if l1 and l2 match on all char.,
 C> logical .false. if not match on any char.
 C>
 C> @note Alias added because of name change in grib write up.
 C> Name of pdb (product definition block) was changd to pds
 C> (product definition section).
 C>
+C> @author Ralph Jones @date 1988-02-22
       LOGICAL FUNCTION IW3PDS(L1, L2, KEY)
 C
        CHARACTER*1 L1(24)
