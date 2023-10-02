@@ -1,7 +1,7 @@
 C> @file
 C> @brief Compute standard height, temp, and pot temp.
 C> @author James McDonell @date 1974-06-01
-C>
+
 C> Computes the standard height, temperature, and potential
 C> temperature given the pressure in millibars (>8.68 mb). For
 C> height and temperature the results duplicate the values in the

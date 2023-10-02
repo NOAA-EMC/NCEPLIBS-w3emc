@@ -27,7 +27,7 @@ generator that uses the Mersenne twister (aka MT19937).
 * putgbex()
 * putgb()
 * putgbn()
-* w3nogds()xs
+* w3nogds()
 
 ## Product Definition Section
 

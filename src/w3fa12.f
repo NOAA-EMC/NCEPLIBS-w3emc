@@ -1,7 +1,7 @@
 C> @file
 C> @brief Computes legendre polynomials at a given latitude.
 C> @author Joe Sela @date 1980-10-28
-C>
+
 C> Subroutine computes legendre polynomials at a given latitude.
 C>
 C> Program history log:

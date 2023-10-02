@@ -1,7 +1,7 @@
 C> @file
 C> @brief Compute number of bits and round field.
 C> @author Mark Iredell @date 1992-10-31
-C>
+
 C> The number of bits required to pack a given field.
 C> The field is rounded off to the decimal scaling for packing.
 C> The minimum and maximum rounded field values are also returned.
