@@ -42,10 +42,10 @@ Brian Curtis, Armand Desmarais, M. Farley, Robert C. Gammill, George
 Gayno, Kyle Gerheiser, Stephen Gilbert, Edward Hartnett, A. Heermann,
 Dom Heinzeller, Peter Henrichsen, Robert Hirano, J. Horodeck, James
 Howcroft, Mark Iredell, Ralph Jones, Dennis Keyser, R. Kistler,
-V. Krasnopolsky, Luke Lin, A.J. McClees, L. Marx, James McDonell,
-Shelley Melchior, J. Newell, Alan Nierow, John Stackpole, Joe Sela,
-B. Struble, Zoltan Toth, Boi Vuong, Jun Wang, Dexin Zhang, other
-NCEP/EMC developers.
+V. Krasnopolsky, Hang Lei, Luke Lin, A.J. McClees, L. Marx, James McDonell,
+Shelley Melchior, J. Newell, Alan Nierow, Joe Sela, David Shimomura,
+John Stackpole, B. Struble, Zoltan Toth, Boi Vuong, Jun Wang, Dexin
+Zhang, other NCEP/EMC developers.
 
 Code manager: [Alex Richert](mailto:alexander.richert@noaa.gov), [Hang
 Lei](mailto:hang.lei@noaa.gov), [Edward

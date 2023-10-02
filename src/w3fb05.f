@@ -1,7 +1,7 @@
 C> @file
 C> @brief Grid coordinates to latitude, longitude.
 C> @author Ralph Jones @date 1986-07-17
-C>
+
 C> Converts the coordinates of a location from the grid(i,j)
 C> coordinate system overlaid on the polar stereographic map projec-
 C> tion true at 60 degrees n or s latitude to the natural coordinate

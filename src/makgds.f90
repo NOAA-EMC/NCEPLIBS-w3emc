@@ -1,3 +1,7 @@
+!> @file
+!! @brief Make or break a grid description section.
+!! @author Mark Iredell @date April 1996
+
 !> This subprogram makes or breaks a grid description section.
 !!
 !! It can do one of the following:
@@ -10,11 +14,8 @@
 !!                - IOPT=-1 TO UNPACK GDS INTO KGDS;
 !!                - IOPT=255 TO USE KGDS TO PACK GDS;
 !!                - 0<IOPT<255 NCEP GRID ID TO MAKE GDS AND KGDS.
-!! @param[in] kgds W3FI63-STYLE UNPACKED GDS (IF IOPT=255)
-!!            ONLY FIRST 22 VALUES ARE ACCESSED IF KGDS(20)=255.)
-!! @param[inout] GDS GRID DEFINITION SECTION (IF IOPT=-1)
-!! @param[out] KGDS  - INTEGER (200) W3FI63-STYLE UNPACKED GDS (IF IOPT<255)
-!! THE KGDS PARAMETERS ARE DESCRIBED BELOW
+!! @param[inout] kgds W3FI63-STYLE UNPACKED GDS (IF IOPT=255)
+!!            ON INPUT ONLY FIRST 22 VALUES ARE ACCESSED IF KGDS(20)=255.)
 !!          AS COPIED FROM THE W3FI63 DOCBLOCK.
 !!          (1)   - DATA REPRESENTATION TYPE
 !!          (19)  - NUMBER OF VERTICAL COORDINATE PARAMETERS
@@ -96,26 +97,22 @@
 !!          (13)  - LATIN 2 - SECOND LAT FROM POLE OF SECANT CONE INTER
 !! @param[out] GDS      - CHARACTER (400) GRID DEFINITION SECTION (IF IOPT>0)
 !! @param[out]    LENGDS   - INTEGER LENGTH OF THE GDS (IF IOPT>0)
-!!     IRET     - INTEGER RETURN CODE
+!! @param[out]    IRET     - INTEGER RETURN CODE
 !!                0    SUCCESSFUL
 !!                1    GRID REPRESENTATION TYPE NOT VALID
 !!                4    DATA REPRESENTATION TYPE NOT CURRENTLY ACCEPTABLE
 !!
-!!
-!! @author Mark Iredell
-!! @date April 1996
+!! @author Mark Iredell @date April 1996
 SUBROUTINE MAKGDS(IOPT,KGDS,GDS,LENGDS,IRET)
   IMPLICIT NONE
-  !
+
   CHARACTER,          INTENT(INOUT) :: GDS(400)
-  !
   INTEGER,            INTENT(IN   ) :: IOPT
   INTEGER,            INTENT(INOUT) :: KGDS(200)
   INTEGER,            INTENT(  OUT) :: IRET, LENGDS
-  !
   INTEGER                           :: ICOMP, IPDS(200), IGDS(200)
   INTEGER                           :: KPTR(200), KPDS(200), NPTS
-  !
+
   DATA KPTR/200*0/, KPDS/200*0/
   ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !  UNPACK GDS INTO KGDS

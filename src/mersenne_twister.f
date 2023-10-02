@@ -5,17 +5,22 @@
 !> This module calculates random numbers using the Mersenne twister.
 !> (It has been adapted to a Fortran 90 module from open source software.
 !> The comments from the original software are given below in the remarks.)
+!>
 !> The Mersenne twister (aka MT19937) is a state-of-the-art random number
 !> generator based on Mersenne primes and originally developed in 1997 by
 !> Matsumoto and Nishimura. It has a period before repeating of 2^19937-1,
-!> which certainly should be good enough for geophysical purposes. :-)
+!> which certainly should be good enough for geophysical purposes.
+!>
 !> Considering the algorithm's robustness, it runs fairly speedily.
 !> (Some timing statistics are given below in the remarks.)
+!>
 !> This adaptation uses the standard Fortran 90 random number interface,
 !> which can generate an arbitrary number of random numbers at one time.
 !> The random numbers generated are uniformly distributed between 0 and 1.
+!>
 !> The module also can generate random numbers from a Gaussian distribution
 !> with mean 0 and standard deviation 1, using a Numerical Recipes algorithm.
+!>
 !> The module also can generate uniformly random integer indices.
 !> There are also thread-safe versions of the generators in this adaptation,
 !> necessitating the passing of generator states which must be kept private.
@@ -142,11 +147,14 @@
         end interface
 !  All the subprograms
       contains
+
 !> Sets and gets state; overloads Fortran 90 standard.
 !> @param[out] size  Optional integer output size of seed array.
 !> @param[in] put Optional integer(:) input seed array.
 !> @param[out] get Optional integer(:) output seed array.
 !> @param[inout] stat Optional type(random_stat) (thread-safe mode).
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_seed(size,put,get,stat)
           implicit none
           integer,intent(out),optional:: size
@@ -203,16 +211,22 @@
             endif
           endif
         end subroutine
+
 !> Sets seed in saved mode.
 !> @param[in] inseed Integer seed input.
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_setseed_s(inseed)
           implicit none
           integer,intent(in):: inseed
           call random_setseed_t(inseed,sstat)
         end subroutine
+
 !> Sets seed in thread-safe mode.
 !> @param[in] inseed Integer seed input
 !> @param[out] stat Type(random_stat) output
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_setseed_t(inseed,stat)
           implicit none
           integer,intent(in):: inseed
@@ -228,8 +242,11 @@
           stat%iset=0
           stat%gset=0.
         end subroutine
+
 !> Generates random numbers in functional mode.
 !> @result harvest Real number output.
+!>
+!> @author Mark Iredell @date 2005-06-14
         function random_number_f() result(harvest)
           implicit none
           real:: harvest
@@ -238,9 +255,12 @@
           call random_number_t(h,sstat)
           harvest=h(1)
         end function
+
 !> Generates random numbers in interactive mode.
 !> @param[out] harvest Real(:) numbers output.
 !> @param[in] inseed Integer seed input.
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_number_i(harvest,inseed)
           implicit none
           real,intent(out):: harvest(:)
@@ -249,17 +269,23 @@
           call random_setseed_t(inseed,stat)
           call random_number_t(harvest,stat)
         end subroutine
+
 !> Generates random numbers in saved mode; overloads Fortran 90 standard.
 !> @param[out] harvest Real(:) numbers output.
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_number_s(harvest)
           implicit none
           real,intent(out):: harvest(:)
           if(sstat%mti.eq.n+1) call random_setseed_t(iseed,sstat)
           call random_number_t(harvest,sstat)
         end subroutine
+
 !> Generates random numbers in thread-safe mode.
 !> @param[out] harvest Real(:) numbers output
 !> @param[inout] stat Type(random_stat) input
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_number_t(harvest,stat)
           implicit none
           real,intent(out):: harvest(:)
@@ -300,8 +326,11 @@
             stat%mti=stat%mti+1
           enddo
         end subroutine
+
 !> Generates Gaussian random numbers in functional mode.
 !> @result harvest Real number output.
+!>
+!> @author Mark Iredell @date 2005-06-14
         function random_gauss_f() result(harvest)
           implicit none
           real:: harvest
@@ -310,9 +339,12 @@
           call random_gauss_t(h,sstat)
           harvest=h(1)
         end function
+
 !> Generates Gaussian random numbers in interactive mode.
 !> @param[out] harvest Real(:) numbers output.
 !> @param[in] inseed Integer seed input.
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_gauss_i(harvest,inseed)
           implicit none
           real,intent(out):: harvest(:)
@@ -321,17 +353,23 @@
           call random_setseed_t(inseed,stat)
           call random_gauss_t(harvest,stat)
         end subroutine
+
 !> Generates Gaussian random numbers in saved mode.
 !> @param[out] harvest Real(:) numbers output.
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_gauss_s(harvest)
           implicit none
           real,intent(out):: harvest(:)
           if(sstat%mti.eq.n+1) call random_setseed_t(iseed,sstat)
           call random_gauss_t(harvest,sstat)
         end subroutine
+
 !> Generates Gaussian random numbers in thread-safe mode.
 !> @param[out] harvest Real(:) numbers output.
 !> @param[inout] stat Type(random_stat) input.
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_gauss_t(harvest,stat)
           implicit none
           real,intent(out):: harvest(:)
@@ -370,12 +408,15 @@
             stat%iset=1
           endif
         contains
+
 !> Numerical Recipes algorithm to generate Gaussian random numbers.
 !> @param[in] r1
 !> @param[in] r2
 !> @param[out] r
 !> @param[out] g1
 !> @param[out] g2
+!>
+!> @author Mark Iredell @date 2005-06-14
           subroutine rgauss(r1,r2,r,g1,g2)
             real,intent(in):: r1,r2
             real,intent(out):: r,g1,g2
@@ -390,9 +431,12 @@
             endif
           end subroutine
         end subroutine
+
 !> Generates random indices in functional mode.
 !> @param[in] imax Integer maximum index input
 !> @result iharvest Integer number output
+!>
+!> @author Mark Iredell @date 2005-06-14
         function random_index_f(imax) result(iharvest)
           implicit none
           integer,intent(in):: imax
@@ -402,10 +446,13 @@
           call random_index_t(imax,ih,sstat)
           iharvest=ih(1)
         end function
+
 !> Generates random indices in interactive mode.
 !> @param [input] imax Integer maximum index input.
 !> @param[out] iharvest Integer(:) numbers output.
 !> @param[in] inseed Integer seed input.
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_index_i(imax,iharvest,inseed)
           implicit none
           integer,intent(in):: imax
@@ -415,9 +462,12 @@
           call random_setseed_t(inseed,stat)
           call random_index_t(imax,iharvest,stat)
         end subroutine
+
 !> Generates random indices in saved mode.
 !> @param[in] imax Integer maximum index input.
 !> @param[out] iharvest Integer(:) numbers output.
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_index_s(imax,iharvest)
           implicit none
           integer,intent(in):: imax
@@ -425,10 +475,13 @@
           if(sstat%mti.eq.n+1) call random_setseed_t(iseed,sstat)
           call random_index_t(imax,iharvest,sstat)
         end subroutine
+
 !> Generates random indices in thread-safe mode.
 !> @param[in] imax Integer maximum index input.
 !> @param[out] iharvest Integer(:) numbers output.
 !> @param[inout] stat Type(random_stat) input.
+!>
+!> @author Mark Iredell @date 2005-06-14
         subroutine random_index_t(imax,iharvest,stat)
           implicit none
           integer,intent(in):: imax
