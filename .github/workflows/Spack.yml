@@ -23,7 +23,7 @@ jobs:
         os: ["ubuntu-latest"]
         pic_shared_extradeps: ["+pic +shared", "+pic ~shared +extradeps", "+pic ~shared ~extradeps", "~pic +extradeps", "~pic ~extradeps"]
         precision: ["precision=d", "precision=4", "precision=8"]
-        bufr: ["~bufr"]
+        bufr: ["+bufr", "~bufr"]
 
     runs-on: ${{ matrix.os }}
 
