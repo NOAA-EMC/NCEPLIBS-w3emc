@@ -23,6 +23,14 @@ program test_mkflsep
      if (csep(i) .ne. ' ') stop 10
   end do
   
+  ! This will succeed.
+  iopt = 1
+  lenin = 19
+  itot = 5000
+  call mkfldsep(csep, iopt, lenin, lenbull, lenout)
+  do i = 1, lenin
+     print *, i, ichar(csep(i))
+  end do
   print *, "SUCCESS"
 end program test_mkflsep
 
