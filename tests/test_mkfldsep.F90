@@ -31,7 +31,7 @@ program test_mkflsep
   itot = 5000
   lenbull = itot + lenhead
   call mkfldsep(csep, iopt, lenin, lenbull, lenout)
-  print *, 'lenout', lenout
+  if (lenout .ne. 18) stop 199
   ! do i = 1, lenin
   !    print *, i, ichar(csep(i))
   ! end do
@@ -56,7 +56,7 @@ program test_mkflsep
   itot = 5000
   lenbull = itot + lenhead
   call mkfldsep(csep, iopt, lenin, lenbull, lenout)
-  print *, 'lenout', lenout
+  if (lenout .ne. 23) stop 299
   ! do i = 1, lenin
   !    print *, i, ichar(csep(i))
   ! end do
@@ -86,7 +86,7 @@ program test_mkflsep
   itot = 5000
   lenbull = itot + lenhead
   call mkfldsep(csep, iopt, lenin, lenbull, lenout)
-  print *, 'lenout', lenout
+  if (lenout .ne. 19) stop 399
   ! do i = 1, lenout
   !    print *, i, ichar(csep(i))
   ! end do
