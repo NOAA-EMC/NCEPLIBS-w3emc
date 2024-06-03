@@ -30,6 +30,7 @@ endfunction()
 # These are the tests.
 foreach(kind ${kinds})
   create_test(test_summary ${kind})
+  create_test(test_mkfldsep ${kind})
   create_test(test_gbytec ${kind})
   create_test(test_w3tagb ${kind})
   create_test(test_w3fi71 ${kind})
