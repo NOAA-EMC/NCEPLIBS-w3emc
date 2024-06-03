@@ -37,10 +37,6 @@ C>  (not including the flag field block).
 C>  - 15 - 18 Marker string (****).
 C>  - 19 Line Feed (ASCII "0A").
 C>
-C>
-C> Program history log:
-C> - Stephen Gilbert 2002-09-16
-C>
 C> @param[in] iopt Flag Field Separator block option:
 C> = 1: Separator block for use with alphanumeric bulletins.
 C> if lenin <= 18 and lenbull <= 999999, OPTION 1 block will be generated.
@@ -55,23 +51,23 @@ C> @param[out] lenout Integer length of the flag field separator block.
 C>
 C> @author Stephen Gilbert @date 2002-09-16
       subroutine mkfldsep(csep,iopt,lenin,lenbull,lenout)
-C
+C     
       character*(*),intent(out) :: csep
       integer,intent(in) :: iopt,lenin,lenbull
       integer,intent(out) :: lenout
-C
+C     
       character(len=4),parameter :: cstar='****',clb='####'
-C
+C     
       if (iopt.eq.1) then
          if ( lenin .le. 18 .and. lenbull .le. 999999 ) then
-                                      ! Create OPTION 1 separator block
+C           Create OPTION 1 separator block
             csep(1:4)=clb
             csep(5:7)='018'
             write(csep(8:13),fmt='(I6.6)') lenbull
             csep(14:17)=clb
             csep(18:18)=char(10)
             lenout=18
-         else                         ! Create OPTION 1a separator block
+         else                   ! Create OPTION 1a separator block
             nnn=lenin
             if ( nnn.lt.23 ) nnn=23
             csep(1:4)=clb
@@ -82,7 +78,7 @@ C
             csep(nnn:nnn)=char(10)
             lenout=nnn
          endif
-      elseif (iopt.eq.2) then         !  Create OPTION 2 separator block
+      elseif (iopt.eq.2) then   !  Create OPTION 2 separator block
          csep(1:4)=cstar
          write(csep(5:14),fmt='(I10.10)') lenbull
          csep(15:18)=cstar
@@ -92,6 +88,6 @@ C
          print *,"mkfldsep: Option ",iopt," not recognized."
          csep(1:lenin)=' '
       endif
-C
+C     
       return
       end
