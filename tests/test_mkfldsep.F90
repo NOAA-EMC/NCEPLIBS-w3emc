@@ -37,9 +37,9 @@ program test_mkflsep
      lenbull = itot + lenhead
      call mkfldsep(csep, iopt, lenin, lenbull, lenout)
      if (lenout .ne. nnn) stop 299
-     do i = 1, lenout
-        print '(i3, a1, z2.2, a1, i2, a1, a)', i, ' ', csep(i), ' ', ichar(csep(i)), ' ', csep(i)
-     end do
+     ! do i = 1, lenout
+     !    print '(i3, a1, z2.2, a1, i2, a1, a)', i, ' ', csep(i), ' ', ichar(csep(i)), ' ', csep(i)
+     ! end do
 
      ! Check every byte of result.
      do i = 1, 4
@@ -56,7 +56,9 @@ program test_mkflsep
      if (csep(11) .ne. '0' .or. csep(12) .ne. '0' .or. csep(13) .ne. '0') stop 113
      if (csep(14) .ne. '0' .or. csep(15) .ne. '5' .or. csep(16) .ne. '0') stop 114
      if (csep(17) .ne. '2' .or. csep(18) .ne. '1') stop 115
-     ! I think this should be a range of 19:nnn-5.
+     ! I think this was intended by the original programmer to be a
+     ! range of 19:nnn-5. But in the standard these bytes are
+     ! "reserved for future use" so it does not matter. So only 
      if (nnn > 23) then
         if (csep(19) .ne. '0') stop 130
      endif

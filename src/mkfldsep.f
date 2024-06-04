@@ -75,6 +75,7 @@ C           Create OPTION 1 separator block
             csep(1:4)=clb
             write(csep(5:7),fmt='(I3.3)') nnn
             write(csep(8:18),fmt='(I11.11)') lenbull
+            ! In docs, these bytes are "reserved for future use".
             csep(19:nnn-5)='0'
             csep(nnn-4:nnn-1)=clb
             csep(nnn:nnn)=char(10)
