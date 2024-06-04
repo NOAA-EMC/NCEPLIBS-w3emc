@@ -9,7 +9,8 @@ C> Transfer Input Service Guide - Input examples and how to FTP files to
 C> the Gateway] (https://www.weather.gov/tg/ftpingest).
 C>
 C> This routine can generate different flag field separator blocks
-C> depending on the value of variable iopt.
+C> depending on the value of variable iopt. For details see [GATEWAY File
+C> Standards & Content Structures] (https://www.weather.gov/tg/fstandrd).
 C>
 C> Bulletin "Flag Field Separator" block - OPTION 1 (old)
 C> - bytes:

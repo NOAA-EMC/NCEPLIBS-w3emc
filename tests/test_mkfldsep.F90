@@ -37,9 +37,9 @@ program test_mkflsep
      lenbull = itot + lenhead
      call mkfldsep(csep, iopt, lenin, lenbull, lenout)
      if (lenout .ne. nnn) stop 299
-     ! do i = 1, lenout
-     !    print *, i, ichar(csep(i))
-     ! end do
+     do i = 1, lenout
+        print '(i3, a1, z2.2, a1, i2, a1, a)', i, ' ', csep(i), ' ', ichar(csep(i)), ' ', csep(i)
+     end do
 
      ! Check every byte of result.
      do i = 1, 4
