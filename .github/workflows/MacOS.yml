@@ -23,67 +23,23 @@ jobs:
         bacio-version: [2.4.1, 2.5.0, 2.6.0]
 
     steps:
-    - name: checkout-bacio
-      uses: actions/checkout@v3
-      with:
-        repository: NOAA-EMC/NCEPLIBS-bacio
-        path: bacio
-        ref: v${{ matrix.bacio-version }}
     
-    - name: cache-bacio
-      id: cache-bacio
-      uses: actions/cache@v3
+    - name: "Build dependencies"
+      uses: NOAA-EMC/ci-build-nceplibs@develop
       with:
-        path: ~/bacio
-        key: bacio-${{ runner.os }}-v${{ matrix.bacio-version }}-${{ matrix.compiler }}
-
-    - name: build-bacio
-      if: steps.cache-bacio.outputs.cache-hit != 'true'
-      run: |
-        cd bacio
-        mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=~/bacio ..
-        make -j2
-        make install
-
-    - name: checkout-bufr
-      uses: actions/checkout@v3
-      with:
-        repository: NOAA-EMC/NCEPLIBS-bufr
-        path: bufr
-        ref: bufr_v11.7.1
-    
-    - name: cache-bufr
-      id: cache-bufr
-      uses: actions/cache@v3
-      with:
-        path: ~/bufr
-        key: bufr-Linux_options_${{ runner.os }}-v11.7.1
-
-    - name: build-bufr
-      if: steps.cache-bufr.outputs.cache-hit != 'true'
-      run: |
-        cd bufr
-        mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=~/bufr ..
-        make -j2
-        make install
+        bacio-version: v${{ matrix.bacio-version }}
+        bufr-version: bufr_v11.7.1
 
     - name: checkout-w3emc
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with: 
         path: w3emc
 
     - name: build-w3emc
       run: |
-        cd w3emc
-        mkdir build 
-        cd build
-        cmake -DCMAKE_PREFIX_PATH="~/bacio;~/bufr" ..
-        make -j2
+        cmake -S w3emc -B w3emc/build -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/nceplibs/NCEPLIBS-bacio;$GITHUB_WORKSPACE/nceplibs/NCEPLIBS-bufr"
+        cmake --build w3emc/build --parallel 2 --verbose
 
     - name: test-w3emc
-      run: |
-        cd w3emc/build
-        ctest --output-on-failure --rerun-failed --verbose
+      run: ctest --test-dir w3emc/build --output-on-failure --rerun-failed --verbose
 

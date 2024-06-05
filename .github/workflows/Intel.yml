@@ -44,5 +44,4 @@ jobs:
         cmake --build w3emc/build --parallel 2 --verbose
 
     - name: "Test w3emc"
-      run: |
-        ctest --test-dir w3emc/build --output-on-failure --rerun-failed --verbose
+      run: ctest --test-dir w3emc/build --output-on-failure --rerun-failed --verbose

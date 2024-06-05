@@ -27,46 +27,14 @@ jobs:
         sudo apt-get install doxygen
         python3 -m pip install gcovr
 
-    - name: checkout-bacio
-      uses: actions/checkout@v3
+    - name: "Build dependencies"
+      uses: NOAA-EMC/ci-build-nceplibs@develop
       with:
-        repository: NOAA-EMC/NCEPLIBS-bacio
-        path: bacio
-        ref: develop
-    
-    - name: build-bacio
-      run: |
-        cd bacio
-        mkdir build && cd build
-        cmake .. -DCMAKE_INSTALL_PREFIX=~/bacio
-        make -j2
-        make install
-
-    - name: checkout-bufr
-      uses: actions/checkout@v3
-      with:
-        repository: NOAA-EMC/NCEPLIBS-bufr
-        path: bufr
-        ref: bufr_v11.7.1
-    
-    - name: cache-bufr
-      id: cache-bufr
-      uses: actions/cache@v3
-      with:
-        path: ~/bufr
-        key: bufr-Linux_options_${{ runner.os }}-v11.7.1
-
-    - name: build-bufr
-      if: steps.cache-bufr.outputs.cache-hit != 'true'
-      run: |
-        cd bufr
-        mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=~/bufr ..
-        make -j2
-        make install
+        bacio-version: develop
+        bufr-version: bufr_v11.7.1
 
     - name: checkout-w3emc
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with: 
         path: w3emc
 
@@ -74,33 +42,27 @@ jobs:
       run: |
         set -x
         doxygen --version
-        cd w3emc
-        mkdir build 
-        cd build
-        cmake -DCMAKE_INSTALL_PREFIX="~/w1" -DCMAKE_PREFIX_PATH="~/;~/bacio;~/bufr" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_C_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_BUILD_TYPE=Debug -DBUILD_8=ON ..
-        make -j2
+        cmake -S w3emc -B w3emc/build -DCMAKE_INSTALL_PREFIX="~/w1" -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/nceplibs/NCEPLIBS-bacio;$GITHUB_WORKSPACE/nceplibs/NCEPLIBS-bufr" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_C_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall" -DCMAKE_BUILD_TYPE=Debug -DBUILD_8=ON
+        cmake --build w3emc/build --parallel 2
 
     - name: test-w3emc
       run: |
-        cd w3emc/build
-        ctest --output-on-failure --rerun-failed --verbose
-        make install
+        ctest --test-dir w3emc/build --output-on-failure --rerun-failed --verbose
+        cmake --install w3emc/build
         ls -l ~/w1
         ls -l ~/w1/lib
 
     - name: generate-test-coverage
-      run: |
-        cd w3emc/build
-        gcovr --root .. -v  --html-details --exclude ../tests --exclude CMakeFiles --print-summary -o test-coverage.html &> /dev/null
+      run: gcovr --root w3emc -v  --html-details --exclude w3emc/tests --exclude w3emc/build/CMakeFiles --print-summary -o test-coverage.html &> /dev/null
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: w3emc-test-coverage
         path: |
-          w3emc/build/*.html
-          w3emc/build/*.css
+          *.html
+          *.css
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: docs
         path: |
