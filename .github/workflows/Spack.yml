@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest"]
-        variants: ["+pic +shared +bufr precision=d", "~pic ~shared ~bufr precision=4", "+pic ~shared ~bufr precision=8"]
+        variants: ["+pic +shared precision=d", "~pic ~shared precision=4", "+pic ~shared precision=8"]
 
     runs-on: ${{ matrix.os }}
 

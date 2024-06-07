@@ -44,6 +44,12 @@ class W3emc(CMakePackage):
         description="Build w3emc with subprograms which call unknown dependencies",
         when="@2.10:2.11",
     )
+    variant(
+        "build_deprecated",
+        default=False,
+        description="Build deprecated subroutines",
+        when="@develop",
+    )
 
     conflicts("+shared +extradeps", msg="Shared library cannot be built with unknown dependencies")
     conflicts("+shared ~pic", msg="Shared library requires PIC")
@@ -80,6 +86,7 @@ class W3emc(CMakePackage):
             self.define("BUILD_8", self.spec.satisfies("precision=8")),
             self.define_from_variant("BUILD_SHARED_LIBS", "shared"),
             self.define_from_variant("BUILD_WITH_EXTRA_DEPS", "extradeps"),
+            self.define_from_variant("BUILD_DEPRECATED", "build_deprecated"),
         ]
 
         return args
