@@ -1,4 +1,4 @@
 var getgbm_8f =
 [
-    [ "getgbm", "getgbm_8f.html#ac004e0201adb9928c5fada5c7372fd78", null ]
+    [ "getgbm", "getgbm_8f.html#a13e5b7b94989de452f47d062a917e8f9", null ]
 ];

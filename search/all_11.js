@@ -1,9 +1,13 @@
 var searchData=
 [
-  ['xdopen_521',['xdopen',['../xdopen_8f.html#a941a5a5172e73a4d75553437ad275ece',1,'xdopen.f']]],
-  ['xdopen_2ef_522',['xdopen.f',['../xdopen_8f.html',1,'']]],
-  ['xmovex_523',['xmovex',['../xmovex_8f.html#a4736b412fd765dc34e51e7ebf774cc61',1,'xmovex.f']]],
-  ['xmovex_2ef_524',['xmovex.f',['../xmovex_8f.html',1,'']]],
-  ['xstore_525',['xstore',['../xstore_8f.html#a31e695d6327ff9328c6604bc9d72a245',1,'xstore.f']]],
-  ['xstore_2ef_526',['xstore.f',['../xstore_8f.html',1,'']]]
+  ['ocean_20only_20_3a_0',['For LPROD = TRUE {Input products file: note all products below except sea-surface temperature are available in the fnoc &quot;operational&quot; products data dump; most ncep products data dumps contain only wind speed, total precipitable water, cloud water and sea-surface temperature (all over ocean only)}:',['../w3miscan_8f.html#autotoc_md85',1,'']]],
+  ['of_20descriptor_1',['of descriptor',['../w3fi88_8f.html#autotoc_md29',1,'- IWIDE1 - Bit width for value of descriptor'],['../w3fi88_8f.html#autotoc_md30',1,'- IWIDE2 - Bit width for value of descriptor'],['../w3fi88_8f.html#autotoc_md31',1,'- IWIDE3 - Bit width for value of descriptor']]],
+  ['of_20retrieval_20flags_3a_2',['Description of retrieval flags:',['../w3miscan_8f.html#autotoc_md92',1,'']]],
+  ['of_20training_20and_20test_20data_20set_3a_3',['Description of training and test data set:',['../w3miscan_8f.html#autotoc_md91',1,'']]],
+  ['office_20note_2085_20subroutines_4',['Office-Note 85 Subroutines',['../index.html#autotoc_md18',1,'']]],
+  ['only_20wind_20speed_20total_20precipitable_20water_20cloud_20water_20and_20sea_20surface_20temperature_20all_20over_20ocean_20only_20_3a_5',['For LPROD = TRUE {Input products file: note all products below except sea-surface temperature are available in the fnoc &quot;operational&quot; products data dump; most ncep products data dumps contain only wind speed, total precipitable water, cloud water and sea-surface temperature (all over ocean only)}:',['../w3miscan_8f.html#autotoc_md85',1,'']]],
+  ['operational_20products_20data_20dump_20most_20ncep_20products_20data_20dumps_20contain_20only_20wind_20speed_20total_20precipitable_20water_20cloud_20water_20and_20sea_20surface_20temperature_20all_20over_20ocean_20only_20_3a_6',['For LPROD = TRUE {Input products file: note all products below except sea-surface temperature are available in the fnoc &quot;operational&quot; products data dump; most ncep products data dumps contain only wind speed, total precipitable water, cloud water and sea-surface temperature (all over ocean only)}:',['../w3miscan_8f.html#autotoc_md85',1,'']]],
+  ['orders_7',['orders',['../orders_8f.html#a606ed1b385c755d9ebbc4de760349893',1,'orders.f']]],
+  ['orders_2ef_8',['orders.f',['../orders_8f.html',1,'']]],
+  ['over_20ocean_20only_20_3a_9',['For LPROD = TRUE {Input products file: note all products below except sea-surface temperature are available in the fnoc &quot;operational&quot; products data dump; most ncep products data dumps contain only wind speed, total precipitable water, cloud water and sea-surface temperature (all over ocean only)}:',['../w3miscan_8f.html#autotoc_md85',1,'']]]
 ];

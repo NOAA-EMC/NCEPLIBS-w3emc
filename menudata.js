@@ -29,8 +29,11 @@ var menudata={children:[
 {text:"Module Members",url:"namespacemembers.html",children:[
 {text:"All",url:"namespacemembers.html"},
 {text:"Functions/Subroutines",url:"namespacemembers_func.html"}]}]},
-{text:"Data Types List",url:"annotated.html",children:[
-{text:"Data Types List",url:"annotated.html"}]},
+{text:"Data Types",url:"annotated.html",children:[
+{text:"Data Types List",url:"annotated.html"},
+{text:"Data Fields",url:"functions.html",children:[
+{text:"All",url:"functions.html"},
+{text:"Functions/Subroutines",url:"functions_func.html"}]}]},
 {text:"Files",url:"files.html",children:[
 {text:"File List",url:"files.html"},
 {text:"Globals",url:"globals.html",children:[

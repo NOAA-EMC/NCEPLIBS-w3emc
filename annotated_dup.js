@@ -1,7 +1,10 @@
 var annotated_dup =
 [
-    [ "args_mod", "namespaceargs__mod.html", [
-      [ "getarg", "interfaceargs__mod_1_1getarg.html", "interfaceargs__mod_1_1getarg" ],
-      [ "iargc", "interfaceargs__mod_1_1iargc.html", "interfaceargs__mod_1_1iargc" ]
+    [ "mersenne_twister", "namespacemersenne__twister.html", [
+      [ "random_gauss", "interfacemersenne__twister_1_1random__gauss.html", "interfacemersenne__twister_1_1random__gauss" ],
+      [ "random_index", "interfacemersenne__twister_1_1random__index.html", "interfacemersenne__twister_1_1random__index" ],
+      [ "random_number", "interfacemersenne__twister_1_1random__number.html", "interfacemersenne__twister_1_1random__number" ],
+      [ "random_setseed", "interfacemersenne__twister_1_1random__setseed.html", "interfacemersenne__twister_1_1random__setseed" ],
+      [ "random_stat", "structmersenne__twister_1_1random__stat.html", null ]
     ] ]
 ];

@@ -1,4 +1,4 @@
 var getgb_8f =
 [
-    [ "getgb", "getgb_8f.html#ab1cec03904b6e6c41840726cd53a69ce", null ]
+    [ "getgb", "getgb_8f.html#a98040aebeda65b55ed5c61d891e49ccf", null ]
 ];

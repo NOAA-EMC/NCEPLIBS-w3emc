@@ -1,4 +1,4 @@
 var gtbits_8f =
 [
-    [ "gtbits", "gtbits_8f.html#a31c0ebc8937002fb7b104298f8c439ec", null ]
+    [ "gtbits", "gtbits_8f.html#a0f90e24d4c196fe0bdf31f938110c704", null ]
 ];
