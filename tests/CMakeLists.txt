@@ -56,10 +56,10 @@ function(create_test name kind use_module)
     target_compile_definitions(${exe_name} PUBLIC -DUSE_W3EMC_MODULE)
     target_include_directories(${exe_name} PRIVATE 
       ${CMAKE_BINARY_DIR}/src/include_${kind})
-    # For shell wrapper tests, don't link library (shell handles it)
-    if(NOT use_shell_wrapper)
-      target_link_libraries(${exe_name} PRIVATE w3emc_${kind})
-    endif()
+    # Add explicit dependencies on module object and library to ensure they're built first
+    add_dependencies(${exe_name} w3emc_${kind}_module_obj w3emc_${kind})
+    # Link library for all tests (shell wrapper only affects test execution, not linking)
+    target_link_libraries(${exe_name} PRIVATE w3emc_${kind})
   else()
     # Traditional tests - always link against the library
     target_link_libraries(${exe_name} PRIVATE w3emc_${kind})
@@ -138,8 +138,9 @@ foreach(kind ${kinds})
   target_include_directories(${exe_name} PRIVATE 
     ${CMAKE_BINARY_DIR}/src/include_${kind})
   
-  # Make the executable depend on the procedure list generation
+  # Make the executable depend on the procedure list generation, module object, and library
   add_dependencies(${exe_name} generate_procedure_list_${kind})
+  add_dependencies(${exe_name} w3emc_${kind}_module_obj w3emc_${kind})
   
   # Note: The test is the compilation of ${exe_name}, not running it.
   # If any procedure in the "only" clause is missing from the module,
