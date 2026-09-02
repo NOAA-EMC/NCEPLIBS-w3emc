@@ -47,7 +47,7 @@ jobs:
       run: |
         set -x
         doxygen --version
-        cmake -S w3emc -B w3emc/build -DCMAKE_INSTALL_PREFIX="~/w1" -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/nceplibs/NCEPLIBS-bacio;$GITHUB_WORKSPACE/nceplibs/NCEPLIBS-bufr" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall -Werror" -DCMAKE_C_FLAGS="-g -fprofile-arcs -ftest-coverage -O0 -fsanitize=address -Wall -Werror" -DCMAKE_BUILD_TYPE=Debug -DBUILD_8=ON
+        cmake -S w3emc -B w3emc/build -DCMAKE_INSTALL_PREFIX="~/w1" -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/nceplibs/NCEPLIBS-bacio;$GITHUB_WORKSPACE/nceplibs/NCEPLIBS-bufr" -DENABLE_DOCS=ON -DCMAKE_Fortran_FLAGS="-g --coverage -O0 -Wall -Werror" -DCMAKE_C_FLAGS="-g --coverage -O0 -Wall -Werror" -DCMAKE_BUILD_TYPE=Debug -DBUILD_8=ON
         cmake --build w3emc/build --parallel 2
 
     - name: test-w3emc

@@ -1,0 +1,189 @@
+SUBROUTINE test_international_centers()
+  IMPLICIT NONE
+  
+  CHARACTER(1), ALLOCATABLE :: msga(:)
+  INTEGER, ALLOCATABLE :: kpds(:), kgds(:), kptr(:)
+  LOGICAL*1, ALLOCATABLE :: kbms(:)
+  REAL, ALLOCATABLE :: data_array(:)
+  
+  INTEGER, PARAMETER :: PDS_SIZE = 100
+  INTEGER, PARAMETER :: GDS_SIZE = 100 
+  INTEGER, PARAMETER :: PTR_SIZE = 20
+  
+  INTEGER :: is_start, pds_start, gds_start, bds_start, es_start
+  INTEGER :: msg_length, kret, i
+  
+  ! Define test cases
+  ! We test combinations of Center (kpds(1)), Grid (kpds(3)), GDS flag (kpds(4)) and expected Mapsize (kptr(10)) and Return Code (kret)
+  INTEGER, PARAMETER :: num_cases = 13
+  INTEGER :: center_ids(num_cases)
+  INTEGER :: grid_ids(num_cases)
+  INTEGER :: gds_flags(num_cases)
+  INTEGER :: exp_sizes(num_cases)
+  INTEGER :: exp_krets(num_cases)
+  
+  ! 1) JAPAN (34), Grid 255, GDS included (128). Expected KRET: 0, Mapsize: 100
+  center_ids(1) = 34; grid_ids(1) = 255; gds_flags(1) = 128; exp_sizes(1) = 100; exp_krets(1) = 0
+  ! 2) CANADIAN (54), Grid 255, GDS included (128). Expected KRET: 0, Mapsize: 100
+  center_ids(2) = 54; grid_ids(2) = 255; gds_flags(2) = 128; exp_sizes(2) = 100; exp_krets(2) = 0
+  ! 3) FNOC (58), Grid 220, No GDS (0). Expected KRET: 0, Mapsize: 3969
+  center_ids(3) = 58; grid_ids(3) = 220; gds_flags(3) = 0;   exp_sizes(3) = 3969; exp_krets(3) = 0
+  ! 4) FNOC (58), Grid 221, No GDS (0). Expected KRET: 0, Mapsize: 3969
+  center_ids(4) = 58; grid_ids(4) = 221; gds_flags(4) = 0;   exp_sizes(4) = 3969; exp_krets(4) = 0
+  ! 5) FNOC (58), Grid 223, No GDS (0). Expected KRET: 0, Mapsize: 10512
+  center_ids(5) = 58; grid_ids(5) = 223; gds_flags(5) = 0;   exp_sizes(5) = 10512; exp_krets(5) = 0
+  ! 6) FNOC (58), Grid 255, GDS included (128). Expected KRET: 0, Mapsize: 100
+  center_ids(6) = 58; grid_ids(6) = 255; gds_flags(6) = 128; exp_sizes(6) = 100; exp_krets(6) = 0
+  ! 7) UKMET (74), Grid 255, GDS included (128). Expected KRET: 0, Mapsize: 100
+  center_ids(7) = 74; grid_ids(7) = 255; gds_flags(7) = 128; exp_sizes(7) = 100; exp_krets(7) = 0
+  ! 8) ECMWF (98), Grid 5, No GDS (0). Expected KRET: 0, Mapsize: 1073
+  center_ids(8) = 98; grid_ids(8) = 5;   gds_flags(8) = 0;   exp_sizes(8) = 1073; exp_krets(8) = 0
+  ! 9) ECMWF (98), Grid 9, No GDS (0). Expected KRET: 0, Mapsize: 1369
+  center_ids(9) = 98; grid_ids(9) = 9;   gds_flags(9) = 0;   exp_sizes(9) = 1369; exp_krets(9) = 0
+  ! 10) ECMWF (98), Grid 13, No GDS (0). Expected KRET: 0, Mapsize: 361
+  center_ids(10) = 98; grid_ids(10) = 13; gds_flags(10) = 0;  exp_sizes(10) = 361; exp_krets(10) = 0
+  ! 11) ECMWF (98), Grid 255, GDS included (128). Expected KRET: 0, Mapsize: 100
+  center_ids(11) = 98; grid_ids(11) = 255; gds_flags(11) = 128; exp_sizes(11) = 100; exp_krets(11) = 0
+  ! 12) ANY center (99), Grid 255, GDS included (128). Expected KRET: 0, Mapsize: 100
+  center_ids(12) = 99; grid_ids(12) = 255; gds_flags(12) = 128; exp_sizes(12) = 100; exp_krets(12) = 0
+  ! 13) ANY center (99), Grid 255, NO GDS (0). Expected KRET: 10
+  center_ids(13) = 99; grid_ids(13) = 255; gds_flags(13) = 0;   exp_sizes(13) = 0;   exp_krets(13) = 10
+  
+  ALLOCATE(kpds(PDS_SIZE))
+  ALLOCATE(kgds(GDS_SIZE))
+  ALLOCATE(kptr(PTR_SIZE))
+  
+  DO i = 1, num_cases
+    ! Calculate total message length
+    ! If GDS is included, we add 32 bytes for GDS
+    IF (gds_flags(i) == 128) THEN
+        msg_length = 8 + 50 + 32 + 11 + MAX(1, exp_sizes(i)) + 4
+    ELSE
+        msg_length = 8 + 50 + 11 + MAX(1, exp_sizes(i)) + 4
+    END IF
+    
+    is_start = 1
+    pds_start = is_start + 8
+    
+    IF (gds_flags(i) == 128) THEN
+        gds_start = pds_start + 50
+        bds_start = gds_start + 32
+    ELSE
+        gds_start = 0
+        bds_start = pds_start + 50
+    END IF
+    
+    es_start = bds_start + 11 + MAX(1, exp_sizes(i))
+    
+    IF (ALLOCATED(msga)) DEALLOCATE(msga)
+    IF (ALLOCATED(kbms)) DEALLOCATE(kbms)
+    IF (ALLOCATED(data_array)) DEALLOCATE(data_array)
+    
+    ALLOCATE(msga(msg_length))
+    ALLOCATE(kbms(MAX(1, exp_sizes(i))))
+    ALLOCATE(data_array(MAX(1, exp_sizes(i))))
+    
+    kpds = 0
+    kgds = 0
+    kbms = .TRUE.
+    data_array = 0.0
+    kptr = 0
+    msga = CHAR(0)
+    
+    ! Section 0
+    msga(is_start:is_start+3) = (/ 'G', 'R', 'I', 'B' /)
+    msga(is_start+4) = CHAR(0)
+    msga(is_start+5) = CHAR(msg_length / 256)
+    msga(is_start+6) = CHAR(MOD(msg_length, 256))
+    msga(is_start+7) = CHAR(1)
+    
+    ! Section 1 (PDS)
+    msga(pds_start) = CHAR(0)
+    msga(pds_start+1) = CHAR(0)
+    msga(pds_start+2) = CHAR(50)
+    msga(pds_start+3) = CHAR(1)
+    msga(pds_start+4) = CHAR(center_ids(i))  ! CENTER
+    msga(pds_start+5) = CHAR(2)
+    msga(pds_start+6) = CHAR(grid_ids(i)) ! GRID ID
+    msga(pds_start+7) = CHAR(gds_flags(i)) ! GDS Flag (NO BMS)
+    msga(pds_start+8) = CHAR(11)
+    msga(pds_start+9) = CHAR(100)
+    msga(pds_start+10) = CHAR(1)
+    msga(pds_start+11) = CHAR(244)
+    msga(pds_start+12) = CHAR(23)
+    msga(pds_start+13) = CHAR(3)
+    msga(pds_start+14) = CHAR(10)
+    msga(pds_start+15) = CHAR(12)
+    msga(pds_start+16) = CHAR(0)
+    msga(pds_start+17) = CHAR(1)
+    msga(pds_start+18) = CHAR(6)
+    msga(pds_start+19) = CHAR(0)
+    msga(pds_start+20) = CHAR(0)
+    msga(pds_start+21) = CHAR(0)
+    msga(pds_start+22) = CHAR(0)
+    msga(pds_start+23) = CHAR(0)
+    msga(pds_start+24) = CHAR(21)
+    msga(pds_start+25) = CHAR(0)
+    msga(pds_start+26) = CHAR(0)
+    msga(pds_start+27) = CHAR(2)
+    
+    ! Section 2 (GDS) if present
+    IF (gds_flags(i) == 128) THEN
+        msga(gds_start) = CHAR(0)
+        msga(gds_start+1) = CHAR(0)
+        msga(gds_start+2) = CHAR(32)
+        msga(gds_start+3) = CHAR(0)
+        msga(gds_start+4) = CHAR(255)
+        msga(gds_start+5) = CHAR(0)
+        
+        ! Map size for our custom GDS grid
+        msga(gds_start+6) = CHAR(10) ! Nx = 10
+        msga(gds_start+7) = CHAR(0)
+        msga(gds_start+8) = CHAR(10) ! Ny = 10 -> Size 100
+        msga(gds_start+9) = CHAR(0)
+        
+        msga(gds_start+10:gds_start+15) = CHAR(0)
+        msga(gds_start+16) = CHAR(128)
+    END IF
+    
+    ! Section 4 (BDS)
+    msga(bds_start) = CHAR(0)
+    msga(bds_start+1) = CHAR(0)
+    msga(bds_start+2) = CHAR(11 + MAX(1, exp_sizes(i)))
+    msga(bds_start+3) = CHAR(0)   ! Flag: no unused bits
+    msga(bds_start+4) = CHAR(0)   ! Scale factor
+    msga(bds_start+5) = CHAR(0)
+    msga(bds_start+6) = CHAR(0)   ! Reference value (real)
+    msga(bds_start+7) = CHAR(0)
+    msga(bds_start+8) = CHAR(0)
+    msga(bds_start+9) = CHAR(0)
+    msga(bds_start+10) = CHAR(8)  ! Bits per value
+    ! Data initialized to 0
+    
+    ! Section 5
+    msga(es_start:es_start+3) = (/ '7', '7', '7', '7' /)
+    
+    CALL W3FI63(msga, kpds, kgds, kbms, data_array, kptr, kret)
+    
+    IF (kret /= exp_krets(i)) THEN
+      PRINT *, "ERROR in test_international_centers (case ", i, "): KRET=", kret, " expected ", exp_krets(i)
+      CALL EXIT(1)
+    END IF
+    
+    IF (kret == 0) THEN
+        IF (kptr(10) /= exp_sizes(i)) THEN
+          PRINT *, "ERROR in test_international_centers (case ", i, "): Map size KPTR(10)=", kptr(10), " expected ", exp_sizes(i)
+          CALL EXIT(1)
+        END IF
+    END IF
+    
+  END DO
+  
+  DEALLOCATE(kpds, kgds, kptr)
+  IF (ALLOCATED(msga)) DEALLOCATE(msga)
+  IF (ALLOCATED(kbms)) DEALLOCATE(kbms)
+  IF (ALLOCATED(data_array)) DEALLOCATE(data_array)
+  
+  PRINT *, "test_international_centers passed"
+  
+END SUBROUTINE test_international_centers

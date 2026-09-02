@@ -11,19 +11,22 @@ program test_w3fi72
   parameter(nbit = 8)
   integer maxbit
   parameter(maxbit=24)  
-  character pds(40000)
+  character*1, dimension(:), allocatable :: pds
   real, dimension(:), allocatable :: fld
   character*1, dimension(:), allocatable :: grib
   integer igflag, igrid
   parameter (igflag = 0)
-  integer ibm(kf),ipds(200),igds(200),ibds(200)
+  integer, dimension(:), allocatable :: ibm
+  integer ipds(200),igds(200),ibds(200)
   integer kfo, lgrib, icomp
   integer ierr
 
   print *, "Testing w3fi72..."
 
   allocate(fld(kf))
+  allocate(pds(40000))
   allocate(grib(1000+kf*12))
+  allocate(ibm(kf))
 
   ! Fill up some test data.
   do i = 1, 200
@@ -49,7 +52,9 @@ program test_w3fi72
    if (iret .ne. 0) stop 4
 
   deallocate(fld)
+  deallocate(pds)
   deallocate(grib)
+  deallocate(ibm)
 
   print *, "SUCCESS"
 end program test_w3fi72

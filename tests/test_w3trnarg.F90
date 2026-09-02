@@ -97,6 +97,14 @@ contains
     integer, intent(out) :: lsubdr, ltnkid, lapchr, iymdhb, iymdhe, ierr
 
     integer :: iu, i
+    character(len=256) :: prog_name
+    character(len=256) :: temp_file
+
+    call get_command_argument(0, prog_name)
+    temp_file = trim(prog_name) // '.stdin'
+    do i = 1, len_trim(temp_file)
+      if (temp_file(i:i) == '/' .or. temp_file(i:i) == '\') temp_file(i:i) = '_'
+    end do
 
     subdir = ' '
     tankid = ' '
@@ -109,17 +117,17 @@ contains
     iymdhe = -999
     ierr = -999
 
-    open(newunit=iu, file='test_w3trnarg.stdin', status='replace', action='write', form='formatted')
+    open(newunit=iu, file=trim(temp_file), status='replace', action='write', form='formatted')
     do i = 1, nlines
       write(iu, '(A)') trim(lines(i))
     end do
     close(iu)
 
-    open(unit=5, file='test_w3trnarg.stdin', status='old', action='read', form='formatted')
+    open(unit=5, file=trim(temp_file), status='old', action='read', form='formatted')
     call w3trnarg(subdir, lsubdr, tankid, ltnkid, appchr, lapchr, tlflag, iymdhb, iymdhe, ierr)
     close(5)
 
-    open(newunit=iu, file='test_w3trnarg.stdin', status='old')
+    open(newunit=iu, file=trim(temp_file), status='old')
     close(iu, status='delete')
   end subroutine run_w3trnarg
 
