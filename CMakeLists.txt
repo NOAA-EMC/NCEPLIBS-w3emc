@@ -80,12 +80,22 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(LLVMFlang)$")
   set(fortran_d_flags "-fdefault-real-8")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=lld")
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(Flang)$")
+  set(CMAKE_Fortran_FLAGS
+      "-g -funroll-loops ${CMAKE_Fortran_FLAGS}")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-O0")
+  set(fortran_d_flags "-fdefault-real-8")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=lld")
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(NVHPC)$")
   set(CMAKE_Fortran_FLAGS
       "-g ${CMAKE_Fortran_FLAGS}")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
   set(CMAKE_Fortran_FLAGS_DEBUG "-O0")
   set(fortran_d_flags "-r8")
+else()
+  message(FATAL_ERROR "Unsupported Fortran compiler '${CMAKE_Fortran_COMPILER_ID}'")
 endif()
 
 # Deal with argument mismatch on GNU compilers version 10 or later.
